@@ -1,0 +1,12 @@
+@import 'tailwindcss';
+
+/* 基本的なスタイル */
+body {
+  margin: 0;
+  font-family: 'Noto Sans JP', sans-serif;
+  background-color: #f8f9fa;
+}
+
+#app {
+  min-height: 100vh;
+}

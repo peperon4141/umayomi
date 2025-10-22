@@ -1,0 +1,339 @@
+---
+alwaysApply: true
+---
+
+# Memoca テスト戦略
+
+## ⚠️ 重要な注意事項
+
+### プロセス管理
+- **絶対に勝手にプロセスを停止しない**: `pkill`、`kill`、`killall`などのコマンドは使用禁止
+- **既存のプロセスを尊重**: ユーザーが起動したプロセスは停止しない
+- **確認が必要**: プロセスの停止が必要な場合は、必ずユーザーに確認する
+
+### 開発環境の運用方針
+- **基本は5000ポートで運用**: Firebase Emulator hosting（http://127.0.0.1:5000）をメインの開発環境として使用
+- **3000ポートは補助的**: Vite dev server（http://127.0.0.1:3000）は必要に応じてのみ使用
+- **dev-bothコマンドは廃止**: 複数ポートの同時起動は不要
+- **統一されたアドレス**: localhostではなく127.0.0.1を統一して使用
+
+## 🧪 テスト実行
+
+### 基本コマンド
+```bash
+# E2Eテスト実行
+make e2e
+
+# 個別テスト実行
+cd apps/e2e && pnpm test
+cd apps/e2e && pnpm test:ui    # UI付きテスト
+cd apps/e2e && pnpm test:headed # ブラウザ表示
+
+# Vitestテスト実行
+cd apps/hosting && pnpm test
+```
+
+### テスト環境
+- **Playwright**: E2Eテストフレームワーク
+- **Vitest**: ユニットテストフレームワーク
+- **Chromium**: テストブラウザ（デフォルト）
+- **Firebase Emulator**: ローカル開発環境でのテスト
+
+## 📋 テスト追加ガイドライン
+
+### 🚀 E2Eテストファースト開発フロー
+**開発順序**: `e2e ディレクトリにe2eテスト1ケース実装 > hosting実装` の順で進める
+
+```bash
+# 1. E2Eテストを先に実装
+touch apps/e2e/tests/新機能名.spec.ts
+# テストケースを1つ実装（失敗する状態）
+
+# 2. その後、hosting実装
+# テストが通るように実装
+
+# 3. 品質チェック
+make format
+make e2e
+```
+
+### 新機能テスト
+- **必須**: 新機能には必ずE2Eテストを追加
+- **テストファイル**: `apps/e2e/tests/` に配置
+- **命名規則**: `機能名.spec.ts` 形式
+- **開発順序**: E2Eテスト → hosting実装
+
+### バグ修正テスト
+- **回帰テスト**: バグ修正時は回帰テストを追加
+- **テストケース名**: 日本語で記述（例：`'ログインページに遷移できる'`）
+
+### テストケース命名規則
+```typescript
+test.describe('機能名', () => {
+  test('具体的な動作の説明', async ({ page }) => {
+    // テスト実装
+  })
+})
+```
+
+### Vitestユニットテスト
+- **フレームワーク**: Vitestを使用
+- **テストファイル**: `apps/hosting/src/` 内に `*.test.ts` または `*.spec.ts`
+- **検証ルール**: 1つのJSオブジェクトに対しては1つのexpectでオブジェクトを検証
+
+```typescript
+// 良い例: 1つのオブジェクトを1つのexpectで検証
+expect(user).toEqual({
+  id: '123',
+  name: 'テストユーザー',
+  email: 'test@example.com'
+})
+
+// 悪い例: 複数のexpectで分割検証
+expect(user.id).toBe('123')
+expect(user.name).toBe('テストユーザー')
+expect(user.email).toBe('test@example.com')
+```
+
+## 🔍 テスト品質管理
+
+### テスト実行前チェック
+- [ ] テストケース名が日本語で記述されている
+- [ ] テストの目的が明確である
+- [ ] 必要なアサーションが含まれている
+- [ ] エラーハンドリングが適切である
+
+### テスト実行後チェック
+- [ ] 全テストが成功している
+- [ ] テスト実行時間が適切である
+- [ ] テスト結果が分かりやすい
+
+## 🚀 テスト開発フロー
+
+### 1. 新機能テスト作成
+```bash
+# 1. テストファイル作成
+touch apps/e2e/tests/新機能名.spec.ts
+
+# 2. テスト実装
+# - テストケース名を日本語で記述
+# - 必要なアサーションを追加
+# - エラーハンドリングを実装
+
+# 3. テスト実行
+make e2e
+```
+
+### 2. バグ修正テスト追加
+```bash
+# 1. 既存テストファイルに追加
+# または新しいテストファイルを作成
+
+# 2. 回帰テスト実装
+# - バグが再発しないことを確認
+# - 関連機能への影響をテスト
+
+# 3. テスト実行
+make e2e
+```
+
+### 3. テストリファクタリング
+```bash
+# 1. 重複テストの統合
+# 2. テストケース名の改善
+# 3. アサーションの最適化
+
+# 4. テスト実行
+make e2e
+```
+
+## 📊 テスト監視
+
+### テスト実行時間
+- **目標**: 全テストが1分以内で完了
+- **監視**: テスト実行時間の推移を記録
+- **最適化**: 遅いテストの特定と改善
+
+### テストカバレッジ
+- **目標**: 主要機能のテストカバレッジ100%
+- **監視**: テストカバレッジの推移を記録
+- **改善**: 未テスト機能の特定とテスト追加
+
+## 🛠️ テストツール
+
+### Playwright設定
+```typescript
+// apps/e2e/playwright.config.ts
+export default defineConfig({
+  testDir: './tests',
+  fullyParallel: true,
+  retries: process.env.CI ? 2 : 0,
+  workers: process.env.CI ? 1 : undefined,
+  reporter: 'list',
+  use: {
+    baseURL: 'http://127.0.0.1:3000',
+    trace: 'on-first-retry',
+  },
+  projects: [
+    {
+      name: 'chromium',
+      use: { ...devices['Desktop Chrome'] },
+    },
+  ],
+  webServer: {
+    command: 'cd ../hosting && pnpm dev:serve',
+    url: 'http://127.0.0.1:3000',
+    reuseExistingServer: !process.env.CI,
+  },
+})
+```
+
+### テストヘルパー
+```typescript
+// 共通のテストヘルパー関数
+export async function loginUser(page: Page, email: string, password: string) {
+  await page.goto('/login')
+  await page.fill('input[type="email"]', email)
+  await page.fill('input[type="password"]', password)
+  await page.click('button[type="submit"]')
+  await page.waitForURL('/dashboard')
+}
+
+export async function createTestDeck(page: Page, title: string) {
+  await page.click('text=デッキを作成')
+  await page.fill('input[id="title"]', title)
+  await page.click('button:has-text("作成")')
+}
+```
+
+## 🚨 テストトラブルシューティング
+
+### よくある問題
+
+#### 1. テストが失敗する
+```bash
+# 1. アプリケーションが起動しているか確認
+curl -s http://localhost:3000
+
+# 2. ログ確認
+tail -f logs/hosting.log
+tail -f logs/firebase.log
+
+# 3. テストを個別実行
+cd apps/e2e && pnpm test:headed
+```
+
+#### 2. テストが遅い
+```bash
+# 1. 並列実行数を調整
+# playwright.config.ts の workers 設定を確認
+
+# 2. 不要な待機時間を削除
+# page.waitForTimeout() の使用を最小限に
+
+# 3. セレクターの最適化
+# より具体的なセレクターを使用
+```
+
+#### 3. テストが不安定
+```bash
+# 1. 待機条件の改善
+await page.waitForSelector('selector')
+await page.waitForURL('/expected-url')
+
+# 2. リトライ機能の活用
+# playwright.config.ts の retries 設定を調整
+
+# 3. テストデータのクリーンアップ
+# 各テスト後にデータをリセット
+```
+
+## 📈 テスト改善
+
+### 継続的改善
+- **テスト実行時間**: 定期的な測定と最適化
+- **テスト安定性**: 失敗率の監視と改善
+- **テスト保守性**: テストコードの可読性向上
+
+### ベストプラクティス
+1. **テストケース名**: 日本語で具体的に記述
+2. **アサーション**: 必要最小限で明確なアサーション
+3. **データ管理**: テストデータの適切な管理
+4. **エラーハンドリング**: 適切なエラーメッセージ
+5. **パフォーマンス**: テスト実行時間の最適化
+6. **PageObject設計**: 検証メソッドはPageObjectに記載しない
+
+---
+
+## 🎯 テストのベストプラクティス
+
+1. **テストファースト**: 機能実装前にテストを書く
+2. **日本語命名**: テストケース名は日本語で記述
+3. **独立性**: 各テストは独立して実行可能
+4. **再現性**: 同じ条件で同じ結果が得られる
+5. **保守性**: テストコードが理解しやすい
+6. **パフォーマンス**: テスト実行時間を最適化
+7. **安定性**: テストが安定して実行される
+
+## 📋 PageObject設計ルール
+
+### PageObjectの責務
+- **要素の取得**: ページの要素を取得するメソッド
+- **操作の実行**: ユーザーアクションを実行するメソッド
+- **データの取得**: ページからデータを取得するメソッド
+
+### PageObjectに記載しないもの
+- **検証メソッド**: `expect*` や `assert*` などの検証メソッド
+- **アサーション**: `toBeVisible()`, `toContainText()` などのアサーション
+- **テストロジック**: テストの条件分岐やループ処理
+
+### 正しいPageObjectの例
+```typescript
+export class DeckDetailPage {
+  // ✅ 要素の取得
+  getDeckTitle(): Locator {
+    return this.page.locator('h1').nth(1)
+  }
+
+  // ✅ 操作の実行
+  async createCard(front: string, back: string): Promise<void> {
+    await this.clickAddCard()
+    await this.cardFrontInput.fill(front)
+    await this.cardBackInput.fill(back)
+    await this.cardSubmitButton.click()
+  }
+
+  // ✅ データの取得
+  async getDeckTitleText(): Promise<string> {
+    return await this.deckTitle.textContent() || ''
+  }
+}
+```
+
+### 間違ったPageObjectの例
+```typescript
+export class DeckDetailPage {
+  // ❌ 検証メソッドは記載しない
+  async expectCardVisible(cardText: string): Promise<void> {
+    await expect(this.page.locator(`text=${cardText}`)).toBeVisible()
+  }
+
+  // ❌ アサーションは記載しない
+  async expectCardCount(count: number): Promise<void> {
+    await expect(this.cardCountChip).toContainText(count.toString())
+  }
+}
+```
+
+### テストファイルでの正しい使い方
+```typescript
+test('カードを作成して保存できる', async ({ page }) => {
+  const deckDetailPage = new DeckDetailPage(page)
+  
+  // ✅ PageObjectで操作を実行
+  await deckDetailPage.createCard('テストカードの表面', 'テストカードの裏面')
+  
+  // ✅ テストファイルでアサーションを実行
+  await expect(page.locator('text=テストカードの表面')).toBeVisible()
+})
+```

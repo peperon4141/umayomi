@@ -1,0 +1,252 @@
+---
+alwaysApply: true
+---
+
+# Memoca コーディングスタイル
+
+## 🎯 基本原則
+
+### 1. 簡素な実装
+- **1liner**: 可能な限り1行で記述
+- **ガード句**: 早期リターンを使用してネストを避ける
+- **簡潔性**: 冗長なコードを避ける
+
+### 2. コメント・ログの最小化
+- **コメント**: 必要最小限のみ記述
+- **console.log**: デバッグ時のみ使用、本番コードでは削除
+
+## 📚 技術別コーディングスタイル
+
+### CSS
+- **詳細**: [CSSコーディングスタイル](./css-coding-style.mdc) を参照
+- **基本**: `!important`を避ける、セレクターを簡潔に、意味のあるクラス名を使用
+
+### TypeScript
+- **詳細**: [TypeScriptコーディングスタイル](./typescript-coding-style.mdc) を参照
+- **基本**: 型安全性を重視、ガード句を活用、any型を避ける
+
+### Vue
+- **詳細**: [Vueコーディングスタイル](./vue-coding-style.mdc) を参照
+- **基本**: コンポーネントの単一責任、適切なプロップス設計、リアクティブデータの管理
+
+### Firebase
+- **詳細**: [Firebaseコーディングスタイル](./firebase-coding-style.mdc) を参照
+- **基本**: セキュリティルールの適切な設定、効率的なクエリ、型安全性の確保
+
+### E2Eテスト
+- **詳細**: [E2Eテストコーディングスタイル](./e2e-coding-style.mdc) を参照
+- **基本**: テストケース名を日本語で記述、PageObjectパターンの使用、適切な待機処理
+
+## 📝 共通コーディングガイドライン
+
+### 関数の書き方
+
+#### ❌ 悪い例
+```typescript
+function validateUser(user: User): boolean {
+  if (user) {
+    if (user.email) {
+      if (user.email.includes('@')) {
+        if (user.password) {
+          if (user.password.length >= 8) {
+            return true;
+          } else {
+            return false;
+          }
+        } else {
+          return false;
+        }
+      } else {
+        return false;
+      }
+    } else {
+      return false;
+    }
+  } else {
+    return false;
+  }
+}
+```
+
+#### ✅ 良い例
+```typescript
+function validateUser(user: User): boolean {
+  if (!user) return false;
+  if (!user.email?.includes('@')) return false;
+  if (!user.password || user.password.length < 8) return false;
+  return true;
+}
+```
+
+## 🔧 共通実装パターン
+
+### 1. ガード句の活用
+```typescript
+// 早期リターンでネストを避ける
+function processData(data: any) {
+  if (!data) return null;
+  if (!data.items) return [];
+  if (data.items.length === 0) return [];
+  
+  return data.items.map(item => transform(item));
+}
+```
+
+### 2. 条件分岐の簡素化
+```typescript
+// 三項演算子の活用
+const status = user.isActive ? 'active' : 'inactive';
+
+// 論理演算子の活用
+const displayName = user.name || user.email || 'Unknown';
+```
+
+### 3. 配列・オブジェクト操作の簡素化
+```typescript
+// 配列操作
+const activeUsers = users.filter(user => user.isActive);
+const userNames = users.map(user => user.name);
+
+// オブジェクト操作
+const userData = { id: user.id, name: user.name, email: user.email };
+```
+
+### 4. 非同期処理の簡素化
+```typescript
+// async/await の活用
+const fetchUser = async (id: string) => {
+  const response = await api.get(`/users/${id}`);
+  return response.data;
+};
+```
+
+## 🚫 避けるべきパターン
+
+### 1. 過度なネスト
+```typescript
+// ❌ 避ける
+if (condition1) {
+  if (condition2) {
+    if (condition3) {
+      // 処理
+    }
+  }
+}
+
+// ✅ 推奨
+if (!condition1) return;
+if (!condition2) return;
+if (!condition3) return;
+// 処理
+```
+
+### 2. 冗長なコメント
+```typescript
+// ❌ 避ける
+// ユーザーを取得する関数
+function getUser() {
+  // ユーザーIDを取得
+  const userId = getCurrentUserId();
+  // ユーザー情報を取得
+  const user = fetchUser(userId);
+  // ユーザー情報を返す
+  return user;
+}
+
+// ✅ 推奨
+function getUser() {
+  const userId = getCurrentUserId();
+  return fetchUser(userId);
+}
+```
+
+### 3. 不要なconsole.log
+```typescript
+// ❌ 避ける
+function processData(data) {
+  console.log('データを処理中:', data);
+  const result = data.map(item => {
+    console.log('アイテム処理中:', item);
+    return transform(item);
+  });
+  console.log('処理完了:', result);
+  return result;
+}
+
+// ✅ 推奨
+function processData(data) {
+  return data.map(transform);
+}
+```
+
+## 📋 共通チェックリスト
+
+### コードレビュー時
+- [ ] 1linerで記述できる箇所は1行で記述
+- [ ] ガード句を使用してネストを避けている
+- [ ] 不要なコメントを削除
+- [ ] console.logを削除
+- [ ] 条件分岐が簡潔
+- [ ] 関数が単一責任
+
+### リファクタリング時
+- [ ] ネストを3レベル以下に抑制
+- [ ] 早期リターンを活用
+- [ ] 三項演算子・論理演算子を活用
+- [ ] 冗長な処理を統合
+
+## 🎯 ベストプラクティス
+
+1. **可読性**: コードが自己説明的である
+2. **簡潔性**: 必要最小限のコードで実装
+3. **保守性**: 変更が容易な構造
+4. **パフォーマンス**: 不要な処理を避ける
+5. **一貫性**: プロジェクト全体で統一されたスタイル
+
+---
+
+## 💡 実装のヒント
+
+### 1. 条件分岐の簡素化
+```typescript
+// 複雑な条件を関数に分離
+const isValidUser = (user: User) => 
+  user?.email?.includes('@') && 
+  user?.password?.length >= 8;
+
+if (isValidUser(user)) {
+  // 処理
+}
+```
+
+### 2. オブジェクト操作の簡素化
+```typescript
+// スプレッド演算子の活用
+const updatedUser = { ...user, lastLogin: new Date() };
+
+// 分割代入の活用
+const { name, email } = user;
+```
+
+### 3. 配列操作の簡素化
+```typescript
+// チェーンメソッドの活用
+const activeUserNames = users
+  .filter(user => user.isActive)
+  .map(user => user.name)
+  .filter(name => name);
+```
+
+### 4. エラーハンドリングの簡素化
+```typescript
+// try-catch の最小化
+const safeExecute = (fn: () => any) => {
+  try {
+    return fn();
+  } catch {
+    return null;
+  }
+};
+```
+
+このコーディングスタイルに従うことで、保守性が高く、読みやすいコードを書くことができます。

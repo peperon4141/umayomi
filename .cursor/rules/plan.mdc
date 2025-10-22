@@ -1,0 +1,207 @@
+# 競馬予想サービス構築計画
+
+## 技術スタック
+
+memocaと同じ構成を採用：
+
+- **フロントエンド**: Vue 3 + TypeScript + Vue Router + PrimeVue 4 + Tailwind CSS 4
+- **バックエンド**: Firebase Authentication + Firestore + Firebase Hosting + Cloud Functions
+- **スクレイピング**: Puppeteer/Cheerio (Cloud Functions上で実行)
+- **開発環境**: pnpm + Turborepo + Playwright (E2E) + Vitest
+- **Node.js**: 20.12.2 (Volta管理)
+
+## プロジェクト構造
+
+```
+umayomi/
+├── apps/
+│   ├── hosting/          # Vue 3 フロントエンド（memoca参考）
+│   ├── firebase/         # Firebase設定・エミュレーター
+│   ├── functions/        # Cloud Functions（スクレイピング）
+│   └── e2e/             # Playwright E2Eテスト（memoca参考）
+├── package.json
+├── pnpm-workspace.yaml
+├── turbo.json
+└── Makefile
+```
+
+## 初期実装スコープ
+
+### 要件
+
+- **会員制**: ログインユーザーのみアクセス可能
+- **対象期間**: 2025年10月分のレースのみ
+- **データ保存**: Firestore
+- **分析システム**: 不要（将来対応）
+
+## フェーズ1: 基本セットアップとレース結果表示
+
+### 1.1 プロジェクト初期化（memoca参考）
+
+- `package.json`, `pnpm-workspace.yaml`, `turbo.json`, `Makefile` をmemocaから移植
+- `apps/hosting/`: Vue 3 + Vite + PrimeVue 4 + Tailwind CSS 4
+- `apps/firebase/`: Firebase設定、Firestore Rules、エミュレーター設定
+- `apps/functions/`: Cloud Functions（TypeScript、Puppeteer/Cheerio、Firebase Admin SDK）
+- `apps/e2e/`: Playwright E2Eテスト設定（memocaと同様の構成）
+
+### 1.2 認証・ルーティング基盤（全ページ認証必須）
+
+- `apps/hosting/src/config/firebase.ts`: Firebase初期化
+- `apps/hosting/src/composables/useAuth.ts`: 認証管理
+- `apps/hosting/src/router/index.ts`: 全ページに`requiresAuth: true`設定
+- `apps/hosting/src/components/LoginDialog.vue`: ログインダイアログ（memoca参考）
+- `apps/hosting/src/layouts/AppLayout.vue`: レイアウト（memoca参考）
+
+**ページ構成:**
+
+- `/` → 未ログイン時：ログイン画面、ログイン後：ダッシュボードにリダイレクト
+- `/dashboard` - レース結果一覧（10月のみ）
+- `/race/:raceId` - レース詳細
+
+### 1.3 JRAスクレイピング機能（Cloud Functions）
+
+**`apps/functions/src/scrapers/jra-scraper.ts`:**
+
+- JRA公式サイト（`https://www.jra.go.jp/`）からレース結果を取得
+- HTTPトリガー: 手動実行用エンドポイント
+- Firestoreの`races`コレクションに保存
+- 10月分のレースを優先的に取得
+
+### 1.4 Firestoreデータモデル
+
+```typescript
+// races コレクション
+{
+  raceId: string           // 例: "20251005-tokyo-11"
+  date: Timestamp          // レース開催日
+  racecourse: string       // "東京", "中山", "京都" など
+  raceNumber: number       // 第何レース
+  raceName: string         // レース名
+  grade: string            // "G1", "G2", "G3", "" など
+  distance: number         // 距離（メートル）
+  surface: string          // "芝", "ダート"
+  results: {
+    rank: number           // 着順
+    horseNumber: number    // 馬番
+    horseName: string      // 馬名
+    jockey: string         // 騎手名
+    time: string           // タイム
+    odds: number           // 単勝オッズ
+  }[]
+  scrapedAt: Timestamp     // スクレイピング実行時刻
+}
+```
+
+**Firestore Rules:**
+
+- 認証ユーザーのみ読み取り可能
+- 書き込みは管理者のみ（Cloud Functions経由）
+
+### 1.5 レース結果表示機能
+
+**フロントエンド実装:**
+
+- `apps/hosting/src/views/Dashboard.vue`: 10月分レース一覧（日付・競馬場フィルター、memocaのDashboard参考）
+- `apps/hosting/src/views/RaceDetail.vue`: レース詳細（着順表示）
+- `apps/hosting/src/composables/useRace.ts`: Firestore CRUD操作
+- `apps/hosting/src/components/RaceCard.vue`: レース結果カード（memocaのCardEditDialog参考）
+- `apps/hosting/src/components/Breadcrumb.vue`: パンくずリスト（memoca移植）
+
+**PrimeVue使用コンポーネント（memoca参考）:**
+
+- DataTable: レース一覧表示
+- Card: レースカード表示
+- Button, Dialog, InputText など
+
+## フェーズ2: Win5・配当金スクレイピングと表示
+
+### 2.1 配当金スクレイピング（Cloud Functions拡張）
+
+**`apps/functions/src/scrapers/payout-scraper.ts`:**
+
+- JRAサイトから配当金・Win5データ取得
+- Firestoreに保存
+
+### 2.2 Firestoreデータモデル拡張
+
+```typescript
+// races コレクションに追加
+{
+  payouts: {
+    win: { horseNumber: number, payout: number }[]
+    place: { horseNumber: number, payout: number }[]
+    quinella: { combination: number[], payout: number }[]
+    exacta: { combination: number[], payout: number }[]
+    trio: { combination: number[], payout: number }[]
+    trifecta: { combination: number[], payout: number }[]
+  }
+}
+
+// win5Results コレクション
+{
+  date: Timestamp
+  races: string[]              // 対象5レースのraceId
+  winningCombination: number[] // 的中馬番
+  payout: number
+  hits: number
+  scrapedAt: Timestamp
+}
+```
+
+### 2.3 配当金・Win5表示機能
+
+- `apps/hosting/src/views/RaceDetail.vue`: 配当金セクション追加
+- `apps/hosting/src/views/Win5.vue`: Win5結果一覧・詳細
+- `apps/hosting/src/components/PayoutTable.vue`: 配当金表示テーブル（PrimeVue DataTable使用）
+- `apps/hosting/src/composables/useWin5.ts`: Win5データ操作
+
+## フェーズ3: 出馬表スクレイピング（将来対応）
+
+**`apps/functions/src/scrapers/race-card-scraper.ts`:**
+
+- レース前の出馬表をスクレイピング
+- Firestoreの`upcomingRaces`コレクションに保存
+
+## 開発・テスト
+
+### E2Eテスト（memoca参考）
+
+- `apps/e2e/tests/login_flow.spec.ts`: ログインフロー
+- `apps/e2e/tests/race_management.spec.ts`: レース表示テスト
+- `apps/e2e/pageObjects/DashboardPage.ts`: ページオブジェクト
+
+### Makefile（memoca参考）
+
+```makefile
+dev: install
+	pnpm turbo dev
+
+e2e:
+	pnpm -F e2e test
+
+build:
+	pnpm -F hosting build
+
+deploy:
+	cd apps/firebase && firebase deploy
+```
+
+## 実装順序
+
+1. プロジェクト初期化（pnpm, turbo, hosting, firebase, functions）
+2. 認証基盤（全ページ認証必須、LoginDialog）
+3. レース結果スクレイピング（Cloud Functions）
+4. レース結果表示（Dashboard, RaceDetail、10月フィルター）
+5. 配当金・Win5スクレイピング
+6. 配当金・Win5表示
+7. E2Eテスト作成
+
+### To-dos
+
+- [ ] プロジェクト初期化（pnpm workspace, turbo, hosting, firebase設定）
+- [ ] Firebase認証とVue Routerの基盤実装
+- [ ] レース結果表示機能（Firestore連携、Home/RaceDetail画面）
+- [ ] 配当金・Win5結果表示機能の追加
+- [ ] JRA-VANデータ取得と馬・騎手マスタ構築
+- [ ] 分析システムの実装（スコアリング・要因分析）
+- [ ] レース前予想配信システムの実装（Cloud Functions + 通知）

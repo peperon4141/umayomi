@@ -1,0 +1,333 @@
+---
+alwaysApply: true
+---
+
+# Memoca CSS コーディングスタイル
+
+## 🎯 基本原則
+
+### 1. 簡素な実装
+- **!important**: 可能な限り避ける
+- **セレクター**: 具体的で簡潔なセレクターを使用
+- **ネスト**: 過度なネストを避ける
+
+### 2. 保守性の重視
+- **クラス名**: 意味のあるクラス名を使用
+- **再利用性**: 共通スタイルはコンポーネント化
+- **一貫性**: プロジェクト全体で統一されたスタイル
+
+### 3. 色の指定
+- **Semantic色**: 直接色指定ではなく、semantic色を使用
+- **テーマ対応**: ライトモード・ダークモードに対応した色指定
+- **Tailwind色クラス回避**: `text-gray-*`, `bg-white`などの直接色指定を避ける
+
+### 4. CSS設定方法
+- **Tailwind優先**: CSS設定はTailwindクラスを使用
+- **インラインスタイル回避**: `style`属性での直接指定を避ける
+- **PrimeVue統合**: PrimeVueのsemantic色をTailwindクラスで使用
+
+## 📝 CSSの書き方
+
+### ❌ 悪い例
+```css
+/* 過度な!importantの使用 */
+.button {
+  color: red !important;
+  background: blue !important;
+  padding: 10px !important;
+}
+
+/* 過度にネストされたセレクター */
+.container .wrapper .content .section .item .button {
+  color: red;
+}
+
+/* 意味のないクラス名 */
+.red-text {
+  color: red;
+}
+```
+
+### ✅ 良い例
+```css
+/* 適切なセレクターの使用 */
+.button {
+  color: red;
+  background: blue;
+  padding: 10px;
+}
+
+/* 簡潔なセレクター */
+.section .button {
+  color: red;
+}
+
+/* 意味のあるクラス名 */
+.error-message {
+  color: red;
+}
+```
+
+## 🔧 実装パターン
+
+### 1. 色の指定
+
+#### ❌ 悪い例
+```html
+<!-- 直接色指定 -->
+<h1 class="text-gray-900 dark:text-white">タイトル</h1>
+<div class="bg-white dark:bg-gray-900">コンテンツ</div>
+<p class="text-gray-600 dark:text-gray-300">説明文</p>
+```
+
+#### ✅ 良い例
+```html
+<!-- Semantic色を使用 -->
+<h1>タイトル</h1>
+<div>コンテンツ</div>
+<p>説明文</p>
+```
+
+```css
+/* PrimeVueのテーマシステムに任せる */
+/* 直接色指定は避け、semantic色を使用 */
+```
+
+### 2. Tailwindクラスの使用
+
+#### ❌ 悪い例
+```html
+<!-- インラインスタイルでの直接指定 -->
+<div style="background-color: var(--p-surface-0);">
+<header style="background-color: var(--p-surface-0);">
+```
+
+#### ✅ 良い例
+```html
+<!-- Tailwindクラスを使用 -->
+<div class="bg-surface-0">
+<header class="bg-surface-0">
+```
+
+### 2. セレクターの優先度を適切に使用
+```css
+/* 基本スタイル */
+.button {
+  color: red;
+}
+
+/* より具体的なセレクターで上書き */
+.section .button {
+  color: blue;
+}
+```
+
+### 2. クラス名の命名規則
+```css
+/* BEM記法の活用 */
+.card {
+  padding: 1rem;
+}
+
+.card__header {
+  font-weight: bold;
+}
+
+.card--featured {
+  border: 2px solid gold;
+}
+```
+
+## 🚫 絶対に避けるべきパターン
+
+### 1. 直接色指定（最重要）
+```html
+<!-- ❌ 絶対に禁止 - 直接色指定 -->
+<div class="bg-green-100 text-green-800">成功</div>
+<span class="text-red-500">エラー</span>
+<button class="bg-blue-500 text-white">ボタン</button>
+
+<!-- ✅ 必ず使用 - Semantic色 -->
+<Badge severity="success">成功</Badge>
+<Badge severity="danger">エラー</Badge>
+<Button severity="primary">ボタン</Button>
+```
+
+### 2. !importantの乱用
+```css
+/* ❌ 避ける */
+.button {
+  color: red !important;
+  background: blue !important;
+  padding: 10px !important;
+}
+
+/* ✅ 推奨 */
+.button {
+  color: red;
+  background: blue;
+  padding: 10px;
+}
+
+/* 必要に応じて、より具体的なセレクターを使用 */
+.section .button {
+  color: red;
+}
+```
+
+### 2. 過度なネスト
+```css
+/* ❌ 避ける */
+.container {
+  .wrapper {
+    .content {
+      .section {
+        .item {
+          .button {
+            color: red;
+          }
+        }
+      }
+    }
+  }
+}
+
+/* ✅ 推奨 */
+.section .button {
+  color: red;
+}
+```
+
+### 3. 意味のないクラス名
+```css
+/* ❌ 避ける */
+.red-text {
+  color: red;
+}
+
+/* ✅ 推奨 */
+.error-message {
+  color: red;
+}
+```
+
+### 4. 直接色指定
+```html
+<!-- ❌ 絶対に避ける - 直接色指定 -->
+<h1 class="text-gray-900 dark:text-white">タイトル</h1>
+<div class="bg-white dark:bg-gray-900">コンテンツ</div>
+<p class="text-gray-600 dark:text-gray-300">説明文</p>
+<div class="bg-green-100 text-green-800">成功メッセージ</div>
+<span class="text-red-500">エラーメッセージ</span>
+
+<!-- ✅ 推奨 - Semantic色を使用 -->
+<h1>タイトル</h1>
+<div>コンテンツ</div>
+<p>説明文</p>
+<Badge severity="success">成功メッセージ</Badge>
+<Badge severity="danger">エラーメッセージ</Badge>
+```
+
+### 5. インラインスタイルの使用
+```html
+<!-- ❌ 避ける - インラインスタイル -->
+<div style="background-color: var(--p-surface-0);">
+<header style="background-color: var(--p-surface-0);">
+
+<!-- ✅ 推奨 - Tailwindクラス -->
+<div class="bg-surface-0">
+<header class="bg-surface-0">
+```
+
+## 📋 チェックリスト
+
+### コードレビュー時（必須チェック）
+- [ ] **最重要**: 直接色指定（`bg-green-*`, `text-red-*`, `bg-blue-*`など）を絶対に避けている
+- [ ] **最重要**: Semantic色（`severity="success"`, `severity="danger"`など）を使用している
+- [ ] CSSで!importantを避けている
+- [ ] CSSセレクターが簡潔で具体的
+- [ ] クラス名が意味のある名前になっている
+- [ ] 過度なネストを避けている
+- [ ] インラインスタイルを使用していない
+- [ ] レスポンシブデザインが適切に実装されている
+- [ ] テーマ対応（ライトモード・ダークモード）が適切に実装されている
+- [ ] Tailwindクラスを使用している
+- [ ] インラインスタイル（`style`属性）を避けている
+
+### リファクタリング時（必須実行）
+- [ ] **最重要**: 直接色指定（`bg-green-*`, `text-red-*`など）を絶対に削除
+- [ ] **最重要**: Semantic色（`severity="success"`, `severity="danger"`など）に置き換え
+- [ ] CSSの!importantを削除
+- [ ] CSSセレクターを簡潔化
+- [ ] クラス名を意味のある名前に変更
+- [ ] 重複するスタイルを統合
+- [ ] 不要なネストを削除
+- [ ] Tailwind色クラスを削除
+- [ ] テーマ対応の色指定に統一
+- [ ] インラインスタイルをTailwindクラスに置き換え
+- [ ] PrimeVueのsemantic色をTailwindクラスで使用
+
+## 🎯 ベストプラクティス
+
+1. **最重要**: 直接色指定を絶対に避ける
+2. **最重要**: Semantic色を必ず使用する
+3. **可読性**: CSSが自己説明的である
+4. **簡潔性**: 必要最小限のCSSで実装
+5. **保守性**: 変更が容易な構造
+6. **パフォーマンス**: 不要なスタイルを避ける
+7. **一貫性**: プロジェクト全体で統一されたスタイル
+8. **レスポンシブ**: モバイルファーストで設計
+
+## ⚠️ 絶対に守るべきルール
+
+### 直接色指定の禁止
+```html
+<!-- ❌ 絶対に禁止 -->
+<div class="bg-green-100 text-green-800">成功</div>
+<span class="text-red-500">エラー</span>
+<button class="bg-blue-500 text-white">ボタン</button>
+
+<!-- ✅ 必ず使用 -->
+<Badge severity="success">成功</Badge>
+<Badge severity="danger">エラー</Badge>
+<Button severity="primary">ボタン</Button>
+```
+
+### 禁止される色クラス
+- `bg-green-*`, `text-green-*`
+- `bg-red-*`, `text-red-*`
+- `bg-blue-*`, `text-blue-*`
+- `bg-yellow-*`, `text-yellow-*`
+- `bg-gray-*`, `text-gray-*`
+- `bg-white`, `text-white`
+- `bg-black`, `text-black`
+
+## 💡 実装のヒント
+
+### 1. セレクターの優先度を理解する
+```css
+/* 優先度: 0,0,1,0 */
+.button {
+  color: red;
+}
+
+/* 優先度: 0,0,2,0 */
+.section .button {
+  color: blue;
+}
+```
+
+### 2. CSS変数の活用
+```css
+:root {
+  --primary-color: #007bff;
+  --border-radius: 4px;
+}
+
+.button {
+  background: var(--primary-color);
+  border-radius: var(--border-radius);
+}
+```
+
+このCSSコーディングスタイルに従うことで、保守性が高く、読みやすいCSSを書くことができます。

@@ -1,0 +1,373 @@
+---
+alwaysApply: true
+---
+
+# Memoca 開発フロー
+
+## 🚀 開発環境セットアップ
+
+### 初回セットアップ
+```bash
+# 1. 依存関係インストール
+pnpm install
+
+# 2. 開発環境起動
+make dev
+```
+
+### 日常的な開発開始
+```bash
+# 全サービス起動（Firebase Emulator + Vue Dev Server）
+make dev
+```
+
+## ⚠️ 重要な注意事項
+
+### プロセス管理
+- **絶対に勝手にプロセスを停止しない**: `pkill`、`kill`、`killall`などのコマンドは使用禁止
+- **既存のプロセスを尊重**: ユーザーが起動したプロセスは停止しない
+- **確認が必要**: プロセスの停止が必要な場合は、必ずユーザーに確認する
+
+### 開発環境の運用方針
+- **基本は5000ポートで運用**: Firebase Emulator hosting（http://127.0.0.1:5000）をメインの開発環境として使用
+- **3000ポートは補助的**: Vite dev server（http://127.0.0.1:3000）は必要に応じてのみ使用
+- **dev-bothコマンドは廃止**: 複数ポートの同時起動は不要
+- **統一されたアドレス**: localhostではなく127.0.0.1を統一して使用
+
+## 📋 開発フロー
+
+### 1. 新機能開発フロー
+
+#### 1.1 機能設計
+- [ ] 要件を明確化
+- [ ] UI/UX設計を検討
+- [ ] データモデル設計
+- [ ] API設計（Firestore構造）
+
+#### 1.2 実装手順（E2Eテストファースト）
+```bash
+# 1. ブランチ作成
+git checkout -b feature/新機能名
+
+# 2. 開発開始
+make dev
+
+# 3. E2Eテストファースト実装
+# 3-1. E2Eテストを先に実装（失敗する状態）
+touch apps/e2e/tests/新機能名.spec.ts
+# テストケースを1つ実装
+
+# 3-2. その後、hosting実装
+# - Vue コンポーネント作成
+# - TypeScript 型定義
+# - Firebase 関数実装
+# - Vitestユニットテスト追加
+
+# 4. 品質チェック（必須）
+pnpm -F hosting build  # ビルドチェック - 正常終了まで実行
+make format            # リント修正 - 正常終了まで実行
+make e2e              # E2Eテスト実行 - 正常終了まで実行
+
+# 5. コミット（品質チェック完了後）
+git add .
+git commit -m "feat: 新機能の説明"
+```
+
+#### 1.3 実装ガイドライン
+- **コンポーネント**: `apps/hosting/src/components/` に配置
+- **ページ**: `apps/hosting/src/views/` に配置
+- **Composables**: `apps/hosting/src/composables/` に配置
+- **型定義**: `apps/hosting/src/types/` に配置
+- **ルート**: `apps/hosting/src/router/index.ts` に追加
+
+### 2. バグ修正フロー
+
+#### 2.1 バグ調査
+```bash
+# 1. 問題の再現
+make dev
+# ブラウザで問題を再現
+
+# 2. ログ確認
+tail -f logs/hosting.log
+tail -f logs/firebase.log
+```
+
+#### 2.2 修正手順
+```bash
+# 1. ブランチ作成
+git checkout -b fix/バグの説明
+
+# 2. 修正実装
+# - 問題箇所の特定
+# - 最小限の修正
+# - テストケース追加
+
+# 3. 検証（必須）
+pnpm -F hosting build  # ビルドチェック - 正常終了まで実行
+make format            # リント修正 - 正常終了まで実行
+make e2e              # E2Eテスト実行 - 正常終了まで実行
+
+# 4. コミット（検証完了後）
+git add .
+git commit -m "fix: バグの説明"
+```
+
+### 3. リファクタリングフロー
+
+#### 3.1 リファクタリング対象の特定
+- 重複コードの統合
+- パフォーマンス改善
+- コードの可読性向上
+- 型安全性の向上
+
+#### 3.2 実行手順
+```bash
+# 1. ブランチ作成
+git checkout -b refactor/リファクタリング内容
+
+# 2. 段階的リファクタリング
+# - 小さな単位で実行
+# - 各段階でテスト実行
+# - 動作確認
+
+# 3. 品質チェック（必須）
+pnpm -F hosting build  # ビルドチェック - 正常終了まで実行
+make format            # リント修正 - 正常終了まで実行
+make e2e              # E2Eテスト実行 - 正常終了まで実行
+
+# 4. コミット（品質チェック完了後）
+git add .
+git commit -m "refactor: リファクタリング内容"
+```
+
+## 🧪 テスト戦略
+
+> **詳細**: [テスト戦略ドキュメント](./testing.mdc) を参照
+
+### 基本コマンド
+```bash
+# E2Eテスト実行
+make e2e
+
+# 個別テスト実行
+cd apps/e2e && pnpm test
+cd apps/e2e && pnpm test:ui    # UI付きテスト
+cd apps/e2e && pnpm test:headed # ブラウザ表示
+```
+
+### テスト追加ガイドライン
+- **新機能**: 必ずE2Eテストを追加
+- **バグ修正**: 回帰テストを追加
+- **テストファイル**: `apps/e2e/tests/` に配置
+- **テストケース名**: 日本語で記述
+
+## 🔍 コード品質管理
+
+### ⚠️ 必須品質チェック
+**タスク完了前には必ず以下を実行し、正常終了まで確認すること：**
+
+```bash
+# 1. ビルドチェック（必須）
+pnpm -F hosting build
+# → TypeScript型エラー・ビルドエラーが0個になるまで修正
+
+# 2. リント修正（必須）
+make format
+# → エラーが0個になるまで修正
+
+# 3. E2Eテスト実行（必須）
+make e2e
+# → 全テストが成功するまで修正
+```
+
+### リント実行
+```bash
+# 全プロジェクトのリント修正
+make format
+
+# 個別実行
+cd apps/hosting && pnpm lint:fix
+cd apps/firebase && pnpm lint:fix
+cd apps/e2e && pnpm lint:fix
+```
+
+### コードレビューチェックリスト
+- [ ] ビルドが成功する（TypeScript型エラーなし）
+- [ ] ESLintエラーなし
+- [ ] テストが通る
+- [ ] パフォーマンスに問題なし
+- [ ] セキュリティリスクなし
+
+## 🚀 デプロイフロー
+
+### 開発環境デプロイ
+```bash
+# Firebase Emulatorでテスト
+make dev
+# http://127.0.0.1:5000 で動作確認
+```
+
+### 本番デプロイ
+```bash
+# 1. ビルド
+cd apps/hosting && pnpm build
+
+# 2. Firebase デプロイ
+cd apps/firebase && firebase deploy
+```
+
+## 📁 プロジェクト構造
+
+```
+memoca/
+├── apps/
+│   ├── hosting/          # Vue 3 フロントエンド
+│   │   ├── src/
+│   │   │   ├── components/  # 再利用可能コンポーネント
+│   │   │   ├── views/        # ページコンポーネント
+│   │   │   ├── composables/  # ビジネスロジック
+│   │   │   ├── types/        # TypeScript型定義
+│   │   │   └── router/       # ルーティング
+│   │   └── package.json
+│   ├── firebase/         # Firebase設定・エミュレーター
+│   └── e2e/             # Playwright E2Eテスト
+├── .cursor/rules/        # Cursor AI ルール
+├── Makefile             # 開発コマンド
+└── README.md
+```
+
+## 🛠️ 開発ツール
+
+### 必須ツール
+- **Node.js**: 20.12.2以上
+- **pnpm**: 10.11.0以上
+- **Firebase CLI**: 最新版
+- **Cursor**: AI支援開発
+
+### 推奨拡張機能
+- Vue Language Features (Volar)
+- TypeScript Importer
+- ESLint
+- Prettier
+- Firebase
+
+## 📝 コミット規約
+
+### コミットメッセージ形式
+```
+<type>(<scope>): <description>
+
+<body>
+
+<footer>
+```
+
+### タイプ一覧
+- `feat`: 新機能
+- `fix`: バグ修正
+- `docs`: ドキュメント更新
+- `style`: コードフォーマット
+- `refactor`: リファクタリング
+- `test`: テスト追加・修正
+- `chore`: ビルド・設定変更
+
+### 例
+```
+feat(auth): ログイン機能を追加
+
+- Firebase Authentication統合
+- ログイン・ログアウト機能実装
+- ルートガード追加
+
+Closes #123
+```
+
+## 🔄 ブランチ戦略
+
+### ブランチ命名規則
+- `main`: 本番環境
+- `develop`: 開発環境
+- `feature/機能名`: 新機能開発
+- `fix/バグ名`: バグ修正
+- `refactor/内容`: リファクタリング
+
+### マージ戦略
+1. 機能ブランチ → `develop`
+2. `develop` → `main` (リリース時)
+
+## 🚨 トラブルシューティング
+
+### よくある問題
+
+#### 1. サービスが起動しない
+```bash
+# ポート確認
+lsof -i :5000
+lsof -i :4000
+
+# プロセス終了（ユーザー確認後）
+pkill -f "firebase"
+pkill -f "vite"
+```
+
+#### 2. Firebase Emulator接続エラー
+```bash
+# エミュレーターリセット
+cd apps/firebase
+firebase emulators:stop
+firebase emulators:start
+```
+
+#### 3. 依存関係エラー
+```bash
+# キャッシュクリア
+rm -rf node_modules
+rm pnpm-lock.yaml
+pnpm install
+```
+
+## 📊 パフォーマンス監視
+
+### 開発時の監視項目
+- [ ] ページロード時間
+- [ ] Firebase接続時間
+- [ ] メモリ使用量
+- [ ] バンドルサイズ
+
+### 最適化チェックリスト
+- [ ] 不要な依存関係の削除
+- [ ] コード分割の実装
+- [ ] 画像最適化
+- [ ] キャッシュ戦略
+
+---
+
+## 🎯 開発のベストプラクティス
+
+1. **品質チェック必須**: タスク完了前は必ず `pnpm -F hosting build`、`make format`、`make e2e` を正常終了
+2. **小さなコミット**: 1つのコミットで1つの変更
+3. **テストファースト**: 可能な限りテストを先に書く
+4. **型安全性**: TypeScriptの型を活用
+5. **コンポーネント設計**: 再利用可能な設計
+6. **パフォーマンス**: 不要な再レンダリングを避ける
+7. **セキュリティ**: Firebase Security Rulesの適切な設定
+8. **アクセシビリティ**: キーボード操作とスクリーンリーダー対応
+9. **国際化**: 将来的な多言語対応を考慮
+
+## 📝 コーディングスタイル
+
+> **詳細**: [コーディングスタイルドキュメント](./coding-style.mdc) を参照
+
+### 基本原則
+- **1liner**: 可能な限り1行で記述
+- **ガード句**: 早期リターンを使用してネストを避ける
+- **簡素な実装**: 冗長なコードを避ける
+- **コメント最小化**: 必要最小限のみ記述
+- **console.log最小化**: デバッグ時のみ使用
+
+### 実装パターン
+- **ガード句の活用**: 早期リターンでネストを避ける
+- **条件分岐の簡素化**: 三項演算子・論理演算子を活用
+- **配列・オブジェクト操作の簡素化**: メソッドチェーンの活用
+- **非同期処理の簡素化**: async/await の活用

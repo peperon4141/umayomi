@@ -1,0 +1,25 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ユーザー自身のデータのみ読み書き可能
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      // 新規ユーザー作成時は認証済みユーザーが自分のドキュメントを作成可能
+      allow create: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // レース結果：認証ユーザーのみ読み取り可能、書き込みはCloud Functionsのみ
+    match /races/{raceId} {
+      allow read: if request.auth != null;
+      // 書き込みはCloud Functions（管理者）のみ
+      allow write: if false;
+    }
+    
+    // Win5結果：認証ユーザーのみ読み取り可能、書き込みはCloud Functionsのみ
+    match /win5Results/{win5Id} {
+      allow read: if request.auth != null;
+      // 書き込みはCloud Functions（管理者）のみ
+      allow write: if false;
+    }
+  }
+}

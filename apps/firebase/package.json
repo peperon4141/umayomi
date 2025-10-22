@@ -1,0 +1,19 @@
+{
+  "name": "umayomi-firebase",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "pnpm run stop && pnpm run start",
+    "lint": "eslint . --ext .js,.ts",
+    "lint:fix": "eslint . --ext .js,.ts --fix",
+    "start": "firebase emulators:start --config firebase.json --project umayomi-dev --import=./firebase-data --export-on-exit=./firebase-data --only auth,firestore,hosting",
+    "stop": "lsof -ti :4100 -ti :4600 -ti :5100 -ti :9199 -ti :8180 | xargs -r kill -TERM || true"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.38.0",
+    "@typescript-eslint/eslint-plugin": "^8.46.1",
+    "@typescript-eslint/parser": "^8.46.1",
+    "eslint": "^9.38.0"
+  }
+}

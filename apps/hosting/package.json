@@ -1,0 +1,45 @@
+{
+  "name": "hosting",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1 --port 3100",
+    "build": "vue-tsc && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "lint": "vue-tsc --noEmit && eslint . --ext .js,.ts",
+    "lint:fix": "eslint . --ext .js,.ts --fix"
+  },
+  "dependencies": {
+    "@primeuix/themes": "^1.0.1",
+    "firebase": "^10.12.0",
+    "primeicons": "^7.0.0",
+    "primevue": "^4.3.7",
+    "vue": "^3.4.21",
+    "vue-router": "^4.3.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.38.0",
+    "@primevue/auto-import-resolver": "^4.3.3",
+    "@tailwindcss/vite": "^4.1.13",
+    "@types/node": "^20.11.30",
+    "@typescript-eslint/eslint-plugin": "^8.46.1",
+    "@typescript-eslint/parser": "^8.46.1",
+    "@vitejs/plugin-vue": "^5.0.4",
+    "@vitest/ui": "3.2.4",
+    "@vue/test-utils": "^2.4.6",
+    "eslint": "^9.38.0",
+    "eslint-plugin-vue": "^10.5.1",
+    "jsdom": "^27.0.1",
+    "sass": "^1.93.2",
+    "tailwindcss": "^4.0.0",
+    "tailwindcss-primeui": "^0.6.1",
+    "typescript": "^5.2.2",
+    "unplugin-vue-components": "^28.5.0",
+    "vite": "^5.1.6",
+    "vitest": "^3.2.4",
+    "vue-eslint-parser": "^10.2.0",
+    "vue-tsc": "^2.0.0"
+  }
+}
