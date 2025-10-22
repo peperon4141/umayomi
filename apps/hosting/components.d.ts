@@ -9,20 +9,10 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     Avatar: typeof import('primevue/avatar')['default']
-    Breadcrumb: typeof import('./src/components/Breadcrumb.vue')['default']
     Button: typeof import('primevue/button')['default']
     Card: typeof import('primevue/card')['default']
-    Dialog: typeof import('primevue/dialog')['default']
-    InputText: typeof import('primevue/inputtext')['default']
-    LoginDialog: typeof import('./src/components/LoginDialog.vue')['default']
-    Menu: typeof import('primevue/menu')['default']
-    Menubar: typeof import('primevue/menubar')['default']
-    Message: typeof import('primevue/message')['default']
-    Password: typeof import('primevue/password')['default']
-    ProfileDialog: typeof import('./src/components/ProfileDialog.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
-    SelectButton: typeof import('primevue/selectbutton')['default']
     Timeline: typeof import('primevue/timeline')['default']
   }
 }

@@ -9,7 +9,7 @@ export default defineConfig({
   workers: process.env.CI ? 2 : 4, // ワーカー数を増加
   reporter: process.env.CI ? 'github' : 'list',
   use: {
-    baseURL: 'http://127.0.0.1:5100', // Firebase Emulator Hosting
+    baseURL: 'http://127.0.0.1:3100', // Vite dev server
     trace: 'on-first-retry',
     // ヘッドレスモード用の設定
     headless: true, // ヘッドレスモードで実行
@@ -28,6 +28,6 @@ export default defineConfig({
   webServer: process.env.CI ? undefined : {
     command: 'cd ../hosting && pnpm dev:serve',
     url: 'http://127.0.0.1:3100',
-    reuseExistingServer: false,
+    reuseExistingServer: true,
   },
 })

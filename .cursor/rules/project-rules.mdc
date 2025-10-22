@@ -1,0 +1,180 @@
+---
+alwaysApply: true
+---
+
+# Umayomi プロジェクト固有ルール
+
+## 🏇 プロジェクト概要
+- **プロジェクト名**: Umayomi（馬予想）
+- **サービス**: 競馬予想サービス
+- **技術スタック**: Vue 3 + TypeScript + Firebase + PrimeVue + Tailwind CSS
+
+## 🚀 開発環境
+
+### ポート設定
+- **Firebase Emulator Hosting**: http://127.0.0.1:5100
+- **Firebase Emulator UI**: http://127.0.0.1:4100
+- **Firebase Auth**: 127.0.0.1:9199
+- **Firestore**: 127.0.0.1:8180
+- **Hub**: 127.0.0.1:4600
+
+### 開発コマンド
+```bash
+# 開発環境起動
+make dev
+
+# ビルド
+make build
+
+# リント修正
+make format
+
+# E2Eテスト
+make e2e
+
+# プロセス停止
+make kill
+```
+
+## 📁 プロジェクト構造
+
+```
+umayomi/
+├── apps/
+│   ├── hosting/          # Vue 3 フロントエンド
+│   │   ├── src/
+│   │   │   ├── components/  # 再利用可能コンポーネント
+│   │   │   ├── views/        # ページコンポーネント
+│   │   │   ├── composables/  # ビジネスロジック
+│   │   │   ├── types/        # TypeScript型定義
+│   │   │   └── router/       # ルーティング
+│   │   └── package.json
+│   ├── firebase/         # Firebase設定・エミュレーター
+│   └── e2e/             # Playwright E2Eテスト
+├── .cursor/rules/        # Cursor AI ルール
+├── Makefile             # 開発コマンド
+└── README.md
+```
+
+## 🏇 競馬サービス仕様
+
+### 基本機能
+- **レース結果表示**: 10月分のレース結果を表示
+- **会員制**: ログインしたユーザーのみアクセス可能
+- **認証**: Firebase Authentication使用
+
+### データ構造
+- **レース情報**: Firestoreの`races`コレクションに保存
+- **認証**: Firebase Authentication
+- **セキュリティ**: 認証済みユーザーのみ読み取り可能
+
+### 実装ガイドライン
+- **コンポーネント**: `apps/hosting/src/components/` に配置
+- **ページ**: `apps/hosting/src/views/` に配置
+- **Composables**: `apps/hosting/src/composables/` に配置
+- **型定義**: `apps/hosting/src/types/` に配置
+- **ルート**: `apps/hosting/src/router/index.ts` に追加
+
+## 🔧 技術スタック固有設定
+
+### Vue 3 + TypeScript
+- **Composition API**: 積極的に使用
+- **型安全性**: 厳密な型定義
+- **コンポーネント設計**: 単一責任の原則
+
+### PrimeVue
+- **コンポーネント**: PrimeVueのコンポーネントを積極的に使用
+- **テーマ**: 統一されたデザインシステム
+- **アクセシビリティ**: キーボード操作とスクリーンリーダー対応
+
+### Firebase
+- **認証**: Firebase Authentication
+- **データベース**: Firestore
+- **ホスティング**: Firebase Hosting
+- **エミュレーター**: 開発環境でローカル実行
+
+### Tailwind CSS
+- **ユーティリティファースト**: 直接的なスタイリング
+- **レスポンシブ**: モバイルファースト設計
+- **カスタマイズ**: プロジェクト固有の設定
+
+## 🧪 テスト戦略
+
+### E2Eテスト
+- **フレームワーク**: Playwright
+- **テストファイル**: `apps/e2e/tests/` に配置
+- **テストケース名**: 日本語で記述
+- **PageObject**: 適切なPageObjectパターンの使用
+
+### ユニットテスト
+- **フレームワーク**: Vitest
+- **テストファイル**: `*.test.ts` または `*.spec.ts`
+- **検証ルール**: 1つのJSオブジェクトに対しては1つのexpectでオブジェクトを検証
+
+## 📝 コーディング規約
+
+### プロジェクト固有のルール
+- **競馬用語**: 適切な競馬用語を使用
+- **日本語UI**: ユーザーインターフェースは日本語
+- **データ形式**: レース結果のデータ形式を統一
+- **エラーハンドリング**: 競馬データ特有のエラー処理
+
+### ファイル命名規則
+- **コンポーネント**: PascalCase（例: `RaceDetail.vue`）
+- **Composables**: camelCase（例: `useRace.ts`）
+- **テストファイル**: `*.spec.ts` または `*.test.ts`
+- **型定義**: PascalCase（例: `RaceResult.ts`）
+
+## 🚨 トラブルシューティング
+
+### よくある問題
+
+#### 1. ポート競合
+```bash
+# ポート確認
+lsof -i :5100 -i :4100 -i :9199 -i :8180
+
+# プロセス停止
+make kill
+```
+
+#### 2. Firebase接続エラー
+```bash
+# エミュレーターリセット
+cd apps/firebase
+firebase emulators:stop
+firebase emulators:start
+```
+
+#### 3. ビルドエラー
+```bash
+# 依存関係再インストール
+rm -rf node_modules
+rm pnpm-lock.yaml
+pnpm install
+```
+
+## 📊 パフォーマンス監視
+
+### 監視項目
+- [ ] ページロード時間
+- [ ] Firebase接続時間
+- [ ] レースデータの読み込み時間
+- [ ] メモリ使用量
+- [ ] バンドルサイズ
+
+### 最適化チェックリスト
+- [ ] 不要な依存関係の削除
+- [ ] コード分割の実装
+- [ ] 画像最適化
+- [ ] キャッシュ戦略
+- [ ] Firestoreクエリの最適化
+
+## 🎯 開発のベストプラクティス
+
+1. **競馬データの整合性**: レース結果データの正確性を重視
+2. **ユーザビリティ**: 競馬ファンにとって使いやすいUI
+3. **パフォーマンス**: 大量のレースデータを効率的に処理
+4. **セキュリティ**: 会員制サービスの適切な認証
+5. **保守性**: 競馬データの変更に対応しやすい設計
+6. **拡張性**: 将来的な機能追加に対応できる設計

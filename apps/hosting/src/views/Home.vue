@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100" data-theme="light">
+  <div class="min-h-screen bg-white" data-theme="light">
     <!-- Navigation -->
     <nav class="bg-white shadow-sm">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -23,34 +23,36 @@
     </nav>
 
     <!-- Hero Section -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-      <div class="text-center">
-        <h1 class="text-4xl md:text-6xl font-bold mb-6" aria-label="メインタイトル">
-          <span class="text-red-600">競馬</span>の<span class="text-red-600">データ</span>を
-          <br>読み解く
-        </h1>
-        <p class="text-xl mb-8 max-w-3xl mx-auto text-surface-600">
-          過去のレース結果を分析して、次のレースの予想精度を向上させませんか？
-          <br><strong class="text-red-600">馬読なら、データに基づいた予想と結果管理ができます。</strong>
-        </p>
-        <div class="flex flex-col sm:flex-row gap-4 justify-center">
-          <Button
-            @click="showLoginModal = true"
-            label="ログイン"
-            severity="primary"
-            size="large"
-            aria-label="ログインダイアログを開く"
-            raised
-          />
-          <Button 
-            @click="scrollToFeatures"
-            label="機能を見る"
-            severity="secondary"
-            size="large"
-            class="text-surface-900"
-            aria-label="機能を見る"
-            raised
-          />
+    <div class="bg-gray-50">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+        <div class="text-center">
+          <h1 class="text-4xl md:text-6xl font-bold mb-6" aria-label="メインタイトル">
+            <span class="text-red-600">競馬</span>の<span class="text-red-600">データ</span>を
+            <br>読み解く
+          </h1>
+          <p class="text-xl mb-8 max-w-3xl mx-auto text-surface-600">
+            過去のレース結果を分析して、次のレースの予想精度を向上させませんか？
+            <br><strong class="text-red-600">馬読なら、データに基づいた予想と結果管理ができます。</strong>
+          </p>
+          <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button
+              @click="showLoginModal = true"
+              label="ログイン"
+              severity="primary"
+              size="large"
+              aria-label="ログインダイアログを開く"
+              raised
+            />
+            <Button 
+              @click="scrollToFeatures"
+              label="機能を見る"
+              severity="secondary"
+              size="large"
+              class="text-surface-900"
+              aria-label="機能を見る"
+              raised
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -58,7 +60,7 @@
     <!-- Features Section -->
     <div
       id="features"
-      class="py-20 bg-surface-50"
+      class="py-20 bg-white"
     >
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-16">
@@ -123,7 +125,7 @@
     </div>
 
     <!-- Highlight Section -->
-    <div class="py-20 bg-surface-900">
+    <div class="py-20 bg-black">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <h2 class="text-3xl font-bold mb-4 text-white">
           なぜ馬読なのか？
@@ -156,7 +158,7 @@
     </div>
 
     <!-- Timeline Section -->
-    <div class="py-20 bg-surface-50">
+    <div class="py-20 bg-gray-100">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-16">
           <h2 class="text-3xl font-bold mb-4">馬予想の分析フロー</h2>
@@ -186,7 +188,7 @@
     </div>
 
     <!-- Case Studies Section -->
-    <div class="py-20 bg-white">
+    <div class="py-20 bg-gray-50">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-16">
           <h2 class="text-3xl font-bold mb-4">
@@ -270,7 +272,7 @@
     </div>
 
     <!-- Footer -->
-    <footer class="py-12">
+    <footer class="py-12 bg-white border-t border-gray-200">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center">
           <h3 class="text-2xl font-bold mb-4">
