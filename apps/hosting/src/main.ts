@@ -5,7 +5,7 @@ import ConfirmationService from 'primevue/confirmationservice'
 
 import App from './App.vue'
 import routes from './router'
-import primevue from './config/primevue'
+import { primeVueConfig } from './config/primevue'
 import './style.css'
 
 const router = createRouter({
@@ -16,7 +16,7 @@ const router = createRouter({
 const app = createApp(App)
 
 app.use(router)
-app.use(PrimeVue, primevue)
+app.use(PrimeVue, primeVueConfig)
 app.use(ConfirmationService)
 
 app.mount('#app')

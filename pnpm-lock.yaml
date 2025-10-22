@@ -57,7 +57,7 @@ importers:
   apps/hosting:
     dependencies:
       '@primeuix/themes':
-        specifier: ^1.0.1
+        specifier: ^1.2.5
         version: 1.2.5
       firebase:
         specifier: ^10.12.0
