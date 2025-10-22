@@ -7,8 +7,8 @@
     "dev": "pnpm run stop && pnpm run start",
     "lint": "eslint . --ext .js,.ts",
     "lint:fix": "eslint . --ext .js,.ts --fix",
-    "start": "firebase emulators:start --config firebase.json --project umayomi-dev --import=./firebase-data --export-on-exit=./firebase-data --only auth,firestore,hosting",
-    "stop": "lsof -ti :4100 -ti :4600 -ti :5100 -ti :9199 -ti :8180 | xargs -r kill -TERM || true"
+    "start": "firebase emulators:start --config firebase.json --project umayomi-dev --import=./firebase-data --export-on-exit=./firebase-data --only auth,firestore,hosting,functions",
+    "stop": "lsof -ti :3100 -ti :4100 -ti :4600 -ti :5100 -ti :5101 -ti :9199 -ti :8180 | xargs -r kill -TERM || true"
   },
   "devDependencies": {
     "@eslint/js": "^9.38.0",

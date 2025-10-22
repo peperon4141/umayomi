@@ -9,10 +9,6 @@ install:
 dev: install
 	pnpm turbo dev
 
-dev-both:
-	pnpm turbo dev
-	make serve
-
 # Format and fix linting issues
 format: install
 	pnpm turbo lint:fix

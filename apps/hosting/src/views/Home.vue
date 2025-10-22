@@ -284,16 +284,39 @@
         </div>
       </div>
     </footer>
+
+    <!-- Login Dialog -->
+    <LoginDialog 
+      v-model:visible="showLoginModal"
+      @login-success="handleLoginSuccess"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { useRouter } from 'vue-router'
+import LoginDialog from '@/components/LoginDialog.vue'
+import { useAuth } from '@/composables/useAuth'
 
+const router = useRouter()
+const { user } = useAuth()
 const showLoginModal = ref(false)
+
+// 認証状態の変化を監視
+watch(user, (newUser) => {
+  if (newUser) {
+    router.push('/dashboard')
+  }
+})
 
 const scrollToFeatures = () => {
   document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })
+}
+
+const handleLoginSuccess = () => {
+  // ログイン成功時にDashboardにリダイレクト
+  router.push('/dashboard')
 }
 
 // Timeline data
@@ -328,6 +351,11 @@ onMounted(() => {
   originalTheme = document.documentElement.getAttribute('data-theme') || ''
   // Force light theme
   document.documentElement.setAttribute('data-theme', 'light')
+  
+  // 認証済みユーザーはDashboardにリダイレクト
+  if (user.value) {
+    router.push('/dashboard')
+  }
 })
 
 onUnmounted(() => {
