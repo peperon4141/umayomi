@@ -37,13 +37,6 @@ serve:
 build:
 	pnpm -F hosting build
 
-# Deploy commands removed to avoid affecting other Firebase projects
-
-# # Kill all project processes
-# kill:
-# 	pkill -f "umayomi" || true
-# 	pkill -f "firebase.*umayomi-dev" || true
-
 # 🚀 統合品質チェック（必須）
 quality-check:
 	make build

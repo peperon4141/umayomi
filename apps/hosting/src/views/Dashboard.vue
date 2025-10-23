@@ -311,7 +311,7 @@ const handleJraScraping = async () => {
   
   try {
     // Cloud Functionsのエンドポイントを呼び出し
-          const response = await fetch('http://127.0.0.1:5101/umayomi-dev/us-central1/scrapeJRAData', {
+      const response = await fetch('http://127.0.0.1:5101/umayomi-fbb2b/us-central1/scrapeJRAData', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

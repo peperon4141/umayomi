@@ -49,5 +49,5 @@ jobs:
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_UMAYOMI_FBB2B }}
-          projectId: umayomi-dev
+          projectId: umayomi-fbb2b
           entryPoint: ./apps/firebase
