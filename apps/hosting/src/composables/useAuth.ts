@@ -1,11 +1,12 @@
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { 
   loginWithEmail, 
   registerWithEmail, 
   logout, 
   getCurrentUser, 
   onAuthChange,
-  loginWithGoogle
+  loginWithGoogle,
+  getGoogleRedirectResult
 } from '@/config/firebase'
 import type { User } from 'firebase/auth'
 
@@ -17,10 +18,32 @@ export function useAuth() {
   // 認証状態の監視
   let unsubscribe: (() => void) | null = null
 
-  onMounted(() => {
-    unsubscribe = onAuthChange((authUser) => {
+  onMounted(async () => {
+    // リダイレクト結果をチェック
+    try {
+      const redirectResult = await getGoogleRedirectResult()
+      if (redirectResult.user) {
+        console.log('Google認証リダイレクト成功:', redirectResult.user)
+      } else if (redirectResult.error) {
+        console.error('Google認証リダイレクトエラー:', redirectResult.error)
+        error.value = redirectResult.error
+      }
+    } catch (err: any) {
+      console.error('リダイレクト結果の取得エラー:', err)
+    }
+
+    unsubscribe = onAuthChange(async (authUser) => {
       user.value = authUser
       loading.value = false
+      
+      // カスタムクレームを更新するためにIDトークンを再取得
+      if (authUser) {
+        try {
+          await authUser.getIdToken(true) // 強制的にトークンを更新
+        } catch (error) {
+          console.error('Failed to refresh ID token:', error)
+        }
+      }
     })
   })
 
@@ -120,6 +143,27 @@ export function useAuth() {
     error.value = null
   }
 
+  // ユーザーのロールを取得
+  const getUserRole = () => {
+    const currentUser = getCurrentUser()
+    if (!currentUser) return null
+    
+    // カスタムクレームからロールを取得
+    const claims = (currentUser as any).customClaims
+    return claims?.role || 'user'
+  }
+
+  // 管理者かどうかをチェック（リアクティブ）
+  const isAdmin = computed(() => {
+    if (!user.value) return false
+    return getUserRole() === 'admin'
+  })
+
+  // ユーザーが特定のロールを持っているかチェック
+  const hasRole = (role: string) => {
+    return getUserRole() === role
+  }
+
   return {
     user,
     loading,
@@ -129,6 +173,9 @@ export function useAuth() {
     loginWithGoogleAuth,
     signOut,
     getCurrentUserInfo,
-    clearError
+    clearError,
+    getUserRole,
+    isAdmin,
+    hasRole
   }
 }

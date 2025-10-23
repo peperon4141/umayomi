@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "pnpm run stop && pnpm run start",
+    "dev-build": "pnpm run stop && pnpm run start",
     "lint": "eslint . --ext .js,.ts",
     "lint:fix": "eslint . --ext .js,.ts --fix",
     "start": "firebase emulators:start --config firebase.json --project umayomi-dev --import=./firebase-data --export-on-exit=./firebase-data --only auth,firestore,hosting,functions",

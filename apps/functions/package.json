@@ -11,8 +11,11 @@
     "start": "npm run shell",
     "deploy": "firebase deploy --only functions",
     "logs": "firebase functions:log",
-    "test": "jest",
-    "test:watch": "jest --watch"
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:scraping": "tsx scripts/testJraScraping.ts",
+    "lint": "eslint . --ext .js,.ts",
+    "lint:fix": "eslint . --ext .js,.ts --fix"
   },
   "engines": {
     "node": "18"
@@ -23,12 +26,15 @@
     "playwright": "^1.40.0"
   },
   "devDependencies": {
-    "@types/jest": "^29.5.0",
+    "@eslint/js": "^9.38.0",
     "@types/node": "^20.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.46.1",
+    "@typescript-eslint/parser": "^8.46.1",
+    "eslint": "^9.38.0",
     "firebase-functions-test": "^3.1.0",
-    "jest": "^29.5.0",
-    "ts-jest": "^29.1.0",
-    "typescript": "^5.0.0"
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0",
+    "vitest": "^2.0.0"
   },
   "private": true
 }

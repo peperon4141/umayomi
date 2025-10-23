@@ -5,13 +5,14 @@
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
           <div class="flex items-center">
-            <h1 class="text-2xl font-bold text-red-600">
+            <h1 class="text-2xl font-bold text-primary">
               馬読
             </h1>
           </div>
           <div class="flex items-center space-x-4">
+            <!-- ログインボタンのみ表示 -->
             <Button
-              @click="showLoginModal = true"
+              @click="handleLoginClick"
               label="ログイン"
               severity="primary"
               size="small"
@@ -27,16 +28,16 @@
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         <div class="text-center">
           <h1 class="text-4xl md:text-6xl font-bold mb-6" aria-label="メインタイトル">
-            <span class="text-red-600">競馬</span>の<span class="text-red-600">データ</span>を
+            <span class="text-primary">競馬</span>の<span class="text-primary">データ</span>を
             <br>読み解く
           </h1>
           <p class="text-xl mb-8 max-w-3xl mx-auto text-surface-600">
             過去のレース結果を分析して、次のレースの予想精度を向上させませんか？
-            <br><strong class="text-red-600">馬読なら、データに基づいた予想と結果管理ができます。</strong>
+            <br><strong class="text-primary">馬読なら、データに基づいた予想と結果管理ができます。</strong>
           </p>
           <div class="flex flex-col sm:flex-row gap-4 justify-center">
             <Button
-              @click="showLoginModal = true"
+              @click="handleLoginClick"
               label="ログイン"
               severity="primary"
               size="large"
@@ -76,8 +77,8 @@
           <Card class="feature-card text-center">
             <template #content>
                      <div class="flex justify-center items-center mb-4">
-                       <Avatar size="xlarge" class="bg-red-100" shape="circle" style="display: flex; align-items: center; justify-content: center;">
-                         <i class="pi pi-chart-line text-2xl text-red-600" />
+                       <Avatar size="xlarge" class="bg-primary-50" shape="circle" style="display: flex; align-items: center; justify-content: center;">
+                         <i class="pi pi-chart-line text-2xl text-primary" />
                        </Avatar>
                      </div>
               <h3 class="text-xl font-semibold mb-3">
@@ -92,8 +93,8 @@
           <Card class="feature-card text-center">
             <template #content>
                      <div class="flex justify-center items-center mb-4">
-                       <Avatar size="xlarge" class="bg-red-100" shape="circle" style="display: flex; align-items: center; justify-content: center;">
-                         <i class="pi pi-calculator text-2xl text-red-600" />
+                       <Avatar size="xlarge" class="bg-primary-50" shape="circle" style="display: flex; align-items: center; justify-content: center;">
+                         <i class="pi pi-calculator text-2xl text-primary" />
                        </Avatar>
                      </div>
               <h3 class="text-xl font-semibold mb-3">
@@ -108,8 +109,8 @@
           <Card class="feature-card text-center">
             <template #content>
                      <div class="flex justify-center items-center mb-4">
-                       <Avatar size="xlarge" class="bg-red-100" shape="circle" style="display: flex; align-items: center; justify-content: center;">
-                         <i class="pi pi-database text-2xl text-red-600" />
+                       <Avatar size="xlarge" class="bg-primary-50" shape="circle" style="display: flex; align-items: center; justify-content: center;">
+                         <i class="pi pi-database text-2xl text-primary" />
                        </Avatar>
                      </div>
               <h3 class="text-xl font-semibold mb-3">
@@ -168,7 +169,7 @@
         <div class="max-w-2xl mx-auto">
           <Timeline :value="timelineItems" :align="'alternate'" class="customized-timeline">
             <template #marker="slotProps">
-                   <span class="flex w-8 h-8 items-center justify-center text-white rounded-full z-10 shadow-sm bg-red-600">
+                   <span class="flex w-8 h-8 items-center justify-center text-primary-contrast rounded-full z-10 shadow-sm bg-primary">
                 <i :class="slotProps.item.icon" class="text-sm"></i>
               </span>
             </template>
@@ -201,8 +202,8 @@
         
         <div class="grid md:grid-cols-3 gap-8">
           <div class="text-center p-6 bg-surface-50 rounded-lg">
-            <div class="bg-red-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-              <i class="pi pi-chart-bar text-2xl text-red-600" />
+            <div class="bg-primary-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="pi pi-chart-bar text-2xl text-primary" />
             </div>
             <h3 class="text-xl font-semibold mb-3">
               予想が当たらない
@@ -217,8 +218,8 @@
           </div>
           
           <div class="text-center p-6 bg-surface-50 rounded-lg">
-            <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-              <i class="pi pi-book text-2xl text-blue-600" />
+            <div class="bg-primary-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="pi pi-book text-2xl text-primary" />
             </div>
             <h3 class="text-xl font-semibold mb-3">
               情報が多すぎて整理できない
@@ -233,8 +234,8 @@
           </div>
           
           <div class="text-center p-6 bg-surface-50 rounded-lg">
-            <div class="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-              <i class="pi pi-chart-pie text-2xl text-green-600" />
+            <div class="bg-primary-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="pi pi-chart-pie text-2xl text-primary" />
             </div>
             <h3 class="text-xl font-semibold mb-3">
               自分の予想パターンがわからない
@@ -252,16 +253,16 @@
     </div>
 
     <!-- CTA Section -->
-    <div class="bg-red-600 py-16">
+    <div class="bg-primary py-16">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <h2 class="text-3xl font-bold text-white mb-4">
           データに基づいた競馬予想を始めませんか？
         </h2>
-        <p class="text-xl text-red-100 mb-8">
+        <p class="text-xl text-primary-contrast mb-8">
           まずは無料で始めて、予想精度の向上を実感してください。
         </p>
         <Button
-          @click="showLoginModal = true"
+          @click="handleLoginClick"
           label="ログイン"
           size="large"
           severity="secondary"
@@ -294,7 +295,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import LoginDialog from '@/components/LoginDialog.vue'
 import { useAuth } from '@/composables/useAuth'
@@ -303,21 +304,32 @@ const router = useRouter()
 const { user } = useAuth()
 const showLoginModal = ref(false)
 
-// 認証状態の変化を監視
-watch(user, (newUser) => {
-  if (newUser) {
-    router.push('/dashboard')
-  }
-})
+// 認証状態の変化を監視（自動リダイレクトは削除）
+// watch(user, (newUser) => {
+//   if (newUser) {
+//     router.push('/dashboard')
+//   }
+// })
 
 const scrollToFeatures = () => {
   document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })
 }
 
-const handleLoginSuccess = () => {
-  // ログイン成功時にDashboardにリダイレクト
-  router.push('/dashboard')
+const handleLoginClick = () => {
+  // すでにログイン済みの場合は/racesに遷移
+  if (user.value) {
+    router.push('/races')
+    return
+  }
+  // 未ログインの場合はログインダイアログを表示
+  showLoginModal.value = true
 }
+
+const handleLoginSuccess = () => {
+  // ログイン成功時は/racesに遷移
+  router.push('/races')
+}
+
 
 // Timeline data
 const timelineItems = ref([
@@ -351,11 +363,6 @@ onMounted(() => {
   originalTheme = document.documentElement.getAttribute('data-theme') || ''
   // Force light theme
   document.documentElement.setAttribute('data-theme', 'light')
-  
-  // 認証済みユーザーはDashboardにリダイレクト
-  if (user.value) {
-    router.push('/dashboard')
-  }
 })
 
 onUnmounted(() => {

@@ -131,6 +131,9 @@ hosting_contents/
 apps/firebase/firebase-data/
 apps/firebase/hosting_contents/
 
+# Firebase Functions build output
+apps/functions/lib/
+
 # Test results
 test-results/
 playwright-report/

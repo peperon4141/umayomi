@@ -1,0 +1,112 @@
+<template>
+  <AppLayout>
+    <!-- ページヘッダー -->
+    <div class="mb-6">
+      <h1 class="text-3xl font-bold text-gray-900">{{ raceDay?.date }}</h1>
+      <p class="text-gray-600 mt-1">{{ raceDay?.venue }} - {{ raceDay?.races.length }}レース</p>
+    </div>
+
+    <!-- レース一覧 -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <Card
+          v-for="race in raceDay?.races"
+          :key="race.id"
+          class="cursor-pointer hover:shadow-lg transition-shadow duration-200"
+          @click="selectRace(race)"
+        >
+          <template #header>
+            <div class="p-4 text-center bg-gray-800">
+              <h3 class="text-lg font-bold text-white">{{ race.raceNumber }}R</h3>
+              <p class="text-sm text-white opacity-90">{{ race.startTime }}</p>
+            </div>
+          </template>
+          <template #content>
+            <div class="p-4">
+              <div class="mb-3">
+                <h4 class="font-bold text-lg text-gray-900 mb-2">{{ race.raceName }}</h4>
+                <div class="flex flex-wrap gap-2 mb-3">
+                  <Badge :value="race.grade" severity="contrast" />
+                  <Badge :value="`${race.distance}m`" severity="contrast" />
+                  <Badge :value="race.surface" severity="contrast" />
+                </div>
+              </div>
+              <div class="space-y-2 text-sm">
+                <div class="flex justify-between">
+                  <span class="text-gray-600">賞金</span>
+                  <span class="font-medium">{{ formatPrize(race.prize) }}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-gray-600">競馬場</span>
+                  <span class="font-medium">{{ race.venue }}</span>
+                </div>
+                <div class="text-gray-500 text-xs mt-2">
+                  {{ race.description }}
+                </div>
+              </div>
+            </div>
+          </template>
+          <template #footer>
+            <div class="p-4 bg-gray-50 text-center">
+              <Button
+                label="詳細を見る"
+                icon="pi pi-arrow-right"
+                class="w-full"
+                @click="selectRace(race)"
+              />
+            </div>
+          </template>
+        </Card>
+      </div>
+    </div>
+  </AppLayout>
+</template>
+
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+import AppLayout from '@/layouts/AppLayout.vue'
+import { mockRaceMonths } from '@/utils/mockData'
+import type { Race, RaceDay } from '@/utils/mockData'
+
+const router = useRouter()
+const route = useRoute()
+
+const raceDay = ref<RaceDay | null>(null)
+const monthName = ref('')
+
+
+
+const formatPrize = (prize: number) => {
+  if (prize >= 1000000) {
+    return `${(prize / 1000000).toFixed(0)}万円`
+  } else if (prize >= 1000) {
+    return `${(prize / 1000).toFixed(0)}千円`
+  } else {
+    return `${prize}円`
+  }
+}
+
+const selectRace = (race: Race) => {
+  router.push(`/races/race/${race.id}`)
+}
+
+
+onMounted(() => {
+  const dateId = route.params.dateId as string
+  
+  // 全月から該当する日付を検索
+  for (const month of mockRaceMonths) {
+    const day = month.days.find(d => d.id === dateId)
+    if (day) {
+      raceDay.value = day
+      monthName.value = month.name
+      break
+    }
+  }
+  
+  if (!raceDay.value) {
+    router.push('/races')
+  }
+})
+</script>

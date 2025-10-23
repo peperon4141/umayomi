@@ -1,21 +1,9 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
-    <!-- ヘッダー -->
-    <div class="bg-white border-b border-gray-200 shadow-sm">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between items-center py-6">
-          <div>
-            <h1 class="text-3xl font-bold text-gray-900">競馬レース結果ダッシュボード</h1>
-                   <p class="text-gray-600 mt-1">8月分のレース結果を確認できます</p>
-          </div>
-          <Button
-            label="ログアウト"
-            icon="pi pi-sign-out"
-            severity="secondary"
-            @click="handleLogout"
-          />
-        </div>
-      </div>
+  <AppLayout>
+    <!-- ページヘッダー -->
+    <div class="mb-6">
+      <h1 class="text-3xl font-bold text-gray-900">競馬レース結果ダッシュボード</h1>
+      <p class="text-gray-600 mt-1">10月分のレース結果を確認できます</p>
     </div>
 
     <!-- フィルター -->
@@ -137,7 +125,7 @@
       <div class="text-center">
         <i class="pi pi-calendar text-6xl text-gray-400 mb-4"></i>
         <h3 class="text-xl font-semibold text-gray-900 mb-2">レースデータがありません</h3>
-               <p class="text-gray-600 mb-6">8月分のレース結果が見つかりませんでした。</p>
+               <p class="text-gray-600 mb-6">10月分のレース結果が見つかりませんでした。</p>
         <Button
           label="データを再読み込み"
           icon="pi pi-refresh"
@@ -145,22 +133,19 @@
         />
       </div>
     </div>
-  </div>
+  </AppLayout>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { useAuth } from '@/composables/useAuth'
 import { useRace } from '@/composables/useRace'
 import RaceCard from '@/components/RaceCard.vue'
+import AppLayout from '@/layouts/AppLayout.vue'
 import { seedRaceData, clearRaceData } from '@/utils/sampleData'
 import type { RaceFilters } from '@/types/race'
 import { useToast } from 'primevue/usetoast'
 
-const router = useRouter()
 const toast = useToast()
-const { signOut } = useAuth()
 const { 
   loading, 
   error, 
@@ -196,10 +181,6 @@ const resetFilters = () => {
   loadRaces()
 }
 
-const handleLogout = async () => {
-  await signOut()
-  router.push('/')
-}
 
 const handleJraScraping = async () => {
   scrapingLoading.value = true

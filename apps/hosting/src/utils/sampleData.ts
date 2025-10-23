@@ -1,11 +1,10 @@
-import { Timestamp } from 'firebase/firestore'
 import type { Race } from '@/types/race'
 
 export const sampleRaces: Race[] = [
   {
     id: 'race-001',
     raceId: 'race-001',
-    date: Timestamp.fromDate(new Date('2025-10-05T14:00:00Z')),
+    date: new Date('2025-10-05T14:00:00Z'),
     racecourse: '東京',
     raceNumber: 1,
     raceName: '新馬戦',
@@ -19,12 +18,12 @@ export const sampleRaces: Race[] = [
       { rank: 2, horseName: 'サンプルホース2', horseNumber: 2, jockey: '騎手B', odds: 3.2, time: '1:23.8' },
       { rank: 3, horseName: 'サンプルホース3', horseNumber: 3, jockey: '騎手C', odds: 4.1, time: '1:24.1' }
     ],
-    scrapedAt: Timestamp.now()
+    scrapedAt: new Date()
   },
   {
     id: 'race-002',
     raceId: 'race-002',
-    date: Timestamp.fromDate(new Date('2025-10-05T15:00:00Z')),
+    date: new Date('2025-10-05T15:00:00Z'),
     racecourse: '中山',
     raceNumber: 2,
     raceName: '条件戦',
@@ -38,7 +37,7 @@ export const sampleRaces: Race[] = [
       { rank: 2, horseName: 'テストホース2', horseNumber: 2, jockey: '騎手E', odds: 2.9, time: '2:05.8' },
       { rank: 3, horseName: 'テストホース3', horseNumber: 3, jockey: '騎手F', odds: 5.2, time: '2:06.1' }
     ],
-    scrapedAt: Timestamp.now()
+    scrapedAt: new Date()
   }
 ]
 

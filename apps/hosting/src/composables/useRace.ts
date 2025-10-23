@@ -11,6 +11,7 @@ import {
 import { db } from '@/config/firebase'
 import type { Race, RaceFilters } from '@/types/race'
 
+
 export function useRace() {
   const races = ref<Race[]>([])
   const loading = ref(false)
@@ -23,8 +24,8 @@ export function useRace() {
 
     try {
          const constraints: QueryConstraint[] = [
-           where('date', '>=', Timestamp.fromDate(new Date('2024-08-01'))),
-           where('date', '<=', Timestamp.fromDate(new Date('2024-08-31'))),
+           where('date', '>=', Timestamp.fromDate(new Date('2024-10-01'))),
+           where('date', '<=', Timestamp.fromDate(new Date('2024-10-31'))),
            orderBy('date', 'desc')
          ]
 
@@ -57,19 +58,19 @@ export function useRace() {
 
   // 競馬場一覧を取得
   const racecourses = computed(() => {
-    const unique = new Set(races.value.map(race => race.racecourse))
+    const unique = new Set(races.value.map((race: Race) => race.racecourse))
     return Array.from(unique).sort()
   })
 
   // グレード一覧を取得
   const grades = computed(() => {
-    const unique = new Set(races.value.map(race => race.grade).filter(Boolean))
+    const unique = new Set(races.value.map((race: Race) => race.grade).filter(Boolean))
     return Array.from(unique).sort()
   })
 
   // コース一覧を取得
   const surfaces = computed(() => {
-    const unique = new Set(races.value.map(race => race.surface))
+    const unique = new Set(races.value.map((race: Race) => race.surface))
     return Array.from(unique).sort()
   })
 
@@ -77,8 +78,10 @@ export function useRace() {
   const racesByDate = computed(() => {
     const grouped: { [key: string]: Race[] } = {}
     
-    races.value.forEach(race => {
-      const dateStr = race.date.toDate().toLocaleDateString('ja-JP')
+    races.value.forEach((race: Race) => {
+      // race.dateがTimestampの場合はtoDate()を使用、Dateの場合はそのまま使用
+      const date = race.date instanceof Timestamp ? race.date.toDate() : race.date
+      const dateStr = date.toLocaleDateString('ja-JP')
       if (!grouped[dateStr]) {
         grouped[dateStr] = []
       }

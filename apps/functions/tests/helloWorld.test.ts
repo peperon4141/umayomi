@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { helloWorld } from '../src/index'
 
 // モック用のRequest/Response型
@@ -7,12 +8,12 @@ interface MockRequest {
   body: any
   query: any
   headers: any
-  get: jest.Mock
+  get: ReturnType<typeof vi.fn>
 }
 
 interface MockResponse {
-  send: jest.Mock
-  status: jest.Mock
+  send: ReturnType<typeof vi.fn>
+  status: ReturnType<typeof vi.fn>
 }
 
 describe('HelloWorld Function', () => {
@@ -26,12 +27,12 @@ describe('HelloWorld Function', () => {
       headers: {},
       method: 'GET',
       url: '',
-      get: jest.fn(),
+      get: vi.fn(),
     }
 
     res = {
-      send: jest.fn(),
-      status: jest.fn().mockReturnThis(),
+      send: vi.fn(),
+      status: vi.fn().mockReturnThis(),
     }
   })
 

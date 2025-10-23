@@ -1,0 +1,15 @@
+{
+  "name": "umayomi-shared",
+  "version": "1.0.0",
+  "description": "Shared types and utilities for Umayomi project",
+  "main": "index.ts",
+  "types": "index.ts",
+  "private": true,
+  "files": [
+    "*.ts",
+    "*.js"
+  ],
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

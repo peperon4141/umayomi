@@ -1,0 +1,85 @@
+name: E2E Tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Volta and install node
+      uses: volta-cli/action@v1
+          
+    - name: Install node and pnpm
+      run: volta install node pnpm
+      
+    - name: Setup pnpm cache
+      uses: actions/cache@v4
+      with:
+        path: $(pnpm store path --silent)
+        key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+        restore-keys: |
+          ${{ runner.os }}-pnpm-store-
+          
+    - name: Install dependencies
+      run: pnpm install
+      
+    - name: Install Firebase CLI
+      run: npm install -g firebase-tools
+      
+    - name: Install Playwright browsers
+      run: pnpm -F e2e exec playwright install --with-deps
+      
+    - name: Build hosting app
+      run: pnpm -F hosting build
+      env:
+        VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
+        VITE_FIREBASE_AUTH_DOMAIN: ${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}
+        VITE_FIREBASE_PROJECT_ID: ${{ secrets.VITE_FIREBASE_PROJECT_ID }}
+        VITE_FIREBASE_STORAGE_BUCKET: ${{ secrets.VITE_FIREBASE_STORAGE_BUCKET }}
+        VITE_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.VITE_FIREBASE_MESSAGING_SENDER_ID }}
+        VITE_FIREBASE_APP_ID: ${{ secrets.VITE_FIREBASE_APP_ID }}
+      
+    - name: Start Firebase emulators
+      run: |
+        cd apps/firebase
+        firebase emulators:start --only auth,firestore,hosting --project umayomi-dev --import=./firebase-data --export-on-exit=./firebase-data &
+        sleep 15
+      env:
+        CI: true
+        
+    - name: Wait for Firebase emulators
+      run: |
+        timeout 30 bash -c 'until curl -f http://127.0.0.1:5000; do sleep 2; done'
+        echo "Firebase emulators are running successfully"
+        
+    - name: Run E2E tests
+      run: pnpm -F e2e test
+      env:
+        CI: true
+        
+    - name: Stop Firebase emulators
+      if: always()
+      run: |
+        pkill -f firebase || true
+        
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      if: failure()
+      with:
+        name: playwright-report
+        path: apps/e2e/playwright-report/
+        retention-days: 30
+        
+    - name: Upload test videos
+      uses: actions/upload-artifact@v4
+      if: failure()
+      with:
+        name: test-videos
+        path: apps/e2e/test-results/
+        retention-days: 30

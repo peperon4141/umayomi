@@ -8,11 +8,12 @@ import {
   User,
   createUserWithEmailAndPassword,
   GoogleAuthProvider,
-  signInWithPopup
+  signInWithRedirect,
+  getRedirectResult
 } from 'firebase/auth';
 import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
 
-// Firebase設定（環境変数を使用）
+// Firebase設定（環境変数のみ使用）
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -84,15 +85,31 @@ export const onAuthChange = (callback: (user: User | null) => void) => {
   return onAuthStateChanged(auth, callback);
 };
 
-// Google認証
+// Google認証（リダイレクト方式）
 export const loginWithGoogle = async () => {
   try {
     const provider = new GoogleAuthProvider();
-    const userCredential = await signInWithPopup(auth, provider);
-    return { user: userCredential.user, error: null };
+    await signInWithRedirect(auth, provider);
+    return { user: null, error: null }; // リダイレクトが発生するため、ここではuserはnull
   } catch (error: any) {
     return { user: null, error: error.message };
   }
 };
+
+// リダイレクト後の結果を取得
+export const getGoogleRedirectResult = async () => {
+  try {
+    const result = await getRedirectResult(auth);
+    if (result) {
+      return { user: result.user, error: null };
+    }
+    return { user: null, error: null };
+  } catch (error: any) {
+    return { user: null, error: error.message };
+  }
+};
+
+// onAuthStateChangedをエクスポート
+export { onAuthStateChanged };
 
 export default app;
