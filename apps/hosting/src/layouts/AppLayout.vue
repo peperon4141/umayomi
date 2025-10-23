@@ -14,7 +14,7 @@
 
       <!-- Navigation Menu -->
       <div class="flex-1 p-4">
-        <Menu :model="sidebarMenuItems" class="w-full border-none" />
+        <Menu :model="sidebarMenuItems" class="w-full border-none sidebar-menu" />
       </div>
 
       <!-- User Menu -->
@@ -108,3 +108,28 @@ const handleLogout = async () => {
   }
 }
 </script>
+
+<style scoped>
+.sidebar-menu :deep(.p-menuitem) {
+  margin-bottom: 0.75rem;
+}
+
+.sidebar-menu :deep(.p-menuitem:last-child) {
+  margin-bottom: 0;
+}
+
+.sidebar-menu :deep(.p-menuitem-link) {
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.sidebar-menu :deep(.p-menuitem-link:hover) {
+  background-color: var(--p-surface-100);
+}
+
+.sidebar-menu :deep(.p-menuitem-link:focus) {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--p-primary-100);
+}
+</style>

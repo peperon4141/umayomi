@@ -13,6 +13,9 @@ const routes: RouteRecordRaw[] = [
   { path: '/dashboard', name: 'Dashboard', component: Dashboard, meta: { requiresAuth: true } },
   { path: '/admin', name: 'AdminDashboard', component: AdminDashboard, meta: { requiresAuth: true, requiresAdmin: true } },
   
+  // レース詳細ページ（直接アクセス用）
+  { path: '/race/:raceId', name: 'RaceDetailDirect', component: RaceDetail, meta: { requiresAuth: true } },
+  
   // 階層的なレース構造
   { path: '/races', redirect: '/races/year/2024' },
   { path: '/races/year/:year', name: 'RaceMonthList', component: RaceMonthList, meta: { requiresAuth: true } },

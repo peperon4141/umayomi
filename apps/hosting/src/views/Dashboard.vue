@@ -167,9 +167,7 @@
       <div v-for="(dayRaces, date) in racesByDate" :key="date" class="mb-8">
         <div class="flex justify-between items-center mb-6 pb-3 border-b-2 border-red-500">
           <h2 class="text-2xl font-semibold text-gray-900">{{ date }}</h2>
-          <span class="bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full">
-            {{ dayRaces.length }}レース
-          </span>
+          <Chip :label="`${dayRaces.length}レース`" size="small" severity="info" />
         </div>
         
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -301,8 +299,8 @@ const getGradeSeverity = (grade: string) => {
 
 
 const viewRaceDetail = (raceId: string) => {
-  // 2024年10月の東京競馬場（placeId: 1）として固定
-  router.push(`/races/year/2024/month/10/place/1/race/${raceId}`)
+  // レースIDから直接レース詳細ページに遷移
+  router.push(`/race/${raceId}`)
 }
 
 
