@@ -118,7 +118,6 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { useRouter } from 'vue-router'
 import { useAuth } from '@/composables/useAuth'
 
 interface Props {
@@ -133,7 +132,6 @@ interface Emits {
 const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
 
-const router = useRouter()
 const { login, register, loginWithGoogleAuth, loading, error, clearError } = useAuth()
 
 // Form data

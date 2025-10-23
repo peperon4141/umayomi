@@ -202,15 +202,6 @@ const getGradeSeverity = (grade: string) => {
   }
 }
 
-const formatPrize = (prize: number) => {
-  if (prize >= 1000000) {
-    return `${(prize / 1000000).toFixed(0)}万円`
-  } else if (prize >= 1000) {
-    return `${(prize / 1000).toFixed(0)}千円`
-  } else {
-    return `${prize}円`
-  }
-}
 
 
 const fetchRaceDetail = async (raceId: string) => {
