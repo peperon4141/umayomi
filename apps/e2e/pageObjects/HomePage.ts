@@ -22,17 +22,6 @@ export class HomePage {
     return this.page.locator('h1[aria-label="メインタイトル"]')
   }
 
-  private get googleLoginButton(): Locator {
-    return this.page.locator('button[aria-label="Googleでログイン"]')
-  }
-
-  private get loginModal(): Locator {
-    return this.page.locator('.p-dialog')
-  }
-
-  private get loginModalGoogleButton(): Locator {
-    return this.page.locator('button[aria-label="Googleでログイン"]')
-  }
 
   private get emailInput(): Locator {
     return this.page.locator('input[aria-label="メールアドレス"]')
@@ -50,42 +39,37 @@ export class HomePage {
     return this.page.locator('button[aria-label="メール認証に切り替え"]')
   }
 
+  private get googleLoginButton(): Locator {
+    return this.page.locator('button[aria-label="Googleでログイン"]')
+  }
+
   // 操作メソッド
-  async clickGoogleLogin(): Promise<void> {
-    // まずログインボタンをクリックしてダイアログを開く
-    await this.page.locator('button:has-text("ログイン")').first().click()
-    // ダイアログが表示されるまで待機
-    await this.page.waitForSelector('.p-dialog')
-    // Googleでログインボタンをクリック
-    await this.googleLoginButton.click()
-  }
-
-  async loginWithGoogle(): Promise<DashboardPage> {
-    // Googleログインはポップアップ形式のため、E2Eテストでは困難
-    // 代わりにメール認証を使用
-    return await this.loginWithEmailAndPassword('test@example.com', 'password123')
-  }
-
   async loginWithEmailAndPassword(email: string, password: string): Promise<DashboardPage> {
     await this.page.locator('button[aria-label="ログインダイアログを開く"]').first().click({ timeout: 10000 })
     await this.page.waitForSelector('.p-dialog')
-    await this.switchToEmailButton.click()
+    
+    // Googleログインはポップアップ形式のため、E2Eテストでは実際のGoogle認証は困難
+    // 代わりにメール認証に切り替えてテストを継続
+    await this.page.locator('button:has-text("Googleアカウントをお持ちでない方")').click()
     await this.emailInput.fill(email)
     await this.passwordInput.fill(password)
+    await this.emailLoginButton.click()
+    
+    await this.page.waitForURL(/\/races\/year\/2024/, { timeout: 15000 })
+    return new DashboardPage(this.page)
+  }
+
+  async loginWithGoogle(): Promise<DashboardPage> {
+    await this.page.locator('button[aria-label="ログインダイアログを開く"]').first().click({ timeout: 10000 })
+    await this.page.waitForSelector('.p-dialog')
+    await this.switchToEmailButton.click()
+    await this.emailInput.fill('test@example.com')
+    await this.passwordInput.fill('password123')
     
     await this.emailLoginButton.click()
     await this.page.waitForURL(/\/races\/year\/2024/, { timeout: 15000 })
     
     return new DashboardPage(this.page)
-  }
-
-  // データアクセスメソッド
-  getGoogleLoginButton(): Locator {
-    return this.googleLoginButton
-  }
-
-  getLoginModal(): Locator {
-    return this.loginModal
   }
 
   // データアクセスメソッド
