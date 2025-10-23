@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test'
 import { HomePage } from '../pageObjects/HomePage'
-import { DashboardPage } from '../pageObjects/DashboardPage'
+import type { DashboardPage } from '../pageObjects/DashboardPage'
 
 test.describe('ログインフロー', () => {
   test('誰でもホームページにアクセスできる', async ({ page }) => {
@@ -19,7 +19,7 @@ test.describe('ログインフロー', () => {
     const homePage = await HomePage.visit(page)
     
     // メール認証でログイン
-    const dashboardPage = await homePage.loginWithGoogle()
+    await homePage.loginWithGoogle()
     
     // レースページ（ダッシュボード）に遷移することを確認
     await expect(page).toHaveURL(/\/races\/year\/2024/)
@@ -32,7 +32,7 @@ test.describe('ログインフロー', () => {
     const homePage = await HomePage.visit(page)
     
     // Googleログインでログイン
-    const dashboardPage = await homePage.loginWithEmailAndPassword('test@example.com', 'password123')
+    await homePage.loginWithEmailAndPassword('test@example.com', 'password123')
     
     // レースページ（ダッシュボード）に遷移することを確認
     await expect(page).toHaveURL(/\/races\/year\/2024/)
@@ -77,7 +77,7 @@ test.describe('ログインフロー', () => {
   test('メール認証でログアウトしたらホームページに自動遷移し、管理画面には入れない', async ({ page }) => {
     // ホームページにアクセスしてログイン
     const homePage = await HomePage.visit(page)
-    const dashboardPage = await homePage.loginWithGoogle()
+    const dashboardPage: DashboardPage = await homePage.loginWithGoogle()
     
     // レースページに遷移することを確認
     await expect(page).toHaveURL(/\/races\/year\/2024/)
@@ -98,7 +98,7 @@ test.describe('ログインフロー', () => {
   test('Googleログインでログアウトしたらホームページに自動遷移し、管理画面には入れない', async ({ page }) => {
     // ホームページにアクセスしてログイン
     const homePage = await HomePage.visit(page)
-    const dashboardPage = await homePage.loginWithEmailAndPassword('test@example.com', 'password123')
+    const dashboardPage: DashboardPage = await homePage.loginWithEmailAndPassword('test@example.com', 'password123')
     
     // レースページに遷移することを確認
     await expect(page).toHaveURL(/\/races\/year\/2024/)

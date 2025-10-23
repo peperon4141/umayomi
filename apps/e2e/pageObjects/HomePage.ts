@@ -22,7 +22,6 @@ export class HomePage {
     return this.page.locator('h1[aria-label="メインタイトル"]')
   }
 
-
   private get emailInput(): Locator {
     return this.page.locator('input[aria-label="メールアドレス"]')
   }
