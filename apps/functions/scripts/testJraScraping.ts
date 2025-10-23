@@ -37,7 +37,7 @@ async function main() {
     }
 
     // レース情報を日付でグループ化
-    const racesByDate = races.reduce((acc: { [key: string]: any[] }, race) => {
+    const racesByDate = races.reduce((acc: Record<string, any[]>, race) => {
       const dateStr = race.date instanceof Date 
         ? race.date.toLocaleDateString('ja-JP')
         : '日付不明'

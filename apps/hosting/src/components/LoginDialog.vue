@@ -2,7 +2,7 @@
   <Dialog
     v-model:visible="isOpen"
     modal
-    class="w-[25rem] max-w-[90vw] p-4"
+    class="w-100 max-w-[90vw] p-4"
     :closable="true"
     :dismissable-mask="true"
     :draggable="false"

@@ -8,12 +8,12 @@ export class DashboardPage {
   constructor(page: Page) {
     this.page = page
     // ページが正しく読み込まれていることを検証
-    expect(new globalThis.URL(page.url()).pathname).toBe('/dashboard')
+    expect(new globalThis.URL(page.url()).pathname).toMatch(/\/races\/year\/2024/)
   }
 
   // 静的メソッドでページ移動を簡潔に
   static async visit(page: Page): Promise<DashboardPage> {
-    await page.goto('/dashboard')
+    await page.goto('/races/year/2024')
     return new DashboardPage(page)
   }
 

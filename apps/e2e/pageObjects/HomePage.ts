@@ -74,7 +74,7 @@ export class HomePage {
     await this.passwordInput.fill(password)
     
     await this.emailLoginButton.click()
-    await this.page.waitForURL(/\/dashboard$/, { timeout: 15000 })
+    await this.page.waitForURL(/\/races\/year\/2024/, { timeout: 15000 })
     
     return new DashboardPage(this.page)
   }

@@ -22,8 +22,8 @@ test.describe('競馬レース結果ダッシュボード', () => {
     const homePage = await HomePage.visit(page)
     await homePage.loginWithGoogle()
     
-    // Should be redirected to dashboard
-    await expect(page).toHaveURL('/dashboard')
+    // Should be redirected to races page
+    await expect(page).toHaveURL('/races/year/2024')
     
     // Dashboard should be visible
     await expect(page.locator('text=競馬レース結果')).toBeVisible()
@@ -34,8 +34,8 @@ test.describe('競馬レース結果ダッシュボード', () => {
     const homePage = await HomePage.visit(page)
     await homePage.loginWithGoogle()
     
-    // Should be redirected to dashboard
-    await expect(page).toHaveURL('/dashboard')
+    // Should be redirected to races page
+    await expect(page).toHaveURL('/races/year/2024')
     
     // Dashboard should show race results
     await expect(page.locator('text=競馬レース結果')).toBeVisible()
@@ -47,8 +47,8 @@ test.describe('競馬レース結果ダッシュボード', () => {
     const homePage = await HomePage.visit(page)
     await homePage.loginWithGoogle()
     
-    // Should be redirected to dashboard
-    await expect(page).toHaveURL('/dashboard')
+    // Should be redirected to races page
+    await expect(page).toHaveURL('/races/year/2024')
     
     // Check if racecourse filter is present
     await expect(page.locator('text=競馬場を選択')).toBeVisible()
@@ -59,8 +59,8 @@ test.describe('競馬レース結果ダッシュボード', () => {
     const homePage = await HomePage.visit(page)
     await homePage.loginWithEmailAndPassword('test@example.com', 'password123')
     
-    // Should be redirected to dashboard
-    await expect(page).toHaveURL('/dashboard')
+    // Should be redirected to races page
+    await expect(page).toHaveURL('/races/year/2024')
     
     // Dashboard should be visible
     await expect(page.locator('text=競馬レース結果')).toBeVisible()

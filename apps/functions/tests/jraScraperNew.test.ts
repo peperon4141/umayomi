@@ -1,18 +1,22 @@
 import { describe, test, expect, vi, beforeEach } from 'vitest'
 
 // Playwrightのモック設定
+const mockPage = {
+  goto: vi.fn(),
+  $$eval: vi.fn(),
+  close: vi.fn()
+}
+
+const mockBrowser = {
+  newContext: vi.fn().mockResolvedValue({
+    newPage: vi.fn().mockResolvedValue(mockPage)
+  }),
+  close: vi.fn()
+}
+
 vi.mock('playwright', () => ({
   chromium: {
-    launch: vi.fn().mockResolvedValue({
-      newContext: vi.fn().mockResolvedValue({
-        newPage: vi.fn().mockResolvedValue({
-          goto: vi.fn(),
-          $$eval: vi.fn(),
-          close: vi.fn()
-        })
-      }),
-      close: vi.fn()
-    })
+    launch: vi.fn().mockResolvedValue(mockBrowser)
   }
 }))
 

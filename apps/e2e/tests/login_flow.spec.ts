@@ -3,16 +3,17 @@ import { HomePage } from '../pageObjects/HomePage'
 import { DashboardPage } from '../pageObjects/DashboardPage'
 
 test.describe('ログインフロー', () => {
-  test('全ユーザーが、ホームページにアクセスできる', async ({ page }) => {
+  test('ユーザーが、ホームページにアクセスできる', async ({ page }) => {
     // ホームページに移動
     const homePage = await HomePage.visit(page)
     
-    await expect(page).toHaveTitle(/Memoca/) // ページタイトルを確認
-    await expect(homePage.getTitleText()).resolves.toContain('デジタルでも実際でも') // メインタイトルが表示されることを確認
+    await expect(page).toHaveTitle(/馬予想/) // ページタイトルを確認
+    await expect(homePage.getTitleText()).resolves.toContain('競馬') // メインタイトルが表示されることを確認
     
     // ログインボタンをクリックしてダイアログを開く
     await page.click('button:has-text("ログイン")')
-    await expect(homePage.getGoogleLoginButton()).toBeVisible() // Googleログインボタンが表示されることを確認
+    await page.waitForTimeout(1000) // モーダル表示の待機
+    await expect(homePage.getLoginModal()).toBeVisible() // ログインモーダルが表示されることを確認
   })
 
   test('ユーザーが、ログインモーダルが表示される', async ({ page }) => {
@@ -21,6 +22,7 @@ test.describe('ログインフロー', () => {
     
     // Googleログインボタンをクリック
     await homePage.clickGoogleLogin()
+    await page.waitForTimeout(1000) // モーダル表示の待機
     
     // ログインモーダルが表示されることを確認
     await expect(homePage.getLoginModal()).toBeVisible()
@@ -35,8 +37,8 @@ test.describe('ログインフロー', () => {
     // メール認証でログイン
     await homePage.loginWithEmailAndPassword('test@example.com', 'password123')
     
-    // ダッシュボードにリダイレクトされることを確認
-    await expect(page).toHaveURL('/dashboard')
+    // レースページにリダイレクトされることを確認
+    await expect(page).toHaveURL('/races/year/2024')
     
     // ダッシュボードの要素が表示されることを確認
     const dashboardPage = new DashboardPage(page)
@@ -50,8 +52,8 @@ test.describe('ログインフロー', () => {
     // メール認証でログイン
     await homePage.loginWithEmailAndPassword('test@example.com', 'password123')
     
-    // ダッシュボードにリダイレクトされることを確認
-    await expect(page).toHaveURL('/dashboard')
+    // レースページにリダイレクトされることを確認
+    await expect(page).toHaveURL('/races/year/2024')
     
     // ダッシュボードの要素が表示されることを確認
     const dashboardPage = new DashboardPage(page)
@@ -79,8 +81,8 @@ test.describe('ログインフロー', () => {
     // メール認証でログイン
     await homePage.loginWithEmailAndPassword('test@example.com', 'password123')
     
-    // ダッシュボードにリダイレクトされることを確認
-    await expect(page).toHaveURL('/dashboard')
+    // レースページにリダイレクトされることを確認
+    await expect(page).toHaveURL('/races/year/2024')
     
     // ログアウト処理
     const dashboardPage = new DashboardPage(page)
@@ -103,8 +105,8 @@ test.describe('ログインフロー', () => {
     // メール認証でログイン
     await homePage.loginWithEmailAndPassword('test@example.com', 'password123')
     
-    // ダッシュボードにリダイレクトされることを確認
-    await expect(page).toHaveURL('/dashboard')
+    // レースページにリダイレクトされることを確認
+    await expect(page).toHaveURL('/races/year/2024')
     
     // ダッシュボードの要素が表示されることを確認
     const dashboardPage = new DashboardPage(page)
@@ -134,13 +136,13 @@ test.describe('ログインフロー', () => {
     // メール認証でログイン
     await homePage.loginWithEmailAndPassword('test@example.com', 'password123')
     
-    // ダッシュボードにリダイレクトされることを確認
-    await expect(page).toHaveURL('/dashboard')
+    // レースページにリダイレクトされることを確認
+    await expect(page).toHaveURL('/races/year/2024')
     
     // ホームページに直接アクセス
     await page.goto('/')
     
-    // ダッシュボードにリダイレクトされることを確認
-    await expect(page).toHaveURL('/dashboard')
+    // レースページにリダイレクトされることを確認
+    await expect(page).toHaveURL('/races/year/2024')
   })
 })

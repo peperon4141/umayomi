@@ -1,5 +1,4 @@
 import { logger } from 'firebase-functions'
-import type { JRARaceData } from '../../../shared/jra'
 
 /**
  * 1日のレースページからレース情報を取得

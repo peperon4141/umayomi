@@ -64,12 +64,13 @@ const { user, isAdmin, signOut } = useAuth()
 const userMenuRef = ref()
 const showProfileDialog = ref(false)
 
+
 // サイドバーメニュー
 const sidebarMenuItems = computed(() => [
   {
     label: 'レース一覧',
     icon: 'pi pi-list',
-    command: () => router.push('/races/year/2024'),
+    command: () => router.push(`/races/year/${new Date().getFullYear()}`),
     class: isActiveRoute('/races') ? 'bg-primary-50 text-primary' : ''
   },
   {
@@ -82,7 +83,7 @@ const sidebarMenuItems = computed(() => [
     label: '管理画面',
     icon: 'pi pi-cog',
     command: () => router.push('/admin'),
-    class: isActiveRoute('/admin') ? 'bg-primary-50 text-primary' : ''
+    class: isActiveRoute('/admin') ? 'bg-purple-50 text-purple-600' : 'text-purple-600'
   }] : [])
 ])
 
