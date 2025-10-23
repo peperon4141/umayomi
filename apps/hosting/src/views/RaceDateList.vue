@@ -45,16 +45,14 @@
               </div>
             </div>
           </template>
-            <template #footer>
-              <div class="p-4 bg-surface-100 text-center">
-                <Button
-                  label="レース一覧を見る"
-                  icon="pi pi-arrow-right"
-                  class="w-full"
-                  @click="selectDate(day)"
-                />
-              </div>
-            </template>
+          <template #footer>
+            <Button
+              label="レース一覧を見る"
+              icon="pi pi-arrow-right"
+              class="w-full"
+              @click="selectDate(day)"
+            />
+          </template>
         </Card>
     </div>
   </AppLayout>

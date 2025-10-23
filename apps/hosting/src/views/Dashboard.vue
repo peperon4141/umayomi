@@ -9,7 +9,7 @@
     <!-- フィルター -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
       <Panel header="フィルター" class="shadow-sm">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
           <div>
             <label class="block text-sm font-medium text-surface-700 mb-2">競馬場</label>
             <InputGroup>
@@ -57,34 +57,35 @@
               />
             </InputGroup>
           </div>
-          
-          <div class="flex gap-2">
-            <Button
-              label="フィルターリセット"
-              icon="pi pi-refresh"
-              severity="secondary"
-              @click="resetFilters"
-            />
-            <Button
-              label="JRAスクレイピング実行"
-              icon="pi pi-cloud-download"
-              severity="info"
-              @click="handleJraScraping"
-              :loading="scrapingLoading"
-            />
-            <Button
-              label="サンプルデータ投入"
-              icon="pi pi-database"
-              severity="success"
-              @click="handleSeedData"
-            />
-            <Button
-              label="データクリア"
-              icon="pi pi-trash"
-              severity="danger"
-              @click="handleClearData"
-            />
-          </div>
+        </div>
+        
+        <!-- アクションボタン -->
+        <div class="mt-4 flex flex-wrap gap-2">
+          <Button
+            label="フィルターリセット"
+            icon="pi pi-refresh"
+            severity="secondary"
+            @click="resetFilters"
+          />
+          <Button
+            label="JRAスクレイピング実行"
+            icon="pi pi-cloud-download"
+            severity="info"
+            @click="handleJraScraping"
+            :loading="scrapingLoading"
+          />
+          <Button
+            label="サンプルデータ投入"
+            icon="pi pi-database"
+            severity="success"
+            @click="handleSeedData"
+          />
+          <Button
+            label="データクリア"
+            icon="pi pi-trash"
+            severity="danger"
+            @click="handleClearData"
+          />
         </div>
         
         <!-- アクティブフィルター表示 -->
@@ -202,14 +203,16 @@
               </div>
             </template>
             <template #footer>
-              <div class="p-4 bg-surface-100 text-center">
                 <Button
                   label="詳細を見る"
                   icon="pi pi-arrow-right"
                   class="w-full"
                   @click="viewRaceDetail(race.id)"
                 />
-              </div>
+                <!-- デバッグ情報 -->
+                <div class="text-xs text-gray-500 mt-2">
+                  ID: {{ race.id || 'undefined' }}
+                </div>
             </template>
           </Card>
         </div>
@@ -299,6 +302,11 @@ const getGradeSeverity = (grade: string) => {
 
 
 const viewRaceDetail = (raceId: string) => {
+  console.log('viewRaceDetail called with raceId:', raceId)
+  if (!raceId) {
+    console.error('raceId is undefined or empty')
+    return
+  }
   // レースIDから直接レース詳細ページに遷移
   router.push(`/race/${raceId}`)
 }

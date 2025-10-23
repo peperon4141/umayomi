@@ -78,18 +78,13 @@ const sidebarMenuItems = computed(() => [
     icon: 'pi pi-chart-bar',
     command: () => router.push('/dashboard'),
     class: isActiveRoute('/dashboard') ? 'bg-primary-50 text-primary' : ''
-  },
-  ...(isAdmin.value ? [{
-    label: '管理画面',
-    icon: 'pi pi-cog',
-    command: () => router.push('/admin'),
-    class: isActiveRoute('/admin') ? 'bg-purple-50 text-purple-600' : 'text-purple-600'
-  }] : [])
+  }
 ])
 
 // ユーザーメニュー
 const userMenuItems = computed(() => [
   { label: 'プロフィール', icon: 'pi pi-user', command: () => { showProfileDialog.value = true } },
+  ...(isAdmin.value ? [{ label: '管理者画面', icon: 'pi pi-cog', command: () => { router.push('/admin') } }] : []),
   { separator: true },
   { label: 'ログアウト', icon: 'pi pi-sign-out', command: () => { handleLogout() }, ariaLabel: 'ログアウト' }
 ])
