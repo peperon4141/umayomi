@@ -295,7 +295,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import LoginDialog from '@/components/LoginDialog.vue'
 import { useAuth } from '@/composables/useAuth'
@@ -304,12 +304,12 @@ const router = useRouter()
 const { user } = useAuth()
 const showLoginModal = ref(false)
 
-// 認証状態の変化を監視（自動リダイレクトは削除）
-// watch(user, (newUser) => {
-//   if (newUser) {
-//     router.push('/dashboard')
-//   }
-// })
+// 認証状態の変化を監視（ログイン後に自動リダイレクト）
+watch(user, (newUser) => {
+  if (newUser) {
+    router.push('/races/year/2024')
+  }
+})
 
 const scrollToFeatures = () => {
   document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })
