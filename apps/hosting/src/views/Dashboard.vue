@@ -204,12 +204,14 @@
               </div>
             </template>
             <template #footer>
-              <Button
-                label="詳細を見る"
-                icon="pi pi-arrow-right"
-                class="w-full"
-                @click="viewRaceDetail(race.id)"
-              />
+              <div class="p-4 bg-surface-100 text-center">
+                <Button
+                  label="詳細を見る"
+                  icon="pi pi-arrow-right"
+                  class="w-full"
+                  @click="viewRaceDetail(race.id)"
+                />
+              </div>
             </template>
           </Card>
         </div>

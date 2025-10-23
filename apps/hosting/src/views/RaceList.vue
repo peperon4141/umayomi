@@ -47,7 +47,7 @@
             </div>
           </template>
           <template #footer>
-            <div class="p-4 bg-gray-50 text-center">
+            <div class="p-4 bg-surface-100 text-center">
               <Button
                 label="詳細を見る"
                 icon="pi pi-arrow-right"
@@ -68,6 +68,9 @@ import { useRouter, useRoute } from 'vue-router'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { mockRaceMonths } from '@/utils/mockData'
 import type { Race, RaceDay } from '@/utils/mockData'
+import Card from 'primevue/card'
+import Button from 'primevue/button'
+import Chip from 'primevue/chip'
 
 const router = useRouter()
 const route = useRoute()
