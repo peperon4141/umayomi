@@ -4,10 +4,11 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import Breadcrumb from 'primevue/breadcrumb'
 
 const route = useRoute()
+const router = useRouter()
 
 // パスとdisplay nameのマップ
 const pathDisplayMap: Record<string, string> = {
@@ -18,16 +19,16 @@ const pathDisplayMap: Record<string, string> = {
 }
 
 const breadcrumbItems = computed(() => {
-  const items = [{ label: 'ホーム', route: '/' }]
+  const items = [{ label: 'ホーム', command: () => router.push('/') }]
   
   // 新しい階層構造に対応
   if (route.path.startsWith('/races')) {
-    items.push({ label: 'レース一覧', route: '/races' })
+    items.push({ label: 'レース一覧', command: () => router.push('/races') })
     
     // 年
     if (route.params.year) {
       const year = route.params.year as string
-      items.push({ label: `${year}年`, route: `/races/year/${year}` })
+      items.push({ label: `${year}年`, command: () => router.push(`/races/year/${year}`) })
     }
     
     // 月
@@ -37,7 +38,7 @@ const breadcrumbItems = computed(() => {
       const monthNames = ['', '1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月']
       items.push({ 
         label: monthNames[parseInt(month)], 
-        route: `/races/year/${year}/month/${month}` 
+        command: () => router.push(`/races/year/${year}/month/${month}`)
       })
     }
     
@@ -48,7 +49,7 @@ const breadcrumbItems = computed(() => {
       const placeId = route.params.placeId as string
       items.push({ 
         label: `開催日: ${placeId}`, 
-        route: `/races/year/${year}/month/${month}/place/${placeId}` 
+        command: () => router.push(`/races/year/${year}/month/${month}/place/${placeId}`)
       })
     }
     
@@ -60,11 +61,11 @@ const breadcrumbItems = computed(() => {
       const raceId = route.params.raceId as string
       items.push({ 
         label: `レース: ${raceId}`, 
-        route: `/races/year/${year}/month/${month}/place/${placeId}/race/${raceId}` 
+        command: () => router.push(`/races/year/${year}/month/${month}/place/${placeId}/race/${raceId}`)
       })
     }
   } else if (pathDisplayMap[route.path]) {
-    items.push({ label: pathDisplayMap[route.path], route: route.path })
+    items.push({ label: pathDisplayMap[route.path], command: () => router.push(route.path) })
   }
   
   return items
