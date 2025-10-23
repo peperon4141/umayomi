@@ -23,9 +23,9 @@
                 <div>
                   <h4 class="font-bold text-lg mb-2">{{ raceDetail?.raceName }}</h4>
                   <div class="flex flex-wrap gap-2 mb-3">
-                    <Badge :value="raceDetail?.grade" :severity="getGradeSeverity(raceDetail?.grade || '')" />
-                    <Badge :value="`${raceDetail?.distance}m`" severity="info" />
-                    <Badge :value="raceDetail?.surface" severity="secondary" />
+                    <Chip :label="raceDetail?.grade" :severity="getGradeSeverity(raceDetail?.grade || '')" />
+                    <Chip :label="`${raceDetail?.distance}m`" severity="info" />
+                    <Chip :label="raceDetail?.surface" severity="secondary" />
                   </div>
                 </div>
                 
@@ -75,7 +75,7 @@
                 >
                   <Column field="number" header="馬番" :sortable="true" style="width: 60px">
                     <template #body="{ data }">
-                      <Badge :value="data.number" severity="info" />
+                      <Chip :label="data.number" severity="info" />
                     </template>
                   </Column>
                   <Column field="name" header="馬名" :sortable="true">
@@ -211,7 +211,7 @@ onMounted(() => {
       if (monthName.value) break
     }
   } else {
-    router.push('/races')
+    router.push('/races/year/2024')
   }
 })
 </script>

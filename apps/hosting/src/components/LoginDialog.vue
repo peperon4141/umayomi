@@ -159,7 +159,7 @@ const handleGoogleLogin = async () => {
     if (success) {
       closeModal()
       emit('login-success')
-      router.push('/races')
+      router.push('/races/year/2024')
     }
   } catch {
     // Error is handled by the composable
@@ -173,7 +173,7 @@ const handleEmailLogin = async () => {
     if (success) {
       closeModal()
       emit('login-success')
-      router.push('/races')
+      router.push('/races/year/2024')
     }
   } catch {
     // Error is handled by the composable
@@ -187,7 +187,7 @@ const handleEmailRegister = async () => {
     if (success) {
       closeModal()
       emit('login-success')
-      router.push('/races')
+      router.push('/races/year/2024')
     }
   } catch {
     // Error is handled by the composable

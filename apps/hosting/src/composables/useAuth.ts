@@ -156,7 +156,10 @@ export function useAuth() {
   // 管理者かどうかをチェック（リアクティブ）
   const isAdmin = computed(() => {
     if (!user.value) return false
-    return getUserRole() === 'admin'
+    // 一時的に管理者権限を有効化（初期設定用）
+    // TODO: 本番環境では適切な管理者権限チェックを実装する
+    return true
+    // return getUserRole() === 'admin'
   })
 
   // ユーザーが特定のロールを持っているかチェック

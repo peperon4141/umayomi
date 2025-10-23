@@ -1,27 +1,25 @@
 <template>
   <div class="min-h-screen bg-white" data-theme="light">
     <!-- Navigation -->
-    <nav class="bg-white shadow-sm">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16">
-          <div class="flex items-center">
-            <h1 class="text-2xl font-bold text-primary">
-              馬読
-            </h1>
+    <Toolbar class="bg-white shadow-sm">
+      <template #start>
+        <div class="flex items-center space-x-2">
+          <div class="w-8 h-8 bg-red-600 text-white rounded-lg flex items-center justify-center font-bold text-lg">
+            馬
           </div>
-          <div class="flex items-center space-x-4">
-            <!-- ログインボタンのみ表示 -->
-            <Button
-              @click="handleLoginClick"
-              label="ログイン"
-              severity="primary"
-              size="small"
-              aria-label="ログインダイアログを開く"
-            />
-          </div>
+          <h1 class="text-2xl font-bold text-primary">馬読</h1>
         </div>
-      </div>
-    </nav>
+      </template>
+      <template #end>
+        <Button
+          @click="handleLoginClick"
+          label="ログイン"
+          severity="primary"
+          size="small"
+          aria-label="ログインダイアログを開く"
+        />
+      </template>
+    </Toolbar>
 
     <!-- Hero Section -->
     <div class="bg-gray-50">
@@ -75,12 +73,14 @@
         
         <div class="grid md:grid-cols-3 gap-6">
           <Card class="feature-card text-center">
+            <template #header>
+              <div class="flex justify-center items-center p-4">
+                <Avatar size="xlarge" class="bg-primary-50" shape="circle" style="display: flex; align-items: center; justify-content: center;">
+                  <i class="pi pi-chart-line text-2xl text-primary" />
+                </Avatar>
+              </div>
+            </template>
             <template #content>
-                     <div class="flex justify-center items-center mb-4">
-                       <Avatar size="xlarge" class="bg-primary-50" shape="circle" style="display: flex; align-items: center; justify-content: center;">
-                         <i class="pi pi-chart-line text-2xl text-primary" />
-                       </Avatar>
-                     </div>
               <h3 class="text-xl font-semibold mb-3">
                 レース結果分析
               </h3>
@@ -318,7 +318,7 @@ const scrollToFeatures = () => {
 const handleLoginClick = () => {
   // すでにログイン済みの場合は/racesに遷移
   if (user.value) {
-    router.push('/races')
+    router.push('/races/year/2024')
     return
   }
   // 未ログインの場合はログインダイアログを表示
@@ -326,8 +326,8 @@ const handleLoginClick = () => {
 }
 
 const handleLoginSuccess = () => {
-  // ログイン成功時は/racesに遷移
-  router.push('/races')
+  // ログイン成功時は2024年のレース一覧に遷移
+  router.push('/races/year/2024')
 }
 
 

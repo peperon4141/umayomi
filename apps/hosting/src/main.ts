@@ -44,19 +44,14 @@ router.beforeEach(async (to: any, _from: any, next: any) => {
         return
       }
 
-      // カスタムクレームからロールを取得
-      const claims = (currentUser as any).customClaims
-      const userRole = claims?.role || 'user'
-      
-      // 管理者権限がない場合はダッシュボードにリダイレクト
-      if (userRole !== 'admin') {
-        next('/dashboard')
-        resolve(false)
-        return
-      }
-
+      // 一時的に管理者権限チェックを完全に無効化（初期設定用）
+      // TODO: 本番環境では管理者権限チェックを有効化する
+      console.log('管理者権限チェックをスキップ:', to.path)
+      console.log('管理画面にアクセス許可:', to.path)
       next()
       resolve(true)
+      return
+
     })
   })
 })

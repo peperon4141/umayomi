@@ -12,35 +12,35 @@
         <Card
           v-for="race in raceDay?.races"
           :key="race.id"
-          class="cursor-pointer hover:shadow-lg transition-shadow duration-200"
+          class="cursor-pointer hover:shadow-lg transition-shadow duration-200 rounded-xl overflow-hidden"
           @click="selectRace(race)"
         >
           <template #header>
-            <div class="p-4 text-center bg-gray-800">
-              <h3 class="text-lg font-bold text-white">{{ race.raceNumber }}R</h3>
-              <p class="text-sm text-white opacity-90">{{ race.startTime }}</p>
+            <div class="bg-surface-900 text-surface-0 p-4 text-center">
+              <h3 class="text-lg font-bold">{{ race.raceNumber }}R</h3>
+              <p class="text-sm opacity-90">{{ race.startTime }}</p>
             </div>
           </template>
           <template #content>
             <div class="p-4">
               <div class="mb-3">
-                <h4 class="font-bold text-lg text-gray-900 mb-2">{{ race.raceName }}</h4>
+                <h4 class="font-bold text-lg text-surface-900 mb-2">{{ race.raceName }}</h4>
                 <div class="flex flex-wrap gap-2 mb-3">
-                  <Badge :value="race.grade" severity="contrast" />
-                  <Badge :value="`${race.distance}m`" severity="contrast" />
-                  <Badge :value="race.surface" severity="contrast" />
+                  <Chip :label="race.grade" severity="contrast" />
+                  <Chip :label="`${race.distance}m`" severity="contrast" />
+                  <Chip :label="race.surface" severity="contrast" />
                 </div>
               </div>
               <div class="space-y-2 text-sm">
                 <div class="flex justify-between">
-                  <span class="text-gray-600">賞金</span>
+                  <span class="text-surface-600">賞金</span>
                   <span class="font-medium">{{ formatPrize(race.prize) }}</span>
                 </div>
                 <div class="flex justify-between">
-                  <span class="text-gray-600">競馬場</span>
+                  <span class="text-surface-600">競馬場</span>
                   <span class="font-medium">{{ race.venue }}</span>
                 </div>
-                <div class="text-gray-500 text-xs mt-2">
+                <div class="text-surface-500 text-xs mt-2">
                   {{ race.description }}
                 </div>
               </div>
@@ -88,25 +88,33 @@ const formatPrize = (prize: number) => {
 }
 
 const selectRace = (race: Race) => {
-  router.push(`/races/race/${race.id}`)
+  // ルートパラメータから年、月、場所を取得
+  const year = route.params.year as string
+  const month = route.params.month as string
+  const placeId = route.params.placeId as string
+  router.push(`/races/year/${year}/month/${month}/place/${placeId}/race/${race.id}`)
 }
 
 
 onMounted(() => {
-  const dateId = route.params.dateId as string
+  const year = route.params.year as string
+  const month = route.params.month as string
+  const placeId = route.params.placeId as string
   
-  // 全月から該当する日付を検索
-  for (const month of mockRaceMonths) {
-    const day = month.days.find(d => d.id === dateId)
+  // 該当する月から該当する日付を検索
+  const monthId = `${year}-${month}`
+  const monthData = mockRaceMonths.find(m => m.id === monthId)
+  
+  if (monthData) {
+    const day = monthData.days.find(d => d.id === placeId)
     if (day) {
       raceDay.value = day
-      monthName.value = month.name
-      break
+      monthName.value = monthData.name
+    } else {
+      router.push('/races/year/2024')
     }
-  }
-  
-  if (!raceDay.value) {
-    router.push('/races')
+  } else {
+    router.push('/races/year/2024')
   }
 })
 </script>

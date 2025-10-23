@@ -2,21 +2,20 @@
   <AppLayout>
     <!-- ページヘッダー -->
     <div class="mb-6">
-      <h1 class="text-3xl font-bold text-gray-900">{{ monthName }}</h1>
-      <p class="text-gray-600 mt-1">開催日を選択してください</p>
+      <h1 class="text-3xl font-bold text-surface-900">{{ monthName }}</h1>
+      <p class="text-surface-600 mt-1">開催日を選択してください</p>
     </div>
 
     <!-- 日付一覧 -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <Card
           v-for="day in raceDays"
           :key="day.id"
-          class="cursor-pointer hover:shadow-lg transition-shadow duration-200"
+          class="cursor-pointer hover:shadow-lg transition-shadow duration-200 rounded-xl overflow-hidden"
           @click="selectDate(day)"
         >
           <template #header>
-            <div class="bg-blue-500 text-white p-4 text-center">
+            <div class="bg-surface-900 text-surface-0 p-4 text-center">
               <h3 class="text-lg font-bold">{{ day.date }}</h3>
               <p class="text-sm opacity-90">{{ day.venue }}</p>
             </div>
@@ -24,38 +23,39 @@
           <template #content>
             <div class="p-4">
               <div class="flex justify-between items-center mb-4">
-                <span class="text-sm text-gray-600">レース数</span>
-                <Badge :value="`${day.races.length}レース`" severity="info" />
+                <span class="text-sm text-surface-600">レース数</span>
+                <Chip :label="`${day.races.length}レース`" severity="info" />
               </div>
               <div class="space-y-2">
-                <div v-for="race in day.races.slice(0, 3)" :key="race.id" class="text-sm">
+                <div v-for="race in day.races.slice(0, 3)" :key="race.id" class="text-xs space-y-1">
                   <div class="flex justify-between items-center">
-                    <span class="font-medium">{{ race.raceNumber }}R</span>
-                    <span class="text-gray-600">{{ race.startTime }}</span>
+                    <span class="font-medium text-sm">{{ race.raceNumber }}R</span>
+                    <span class="text-surface-600 text-xs">{{ race.startTime }}</span>
                   </div>
-                  <div class="text-gray-700">{{ race.raceName }}</div>
-                  <div class="text-xs text-gray-500">
-                    {{ race.grade }} | {{ race.distance }}m | {{ race.surface }}
+                  <div class="text-surface-700 text-xs">{{ race.raceName }}</div>
+                  <div class="flex gap-1 flex-wrap">
+                    <Chip :label="race.grade" size="small" :severity="getGradeSeverity(race.grade)" class="text-xs" />
+                    <Chip :label="`${race.distance}m`" size="small" severity="secondary" class="text-xs" />
+                    <Chip :label="race.surface" size="small" severity="contrast" class="text-xs" />
                   </div>
                 </div>
-                <div v-if="day.races.length > 3" class="text-gray-400 text-sm">
+                <div v-if="day.races.length > 3" class="text-surface-400 text-sm">
                   ...他{{ day.races.length - 3 }}レース
                 </div>
               </div>
             </div>
           </template>
-          <template #footer>
-            <div class="p-4 bg-gray-50 text-center">
-              <Button
-                label="レース一覧を見る"
-                icon="pi pi-arrow-right"
-                class="w-full"
-                @click="selectDate(day)"
-              />
-            </div>
-          </template>
+            <template #footer>
+              <div class="p-4 bg-surface-100 text-center">
+                <Button
+                  label="レース一覧を見る"
+                  icon="pi pi-arrow-right"
+                  class="w-full"
+                  @click="selectDate(day)"
+                />
+              </div>
+            </template>
         </Card>
-      </div>
     </div>
   </AppLayout>
 </template>
@@ -75,19 +75,39 @@ const monthName = ref('')
 
 
 const selectDate = (day: RaceDay) => {
-  router.push(`/races/date/${day.id}`)
+  // ルートパラメータから年と月を取得
+  const year = route.params.year as string
+  const month = route.params.month as string
+  router.push(`/races/year/${year}/month/${month}/place/${day.id}`)
+}
+
+const getGradeSeverity = (grade: string) => {
+  switch (grade) {
+    case 'GⅠ':
+      return 'danger'
+    case 'GⅡ':
+      return 'warning'
+    case 'GⅢ':
+      return 'info'
+    case 'オープン':
+      return 'success'
+    default:
+      return 'secondary'
+  }
 }
 
 
 onMounted(() => {
-  const monthId = route.params.monthId as string
-  const month = mockRaceMonths.find(m => m.id === monthId)
+  const year = route.params.year as string
+  const month = route.params.month as string
+  const monthId = `${year}-${month}`
+  const monthData = mockRaceMonths.find(m => m.id === monthId)
   
-  if (month) {
-    monthName.value = month.name
-    raceDays.value = month.days
+  if (monthData) {
+    monthName.value = monthData.name
+    raceDays.value = monthData.days
   } else {
-    router.push('/races')
+    router.push('/races/year/2024')
   }
 })
 </script>

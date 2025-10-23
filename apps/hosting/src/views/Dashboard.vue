@@ -8,76 +8,138 @@
 
     <!-- フィルター -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <Panel header="フィルター" class="shadow-sm">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">競馬場</label>
-            <Dropdown
-              v-model="filters.racecourse"
-              :options="racecourses"
-              placeholder="すべて"
-              class="w-full"
-              @change="applyFilters"
-            />
+            <label class="block text-sm font-medium text-surface-700 mb-2">競馬場</label>
+            <InputGroup>
+              <InputGroupAddon>
+                <i class="pi pi-map-marker"></i>
+              </InputGroupAddon>
+              <Dropdown
+                v-model="filters.racecourse"
+                :options="racecourses"
+                placeholder="すべて"
+                class="w-full"
+                @change="applyFilters"
+              />
+            </InputGroup>
           </div>
           
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">グレード</label>
-            <Dropdown
-              v-model="filters.grade"
-              :options="grades"
-              placeholder="すべて"
-              class="w-full"
-              @change="applyFilters"
-            />
+            <label class="block text-sm font-medium text-surface-700 mb-2">グレード</label>
+            <InputGroup>
+              <InputGroupAddon>
+                <i class="pi pi-star"></i>
+              </InputGroupAddon>
+              <Dropdown
+                v-model="filters.grade"
+                :options="grades"
+                placeholder="すべて"
+                class="w-full"
+                @change="applyFilters"
+              />
+            </InputGroup>
           </div>
           
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">コース</label>
-            <Dropdown
-              v-model="filters.surface"
-              :options="surfaces"
-              placeholder="すべて"
-              class="w-full"
-              @change="applyFilters"
-            />
+            <label class="block text-sm font-medium text-surface-700 mb-2">コース</label>
+            <InputGroup>
+              <InputGroupAddon>
+                <i class="pi pi-circle"></i>
+              </InputGroupAddon>
+              <Dropdown
+                v-model="filters.surface"
+                :options="surfaces"
+                placeholder="すべて"
+                class="w-full"
+                @change="applyFilters"
+              />
+            </InputGroup>
           </div>
           
-                 <div class="flex gap-2">
-                   <Button
-                     label="フィルターリセット"
-                     icon="pi pi-refresh"
-                     severity="secondary"
-                     @click="resetFilters"
-                   />
-                   <Button
-                     label="JRAスクレイピング実行"
-                     icon="pi pi-cloud-download"
-                     severity="info"
-                     @click="handleJraScraping"
-                     :loading="scrapingLoading"
-                   />
-                   <Button
-                     label="サンプルデータ投入"
-                     icon="pi pi-database"
-                     severity="success"
-                     @click="handleSeedData"
-                   />
-                   <Button
-                     label="データクリア"
-                     icon="pi pi-trash"
-                     severity="danger"
-                     @click="handleClearData"
-                   />
-                 </div>
+          <div class="flex gap-2">
+            <Button
+              label="フィルターリセット"
+              icon="pi pi-refresh"
+              severity="secondary"
+              @click="resetFilters"
+            />
+            <Button
+              label="JRAスクレイピング実行"
+              icon="pi pi-cloud-download"
+              severity="info"
+              @click="handleJraScraping"
+              :loading="scrapingLoading"
+            />
+            <Button
+              label="サンプルデータ投入"
+              icon="pi pi-database"
+              severity="success"
+              @click="handleSeedData"
+            />
+            <Button
+              label="データクリア"
+              icon="pi pi-trash"
+              severity="danger"
+              @click="handleClearData"
+            />
+          </div>
         </div>
-      </div>
+        
+        <!-- アクティブフィルター表示 -->
+        <div v-if="hasActiveFilters" class="mt-4 pt-4 border-t border-surface-200">
+          <div class="flex items-center gap-2 flex-wrap">
+            <span class="text-sm text-surface-600">アクティブフィルター:</span>
+            <Chip 
+              v-if="filters.racecourse" 
+              :label="`競馬場: ${filters.racecourse}`" 
+              removable 
+              @remove="filters.racecourse = undefined; applyFilters()"
+            />
+            <Chip 
+              v-if="filters.grade" 
+              :label="`グレード: ${filters.grade}`" 
+              removable 
+              @remove="filters.grade = undefined; applyFilters()"
+            />
+            <Chip 
+              v-if="filters.surface" 
+              :label="`コース: ${filters.surface}`" 
+              removable 
+              @remove="filters.surface = undefined; applyFilters()"
+            />
+          </div>
+        </div>
+      </Panel>
     </div>
 
     <!-- ローディング -->
-    <div v-if="loading" class="flex flex-col items-center justify-center py-20">
-      <ProgressSpinner />
-      <p class="mt-4 text-lg text-gray-600">レースデータを読み込み中...</p>
+    <div v-if="loading" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div class="space-y-6">
+        <div class="text-center mb-8">
+          <Skeleton width="300px" height="2rem" class="mx-auto mb-2" />
+          <Skeleton width="200px" height="1rem" class="mx-auto" />
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <Card v-for="n in 6" :key="n" class="rounded-xl overflow-hidden">
+            <template #header>
+              <Skeleton width="100%" height="80px" />
+            </template>
+            <template #content>
+              <div class="p-4 space-y-3">
+                <Skeleton width="100%" height="1rem" />
+                <Skeleton width="80%" height="1rem" />
+                <Skeleton width="60%" height="1rem" />
+              </div>
+            </template>
+            <template #footer>
+              <Skeleton width="100%" height="40px" />
+            </template>
+          </Card>
+        </div>
+      </div>
     </div>
 
     <!-- エラー -->
@@ -111,11 +173,45 @@
         </div>
         
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <RaceCard
+          <Card
             v-for="race in dayRaces"
             :key="race.id"
-            :race="race"
-          />
+            class="rounded-xl overflow-hidden hover:shadow-lg transition-shadow duration-200"
+          >
+            <template #header>
+              <div class="bg-surface-900 text-surface-0 p-4">
+                <div class="flex justify-between items-center">
+                  <h3 class="text-lg font-bold">{{ race.raceNumber }}R {{ race.raceName }}</h3>
+                  <Chip :label="race.grade" :severity="getGradeSeverity(race.grade)" size="small" />
+                </div>
+                <div class="flex gap-2 mt-2">
+                  <Chip :label="`${race.distance}m`" size="small" severity="secondary" />
+                  <Chip :label="race.surface" size="small" severity="contrast" />
+                  <Chip :label="race.weather" size="small" severity="info" />
+                </div>
+              </div>
+            </template>
+            <template #content>
+              <div class="p-4">
+                <div class="flex justify-between items-center mb-3">
+                  <span class="text-sm text-surface-600">競馬場</span>
+                  <span class="font-medium">{{ race.racecourse }}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-sm text-surface-600">馬場状態</span>
+                  <span class="font-medium">{{ race.trackCondition }}</span>
+                </div>
+              </div>
+            </template>
+            <template #footer>
+              <Button
+                label="詳細を見る"
+                icon="pi pi-arrow-right"
+                class="w-full"
+                @click="viewRaceDetail(race.id)"
+              />
+            </template>
+          </Card>
         </div>
       </div>
     </div>
@@ -137,15 +233,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { useRace } from '@/composables/useRace'
-import RaceCard from '@/components/RaceCard.vue'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { seedRaceData, clearRaceData } from '@/utils/sampleData'
 import type { RaceFilters } from '@/types/race'
 import { useToast } from 'primevue/usetoast'
 
 const toast = useToast()
+const router = useRouter()
 const { 
   loading, 
   error, 
@@ -179,6 +276,31 @@ const resetFilters = () => {
     surface: undefined
   }
   loadRaces()
+}
+
+const hasActiveFilters = computed(() => {
+  return filters.value.racecourse || filters.value.grade || filters.value.surface
+})
+
+const getGradeSeverity = (grade: string) => {
+  switch (grade) {
+    case 'GⅠ':
+      return 'danger'
+    case 'GⅡ':
+      return 'warning'
+    case 'GⅢ':
+      return 'info'
+    case 'オープン':
+      return 'success'
+    default:
+      return 'secondary'
+  }
+}
+
+
+const viewRaceDetail = (raceId: string) => {
+  // 2024年10月の東京競馬場（placeId: 1）として固定
+  router.push(`/races/year/2024/month/10/place/1/race/${raceId}`)
 }
 
 

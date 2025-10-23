@@ -5,7 +5,7 @@
       <!-- Logo -->
       <div class="p-4 border-b border-gray-200">
         <router-link to="/" class="flex items-center space-x-2">
-          <div class="w-8 h-8 bg-primary text-primary-contrast rounded-lg flex items-center justify-center font-bold text-lg">
+          <div class="w-8 h-8 bg-red-600 text-white rounded-lg flex items-center justify-center font-bold text-lg">
             馬
           </div>
           <h1 class="text-xl font-bold text-primary">馬読</h1>
@@ -36,7 +36,7 @@
     <!-- Main Content Area -->
     <div class="flex-1 flex flex-col min-w-0">
       <!-- Header -->
-      <header class="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
+      <header class="bg-white shadow-sm border-b border-gray-200 px-6 py-2">
         <Breadcrumb />
       </header>
 
@@ -69,7 +69,7 @@ const sidebarMenuItems = computed(() => [
   {
     label: 'レース一覧',
     icon: 'pi pi-list',
-    command: () => router.push('/races'),
+    command: () => router.push('/races/year/2024'),
     class: isActiveRoute('/races') ? 'bg-primary-50 text-primary' : ''
   },
   {
