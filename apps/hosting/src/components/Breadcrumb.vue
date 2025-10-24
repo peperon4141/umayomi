@@ -27,7 +27,7 @@ const pathDisplayMap: Record<string, string> = {
 }
 
 const breadcrumbItems = computed(() => {
-  const items = [{ label: 'ホーム', command: () => router.push('/') }]
+  const items: any[] = []
   
   // レース関連の階層構造に対応
   if (route.path.startsWith('/races')) {
@@ -99,8 +99,8 @@ const breadcrumbItems = computed(() => {
       command: () => router.push(generateRoute(RouteName.RACE_DETAIL_DIRECT, { raceId }))
     })
   }
-  // その他のページ
-  else if (pathDisplayMap[route.path]) {
+  // その他のページ（ホーム以外）
+  else if (pathDisplayMap[route.path] && route.path !== '/') {
     items.push({ label: pathDisplayMap[route.path], command: () => router.push(route.path) })
   }
   

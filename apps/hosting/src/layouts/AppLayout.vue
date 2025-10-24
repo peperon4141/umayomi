@@ -1,8 +1,8 @@
 <template>
   <div class="min-h-screen bg-gray-50">
     <!-- Fixed Header -->
-    <header class="fixed top-0 left-0 right-0 z-50 bg-white shadow-sm border-b border-gray-200">
-      <div class="flex items-center justify-between px-4 py-2">
+    <header class="fixed top-0 left-0 right-0 z-50 bg-white shadow-sm border-b-2 border-gray-300" style="height: 4em;">
+      <div class="flex items-center justify-between px-4 h-full">
         <!-- Left Side -->
         <div class="flex items-center space-x-4">
           <!-- Mobile Menu Button -->
@@ -46,22 +46,8 @@
       </div>
     </header>
 
-    <!-- Breadcrumb -->
-    <div class="pt-14">
-      <div class="bg-white border-b border-gray-200 px-4 py-1">
-        <Breadcrumb />
-      </div>
-    </div>
-
-    <!-- Mobile Overlay -->
-    <div
-      v-if="sidebarOpen"
-      class="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
-      @click="sidebarOpen = false"
-    ></div>
-
     <!-- Main Content Area -->
-    <div class="flex-1 min-w-0 flex">
+    <div class="flex-1 min-w-0 flex" style="padding-top: 4em;">
       <!-- Sidebar -->
       <div
         :class="[
@@ -71,16 +57,32 @@
         ]"
       >
         <!-- Navigation Menu -->
-        <div class="flex-1 p-4 pt-16 lg:pt-4">
+        <div class="flex-1 p-4" style="padding-top: calc(4em + 1rem);">
           <Menu :model="sidebarMenuItems" class="w-full border-none sidebar-menu" />
         </div>
       </div>
 
       <!-- Content -->
-      <main class="flex-1 p-4 sm:p-6">
-        <slot />
+      <main class="flex-1">
+        <!-- Breadcrumb -->
+        <div class="bg-white border-b border-gray-200 px-4 py-2">
+          <Breadcrumb />
+        </div>
+        
+        <!-- Page Content -->
+        <div class="p-4 sm:p-6">
+          <slot />
+        </div>
       </main>
     </div>
+
+    <!-- Mobile Overlay -->
+    <div
+      v-if="sidebarOpen"
+      class="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+      @click="sidebarOpen = false"
+    ></div>
+
 
     <!-- Profile Dialog -->
     <ProfileDialog v-model:visible="showProfileDialog" />
