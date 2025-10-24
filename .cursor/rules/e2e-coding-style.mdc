@@ -189,7 +189,7 @@ test.afterEach(async ({ page }) => {
 // ❌ 避ける - 固定時間待機
 test('不適切な待機', async ({ page }) => {
   await page.goto('/');
-  await page.waitForTimeout(5000); // 固定時間待機
+  await page.waitForTimeout(5100); // 固定時間待機
   await page.click('button');
 });
 

@@ -82,7 +82,7 @@ export const mockRaceMonths: RaceMonth[] = [
             surface: 'ダート',
             startTime: '10:05',
             venue: '東京',
-            prize: 500000,
+            prize: 510000,
             description: '2歳未勝利 1,600m（ダート）'
           },
           {
@@ -94,7 +94,7 @@ export const mockRaceMonths: RaceMonth[] = [
             surface: '芝',
             startTime: '10:35',
             venue: '東京',
-            prize: 500000,
+            prize: 510000,
             description: '2歳未勝利 2,000m（芝）'
           },
           {
@@ -106,7 +106,7 @@ export const mockRaceMonths: RaceMonth[] = [
             surface: '芝',
             startTime: '11:05',
             venue: '東京',
-            prize: 500000,
+            prize: 510000,
             description: '2歳新馬 1,400m（芝）'
           },
           {
@@ -130,7 +130,7 @@ export const mockRaceMonths: RaceMonth[] = [
             surface: '芝',
             startTime: '12:25',
             venue: '東京',
-            prize: 500000,
+            prize: 510000,
             description: '2歳新馬 1,800m（芝）'
           },
           {
@@ -190,7 +190,7 @@ export const mockRaceMonths: RaceMonth[] = [
             surface: '芝',
             startTime: '15:05',
             venue: '東京',
-            prize: 1500000,
+            prize: 1510000,
             description: 'エクセル田無開設30周年記念白秋ステークス 3歳以上3勝クラス 1,400m（芝）ハンデ'
           },
           {
@@ -233,7 +233,7 @@ export const mockRaceMonths: RaceMonth[] = [
             surface: 'ダート',
             startTime: '10:05',
             venue: '京都',
-            prize: 500000,
+            prize: 510000,
             description: '2歳未勝利 1,400m（ダート）'
           },
           {
@@ -245,7 +245,7 @@ export const mockRaceMonths: RaceMonth[] = [
             surface: '芝',
             startTime: '10:35',
             venue: '京都',
-            prize: 500000,
+            prize: 510000,
             description: '2歳未勝利 1,800m（芝）'
           },
           {
@@ -257,7 +257,7 @@ export const mockRaceMonths: RaceMonth[] = [
             surface: '芝',
             startTime: '11:05',
             venue: '京都',
-            prize: 500000,
+            prize: 510000,
             description: '2歳未勝利 1,400m（芝）'
           },
           {
@@ -269,7 +269,7 @@ export const mockRaceMonths: RaceMonth[] = [
             surface: 'ダート',
             startTime: '11:35',
             venue: '京都',
-            prize: 500000,
+            prize: 510000,
             description: '障害3歳以上未勝利 3,000m（ダート）定量'
           },
           {
@@ -281,7 +281,7 @@ export const mockRaceMonths: RaceMonth[] = [
             surface: '芝',
             startTime: '12:25',
             venue: '京都',
-            prize: 500000,
+            prize: 510000,
             description: '2歳新馬 2,000m（芝）'
           },
           {
@@ -293,7 +293,7 @@ export const mockRaceMonths: RaceMonth[] = [
             surface: 'ダート',
             startTime: '12:55',
             venue: '京都',
-            prize: 500000,
+            prize: 510000,
             description: '2歳新馬 1,600m（ダート）'
           },
           {
@@ -341,7 +341,7 @@ export const mockRaceMonths: RaceMonth[] = [
             surface: 'ダート',
             startTime: '15:05',
             venue: '京都',
-            prize: 1500000,
+            prize: 1510000,
             description: '赤富士ステークス 3歳以上3勝クラス 1,600m（ダート）定量'
           },
           {
@@ -384,7 +384,7 @@ export const mockRaceMonths: RaceMonth[] = [
             surface: '芝',
             startTime: '10:05',
             venue: '新潟',
-            prize: 500000,
+            prize: 510000,
             description: '2歳未勝利 1,600m（芝）（牝）'
           },
           {
@@ -396,7 +396,7 @@ export const mockRaceMonths: RaceMonth[] = [
             surface: 'ダート',
             startTime: '10:35',
             venue: '新潟',
-            prize: 500000,
+            prize: 510000,
             description: '2歳未勝利 1,300m（ダート）'
           },
           {
@@ -408,7 +408,7 @@ export const mockRaceMonths: RaceMonth[] = [
             surface: '芝',
             startTime: '11:05',
             venue: '新潟',
-            prize: 500000,
+            prize: 510000,
             description: '2歳未勝利 1,800m（芝）'
           },
           {
@@ -420,7 +420,7 @@ export const mockRaceMonths: RaceMonth[] = [
             surface: 'ダート',
             startTime: '11:35',
             venue: '新潟',
-            prize: 500000,
+            prize: 510000,
             description: '2歳新馬 1,400m（ダート）'
           },
           {
@@ -432,7 +432,7 @@ export const mockRaceMonths: RaceMonth[] = [
             surface: '芝',
             startTime: '12:25',
             venue: '新潟',
-            prize: 500000,
+            prize: 510000,
             description: '2歳新馬 1,600m（芝）'
           },
           {
@@ -444,7 +444,7 @@ export const mockRaceMonths: RaceMonth[] = [
             surface: 'ダート',
             startTime: '12:55',
             venue: '新潟',
-            prize: 500000,
+            prize: 510000,
             description: '2歳新馬 1,600m（ダート）'
           },
           {
@@ -504,7 +504,7 @@ export const mockRaceMonths: RaceMonth[] = [
             surface: '芝',
             startTime: '15:45',
             venue: '新潟',
-            prize: 5000000,
+            prize: 5100000,
             description: '日本・サウジアラビア外交関係樹立70周年記念第11回 サウジアラビアロイヤルカップ（GⅢ） 2歳オープン 1,600m（芝）'
           },
           {
@@ -536,7 +536,7 @@ export const mockRaceDetails: { [key: string]: RaceDetail } = {
     surface: 'ダート',
     age: '2歳',
     weight: '54kg',
-    prize: 500000,
+    prize: 510000,
     startTime: '10:05',
     venue: '東京',
     description: '2歳未勝利 1,600m（ダート）',
