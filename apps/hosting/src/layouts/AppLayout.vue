@@ -1,47 +1,83 @@
 <template>
-  <div class="min-h-screen bg-gray-50 flex">
-    <!-- Sidebar -->
-    <div class="w-64 bg-white shadow-lg flex flex-col">
-      <!-- Logo -->
-      <div class="p-4 border-b border-gray-200">
-        <router-link to="/" class="flex items-center space-x-2">
-          <div class="w-8 h-8 bg-red-600 text-white rounded-lg flex items-center justify-center font-bold text-lg">
-            馬
-          </div>
-          <h1 class="text-xl font-bold text-primary">馬読</h1>
-        </router-link>
-      </div>
-
-      <!-- Navigation Menu -->
-      <div class="flex-1 p-4">
-        <Menu :model="sidebarMenuItems" class="w-full border-none sidebar-menu" />
-      </div>
-
-      <!-- User Menu -->
-      <div class="p-4 border-t border-gray-200">
-        <div class="flex items-center space-x-3">
-          <Avatar :label="user?.displayName?.charAt(0) || user?.email?.charAt(0) || 'U'" size="large" class="font-medium" shape="circle" />
-          <div class="flex-1 min-w-0">
-            <p class="text-sm font-medium text-gray-900 truncate">{{ user?.displayName || 'ユーザー' }}</p>
-            <p class="text-xs text-gray-500 truncate">{{ user?.email }}</p>
-          </div>
-          <button @click="(e) => userMenuRef?.toggle(e)" class="p-1 rounded-full hover:bg-gray-100" aria-label="ユーザーメニュー">
-            <i class="pi pi-ellipsis-v text-gray-500"></i>
+  <div class="min-h-screen bg-gray-50">
+    <!-- Fixed Header -->
+    <header class="fixed top-0 left-0 right-0 z-50 bg-white shadow-sm border-b border-gray-200">
+      <div class="flex items-center justify-between px-4 py-2">
+        <!-- Left Side -->
+        <div class="flex items-center space-x-4">
+          <!-- Mobile Menu Button -->
+          <button
+            @click="sidebarOpen = !sidebarOpen"
+            class="lg:hidden p-2 rounded-md hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+            aria-label="メニューを開く"
+          >
+            <i class="pi pi-bars text-gray-600"></i>
           </button>
-          <Menu :model="userMenuItems" popup ref="userMenuRef" />
+
+          <!-- Logo -->
+          <router-link to="/" class="flex items-center space-x-2">
+            <div class="w-8 h-8 bg-red-600 text-white rounded-lg flex items-center justify-center font-bold text-lg">
+              馬
+            </div>
+            <h1 class="text-xl font-bold text-primary">馬読</h1>
+          </router-link>
         </div>
+
+        <!-- Right Side -->
+        <div class="flex items-center">
+          <!-- User Menu -->
+          <div class="flex items-center">
+            <button 
+              @click="(e) => userMenuRef?.toggle(e)" 
+              class="p-2 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500" 
+              aria-label="ユーザーメニュー"
+            >
+              <Avatar 
+                :label="user?.displayName?.charAt(0) || user?.email?.charAt(0) || 'U'" 
+                size="normal" 
+                class="font-medium" 
+                shape="circle" 
+              />
+            </button>
+
+            <Menu :model="userMenuItems" popup ref="userMenuRef" />
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Breadcrumb -->
+    <div class="pt-14">
+      <div class="bg-white border-b border-gray-200 px-4 py-1">
+        <Breadcrumb />
       </div>
     </div>
 
+    <!-- Mobile Overlay -->
+    <div
+      v-if="sidebarOpen"
+      class="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+      @click="sidebarOpen = false"
+    ></div>
+
     <!-- Main Content Area -->
-    <div class="flex-1 flex flex-col min-w-0">
-      <!-- Header -->
-      <header class="bg-white shadow-sm border-b border-gray-200 px-6 py-2">
-        <Breadcrumb />
-      </header>
+    <div class="flex-1 min-w-0 flex">
+      <!-- Sidebar -->
+      <div
+        :class="[
+          'w-64 bg-white shadow-lg flex flex-col transition-transform duration-300 ease-in-out',
+          'fixed lg:static inset-y-0 left-0 z-50',
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+        ]"
+      >
+        <!-- Navigation Menu -->
+        <div class="flex-1 p-4 pt-16 lg:pt-4">
+          <Menu :model="sidebarMenuItems" class="w-full border-none sidebar-menu" />
+        </div>
+      </div>
 
       <!-- Content -->
-      <main class="flex-1 p-6">
+      <main class="flex-1 p-4 sm:p-6">
         <slot />
       </main>
     </div>
@@ -64,6 +100,7 @@ const route = useRoute()
 const { user, isAdmin, signOut } = useAuth()
 const userMenuRef = ref()
 const showProfileDialog = ref(false)
+const sidebarOpen = ref(false)
 
 
 // サイドバーメニュー
@@ -71,24 +108,61 @@ const sidebarMenuItems = computed(() => [
   {
     label: 'レース一覧',
     icon: 'pi pi-list',
-    command: () => router.push(getCurrentYearRedirect()),
+    command: () => {
+      router.push(getCurrentYearRedirect())
+      sidebarOpen.value = false
+    },
     class: isActiveRoute('/races') ? 'bg-primary-50 text-primary' : ''
   },
   {
     label: 'ダッシュボード',
     icon: 'pi pi-chart-bar',
-    command: () => router.push('/dashboard'),
+    command: () => {
+      router.push('/dashboard')
+      sidebarOpen.value = false
+    },
     class: isActiveRoute('/dashboard') ? 'bg-primary-50 text-primary' : ''
   }
 ])
 
-// ユーザーメニュー
-const userMenuItems = computed(() => [
-  { label: 'プロフィール', icon: 'pi pi-user', command: () => { showProfileDialog.value = true } },
-  ...(isAdmin.value ? [{ label: '管理者画面', icon: 'pi pi-cog', command: () => { router.push('/admin') } }] : []),
-  { separator: true },
-  { label: 'ログアウト', icon: 'pi pi-sign-out', command: () => { handleLogout() }, ariaLabel: 'ログアウト' }
-])
+  // ユーザーメニュー
+  const userMenuItems = computed(() => [
+    { 
+      label: 'プロフィール', 
+      icon: 'pi pi-user', 
+      command: () => { 
+        showProfileDialog.value = true
+        sidebarOpen.value = false // メニューを閉じる
+      } 
+    },
+    { 
+      label: '設定', 
+      icon: 'pi pi-cog', 
+      command: () => { 
+        // 設定ページへの遷移（将来実装）
+        console.log('設定ページへ遷移')
+        sidebarOpen.value = false
+      } 
+    },
+    ...(isAdmin.value ? [{ 
+      label: '管理者画面', 
+      icon: 'pi pi-shield', 
+      command: () => { 
+        router.push('/admin')
+        sidebarOpen.value = false
+      } 
+    }] : []),
+    { separator: true },
+    { 
+      label: 'ログアウト', 
+      icon: 'pi pi-sign-out', 
+      command: () => { 
+        handleLogout()
+        sidebarOpen.value = false
+      }, 
+      ariaLabel: 'ログアウト' 
+    }
+  ])
 
 // 現在のルートがアクティブかチェック
 const isActiveRoute = (path: string) => {

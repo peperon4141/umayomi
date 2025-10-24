@@ -1,13 +1,13 @@
 <template>
   <AppLayout>
     <!-- ページヘッダー -->
-    <div class="mb-6">
-      <h1 class="text-3xl font-bold text-surface-900">{{ dayName }}</h1>
-      <p class="text-surface-600 mt-1">その日のレース一覧</p>
+    <div class="mb-4 sm:mb-6">
+      <h1 class="text-2xl sm:text-3xl font-bold text-surface-900">{{ dayName }}</h1>
+      <p class="text-sm sm:text-base text-surface-600 mt-1">その日のレース一覧</p>
     </div>
 
     <!-- 表示切り替えボタン -->
-    <div class="mb-6 flex justify-end">
+    <div class="mb-4 sm:mb-6 flex justify-end">
       <div class="flex bg-surface-100 rounded-lg p-1">
         <Button
           :class="{ 'bg-surface-0 shadow-sm': viewMode === 'card' }"
@@ -15,6 +15,7 @@
           @click="viewMode = 'card'"
           text
           rounded
+          size="small"
         />
         <Button
           :class="{ 'bg-surface-0 shadow-sm': viewMode === 'list' }"
@@ -22,6 +23,7 @@
           @click="viewMode = 'list'"
           text
           rounded
+          size="small"
         />
       </div>
     </div>
@@ -61,32 +63,52 @@
         </Card>
       </div>
 
-      <!-- リスト表示 -->
-      <div v-else class="space-y-4">
-        <div
-          v-for="race in dayRaces"
-          :key="race.id"
-          class="bg-surface-0 border border-surface-200 rounded-lg p-4 cursor-pointer hover:shadow-md transition-shadow duration-200"
-          @click="selectRace(race)"
+      <!-- DataTable表示 -->
+      <div v-else>
+        <DataTable 
+          :value="dayRaces" 
+          :paginator="true" 
+          :rows="10"
+          :rowsPerPageOptions="[5, 10, 20]"
+          paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+          currentPageReportTemplate="全 {totalRecords} 件中 {first} 〜 {last} 件を表示"
+          responsiveLayout="scroll"
+          :scrollable="true"
+          scrollHeight="400px"
+          class="p-datatable-sm"
         >
-          <div class="flex justify-between items-center">
-            <div>
-              <h3 class="text-lg font-semibold text-surface-900">{{ race.raceName }}</h3>
-              <p class="text-sm text-surface-600">{{ race.venue }}</p>
-            </div>
-            <div class="flex items-center space-x-4">
-              <Chip :label="`${race.distance}m`" severity="info" />
-              <Chip :label="race.grade" :severity="getGradeSeverity(race.grade)" />
-              <span class="text-sm font-medium">{{ formatPrize(race.prize) }}</span>
+          <Column field="raceName" header="レース名" :sortable="true">
+            <template #body="slotProps">
+              <div class="font-semibold">{{ slotProps.data.raceName }}</div>
+              <div class="text-sm text-surface-600">{{ slotProps.data.venue }}</div>
+            </template>
+          </Column>
+          <Column field="distance" header="距離" :sortable="true">
+            <template #body="slotProps">
+              <Chip :label="`${slotProps.data.distance}m`" severity="info" size="small" />
+            </template>
+          </Column>
+          <Column field="grade" header="グレード" :sortable="true">
+            <template #body="slotProps">
+              <Chip :label="slotProps.data.grade" :severity="getGradeSeverity(slotProps.data.grade)" size="small" />
+            </template>
+          </Column>
+          <Column field="prize" header="賞金" :sortable="true">
+            <template #body="slotProps">
+              <span class="font-medium">{{ formatPrize(slotProps.data.prize) }}</span>
+            </template>
+          </Column>
+          <Column header="アクション" :exportable="false">
+            <template #body="slotProps">
               <Button
-                label="詳細を見る"
+                label="詳細"
                 icon="pi pi-arrow-right"
                 size="small"
-                @click.stop="selectRace(race)"
+                @click="selectRace(slotProps.data)"
               />
-            </div>
-          </div>
-        </div>
+            </template>
+          </Column>
+        </DataTable>
       </div>
     </div>
   </AppLayout>
@@ -103,6 +125,9 @@ import { getVenueNameFromId } from '@/entity'
 import { RouteName } from '@/router/routeCalculator'
 import Card from 'primevue/card'
 import Chip from 'primevue/chip'
+import Button from 'primevue/button'
+import DataTable from 'primevue/datatable'
+import Column from 'primevue/column'
 
 const { navigateTo, navigateTo404, getParams, getQuery } = useNavigation()
 

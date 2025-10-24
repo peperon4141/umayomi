@@ -6,6 +6,69 @@
       <p class="text-gray-600 mt-1">10月分のレース結果を確認できます</p>
     </div>
 
+    <!-- 統計カード -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <Card class="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
+        <template #content>
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-sm font-medium opacity-90">総レース数</h3>
+              <p class="text-2xl font-bold">{{ totalRaces }}</p>
+              <p class="text-sm opacity-90">今月の開催レース</p>
+            </div>
+            <div class="w-12 h-12 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
+              <i class="pi pi-flag text-2xl"></i>
+            </div>
+          </div>
+        </template>
+      </Card>
+
+      <Card class="bg-gradient-to-r from-green-500 to-green-600 text-white">
+        <template #content>
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-sm font-medium opacity-90">開催日数</h3>
+              <p class="text-2xl font-bold">{{ raceDays.length }}</p>
+              <p class="text-sm opacity-90">今月の開催日</p>
+            </div>
+            <div class="w-12 h-12 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
+              <i class="pi pi-calendar text-2xl"></i>
+            </div>
+          </div>
+        </template>
+      </Card>
+
+      <Card class="bg-gradient-to-r from-purple-500 to-purple-600 text-white">
+        <template #content>
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-sm font-medium opacity-90">競馬場数</h3>
+              <p class="text-2xl font-bold">{{ uniqueVenues.length }}</p>
+              <p class="text-sm opacity-90">開催競馬場</p>
+            </div>
+            <div class="w-12 h-12 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
+              <i class="pi pi-map-marker text-2xl"></i>
+            </div>
+          </div>
+        </template>
+      </Card>
+
+      <Card class="bg-gradient-to-r from-orange-500 to-orange-600 text-white">
+        <template #content>
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-sm font-medium opacity-90">G1レース</h3>
+              <p class="text-2xl font-bold">{{ g1Races }}</p>
+              <p class="text-sm opacity-90">最高グレード</p>
+            </div>
+            <div class="w-12 h-12 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
+              <i class="pi pi-star text-2xl"></i>
+            </div>
+          </div>
+        </template>
+      </Card>
+    </div>
+
     <!-- フィルター -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
       <Panel header="フィルター" class="shadow-sm">
@@ -263,9 +326,16 @@ const filters = ref<RaceFilters>({
 })
 
 const scrapingLoading = ref(false)
+const raceDays = ref<any[]>([])
 
 const loadRaces = async () => {
   await fetchOctoberRaces(filters.value)
+  // raceDaysを更新 - racesByDateはオブジェクトなので配列に変換
+  if (racesByDate.value) {
+    raceDays.value = Object.values(racesByDate.value).flat()
+  } else {
+    raceDays.value = []
+  }
 }
 
 const applyFilters = () => {
@@ -283,6 +353,31 @@ const resetFilters = () => {
 
 const hasActiveFilters = computed(() => {
   return filters.value.racecourse || filters.value.grade || filters.value.surface
+})
+
+// 統計データの計算
+const totalRaces = computed(() => {
+  return raceDays.value.reduce((total: number, day: any) => total + (day.races?.length || 0), 0)
+})
+
+const uniqueVenues = computed(() => {
+  const venues = new Set()
+  raceDays.value.forEach((day: any) => {
+    if (day.venue) venues.add(day.venue)
+  })
+  return Array.from(venues)
+})
+
+const g1Races = computed(() => {
+  let count = 0
+  raceDays.value.forEach((day: any) => {
+    if (day.races) {
+      day.races.forEach((race: any) => {
+        if (race.grade === 'GⅠ') count++
+      })
+    }
+  })
+  return count
 })
 
 const getGradeSeverity = (grade: string) => {

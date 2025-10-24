@@ -14,6 +14,32 @@ export const primeVueConfig = {
     clear: 'クリア',
     weekHeader: '週'
   },
+  pt: {
+    datatable: {
+      root: {
+        class: 'w-full'
+      },
+      table: {
+        class: 'w-full'
+      },
+      header: {
+        class: 'bg-surface-50'
+      },
+      column: {
+        headerCell: {
+          class: 'text-sm font-semibold text-surface-700'
+        }
+      },
+      bodyRow: {
+        class: 'hover:bg-surface-50 transition-colors duration-200'
+      },
+      paginator: {
+        root: {
+          class: 'flex justify-between items-center p-4 bg-surface-0 border-t border-surface-200'
+        }
+      }
+    }
+  },
   unstyled: false,
   theme: {
     preset: definePreset(Aura, {

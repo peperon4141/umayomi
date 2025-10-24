@@ -3,6 +3,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import PrimeVue from 'primevue/config'
 import ConfirmationService from 'primevue/confirmationservice'
 import ToastService from 'primevue/toastservice'
+import 'primeflex/primeflex.css'
 
 import App from './App.vue'
 import routes from './router'

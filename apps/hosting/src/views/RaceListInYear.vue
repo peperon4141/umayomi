@@ -1,13 +1,13 @@
 <template>
   <AppLayout>
     <!-- ページヘッダー -->
-    <div class="mb-6">
-      <h1 class="text-3xl font-bold text-gray-900">競馬レース一覧</h1>
-      <p class="text-gray-600 mt-1">開催月を選択してください</p>
+    <div class="mb-4 sm:mb-6">
+      <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">競馬レース一覧</h1>
+      <p class="text-sm sm:text-base text-gray-600 mt-1">開催月を選択してください</p>
     </div>
 
     <!-- 表示切り替えボタン -->
-    <div class="mb-6 flex justify-end">
+    <div class="mb-4 sm:mb-6 flex justify-end">
       <div class="flex bg-surface-100 rounded-lg p-1">
         <Button
           :class="{ 'bg-surface-0 shadow-sm': viewMode === 'card' }"
@@ -15,6 +15,7 @@
           @click="viewMode = 'card'"
           text
           rounded
+          size="small"
         />
         <Button
           :class="{ 'bg-surface-0 shadow-sm': viewMode === 'list' }"
@@ -22,6 +23,7 @@
           @click="viewMode = 'list'"
           text
           rounded
+          size="small"
         />
       </div>
     </div>
@@ -72,31 +74,47 @@
         </Card>
       </div>
 
-      <!-- リスト表示 -->
-      <div v-else class="space-y-4">
-        <div
-          v-for="month in raceMonths"
-          :key="month.id"
-          class="bg-surface-0 border border-surface-200 rounded-lg p-4 cursor-pointer hover:shadow-md transition-shadow duration-200"
-          @click="selectMonth(month)"
+      <!-- DataTable表示 -->
+      <div v-else>
+        <DataTable 
+          :value="raceMonths" 
+          :paginator="true" 
+          :rows="10"
+          :rowsPerPageOptions="[5, 10, 20]"
+          paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+          currentPageReportTemplate="全 {totalRecords} 件中 {first} 〜 {last} 件を表示"
+          responsiveLayout="scroll"
+          :scrollable="true"
+          scrollHeight="400px"
+          class="p-datatable-sm"
         >
-          <div class="flex justify-between items-center">
-            <div>
-              <h3 class="text-lg font-semibold text-surface-900">{{ month.name }}</h3>
-              <p class="text-sm text-surface-600">開催日数: {{ month.days.length }}日</p>
-            </div>
-            <div class="flex items-center space-x-4">
-              <Chip :label="`${month.days.length}日`" severity="info" />
-              <Chip :label="`${getTotalRaces(month)}レース`" severity="success" />
+          <Column field="name" header="月" :sortable="true">
+            <template #body="slotProps">
+              <div class="font-semibold">{{ slotProps.data.name }}</div>
+              <div class="text-sm text-surface-600">開催日数: {{ slotProps.data.days.length }}日</div>
+            </template>
+          </Column>
+          <Column field="days.length" header="開催日数" :sortable="true">
+            <template #body="slotProps">
+              <Chip :label="`${slotProps.data.days.length}日`" severity="info" size="small" />
+            </template>
+          </Column>
+          <Column header="総レース数" :sortable="true">
+            <template #body="slotProps">
+              <Chip :label="`${getTotalRaces(slotProps.data)}レース`" severity="success" size="small" />
+            </template>
+          </Column>
+          <Column header="アクション" :exportable="false">
+            <template #body="slotProps">
               <Button
-                label="詳細を見る"
+                label="詳細"
                 icon="pi pi-arrow-right"
                 size="small"
-                @click.stop="selectMonth(month)"
+                @click="selectMonth(slotProps.data)"
               />
-            </div>
-          </div>
-        </div>
+            </template>
+          </Column>
+        </DataTable>
       </div>
     </div>
   </AppLayout>
@@ -112,6 +130,8 @@ import { RouteName } from '@/router/routeCalculator'
 import Card from 'primevue/card'
 import Button from 'primevue/button'
 import Chip from 'primevue/chip'
+import DataTable from 'primevue/datatable'
+import Column from 'primevue/column'
 
 const { navigateTo, navigateTo404 } = useNavigation()
 
