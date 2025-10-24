@@ -2,31 +2,36 @@ import { RouteRecordRaw } from 'vue-router'
 import Home from '../views/Home.vue'
 import Dashboard from '../views/Dashboard.vue'
 import AdminDashboard from '../views/AdminDashboard.vue'
-import RaceMonthList from '../views/RaceMonthList.vue'
-import RaceDateList from '../views/RaceDateList.vue'
+import RaceListInYear from '../views/RaceListInYear.vue'
+import RaceListInMonth from '../views/RaceListInMonth.vue'
 import RaceList from '../views/RaceList.vue'
+import RaceListInDay from '../views/RaceListInDay.vue'
 import RaceDetail from '../views/RaceDetail.vue'
+import NotFound from '../views/NotFound.vue'
+import { 
+  getCurrentYearRoute
+} from './routeCalculator'
 
+import { RouteName } from './routeCalculator'
 
 const routes: RouteRecordRaw[] = [
-  { path: '/', name: 'Home', component: Home },
-  { path: '/dashboard', name: 'Dashboard', component: Dashboard, meta: { requiresAuth: true } },
-  { path: '/admin', name: 'AdminDashboard', component: AdminDashboard, meta: { requiresAuth: true, requiresAdmin: true } },
+  { path: '/', name: RouteName.HOME, component: Home },
+  { path: '/dashboard', name: RouteName.DASHBOARD, component: Dashboard, meta: { requiresAuth: true } },
+  { path: '/admin', name: RouteName.ADMIN_DASHBOARD, component: AdminDashboard, meta: { requiresAuth: true, requiresAdmin: true } },
   
   // レース詳細ページ（直接アクセス用）
-  { path: '/race/:raceId', name: 'RaceDetailDirect', component: RaceDetail, meta: { requiresAuth: true } },
+  { path: '/race/:raceId', name: RouteName.RACE_DETAIL_DIRECT, component: RaceDetail, meta: { requiresAuth: true } },
   
   // 階層的なレース構造
-  { path: '/races', redirect: '/races/year/2024' },
-  { path: '/races/year/:year', name: 'RaceMonthList', component: RaceMonthList, meta: { requiresAuth: true } },
-  { path: '/races/year/:year/month/:month', name: 'RaceDateList', component: RaceDateList, meta: { requiresAuth: true } },
-  { path: '/races/year/:year/month/:month/place/:placeId', name: 'RaceList', component: RaceList, meta: { requiresAuth: true } },
-  { path: '/races/year/:year/month/:month/place/:placeId/race/:raceId', name: 'RaceDetail', component: RaceDetail, meta: { requiresAuth: true } },
+  { path: '/races', redirect: getCurrentYearRoute() },
+  { path: '/races/year/:year', name: RouteName.RACE_LIST_IN_YEAR, component: RaceListInYear, meta: { requiresAuth: true } },
+  { path: '/races/year/:year/month/:month', name: RouteName.RACE_LIST_IN_MONTH, component: RaceListInMonth, meta: { requiresAuth: true } },
+  { path: '/races/year/:year/month/:month/day/:day', name: RouteName.RACE_LIST_IN_DAY, component: RaceListInDay, meta: { requiresAuth: true } },
+  { path: '/races/year/:year/month/:month/place/:placeId', name: RouteName.RACE_LIST_IN_PLACE, component: RaceList, meta: { requiresAuth: true } },
+  { path: '/races/year/:year/month/:month/place/:placeId/race/:raceId', name: RouteName.RACE_DETAIL, component: RaceDetail, meta: { requiresAuth: true } },
   
-  // 後方互換性のための旧ルート（リダイレクト用）
-  { path: '/races/month/:monthId', redirect: to => `/races/year/2024/month/${to.params.monthId}` },
-  { path: '/races/date/:dateId', redirect: to => `/races/year/2024/month/10/place/${to.params.dateId}` },
-  { path: '/races/race/:raceId', redirect: to => `/races/year/2024/month/10/place/1/race/${to.params.raceId}` }
+  // 404ページ（最後に配置）
+  { path: '/:pathMatch(.*)*', name: 'NotFound', component: NotFound },
 ]
 
 export default routes

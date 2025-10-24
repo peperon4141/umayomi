@@ -1,4 +1,4 @@
-import type { Race } from '@/types/race'
+import type { Race } from '../../../shared/race'
 
 export const sampleRaces: Race[] = [
   {

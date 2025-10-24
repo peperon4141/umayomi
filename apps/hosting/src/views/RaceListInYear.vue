@@ -56,15 +56,16 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useNavigation } from '@/composables/useNavigation'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { mockRaceMonths } from '@/utils/mockData'
 import type { RaceMonth } from '@/utils/mockData'
+import { RouteName } from '@/router/routeCalculator'
 import Card from 'primevue/card'
 import Button from 'primevue/button'
 import Chip from 'primevue/chip'
 
-const router = useRouter()
+const { navigateTo, navigateTo404 } = useNavigation()
 
 const raceMonths = ref<RaceMonth[]>([])
 
@@ -75,7 +76,15 @@ const getTotalRaces = (month: RaceMonth) => {
 const selectMonth = (month: RaceMonth) => {
   // 月IDから年と月を抽出（例: "2024-10" -> year: 2024, month: 10）
   const [year, monthNum] = month.id.split('-')
-  router.push(`/races/year/${year}/month/${monthNum}`)
+  const yearNum = parseInt(year)
+  const monthNumber = parseInt(monthNum)
+  
+  if (isNaN(yearNum) || isNaN(monthNumber)) {
+    navigateTo404()
+    return
+  }
+  
+  navigateTo(RouteName.RACE_LIST_IN_MONTH, { year: yearNum, month: monthNumber })
 }
 
 

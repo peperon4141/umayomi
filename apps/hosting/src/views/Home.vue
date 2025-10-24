@@ -296,18 +296,19 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch } from 'vue'
-import { useRouter } from 'vue-router'
 import LoginDialog from '@/components/LoginDialog.vue'
 import { useAuth } from '@/composables/useAuth'
+import { useNavigation } from '@/composables/useNavigation'
+import { RouteName } from '@/router/routeCalculator'
 
-const router = useRouter()
+const { navigateTo } = useNavigation()
 const { user } = useAuth()
 const showLoginModal = ref(false)
 
 // 認証状態の変化を監視（ログイン後に自動リダイレクト）
 watch(user, (newUser) => {
   if (newUser) {
-    router.push('/races/year/2024')
+    navigateTo(RouteName.RACE_LIST_IN_YEAR, { year: new Date().getFullYear() })
   }
 })
 
@@ -318,7 +319,7 @@ const scrollToFeatures = () => {
 const handleLoginClick = () => {
   // すでにログイン済みの場合は/racesに遷移
   if (user.value) {
-    router.push('/races/year/2024')
+    navigateTo(RouteName.RACE_LIST_IN_YEAR, { year: new Date().getFullYear() })
     return
   }
   // 未ログインの場合はログインダイアログを表示
@@ -326,8 +327,8 @@ const handleLoginClick = () => {
 }
 
 const handleLoginSuccess = () => {
-  // ログイン成功時は2024年のレース一覧に遷移
-  router.push('/races/year/2024')
+  // ログイン成功時は現在年のレース一覧に遷移
+  navigateTo(RouteName.RACE_LIST_IN_YEAR, { year: new Date().getFullYear() })
 }
 
 

@@ -28,7 +28,7 @@
           <Button
             label="ダッシュボードに戻る"
             icon="pi pi-arrow-left"
-            @click="router.push('/dashboard')"
+            @click="navigateTo(RouteName.DASHBOARD)"
           />
         </div>
       </div>
@@ -138,14 +138,14 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { useNavigation } from '@/composables/useNavigation'
 import { doc, getDoc } from 'firebase/firestore'
 import { db } from '@/config/firebase'
 import AppLayout from '@/layouts/AppLayout.vue'
-import type { Race } from '@/types/race'
+import type { Race } from '../../../shared/race'
+import { RouteName } from '@/router/routeCalculator'
 
-const router = useRouter()
-const route = useRoute()
+const { getParam, navigateTo } = useNavigation()
 
 const raceDetail = ref<Race | null>(null)
 const loading = ref(false)
@@ -154,26 +154,16 @@ const error = ref<string | null>(null)
 
 const getGradeColor = (grade: string) => {
   switch (grade) {
-    case 'GⅠ':
-      return 'bg-red-600'
-    case 'GⅡ':
-      return 'bg-orange-500'
-    case 'GⅢ':
-      return 'bg-yellow-500'
-    case 'オープン':
-      return 'bg-purple-500'
-    case '3勝クラス':
-      return 'bg-blue-500'
-    case '2勝クラス':
-      return 'bg-green-500'
-    case '1勝クラス':
-      return 'bg-teal-500'
-    case '新馬':
-      return 'bg-indigo-500'
-    case '未勝利':
-      return 'bg-gray-500'
-    default:
-      return 'bg-gray-500'
+    case 'GⅠ': return 'bg-red-600'
+    case 'GⅡ': return 'bg-orange-500'
+    case 'GⅢ': return 'bg-yellow-500'
+    case 'オープン': return 'bg-purple-500'
+    case '3勝クラス': return 'bg-blue-500'
+    case '2勝クラス': return 'bg-green-500'
+    case '1勝クラス': return 'bg-teal-500'
+    case '新馬': return 'bg-indigo-500'
+    case '未勝利': return 'bg-gray-500'
+    default: return 'bg-gray-500'
   }
 }
 
@@ -218,7 +208,7 @@ const fetchRaceDetail = async (raceId: string) => {
       } as Race
     } else {
       error.value = 'レースが見つかりません'
-      router.push('/dashboard')
+      navigateTo(RouteName.DASHBOARD)
     }
   } catch (err: any) {
     error.value = err.message
@@ -229,11 +219,11 @@ const fetchRaceDetail = async (raceId: string) => {
 }
 
 onMounted(() => {
-  const raceId = route.params.raceId as string
+  const raceId = getParam('raceId')
   if (raceId) {
     fetchRaceDetail(raceId)
   } else {
-    router.push('/dashboard')
+    navigateTo(RouteName.DASHBOARD)
   }
 })
 </script>

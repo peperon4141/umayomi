@@ -5,6 +5,15 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { 
+  RouteName, 
+  generateRoute, 
+  getCurrentYearRoute,
+  getRaceYearRoute, 
+  getRaceMonthRoute, 
+  getRaceDateRoute, 
+  getRaceDetailRoute 
+} from '@/router/routeCalculator'
 import Breadcrumb from 'primevue/breadcrumb'
 
 const route = useRoute()
@@ -13,7 +22,6 @@ const router = useRouter()
 // パスとdisplay nameのマップ
 const pathDisplayMap: Record<string, string> = {
   '/': 'ホーム',
-  '/races': 'レース一覧',
   '/dashboard': 'ダッシュボード',
   '/admin': '管理画面'
 }
@@ -21,14 +29,17 @@ const pathDisplayMap: Record<string, string> = {
 const breadcrumbItems = computed(() => {
   const items = [{ label: 'ホーム', command: () => router.push('/') }]
   
-  // 新しい階層構造に対応
+  // レース関連の階層構造に対応
   if (route.path.startsWith('/races')) {
-    items.push({ label: 'レース一覧', command: () => router.push('/races') })
+    items.push({ label: 'レース一覧', command: () => router.push(getCurrentYearRoute()) })
     
     // 年
     if (route.params.year) {
       const year = route.params.year as string
-      items.push({ label: `${year}年`, command: () => router.push(`/races/year/${year}`) })
+      items.push({ 
+        label: `${year}年`, 
+        command: () => router.push(getRaceYearRoute(parseInt(year))) 
+      })
     }
     
     // 月
@@ -38,18 +49,33 @@ const breadcrumbItems = computed(() => {
       const monthNames = ['', '1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月']
       items.push({ 
         label: monthNames[parseInt(month)], 
-        command: () => router.push(`/races/year/${year}/month/${month}`)
+        command: () => router.push(getRaceMonthRoute(parseInt(year), parseInt(month)))
       })
     }
     
-    // 場所（開催日）
+    // 日
+    if (route.params.day) {
+      const year = route.params.year as string
+      const month = route.params.month as string
+      const day = route.params.day as string
+      items.push({ 
+        label: `${day}日`, 
+        command: () => router.push(generateRoute(RouteName.RACE_LIST_IN_DAY, {
+          year: parseInt(year),
+          month: parseInt(month),
+          day: parseInt(day)
+        }))
+      })
+    }
+    
+    // 競馬場
     if (route.params.placeId) {
       const year = route.params.year as string
       const month = route.params.month as string
       const placeId = route.params.placeId as string
       items.push({ 
-        label: `開催日: ${placeId}`, 
-        command: () => router.push(`/races/year/${year}/month/${month}/place/${placeId}`)
+        label: `競馬場: ${placeId}`, 
+        command: () => router.push(getRaceDateRoute(parseInt(year), parseInt(month), placeId))
       })
     }
     
@@ -61,10 +87,20 @@ const breadcrumbItems = computed(() => {
       const raceId = route.params.raceId as string
       items.push({ 
         label: `レース: ${raceId}`, 
-        command: () => router.push(`/races/year/${year}/month/${month}/place/${placeId}/race/${raceId}`)
+        command: () => router.push(getRaceDetailRoute(parseInt(year), parseInt(month), placeId, raceId))
       })
     }
-  } else if (pathDisplayMap[route.path]) {
+  } 
+  // 直接レース詳細ページ
+  else if (route.path.startsWith('/race/')) {
+    const raceId = route.params.raceId as string
+    items.push({ 
+      label: 'レース詳細', 
+      command: () => router.push(generateRoute(RouteName.RACE_DETAIL_DIRECT, { raceId }))
+    })
+  }
+  // その他のページ
+  else if (pathDisplayMap[route.path]) {
     items.push({ label: pathDisplayMap[route.path], command: () => router.push(route.path) })
   }
   

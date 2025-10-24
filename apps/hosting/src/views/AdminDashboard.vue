@@ -247,7 +247,7 @@
                 <i class="pi pi-cloud-download text-blue-500"></i>
                 <div class="flex-1">
                   <p class="font-medium">JRAスクレイピング実行</p>
-                  <p class="text-sm text-gray-600">2024年10月のデータを取得</p>
+                  <p class="text-sm text-gray-600">{{ getCurrentYear() }}年{{ getCurrentMonth() }}月のデータを取得</p>
                 </div>
                 <span class="text-sm text-gray-500">2時間前</span>
               </div>
@@ -283,6 +283,7 @@ import { useRouter } from 'vue-router'
 import { useAuth } from '@/composables/useAuth'
 import { seedRaceData, clearRaceData } from '@/utils/sampleData'
 import { useToast } from 'primevue/usetoast'
+import { getCurrentYear, getCurrentMonth } from '@/router/routeCalculator'
 
 const router = useRouter()
 const { user, signOut } = useAuth()
@@ -292,7 +293,7 @@ const toast = useToast()
 const totalRaces = ref(0)
 const monthlyRaces = ref(0)
 const activeUsers = ref(1)
-const lastUpdate = ref('2024年10月15日')
+const lastUpdate = ref(`${getCurrentYear()}年${getCurrentMonth()}月15日`)
 
 // ローディング状態
 const scrapingLoading = ref(false)

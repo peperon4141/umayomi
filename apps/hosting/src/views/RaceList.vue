@@ -62,16 +62,16 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { useNavigation } from '@/composables/useNavigation'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { mockRaceMonths } from '@/utils/mockData'
 import type { Race, RaceDay } from '@/utils/mockData'
+import { RouteName } from '@/router/routeCalculator'
 import Card from 'primevue/card'
 import Button from 'primevue/button'
 import Chip from 'primevue/chip'
 
-const router = useRouter()
-const route = useRoute()
+const { navigateTo, navigateTo404, getParams } = useNavigation()
 
 const raceDay = ref<RaceDay | null>(null)
 const monthName = ref('')
@@ -90,20 +90,45 @@ const formatPrize = (prize: number) => {
 
 const selectRace = (race: Race) => {
   // ルートパラメータから年、月、場所を取得
-  const year = route.params.year as string
-  const month = route.params.month as string
-  const placeId = route.params.placeId as string
-  router.push(`/races/year/${year}/month/${month}/place/${placeId}/race/${race.id}`)
+  const params = getParams()
+  const yearParam = params.year
+  const monthParam = params.month
+  const placeId = params.placeId
+  
+  // 必須パラメータがなければ404ページに遷移
+  if (!yearParam || !monthParam || !placeId) {
+        navigateTo404()
+    return
+  }
+  
+  // 次の戦でparse
+  const year = parseInt(yearParam)
+  const month = parseInt(monthParam)
+  
+  // parseに失敗した場合は404ページに飛ぶ
+  if (isNaN(year) || isNaN(month)) {
+        navigateTo404()
+    return
+  }
+  
+  navigateTo(RouteName.RACE_DETAIL, { year, month, placeId, raceId: race.id })
 }
 
 
 onMounted(() => {
-  const year = route.params.year as string
-  const month = route.params.month as string
-  const placeId = route.params.placeId as string
+  const params = getParams()
+  const yearParam = params.year
+  const monthParam = params.month
+  const placeId = params.placeId
+  
+  // 必須パラメータがなければ404ページに遷移
+  if (!yearParam || !monthParam || !placeId) {
+        navigateTo404()
+    return
+  }
   
   // 該当する月から該当する日付を検索
-  const monthId = `${year}-${month}`
+  const monthId = `${yearParam}-${monthParam}`
   const monthData = mockRaceMonths.find(m => m.id === monthId)
   
   if (monthData) {
@@ -112,10 +137,10 @@ onMounted(() => {
       raceDay.value = day
       monthName.value = monthData.name
     } else {
-      router.push('/races/year/2024')
+      navigateTo(RouteName.RACE_LIST_IN_YEAR, { year: new Date().getFullYear() })
     }
   } else {
-    router.push('/races/year/2024')
+    navigateTo(RouteName.RACE_LIST_IN_YEAR, { year: 2024 })
   }
 })
 </script>

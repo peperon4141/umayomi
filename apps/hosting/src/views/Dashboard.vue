@@ -241,7 +241,7 @@ import { useRouter } from 'vue-router'
 import { useRace } from '@/composables/useRace'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { seedRaceData, clearRaceData } from '@/utils/sampleData'
-import type { RaceFilters } from '@/types/race'
+import type { RaceFilters } from '../../../shared/race'
 import { useToast } from 'primevue/usetoast'
 
 const toast = useToast()

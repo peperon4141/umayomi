@@ -9,7 +9,7 @@ import {
   type QueryConstraint 
 } from 'firebase/firestore'
 import { db } from '@/config/firebase'
-import type { Race, RaceFilters } from '@/types/race'
+import type { Race, RaceFilters } from '../../../shared/race'
 
 
 export function useRace() {

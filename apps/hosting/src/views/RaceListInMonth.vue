@@ -66,7 +66,7 @@ import { mockRaceMonths } from '@/utils/mockData'
 import type { RaceDay } from '@/utils/mockData'
 import { RouteName } from '@/router/routeCalculator'
 
-const { navigateTo, getParams } = useNavigation()
+const { navigateTo, navigateTo404, getParams } = useNavigation()
 
 const raceDays = ref<RaceDay[]>([])
 const monthName = ref('')
@@ -80,7 +80,7 @@ const selectDate = (day: RaceDay) => {
   
   // 必須パラメータがなければ404ページに遷移
   if (!yearParam || !monthParam) {
-    navigateTo(RouteName.HOME)
+        navigateTo404()
     return
   }
   
@@ -90,7 +90,7 @@ const selectDate = (day: RaceDay) => {
   
   // parseに失敗した場合は404ページに飛ぶ
   if (isNaN(year) || isNaN(month)) {
-    navigateTo(RouteName.HOME)
+        navigateTo404()
     return
   }
   
@@ -118,7 +118,7 @@ onMounted(() => {
   
   // 必須パラメータがなければ404ページに遷移
   if (!yearParam || !monthParam) {
-    navigateTo(RouteName.HOME)
+        navigateTo404()
     return
   }
   

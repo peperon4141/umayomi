@@ -57,6 +57,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { useAuth } from '@/composables/useAuth'
 import ProfileDialog from '@/components/ProfileDialog.vue'
 import Breadcrumb from '@/components/Breadcrumb.vue'
+import { getCurrentYearRedirect } from '@/router/routeCalculator'
 
 const router = useRouter()
 const route = useRoute()
@@ -70,7 +71,7 @@ const sidebarMenuItems = computed(() => [
   {
     label: 'レース一覧',
     icon: 'pi pi-list',
-    command: () => router.push(`/races/year/${new Date().getFullYear()}`),
+    command: () => router.push(getCurrentYearRedirect()),
     class: isActiveRoute('/races') ? 'bg-primary-50 text-primary' : ''
   },
   {
