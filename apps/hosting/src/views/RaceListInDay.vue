@@ -6,9 +6,30 @@
       <p class="text-surface-600 mt-1">その日のレース一覧</p>
     </div>
 
+    <!-- 表示切り替えボタン -->
+    <div class="mb-6 flex justify-end">
+      <div class="flex bg-surface-100 rounded-lg p-1">
+        <Button
+          :class="{ 'bg-surface-0 shadow-sm': viewMode === 'card' }"
+          icon="pi pi-th-large"
+          @click="viewMode = 'card'"
+          text
+          rounded
+        />
+        <Button
+          :class="{ 'bg-surface-0 shadow-sm': viewMode === 'list' }"
+          icon="pi pi-list"
+          @click="viewMode = 'list'"
+          text
+          rounded
+        />
+      </div>
+    </div>
+
     <!-- レース一覧 -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <!-- カード表示 -->
+      <div v-if="viewMode === 'card'" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <Card
           v-for="race in dayRaces"
           :key="race.id"
@@ -39,6 +60,34 @@
           </template>
         </Card>
       </div>
+
+      <!-- リスト表示 -->
+      <div v-else class="space-y-4">
+        <div
+          v-for="race in dayRaces"
+          :key="race.id"
+          class="bg-surface-0 border border-surface-200 rounded-lg p-4 cursor-pointer hover:shadow-md transition-shadow duration-200"
+          @click="selectRace(race)"
+        >
+          <div class="flex justify-between items-center">
+            <div>
+              <h3 class="text-lg font-semibold text-surface-900">{{ race.raceName }}</h3>
+              <p class="text-sm text-surface-600">{{ race.venue }}</p>
+            </div>
+            <div class="flex items-center space-x-4">
+              <Chip :label="`${race.distance}m`" severity="info" />
+              <Chip :label="race.grade" :severity="getGradeSeverity(race.grade)" />
+              <span class="text-sm font-medium">{{ formatPrize(race.prize) }}</span>
+              <Button
+                label="詳細を見る"
+                icon="pi pi-arrow-right"
+                size="small"
+                @click.stop="selectRace(race)"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </AppLayout>
 </template>
@@ -59,6 +108,7 @@ const { navigateTo, navigateTo404, getParams, getQuery } = useNavigation()
 
 const dayRaces = ref<Race[]>([])
 const dayName = ref('')
+const viewMode = ref<'card' | 'list'>('card')
 
 const getGradeSeverity = (grade: string) => {
   switch (grade) {
@@ -120,7 +170,7 @@ const selectRace = (race: Race) => {
   const dayParam = params.day
   
   if (!yearParam || !monthParam || !dayParam) {
-          navigateTo404()
+    navigateTo404()
     return
   }
   
@@ -129,7 +179,7 @@ const selectRace = (race: Race) => {
   const day = parseInt(dayParam)
   
   if (isNaN(year) || isNaN(month) || isNaN(day)) {
-          navigateTo404()
+    navigateTo404()
     return
   }
   

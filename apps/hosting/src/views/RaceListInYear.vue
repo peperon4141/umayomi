@@ -6,9 +6,30 @@
       <p class="text-gray-600 mt-1">開催月を選択してください</p>
     </div>
 
+    <!-- 表示切り替えボタン -->
+    <div class="mb-6 flex justify-end">
+      <div class="flex bg-surface-100 rounded-lg p-1">
+        <Button
+          :class="{ 'bg-surface-0 shadow-sm': viewMode === 'card' }"
+          icon="pi pi-th-large"
+          @click="viewMode = 'card'"
+          text
+          rounded
+        />
+        <Button
+          :class="{ 'bg-surface-0 shadow-sm': viewMode === 'list' }"
+          icon="pi pi-list"
+          @click="viewMode = 'list'"
+          text
+          rounded
+        />
+      </div>
+    </div>
+
     <!-- 月一覧 -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <!-- カード表示 -->
+      <div v-if="viewMode === 'card'" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <Card
           v-for="month in raceMonths"
           :key="month.id"
@@ -50,6 +71,33 @@
           </template>
         </Card>
       </div>
+
+      <!-- リスト表示 -->
+      <div v-else class="space-y-4">
+        <div
+          v-for="month in raceMonths"
+          :key="month.id"
+          class="bg-surface-0 border border-surface-200 rounded-lg p-4 cursor-pointer hover:shadow-md transition-shadow duration-200"
+          @click="selectMonth(month)"
+        >
+          <div class="flex justify-between items-center">
+            <div>
+              <h3 class="text-lg font-semibold text-surface-900">{{ month.name }}</h3>
+              <p class="text-sm text-surface-600">開催日数: {{ month.days.length }}日</p>
+            </div>
+            <div class="flex items-center space-x-4">
+              <Chip :label="`${month.days.length}日`" severity="info" />
+              <Chip :label="`${getTotalRaces(month)}レース`" severity="success" />
+              <Button
+                label="詳細を見る"
+                icon="pi pi-arrow-right"
+                size="small"
+                @click.stop="selectMonth(month)"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </AppLayout>
 </template>
@@ -68,6 +116,7 @@ import Chip from 'primevue/chip'
 const { navigateTo, navigateTo404 } = useNavigation()
 
 const raceMonths = ref<RaceMonth[]>([])
+const viewMode = ref<'card' | 'list'>('card')
 
 const getTotalRaces = (month: RaceMonth) => {
   return month.days.reduce((total, day) => total + day.races.length, 0)
