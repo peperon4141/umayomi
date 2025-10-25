@@ -1,5 +1,7 @@
 <template>
-  <Breadcrumb :model="breadcrumbItems" />
+  <div class="w-full overflow-hidden" style="white-space: nowrap; overflow-x: auto;">
+    <Breadcrumb :model="breadcrumbItems" class="w-full" style="white-space: nowrap;" />
+  </div>
 </template>
 
 <script setup lang="ts">

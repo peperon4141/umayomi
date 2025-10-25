@@ -81,8 +81,8 @@ async function saveRacesToFirestore(races: JRARaceData[]) {
       const docRef = db.collection('races').doc()
       batch.set(docRef, {
         ...race,
-        date: Timestamp.fromDate(race.date),
-        scrapedAt: Timestamp.fromDate(race.scrapedAt)
+        date: race.date && !isNaN(race.date.getTime()) ? Timestamp.fromDate(race.date) : null,
+        scrapedAt: race.scrapedAt instanceof Date ? Timestamp.fromDate(race.scrapedAt) : Timestamp.fromDate(new Date(race.scrapedAt))
       })
       savedCount++
     } catch (error) {

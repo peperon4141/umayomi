@@ -59,7 +59,7 @@ async function main() {
       
       dayRaces.forEach((race, index) => {
         console.log(`${index + 1}. ${race.raceName}`)
-        console.log(`   🏟️  競馬場: ${race.racecourse}`)
+        console.log(`   🏟️  競馬場: ${race.venue}`)
         console.log(`   🏆 グレード: ${race.grade}`)
         console.log(`   🏃 コース: ${race.surface}`)
         console.log(`   📏 距離: ${race.distance}m`)
@@ -73,7 +73,7 @@ async function main() {
     console.log('📊 統計情報:')
     console.log('=' .repeat(40))
     
-    const racecourses = [...new Set(races.map(r => r.racecourse))].filter(Boolean)
+    const racecourses = [...new Set(races.map(r => r.venue))].filter(Boolean)
     const grades = [...new Set(races.map(r => r.grade))].filter(Boolean)
     const surfaces = [...new Set(races.map(r => r.surface))].filter(Boolean)
     

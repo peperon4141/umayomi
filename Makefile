@@ -1,6 +1,6 @@
 # Umayomi Horse Racing Prediction Service Makefile
 
-.PHONY: dev dev-build format e2e quality-check pre-commit build kill
+.PHONY: dev dev-build format e2e quality-check pre-commit build kill test
 
 install:
 	pnpm install
@@ -24,18 +24,18 @@ format: install
 
 # Run e2e tests
 e2e:
-	pnpm -F umayomi-e2e test
+	pnpm -F e2e test
 
-# Run unit tests
+# Run unit tests using Turbo
 test:
-	pnpm -F hosting test:run
+	pnpm turbo test
 
 serve:
 	pnpm -F hosting dev:serve
 
-# Build hosting app
+# Build all projects using Turbo
 build:
-	pnpm -F hosting build
+	pnpm turbo build
 
 # 🚀 統合品質チェック（必須）
 quality-check:

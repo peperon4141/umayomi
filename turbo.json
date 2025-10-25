@@ -4,7 +4,8 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
+      "outputs": ["dist/**", ".next/**", "!.next/cache/**", "lib/**"],
+      "passThroughEnv": ["SKIP_FUNCTIONS_BUILD"]
     },
     "lint": {},
     "lint:fix": {},
@@ -18,7 +19,11 @@
     },
     "test": {
       "dependsOn": ["build"],
-      "outputs": ["test-results/**", "playwright-report/**"]
+      "outputs": ["test-results/**", "playwright-report/**", "coverage/**"]
+    },
+    "test:run": {
+      "dependsOn": ["build"],
+      "outputs": ["test-results/**", "coverage/**"]
     }
   }
 }
