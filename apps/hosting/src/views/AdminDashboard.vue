@@ -232,44 +232,87 @@
         </Card>
       </div>
 
-      <!-- 最近のアクティビティ -->
+      <!-- Functions実行履歴 -->
       <Card class="mt-8">
         <template #header>
           <div class="p-6 border-b border-gray-200">
-            <h3 class="text-xl font-bold text-gray-900">最近のアクティビティ</h3>
-            <p class="text-gray-600 mt-1">システムの操作履歴</p>
+            <div class="flex justify-between items-center">
+              <div>
+                <h3 class="text-xl font-bold text-gray-900">Functions実行履歴</h3>
+                <p class="text-gray-600 mt-1">Cloud Functionsの実行ログ</p>
+              </div>
+              <Button
+                label="更新"
+                icon="pi pi-refresh"
+                severity="secondary"
+                size="small"
+                @click="refreshLogs"
+                :loading="loading"
+              />
+            </div>
           </div>
         </template>
         <template #content>
           <div class="p-6">
-            <div class="space-y-4">
-              <div class="flex items-center space-x-4 p-3 bg-gray-50 rounded-lg">
-                <i class="pi pi-cloud-download text-blue-500"></i>
-                <div class="flex-1">
-                  <p class="font-medium">JRAスクレイピング実行</p>
-                  <p class="text-sm text-gray-600">{{ getCurrentYear() }}年{{ getCurrentMonth() }}月のデータを取得</p>
-                </div>
-                <span class="text-sm text-gray-500">2時間前</span>
-              </div>
+            <DataTable
+              :value="logs"
+              :loading="loading"
+              :paginator="true"
+              :rows="pageSize"
+              :totalRecords="totalCount"
+              :lazy="true"
+              @page="onPageChange"
+              paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+              :rowsPerPageOptions="[5, 10, 20, 50]"
+              currentPageReportTemplate="全 {totalRecords} 件中 {first} - {last} 件を表示"
+              class="p-datatable-sm"
+            >
+              <Column field="functionName" header="関数名" :sortable="true">
+                <template #body="{ data }">
+                  <div class="flex items-center space-x-2">
+                    <i :class="getFunctionIcon(data.functionName)" class="text-lg"></i>
+                    <span class="font-medium">{{ getFunctionDisplayName(data.functionName) }}</span>
+                  </div>
+                </template>
+              </Column>
               
-              <div class="flex items-center space-x-4 p-3 bg-gray-50 rounded-lg">
-                <i class="pi pi-database text-green-500"></i>
-                <div class="flex-1">
-                  <p class="font-medium">サンプルデータ投入</p>
-                  <p class="text-sm text-gray-600">テスト用データを生成</p>
-                </div>
-                <span class="text-sm text-gray-500">1日前</span>
-              </div>
+              <Column field="status" header="ステータス" :sortable="true">
+                <template #body="{ data }">
+                  <Badge 
+                    :label="data.status === 'success' ? '成功' : '失敗'"
+                    :severity="data.status === 'success' ? 'success' : 'danger'"
+                  />
+                </template>
+              </Column>
               
-              <div class="flex items-center space-x-4 p-3 bg-gray-50 rounded-lg">
-                <i class="pi pi-user text-purple-500"></i>
-                <div class="flex-1">
-                  <p class="font-medium">ユーザーログイン</p>
-                  <p class="text-sm text-gray-600">管理者がログインしました</p>
-                </div>
-                <span class="text-sm text-gray-500">3日前</span>
-              </div>
-            </div>
+              <Column field="executedAt" header="実行日時" :sortable="true">
+                <template #body="{ data }">
+                  <span class="text-sm">
+                    {{ formatDate(data.executedAt) }}
+                  </span>
+                </template>
+              </Column>
+              
+              <Column field="metadata.duration" header="実行時間" :sortable="true">
+                <template #body="{ data }">
+                  <span class="text-sm text-gray-600">
+                    {{ data.metadata?.duration ? `${data.metadata.duration}ms` : '-' }}
+                  </span>
+                </template>
+              </Column>
+              
+              <Column header="詳細">
+                <template #body="{ data }">
+                  <Button
+                    icon="pi pi-eye"
+                    severity="secondary"
+                    size="small"
+                    @click="showLogDetail(data)"
+                    v-tooltip.top="'詳細を表示'"
+                  />
+                </template>
+              </Column>
+            </DataTable>
           </div>
         </template>
       </Card>
@@ -282,13 +325,30 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuth } from '@/composables/useAuth'
 import { useRace } from '@/composables/useRace'
+import { useFunctionLog } from '@/composables/useFunctionLog'
 import { seedRaceData, clearRaceData } from '@/utils/sampleData'
 import { useToast } from 'primevue/usetoast'
 import { getCurrentYear, getCurrentMonth } from '@/router/routeCalculator'
+// ローカル型定義
+interface FunctionLog {
+  id: string
+  functionName: string
+  status: 'success' | 'failure'
+  executedAt: any
+  metadata?: {
+    duration?: number
+    errorMessage?: string
+    responseData?: any
+    method?: string
+    url?: string
+    [key: string]: any
+  }
+}
 
 const router = useRouter()
 const { user, signOut } = useAuth()
 const { races, fetchOctoberRaces } = useRace()
+const { logs, loading, totalCount, pageSize, fetchLogs, onPageChange, refreshLogs } = useFunctionLog()
 const toast = useToast()
 
 // 統計データ
@@ -374,6 +434,66 @@ const handleClearData = async () => {
   })
 }
 
+// Functions実行履歴の表示用関数
+const getFunctionIcon = (functionName: string) => {
+  const iconMap: Record<string, string> = {
+    'helloWorld': 'pi pi-check-circle text-blue-500',
+    'scrapeJRAData': 'pi pi-cloud-download text-green-500',
+    'manualJraScraping': 'pi pi-cog text-orange-500',
+    'scheduledJraScraping': 'pi pi-clock text-purple-500',
+    'setAdminRole': 'pi pi-user text-indigo-500'
+  }
+  return iconMap[functionName] || 'pi pi-code text-gray-500'
+}
+
+const getFunctionDisplayName = (functionName: string) => {
+  const nameMap: Record<string, string> = {
+    'helloWorld': 'Hello World',
+    'scrapeJRAData': 'JRAスクレイピング',
+    'manualJraScraping': '手動JRAスクレイピング',
+    'scheduledJraScraping': '定期JRAスクレイピング',
+    'setAdminRole': '管理者権限設定'
+  }
+  return nameMap[functionName] || functionName
+}
+
+const formatDate = (timestamp: any) => {
+  if (!timestamp) return '-'
+  
+  // Firestore Timestampの場合
+  if (timestamp.toDate) {
+    return timestamp.toDate().toLocaleString('ja-JP')
+  }
+  
+  // Dateオブジェクトの場合
+  if (timestamp instanceof Date) {
+    return timestamp.toLocaleString('ja-JP')
+  }
+  
+  // 文字列の場合
+  return new Date(timestamp).toLocaleString('ja-JP')
+}
+
+const showLogDetail = (log: FunctionLog) => {
+  const detail = {
+    functionName: getFunctionDisplayName(log.functionName),
+    status: log.status === 'success' ? '成功' : '失敗',
+    executedAt: formatDate(log.executedAt),
+    duration: log.metadata?.duration ? `${log.metadata.duration}ms` : '-',
+    method: log.metadata?.method || '-',
+    url: log.metadata?.url || '-',
+    errorMessage: log.metadata?.errorMessage || '-',
+    responseData: log.metadata?.responseData ? JSON.stringify(log.metadata.responseData, null, 2) : '-'
+  }
+  
+  toast.add({
+    severity: 'info',
+    summary: '実行ログ詳細',
+    detail: `関数: ${detail.functionName}\nステータス: ${detail.status}\n実行日時: ${detail.executedAt}\n実行時間: ${detail.duration}\nメソッド: ${detail.method}\nURL: ${detail.url}\nエラー: ${detail.errorMessage}\nレスポンス: ${detail.responseData}`,
+    life: 10000
+  })
+}
+
 onMounted(async () => {
   // Firestoreからレースデータを取得
   await fetchOctoberRaces()
@@ -382,5 +502,8 @@ onMounted(async () => {
   totalRaces.value = races.value.length
   monthlyRaces.value = races.value.length
   activeUsers.value = 1
+  
+  // Functions実行履歴を取得
+  await fetchLogs()
 })
 </script>

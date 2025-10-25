@@ -6,6 +6,7 @@ import { getFirestore, Timestamp } from 'firebase-admin/firestore'
 import { getAuth } from 'firebase-admin/auth'
 import { scrapeJRAData as scrapeJRADataLogic } from './scraper/jraScraper'
 import type { JRARaceData } from '../../shared/jra'
+import type { CreateFunctionLogData } from '../../shared/functionLog'
 
 // Firebase Admin SDKを初期化
 initializeApp()
@@ -13,16 +14,62 @@ const db = getFirestore()
 const auth = getAuth()
 
 /**
+ * Functions実行ログをFirestoreに保存
+ */
+async function saveFunctionLog(logData: CreateFunctionLogData): Promise<void> {
+  try {
+    const docRef = db.collection('function_logs').doc()
+    await docRef.set({
+      functionName: logData.functionName,
+      status: logData.status,
+      executedAt: Timestamp.fromDate(new Date()),
+      metadata: logData.metadata || {}
+    })
+    logger.info('Function log saved', { functionName: logData.functionName, status: logData.status })
+  } catch (error) {
+    logger.error('Failed to save function log', { error, logData })
+  }
+}
+
+/**
  * HelloWorld Cloud Function
  * TDDで作成されたシンプルな関数
  */
-export const helloWorld = onRequest((request, response) => {
+export const helloWorld = onRequest(async (request, response) => {
+  const startTime = Date.now()
+  
   logger.info('HelloWorld function called', { 
     method: request.method,
     url: request.url 
   })
-  
-  response.send('Hello World!')
+
+  try {
+    response.send('Hello World!')
+    
+    // 成功ログを保存
+    await saveFunctionLog({
+      functionName: 'helloWorld',
+      status: 'success',
+      metadata: {
+        method: request.method,
+        url: request.url,
+        duration: Date.now() - startTime
+      }
+    })
+  } catch (error) {
+    // 失敗ログを保存
+    await saveFunctionLog({
+      functionName: 'helloWorld',
+      status: 'failure',
+      metadata: {
+        method: request.method,
+        url: request.url,
+        duration: Date.now() - startTime,
+        errorMessage: error instanceof Error ? error.message : 'Unknown error'
+      }
+    })
+    throw error
+  }
 })
 
 /**
@@ -32,6 +79,8 @@ export const helloWorld = onRequest((request, response) => {
 export const scrapeJRAData = onRequest(
   { timeoutSeconds: 300, memory: '1GiB' },
   async (request, response) => {
+    const startTime = Date.now()
+    
     logger.info('JRA scraping function called', { 
       method: request.method,
       url: request.url 
@@ -47,12 +96,29 @@ export const scrapeJRAData = onRequest(
       const savedCount = await saveRacesToFirestore(races)
       logger.info('Races saved to Firestore', { savedCount })
 
-      response.send({
+      const result = {
         success: true,
         message: 'JRAデータのスクレイピングが完了しました',
         racesCount: races.length,
         savedCount: savedCount,
         races: races
+      }
+
+      response.send(result)
+
+      // 成功ログを保存
+      await saveFunctionLog({
+        functionName: 'scrapeJRAData',
+        status: 'success',
+        metadata: {
+          method: request.method,
+          url: request.url,
+          duration: Date.now() - startTime,
+          responseData: {
+            racesCount: races.length,
+            savedCount: savedCount
+          }
+        }
       })
 
     } catch (error) {
@@ -60,9 +126,23 @@ export const scrapeJRAData = onRequest(
         error: error instanceof Error ? error.message : 'Unknown error' 
       })
       
-      response.status(500).send({
+      const errorResponse = {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error'
+      }
+      
+      response.status(500).send(errorResponse)
+
+      // 失敗ログを保存
+      await saveFunctionLog({
+        functionName: 'scrapeJRAData',
+        status: 'failure',
+        metadata: {
+          method: request.method,
+          url: request.url,
+          duration: Date.now() - startTime,
+          errorMessage: error instanceof Error ? error.message : 'Unknown error'
+        }
       })
     }
   }
@@ -119,6 +199,8 @@ async function saveRacesToFirestore(races: JRARaceData[]) {
  * ユーザーにadminロールを付与する Cloud Function
  */
 export const setAdminRole = onRequest(async (request, response) => {
+  const startTime = Date.now()
+  
   logger.info('setAdminRole function called', { 
     method: request.method,
     url: request.url 
@@ -128,10 +210,11 @@ export const setAdminRole = onRequest(async (request, response) => {
     const { uid } = request.body
 
     if (!uid) {
-      response.status(400).send({
+      const errorResponse = {
         success: false,
         error: 'UID is required'
-      })
+      }
+      response.status(400).send(errorResponse)
       return
     }
 
@@ -140,9 +223,23 @@ export const setAdminRole = onRequest(async (request, response) => {
     
     logger.info('Admin role set successfully', { uid })
 
-    response.send({
+    const result = {
       success: true,
       message: 'Admin role has been set successfully'
+    }
+
+    response.send(result)
+
+    // 成功ログを保存
+    await saveFunctionLog({
+      functionName: 'setAdminRole',
+      status: 'success',
+      metadata: {
+        method: request.method,
+        url: request.url,
+        duration: Date.now() - startTime,
+        responseData: { uid }
+      }
     })
 
   } catch (error) {
@@ -150,9 +247,23 @@ export const setAdminRole = onRequest(async (request, response) => {
       error: error instanceof Error ? error.message : 'Unknown error' 
     })
     
-    response.status(500).send({
+    const errorResponse = {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error'
+    }
+    
+    response.status(500).send(errorResponse)
+
+    // 失敗ログを保存
+    await saveFunctionLog({
+      functionName: 'setAdminRole',
+      status: 'failure',
+      metadata: {
+        method: request.method,
+        url: request.url,
+        duration: Date.now() - startTime,
+        errorMessage: error instanceof Error ? error.message : 'Unknown error'
+      }
     })
   }
 })
@@ -169,6 +280,8 @@ export const scheduledJraScraping = onSchedule(
     timeoutSeconds: 300
   },
   async (event) => {
+    const startTime = Date.now()
+    
     logger.info('Scheduled JRA scraping started', { 
       timestamp: new Date().toISOString(),
       eventId: event.scheduleTime 
@@ -190,10 +303,35 @@ export const scheduledJraScraping = onSchedule(
         savedCount
       })
 
+      // 成功ログを保存
+      await saveFunctionLog({
+        functionName: 'scheduledJraScraping',
+        status: 'success',
+        metadata: {
+          duration: Date.now() - startTime,
+          eventId: event.scheduleTime,
+          responseData: {
+            racesCount: races.length,
+            savedCount
+          }
+        }
+      })
+
     } catch (error) {
       logger.error('Scheduled JRA scraping failed', { 
         error: error instanceof Error ? error.message : 'Unknown error',
         timestamp: new Date().toISOString()
+      })
+      
+      // 失敗ログを保存
+      await saveFunctionLog({
+        functionName: 'scheduledJraScraping',
+        status: 'failure',
+        metadata: {
+          duration: Date.now() - startTime,
+          eventId: event.scheduleTime,
+          errorMessage: error instanceof Error ? error.message : 'Unknown error'
+        }
       })
       
       // エラー通知（必要に応じて）
@@ -209,6 +347,8 @@ export const scheduledJraScraping = onSchedule(
 export const manualJraScraping = onRequest(
   { timeoutSeconds: 300, memory: '1GiB' },
   async (request, response) => {
+    const startTime = Date.now()
+    
     logger.info('Manual JRA scraping function called', { 
       method: request.method,
       url: request.url,
@@ -219,10 +359,11 @@ export const manualJraScraping = onRequest(
       // 認証チェック（管理者のみ実行可能）
       const authHeader = request.headers.authorization
       if (!authHeader) {
-        response.status(401).send({
+        const errorResponse = {
           success: false,
           error: 'Authorization header is required'
-        })
+        }
+        response.status(401).send(errorResponse)
         return
       }
 
@@ -235,12 +376,29 @@ export const manualJraScraping = onRequest(
       const savedCount = await saveRacesToFirestore(races)
       logger.info('Manual races saved to Firestore', { savedCount })
 
-      response.send({
+      const result = {
         success: true,
         message: '手動JRAデータのスクレイピングが完了しました',
         racesCount: races.length,
         savedCount: savedCount,
         timestamp: new Date().toISOString()
+      }
+
+      response.send(result)
+
+      // 成功ログを保存
+      await saveFunctionLog({
+        functionName: 'manualJraScraping',
+        status: 'success',
+        metadata: {
+          method: request.method,
+          url: request.url,
+          duration: Date.now() - startTime,
+          responseData: {
+            racesCount: races.length,
+            savedCount
+          }
+        }
       })
 
     } catch (error) {
@@ -249,9 +407,23 @@ export const manualJraScraping = onRequest(
         timestamp: new Date().toISOString()
       })
       
-      response.status(500).send({
+      const errorResponse = {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error'
+      }
+      
+      response.status(500).send(errorResponse)
+
+      // 失敗ログを保存
+      await saveFunctionLog({
+        functionName: 'manualJraScraping',
+        status: 'failure',
+        metadata: {
+          method: request.method,
+          url: request.url,
+          duration: Date.now() - startTime,
+          errorMessage: error instanceof Error ? error.message : 'Unknown error'
+        }
       })
     }
   }

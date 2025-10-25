@@ -1,6 +1,6 @@
 # Umayomi Horse Racing Prediction Service Makefile
 
-.PHONY: dev dev-build format e2e quality-check pre-commit build kill test
+.PHONY: dev dev-build format e2e quality-check pre-commit build kill test scrape-jra scrape-jra-manual test-hello
 
 install:
 	pnpm install
@@ -42,3 +42,37 @@ quality-check:
 	make build
 	make format
 	make e2e
+
+# JRAスクレイピング
+scrape-jra:
+	@curl -X POST \
+		-H "Content-Type: application/json" \
+		http://127.0.0.1:5101/umayomi-fbb2b/us-central1/scrapeJRAData \
+		--max-time 300 \
+		--connect-timeout 10 \
+		--retry 3 \
+		--retry-delay 1 \
+		--show-error \
+		--fail-with-body
+
+# 手動JRAスクレイピング
+scrape-jra-manual:
+	@curl -X POST \
+		-H "Content-Type: application/json" \
+		-H "Authorization: Bearer admin-token" \
+		http://127.0.0.1:5101/umayomi-fbb2b/us-central1/manualJraScraping \
+		--max-time 300 \
+		--connect-timeout 10 \
+		--retry 3 \
+		--retry-delay 1 \
+		--show-error \
+		--fail-with-body
+
+# HelloWorld関数テスト
+test-hello:
+	@curl -X GET \
+		http://127.0.0.1:5101/umayomi-fbb2b/us-central1/helloWorld \
+		--max-time 30 \
+		--connect-timeout 10 \
+		--show-error \
+		--fail-with-body

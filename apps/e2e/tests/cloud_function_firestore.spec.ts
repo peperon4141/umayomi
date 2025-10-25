@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test'
+import { HomePage } from '../pageObjects/HomePage'
 
 test.describe('Cloud Function Firestore Integration', () => {
   test('Cloud Functionを呼び出してFirestoreにデータが保存される', async ({ request, page }) => {
@@ -88,11 +89,50 @@ test.describe('Cloud Function Firestore Integration', () => {
     // タイムアウトを延長
     test.setTimeout(30000)
     
-    // ダッシュボードページにアクセス
-    await page.goto('http://127.0.0.1:5100/races')
+    // ホームページにアクセスしてログイン
+    const homePage = await HomePage.visit(page)
+    await homePage.loginWithGoogle()
     
-    // ログイン処理（必要に応じて）
-    // ここでは認証が必要な場合の処理を追加
+    // 認証後にダッシュボードページにアクセス
+    await page.goto('http://127.0.0.1:5100/dashboard')
+    
+    // ページの読み込みを待つ
+    await page.waitForLoadState('networkidle')
+    
+    // 少し待機してからボタンを探す
+    await page.waitForTimeout(3000)
+    
+    // ページの内容をデバッグ
+    console.log('Current URL:', page.url())
+    const pageContent = await page.content()
+    console.log('Page content length:', pageContent.length)
+    console.log('Page content:', pageContent)
+    
+    // すべてのボタンを確認
+    const allButtons = await page.locator('button').all()
+    console.log('Found buttons:', allButtons.length)
+    for (let i = 0; i < allButtons.length; i++) {
+      const text = await allButtons[i].textContent()
+      const isVisible = await allButtons[i].isVisible()
+      console.log(`Button ${i}: "${text}" (visible: ${isVisible})`)
+    }
+    
+    // テキストで検索
+    const jraButton = page.locator('text="JRAスクレイピング実行"')
+    const jraButtonCount = await jraButton.count()
+    console.log('JRA button count:', jraButtonCount)
+    
+    // ページのHTMLを出力（デバッグ用）
+    const html = await page.content()
+    console.log('HTML contains JRA:', html.includes('JRAスクレイピング実行'))
+    console.log('HTML contains スクレイピング:', html.includes('スクレイピング'))
+    
+    // すべてのテキストを確認
+    const allText = await page.textContent('body')
+    console.log('All text contains JRA:', allText?.includes('JRAスクレイピング実行'))
+    
+    // JRAスクレイピングボタンが表示されるまで待機
+    await page.waitForSelector('button:has-text("JRAスクレイピング実行")', { timeout: 15000 })
     
     // JRAスクレイピングボタンをクリック
     await page.click('button:has-text("JRAスクレイピング実行")')
@@ -100,26 +140,33 @@ test.describe('Cloud Function Firestore Integration', () => {
     // スクレイピング完了のトーストメッセージを確認
     await expect(page.locator('.p-toast-message')).toBeVisible({ timeout: 30000 })
     
-    // レースデータが表示されることを確認
-    await expect(page.locator('.races-grid')).toBeVisible()
+    // レースデータが表示されることを確認（正しいセレクターを使用）
+    await expect(page.locator('.grid.grid-cols-1')).toBeVisible()
   })
 
   test('Firestoreからレースデータを取得して表示できる', async ({ page }) => {
     // タイムアウトを延長
     test.setTimeout(30000)
     
-    // ダッシュボードページにアクセス
-    await page.goto('http://127.0.0.1:5100/races')
+    // ホームページにアクセスしてログイン
+    const homePage = await HomePage.visit(page)
+    await homePage.loginWithGoogle()
     
-    // レースデータが読み込まれるまで待機
-    await page.waitForSelector('.grid', { timeout: 10000 })
+    // ダッシュボードページに直接アクセス（レースデータが表示されるページ）
+    await page.goto('http://127.0.0.1:5100/dashboard')
     
-    // レースカードが表示されることを確認
-    const raceCards = page.locator('.grid > div')
+    // 少し待機してからレースデータを探す
+    await page.waitForTimeout(2000)
+    
+    // レースデータが読み込まれるまで待機（正しいセレクターを使用）
+    await page.waitForSelector('.grid.grid-cols-1', { timeout: 15000 })
+    
+    // レースカードが表示されることを確認（正しいセレクターを使用）
+    const raceCards = page.locator('.grid.grid-cols-1 > div')
     await expect(raceCards).toHaveCount(1)
     
     // レース詳細ページに遷移できることを確認
     await raceCards.first().click()
-    await expect(page).toHaveURL(/\/race\/[a-zA-Z0-9]+/)
+    await expect(page).toHaveURL(/\/races\/year\/\d{4}\/month\/\d{1,2}\/place\/[a-zA-Z0-9]+\/race\/[a-zA-Z0-9]+/)
   })
 })

@@ -18,6 +18,12 @@ service cloud.firestore {
         request.auth.token.role == 'admin';
     }
     
+    // Functions実行ログ：管理者のみ読み取り可能
+    match /function_logs/{logId} {
+      allow read: if request.auth != null && request.auth.token.role == 'admin';
+      allow write: if false; // Cloud Functionsからのみ書き込み
+    }
+    
     // その他のドキュメントは認証済みユーザーのみ読み取り可能
     match /{document=**} {
       allow read: if request.auth != null;
