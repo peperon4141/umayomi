@@ -28,8 +28,34 @@
       </div>
     </div>
 
+    <!-- ローディング -->
+    <div v-if="loading" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div class="text-center">
+        <i class="pi pi-spin pi-spinner text-4xl text-surface-500 mb-4"></i>
+        <p class="text-surface-600">レースデータを読み込み中...</p>
+      </div>
+    </div>
+
+    <!-- エラー -->
+    <div v-else-if="error" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div class="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+        <i class="pi pi-exclamation-triangle text-red-500 text-4xl mb-4"></i>
+        <h3 class="text-red-800 font-medium mb-2">エラーが発生しました</h3>
+        <p class="text-red-600">{{ error }}</p>
+      </div>
+    </div>
+
+    <!-- データなし -->
+    <div v-else-if="raceMonths.length === 0" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div class="text-center">
+        <i class="pi pi-calendar text-6xl text-surface-400 mb-4"></i>
+        <h3 class="text-xl font-semibold text-surface-900 mb-2">レースデータがありません</h3>
+        <p class="text-surface-600">10月分のレースデータが見つかりませんでした。</p>
+      </div>
+    </div>
+
     <!-- 月一覧 -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div v-else class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <!-- カード表示 -->
       <div v-if="viewMode === 'card'" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <Card
@@ -121,11 +147,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useNavigation } from '@/composables/useNavigation'
+import { useRace } from '@/composables/useRace'
 import AppLayout from '@/layouts/AppLayout.vue'
-import { mockRaceMonths } from '@/utils/mockData'
-import type { RaceMonth } from '@/utils/mockData'
+import type { Race } from '../../../shared/race'
 import { RouteName } from '@/router/routeCalculator'
 import Card from 'primevue/card'
 import Button from 'primevue/button'
@@ -134,15 +160,59 @@ import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 
 const { navigateTo, navigateTo404 } = useNavigation()
+const { races, loading, error, fetchOctoberRaces } = useRace()
 
-const raceMonths = ref<RaceMonth[]>([])
 const viewMode = ref<'card' | 'list'>('card')
 
-const getTotalRaces = (month: RaceMonth) => {
-  return month.days.reduce((total, day) => total + day.races.length, 0)
+// レースデータを月ごとにグループ化
+const raceMonths = computed(() => {
+  const grouped: { [key: string]: { id: string, name: string, year: number, month: number, days: any[] } } = {}
+  
+  races.value.forEach((race: Race) => {
+    const raceDate = race.date instanceof Date ? race.date : (race.date as any).toDate()
+    const year = raceDate.getFullYear()
+    const month = raceDate.getMonth() + 1
+    const day = raceDate.getDate()
+    
+    const monthId = `${year}-${month}`
+    const dayId = `${year}-${month}-${day}`
+    
+    if (!grouped[monthId]) {
+      grouped[monthId] = {
+        id: monthId,
+        name: `${year}年${month}月`,
+        year,
+        month,
+        days: []
+      }
+    }
+    
+    // 日付ごとにグループ化
+    let dayData = grouped[monthId].days.find(d => d.id === dayId)
+    if (!dayData) {
+      dayData = {
+        id: dayId,
+        date: `${year}年${month}月${day}日`,
+        venue: race.racecourse,
+        races: []
+      }
+      grouped[monthId].days.push(dayData)
+    }
+    
+    dayData.races.push(race)
+  })
+  
+  return Object.values(grouped).sort((a, b) => {
+    if (a.year !== b.year) return a.year - b.year
+    return a.month - b.month
+  })
+})
+
+const getTotalRaces = (month: any) => {
+  return month.days.reduce((total: number, day: any) => total + day.races.length, 0)
 }
 
-const selectMonth = (month: RaceMonth) => {
+const selectMonth = (month: any) => {
   // 月IDから年と月を抽出（例: "2024-10" -> year: 2024, month: 10）
   const [year, monthNum] = month.id.split('-')
   const yearNum = parseInt(year)
@@ -156,8 +226,7 @@ const selectMonth = (month: RaceMonth) => {
   navigateTo(RouteName.RACE_LIST_IN_MONTH, { year: yearNum, month: monthNumber })
 }
 
-
-onMounted(() => {
-  raceMonths.value = mockRaceMonths
+onMounted(async () => {
+  await fetchOctoberRaces()
 })
 </script>

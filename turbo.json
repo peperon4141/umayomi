@@ -4,8 +4,7 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**", ".next/**", "!.next/cache/**", "lib/**"],
-      "passThroughEnv": ["SKIP_FUNCTIONS_BUILD"]
+      "outputs": ["dist/**", ".next/**", "!.next/cache/**", "lib/**"]
     },
     "lint": {},
     "lint:fix": {},

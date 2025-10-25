@@ -30,7 +30,7 @@
                 <div v-for="race in day.races.slice(0, 3)" :key="race.id" class="text-xs space-y-1">
                   <div class="flex justify-between items-center">
                     <span class="font-medium text-sm">{{ race.raceNumber }}R</span>
-                    <span class="text-surface-600 text-xs">{{ race.startTime }}</span>
+                    <span class="text-surface-600 text-xs">{{ race.raceName }}</span>
                   </div>
                   <div class="text-surface-700 text-xs">{{ race.raceName }}</div>
                   <div class="flex gap-1 flex-wrap">
@@ -59,20 +59,48 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useNavigation } from '@/composables/useNavigation'
+import { useRace } from '@/composables/useRace'
 import AppLayout from '@/layouts/AppLayout.vue'
-import { mockRaceMonths } from '@/utils/mockData'
-import type { RaceDay } from '@/utils/mockData'
+import type { Race } from '../../../shared/race'
 import { RouteName } from '@/router/routeCalculator'
 
 const { navigateTo, getParams } = useNavigation()
+const { races, fetchOctoberRaces } = useRace()
 
-const raceDays = ref<RaceDay[]>([])
 const monthName = ref('')
 
+// レースデータを日付ごとにグループ化
+const raceDays = computed(() => {
+  const grouped: { [key: string]: { id: string, date: string, venue: string, races: Race[] } } = {}
+  
+  races.value.forEach((race: Race) => {
+    const raceDate = race.date instanceof Date ? race.date : (race.date as any).toDate()
+    const year = raceDate.getFullYear()
+    const month = raceDate.getMonth() + 1
+    const day = raceDate.getDate()
+    
+    const dayId = `${year}-${month}-${day}`
+    const dateStr = `${year}年${month}月${day}日`
+    
+    if (!grouped[dayId]) {
+      grouped[dayId] = {
+        id: dayId,
+        date: dateStr,
+        venue: race.racecourse,
+        races: []
+      }
+    }
+    
+    grouped[dayId].races.push(race)
+  })
+  
+  return Object.values(grouped).sort((a, b) => a.id.localeCompare(b.id))
+})
 
-const selectDate = (day: RaceDay) => {
+
+const selectDate = (day: any) => {
   // ルートパラメータから年と月を取得
   const params = getParams()
   const yearParam = params.year
@@ -111,7 +139,7 @@ const getGradeSeverity = (grade: string) => {
 
 
 
-onMounted(() => {
+onMounted(async () => {
   const params = getParams()
   const yearParam = params.year
   const monthParam = params.month
@@ -122,14 +150,17 @@ onMounted(() => {
     return
   }
   
-  const monthId = `${yearParam}-${monthParam}`
-  const monthData = mockRaceMonths.find(m => m.id === monthId)
+  const year = parseInt(yearParam)
+  const month = parseInt(monthParam)
   
-  if (monthData) {
-    monthName.value = monthData.name
-    raceDays.value = monthData.days
-  } else {
-    navigateTo(RouteName.RACE_LIST_IN_YEAR, { year: new Date().getFullYear() })
+  if (isNaN(year) || isNaN(month)) {
+    navigateTo(RouteName.HOME)
+    return
   }
+  
+  monthName.value = `${year}年${month}月`
+  
+  // Firestoreからレースデータを取得
+  await fetchOctoberRaces()
 })
 </script>

@@ -281,12 +281,14 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuth } from '@/composables/useAuth'
+import { useRace } from '@/composables/useRace'
 import { seedRaceData, clearRaceData } from '@/utils/sampleData'
 import { useToast } from 'primevue/usetoast'
 import { getCurrentYear, getCurrentMonth } from '@/router/routeCalculator'
 
 const router = useRouter()
 const { user, signOut } = useAuth()
+const { races, fetchOctoberRaces } = useRace()
 const toast = useToast()
 
 // 統計データ
@@ -372,10 +374,13 @@ const handleClearData = async () => {
   })
 }
 
-onMounted(() => {
-  // 統計データの初期化
-  totalRaces.value = 150
-  monthlyRaces.value = 36
+onMounted(async () => {
+  // Firestoreからレースデータを取得
+  await fetchOctoberRaces()
+  
+  // 統計データの計算
+  totalRaces.value = races.value.length
+  monthlyRaces.value = races.value.length
   activeUsers.value = 1
 })
 </script>

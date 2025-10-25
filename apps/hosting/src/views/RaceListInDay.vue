@@ -28,8 +28,34 @@
       </div>
     </div>
 
+    <!-- ローディング -->
+    <div v-if="loading" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div class="text-center">
+        <i class="pi pi-spin pi-spinner text-4xl text-surface-500 mb-4"></i>
+        <p class="text-surface-600">レースデータを読み込み中...</p>
+      </div>
+    </div>
+
+    <!-- エラー -->
+    <div v-else-if="error" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div class="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+        <i class="pi pi-exclamation-triangle text-red-500 text-4xl mb-4"></i>
+        <h3 class="text-red-800 font-medium mb-2">エラーが発生しました</h3>
+        <p class="text-red-600">{{ error }}</p>
+      </div>
+    </div>
+
+    <!-- データなし -->
+    <div v-else-if="dayRaces.length === 0" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div class="text-center">
+        <i class="pi pi-calendar text-6xl text-surface-400 mb-4"></i>
+        <h3 class="text-xl font-semibold text-surface-900 mb-2">レースデータがありません</h3>
+        <p class="text-surface-600">指定された日のレースが見つかりませんでした。</p>
+      </div>
+    </div>
+
     <!-- レース一覧 -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div v-else class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <!-- カード表示 -->
       <div v-if="viewMode === 'card'" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <Card
@@ -41,7 +67,7 @@
           <template #header>
             <div class="bg-surface-900 text-surface-0 p-4 text-center">
               <h3 class="text-lg font-bold">{{ race.raceName }}</h3>
-              <p class="text-sm opacity-90">{{ race.venue }}</p>
+              <p class="text-sm opacity-90">{{ race.racecourse }}</p>
             </div>
           </template>
           <template #content>
@@ -55,8 +81,8 @@
                 <Chip :label="race.grade" :severity="getGradeSeverity(race.grade)" />
               </div>
               <div class="flex justify-between items-center">
-                <span class="text-sm text-surface-600">賞金</span>
-                <span class="text-sm font-medium">{{ formatPrize(race.prize) }}</span>
+                <span class="text-sm text-surface-600">発走時刻</span>
+                <span class="text-sm font-medium">{{ race.raceName }}</span>
               </div>
             </div>
           </template>
@@ -80,7 +106,7 @@
           <Column field="raceName" header="レース名" :sortable="true">
             <template #body="slotProps">
               <div class="font-semibold">{{ slotProps.data.raceName }}</div>
-              <div class="text-sm text-surface-600">{{ slotProps.data.venue }}</div>
+              <div class="text-sm text-surface-600">{{ slotProps.data.racecourse }}</div>
             </template>
           </Column>
           <Column field="distance" header="距離" :sortable="true">
@@ -93,9 +119,9 @@
               <Chip :label="slotProps.data.grade" :severity="getGradeSeverity(slotProps.data.grade)" size="small" />
             </template>
           </Column>
-          <Column field="prize" header="賞金" :sortable="true">
+          <Column field="raceName" header="レース名" :sortable="true">
             <template #body="slotProps">
-              <span class="font-medium">{{ formatPrize(slotProps.data.prize) }}</span>
+              <span class="font-medium">{{ slotProps.data.raceName }}</span>
             </template>
           </Column>
           <Column header="アクション" :exportable="false">
@@ -117,9 +143,9 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useNavigation } from '@/composables/useNavigation'
+import { useRace } from '@/composables/useRace'
 import AppLayout from '@/layouts/AppLayout.vue'
-import { mockRaceMonths } from '@/utils/mockData'
-import type { Race } from '@/utils/mockData'
+import type { Race } from '../../../shared/race'
 import { convertVenueToId } from '@/router/routeCalculator'
 import { getVenueNameFromId } from '@/entity'
 import { RouteName } from '@/router/routeCalculator'
@@ -130,6 +156,7 @@ import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 
 const { navigateTo, navigateTo404, getParams, getQuery } = useNavigation()
+const { races, loading, error, fetchOctoberRaces } = useRace()
 
 const dayRaces = ref<Race[]>([])
 const dayName = ref('')
@@ -146,44 +173,54 @@ const getGradeSeverity = (grade: string) => {
 }
 
 // その日のレースデータを取得
-const loadDayRaces = (year: number, month: number, day: number) => {
-  const monthId = `${year}-${month}`
-  const monthData = mockRaceMonths.find(m => m.id === monthId)
-  
-  if (monthData) {
-    const dayData = monthData.days.find(d => d.id === `${year}-${month}-${day}`)
-    if (dayData) {
+const loadDayRaces = async (year: number, month: number, day: number) => {
+  try {
+    await fetchOctoberRaces()
+    
+    // 指定された日付のレースをフィルタリング
+    const filteredRaces = races.value.filter(race => {
+      const raceDate = race.date instanceof Date ? race.date : (race.date as any).toDate()
+      return raceDate.getFullYear() === year && 
+             raceDate.getMonth() === month - 1 && 
+             raceDate.getDate() === day
+    })
+    
+    if (filteredRaces.length > 0) {
       dayName.value = `${year}年${month}月${day}日`
-      dayRaces.value = dayData.races
+      dayRaces.value = filteredRaces
     } else {
-        navigateTo404()
+      navigateTo404()
     }
-  } else {
-        navigateTo404()
+  } catch (err) {
+    console.error('レースデータの取得に失敗しました:', err)
+    navigateTo404()
   }
 }
 
 // その日の特定競馬場のレースデータを取得
-const loadDayRacesByPlace = (year: number, month: number, day: number, placeId: string) => {
-  const monthId = `${year}-${month}`
-  const monthData = mockRaceMonths.find(m => m.id === monthId)
-  
-  if (monthData) {
-    const dayData = monthData.days.find(d => d.id === `${year}-${month}-${day}`)
-    if (dayData) {
-      // 特定の競馬場のレースのみをフィルタリング
-      const filteredRaces = dayData.races.filter(race => {
-        const venueId = convertVenueToId(race.venue || '東京競馬場')
-        return venueId === placeId
-      })
-      
+const loadDayRacesByPlace = async (year: number, month: number, day: number, placeId: string) => {
+  try {
+    await fetchOctoberRaces()
+    
+    // 指定された日付と競馬場のレースをフィルタリング
+    const filteredRaces = races.value.filter(race => {
+      const raceDate = race.date instanceof Date ? race.date : (race.date as any).toDate()
+      const venueId = convertVenueToId(race.racecourse || '東京')
+      return raceDate.getFullYear() === year && 
+             raceDate.getMonth() === month - 1 && 
+             raceDate.getDate() === day &&
+             venueId === placeId
+    })
+    
+    if (filteredRaces.length > 0) {
       dayName.value = `${year}年${month}月${day}日 - ${getVenueNameFromId(placeId as any)}`
       dayRaces.value = filteredRaces
     } else {
-        navigateTo404()
+      navigateTo404()
     }
-  } else {
-        navigateTo404()
+  } catch (err) {
+    console.error('レースデータの取得に失敗しました:', err)
+    navigateTo404()
   }
 }
 
@@ -208,19 +245,12 @@ const selectRace = (race: Race) => {
     return
   }
   
-  const venueId = convertVenueToId(race.venue || '東京競馬場')
+  const venueId = convertVenueToId(race.racecourse || '東京')
   navigateTo(RouteName.RACE_DETAIL, { year, month, placeId: venueId, raceId: race.id })
 }
 
-// 賞金フォーマット
-const formatPrize = (prize: number) => {
-  if (prize >= 10000) {
-    return `${(prize / 10000).toFixed(0)}万円`
-  }
-  return `${prize.toLocaleString()}円`
-}
 
-onMounted(() => {
+onMounted(async () => {
   const params = getParams()
   const yearParam = params.year
   const monthParam = params.month
@@ -228,36 +258,28 @@ onMounted(() => {
   
   // 必須パラメータがなければ404ページに遷移
   if (!yearParam || !monthParam || !dayParam) {
-          navigateTo404()
+    navigateTo404()
     return
   }
   
   // クエリパラメータからplaceIdを取得
   const placeId = getQuery('placeId')
   
-  // placeIdが指定されている場合は、その日のその競馬場のレース一覧を表示
-  if (placeId) {
-    const year = parseInt(yearParam)
-    const month = parseInt(monthParam)
-    const day = parseInt(dayParam)
-    
-    if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
-      // その日のその競馬場のレースのみをフィルタリングして表示
-      loadDayRacesByPlace(year, month, day, placeId as string)
-      return
-    }
-  }
-  
-  // placeIdがない場合は、その日の全競馬場のレース一覧を表示
   const year = parseInt(yearParam)
   const month = parseInt(monthParam)
   const day = parseInt(dayParam)
   
-  if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
-    // その日のレースデータを取得して表示
-    loadDayRaces(year, month, day)
+  if (isNaN(year) || isNaN(month) || isNaN(day)) {
+    navigateTo404()
+    return
+  }
+  
+  // placeIdが指定されている場合は、その日のその競馬場のレース一覧を表示
+  if (placeId) {
+    await loadDayRacesByPlace(year, month, day, placeId as string)
   } else {
-          navigateTo404()
+    // placeIdがない場合は、その日の全競馬場のレース一覧を表示
+    await loadDayRaces(year, month, day)
   }
 })
 </script>
