@@ -2,7 +2,7 @@
   "name": "umayomi-functions",
   "version": "1.0.0",
   "description": "Umayomi Cloud Functions",
-  "main": "lib/index.js",
+  "main": "lib/functions/src/index.js",
   "scripts": {
     "build": "tsc",
     "build:watch": "tsc --watch",

@@ -4,6 +4,7 @@ test.describe('Cloud Function Firestore Integration', () => {
   test('Cloud Functionを呼び出してFirestoreにデータが保存される', async ({ request, page }) => {
     // タイムアウトを延長
     test.setTimeout(30000)
+    
     // JRAサイトのHTMLをモック
     await page.route('https://www.jra.go.jp/keiba/calendar/oct.html', async route => {
       await route.fulfill({
@@ -81,5 +82,44 @@ test.describe('Cloud Function Firestore Integration', () => {
     // Firestoreにデータが保存されていることを確認
     // 注意: 実際のFirestore確認は別途実装が必要
     // ここではCloud Functionの呼び出しが成功することを確認
+  })
+
+  test('フロントエンドからCloud Functionを呼び出してデータを取得できる', async ({ page }) => {
+    // タイムアウトを延長
+    test.setTimeout(30000)
+    
+    // ダッシュボードページにアクセス
+    await page.goto('http://127.0.0.1:5100/races')
+    
+    // ログイン処理（必要に応じて）
+    // ここでは認証が必要な場合の処理を追加
+    
+    // JRAスクレイピングボタンをクリック
+    await page.click('button:has-text("JRAスクレイピング実行")')
+    
+    // スクレイピング完了のトーストメッセージを確認
+    await expect(page.locator('.p-toast-message')).toBeVisible({ timeout: 30000 })
+    
+    // レースデータが表示されることを確認
+    await expect(page.locator('.races-grid')).toBeVisible()
+  })
+
+  test('Firestoreからレースデータを取得して表示できる', async ({ page }) => {
+    // タイムアウトを延長
+    test.setTimeout(30000)
+    
+    // ダッシュボードページにアクセス
+    await page.goto('http://127.0.0.1:5100/races')
+    
+    // レースデータが読み込まれるまで待機
+    await page.waitForSelector('.grid', { timeout: 10000 })
+    
+    // レースカードが表示されることを確認
+    const raceCards = page.locator('.grid > div')
+    await expect(raceCards).toHaveCount(1)
+    
+    // レース詳細ページに遷移できることを確認
+    await raceCards.first().click()
+    await expect(page).toHaveURL(/\/race\/[a-zA-Z0-9]+/)
   })
 })
