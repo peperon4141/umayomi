@@ -3,7 +3,52 @@
     <!-- ページヘッダー -->
     <div class="mb-6">
       <h1 class="text-3xl font-bold text-gray-900">競馬レース結果ダッシュボード</h1>
-      <p class="text-gray-600 mt-1">10月分のレース結果を確認できます</p>
+      <p class="text-gray-600 mt-1">レース結果を確認できます</p>
+    </div>
+
+    <!-- 日付選択 -->
+    <div class="mb-6 bg-white rounded-lg shadow p-6">
+      <h2 class="text-lg font-semibold text-gray-900 mb-4">日付範囲を選択</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">開始日</label>
+          <Calendar 
+            v-model="dateRange.startDate" 
+            :maxDate="dateRange.endDate"
+            placeholder="開始日を選択"
+            class="w-full"
+          />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">終了日</label>
+          <Calendar 
+            v-model="dateRange.endDate" 
+            :minDate="dateRange.startDate"
+            placeholder="終了日を選択"
+            class="w-full"
+          />
+        </div>
+      </div>
+      <div class="mt-4 flex gap-2">
+        <Button 
+          label="データを取得" 
+          icon="pi pi-search" 
+          @click="loadRaces"
+          :loading="loading"
+        />
+        <Button 
+          label="今月" 
+          icon="pi pi-calendar" 
+          severity="secondary"
+          @click="setThisMonth"
+        />
+        <Button 
+          label="先月" 
+          icon="pi pi-calendar-minus" 
+          severity="secondary"
+          @click="setLastMonth"
+        />
+      </div>
     </div>
 
     <!-- 統計カード -->
@@ -328,13 +373,40 @@ const filters = ref<RaceFilters>({
 const scrapingLoading = ref(false)
 const raceDays = ref<any[]>([])
 
+// 日付範囲の管理
+const dateRange = ref({
+  startDate: new Date('2024-10-01'),
+  endDate: new Date('2024-10-31')
+})
+
 const loadRaces = async () => {
-  await fetchOctoberRaces(filters.value)
+  await fetchOctoberRaces()
   // raceDaysを更新 - racesByDateはオブジェクトなので配列に変換
   if (racesByDate.value) {
     raceDays.value = Object.values(racesByDate.value).flat()
   } else {
     raceDays.value = []
+  }
+}
+
+// 日付範囲の設定
+const setThisMonth = () => {
+  const now = new Date()
+  const firstDay = new Date(now.getFullYear(), now.getMonth(), 1)
+  const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0)
+  dateRange.value = {
+    startDate: firstDay,
+    endDate: lastDay
+  }
+}
+
+const setLastMonth = () => {
+  const now = new Date()
+  const firstDay = new Date(now.getFullYear(), now.getMonth() - 1, 1)
+  const lastDay = new Date(now.getFullYear(), now.getMonth(), 0)
+  dateRange.value = {
+    startDate: firstDay,
+    endDate: lastDay
   }
 }
 

@@ -17,17 +17,22 @@ export function useRace() {
   const loading = ref(false)
   const error = ref<string | null>(null)
 
-  // 10月分のレースを取得
-  const fetchOctoberRaces = async (filters?: RaceFilters) => {
+  // レースを取得（日付範囲を動的に設定）
+  const fetchRaces = async (startDate?: Date, endDate?: Date, filters?: RaceFilters) => {
     loading.value = true
     error.value = null
 
     try {
-         const constraints: QueryConstraint[] = [
-           where('date', '>=', Timestamp.fromDate(new Date('2024-10-01'))),
-           where('date', '<=', Timestamp.fromDate(new Date('2024-10-31'))),
-           orderBy('date', 'desc')
-         ]
+      // デフォルトの日付範囲（過去1年）
+      const defaultStartDate = startDate || new Date()
+      defaultStartDate.setFullYear(defaultStartDate.getFullYear() - 1)
+      const defaultEndDate = endDate || new Date()
+
+      const constraints: QueryConstraint[] = [
+        where('date', '>=', Timestamp.fromDate(defaultStartDate)),
+        where('date', '<=', Timestamp.fromDate(defaultEndDate)),
+        orderBy('date', 'desc')
+      ]
 
       // フィルター条件を追加
       if (filters?.racecourse) {
@@ -99,6 +104,7 @@ export function useRace() {
     grades,
     surfaces,
     racesByDate,
-    fetchOctoberRaces
+    fetchRaces,
+    fetchOctoberRaces: () => fetchRaces() // 後方互換性のため
   }
 }

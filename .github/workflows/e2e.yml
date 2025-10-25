@@ -47,15 +47,14 @@ jobs:
       
     - name: Start Firebase emulators
       run: |
-        cd apps/firebase
-        firebase emulators:start --only auth,firestore,hosting --project umayomi-dev --import=./firebase-data --export-on-exit=./firebase-data &
-        sleep 15
+        make dev &
+        sleep 20
       env:
         CI: true
         
     - name: Wait for Firebase emulators
       run: |
-        timeout 30 bash -c 'until curl -f http://127.0.0.1:5000; do sleep 2; done'
+        timeout 30 bash -c 'until curl -f http://127.0.0.1:5100; do sleep 2; done'
         echo "Firebase emulators are running successfully"
         
     - name: Run E2E tests

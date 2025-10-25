@@ -9,7 +9,7 @@ export default defineConfig({
   workers: process.env.CI ? 2 : 4, // ワーカー数を増加
   reporter: process.env.CI ? 'github' : 'list',
   use: {
-    baseURL: 'http://127.0.0.1:3100', // Vite dev server
+    baseURL: 'http://127.0.0.1:3100', // Firebase Emulator hosting
     trace: 'on-first-retry',
     // ヘッドレスモード用の設定
     headless: true, // ヘッドレスモードで実行
@@ -24,10 +24,6 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
   ],
-  // CI環境ではwebServerを無効化（Firebase Emulatorが既に起動しているため）
-  webServer: process.env.CI ? undefined : {
-    command: 'cd ../hosting && pnpm dev:serve',
-    url: 'http://127.0.0.1:3100',
-    reuseExistingServer: true,
-  },
+  // webServerは無効化（Firebase Emulatorが既に起動しているため）
+  webServer: undefined,
 })
