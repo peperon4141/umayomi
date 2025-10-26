@@ -1,0 +1,247 @@
+{
+  "success": true,
+  "racesCount": 24,
+  "savedCount": 24,
+  "races": [
+    {
+      "raceNumber": 1,
+      "raceName": "2歳未勝利",
+      "venue": "東京",
+      "date": "2025-10-13T00:00:00.000Z",
+      "distance": 1600,
+      "surface": "ダ",
+      "startTime": "2025-10-13T00:50:00.000Z",
+      "scrapedAt": "2025-01-26T00:00:00.000Z"
+    },
+    {
+      "raceNumber": 2,
+      "raceName": "2歳未勝利",
+      "venue": "東京",
+      "date": "2025-10-13T00:00:00.000Z",
+      "distance": 1400,
+      "surface": "ダ",
+      "startTime": "2025-10-13T01:20:00.000Z",
+      "scrapedAt": "2025-01-26T00:00:00.000Z"
+    },
+    {
+      "raceNumber": 3,
+      "raceName": "2歳未勝利",
+      "venue": "東京",
+      "date": "2025-10-13T00:00:00.000Z",
+      "distance": 1400,
+      "surface": "芝",
+      "startTime": "2025-10-13T01:50:00.000Z",
+      "scrapedAt": "2025-01-26T00:00:00.000Z"
+    },
+    {
+      "raceNumber": 4,
+      "raceName": "障害3歳以上未勝利",
+      "venue": "東京",
+      "date": "2025-10-13T00:00:00.000Z",
+      "distance": 3000,
+      "surface": "ダ",
+      "startTime": "2025-10-13T02:20:00.000Z",
+      "scrapedAt": "2025-01-26T00:00:00.000Z"
+    },
+    {
+      "raceNumber": 5,
+      "raceName": "2歳新馬",
+      "venue": "東京",
+      "date": "2025-10-13T00:00:00.000Z",
+      "distance": 1800,
+      "surface": "芝",
+      "startTime": "2025-10-13T03:10:00.000Z",
+      "scrapedAt": "2025-01-26T00:00:00.000Z"
+    },
+    {
+      "raceNumber": 6,
+      "raceName": "2歳新馬",
+      "venue": "東京",
+      "date": "2025-10-13T00:00:00.000Z",
+      "distance": 1600,
+      "surface": "芝",
+      "startTime": "2025-10-13T03:40:00.000Z",
+      "scrapedAt": "2025-01-26T00:00:00.000Z"
+    },
+    {
+      "raceNumber": 7,
+      "raceName": "3歳以上1勝クラス",
+      "venue": "東京",
+      "date": "2025-10-13T00:00:00.000Z",
+      "distance": 2100,
+      "surface": "ダ",
+      "startTime": "2025-10-13T04:10:00.000Z",
+      "scrapedAt": "2025-01-26T00:00:00.000Z"
+    },
+    {
+      "raceNumber": 8,
+      "raceName": "3歳以上1勝クラス",
+      "venue": "東京",
+      "date": "2025-10-13T00:00:00.000Z",
+      "distance": 1600,
+      "surface": "芝",
+      "startTime": "2025-10-13T04:40:00.000Z",
+      "scrapedAt": "2025-01-26T00:00:00.000Z"
+    },
+    {
+      "raceNumber": 9,
+      "raceName": "プラタナス賞",
+      "venue": "東京",
+      "date": "2025-10-13T00:00:00.000Z",
+      "distance": 1600,
+      "surface": "ダ",
+      "startTime": "2025-10-13T05:15:00.000Z",
+      "scrapedAt": "2025-01-26T00:00:00.000Z"
+    },
+    {
+      "raceNumber": 10,
+      "raceName": "昇仙峡ステークス",
+      "venue": "東京",
+      "date": "2025-10-13T00:00:00.000Z",
+      "distance": 2400,
+      "surface": "芝",
+      "startTime": "2025-10-13T05:50:00.000Z",
+      "scrapedAt": "2025-01-26T00:00:00.000Z"
+    },
+    {
+      "raceNumber": 11,
+      "raceName": "オクトーバーステークス（L）",
+      "venue": "東京",
+      "date": "2025-10-13T00:00:00.000Z",
+      "distance": 2000,
+      "surface": "芝",
+      "startTime": "2025-10-13T06:30:00.000Z",
+      "scrapedAt": "2025-01-26T00:00:00.000Z"
+    },
+    {
+      "raceNumber": 12,
+      "raceName": "3歳以上1勝クラス",
+      "venue": "東京",
+      "date": "2025-10-13T00:00:00.000Z",
+      "distance": 1300,
+      "surface": "ダ",
+      "startTime": "2025-10-13T07:10:00.000Z",
+      "scrapedAt": "2025-01-26T00:00:00.000Z"
+    },
+    {
+      "raceNumber": 1,
+      "raceName": "2歳未勝利",
+      "venue": "京都",
+      "date": "2025-10-13T00:00:00.000Z",
+      "distance": 1400,
+      "surface": "ダ",
+      "startTime": "2025-10-13T01:05:00.000Z",
+      "scrapedAt": "2025-01-26T00:00:00.000Z"
+    },
+    {
+      "raceNumber": 2,
+      "raceName": "2歳未勝利",
+      "venue": "京都",
+      "date": "2025-10-13T00:00:00.000Z",
+      "distance": 1600,
+      "surface": "芝",
+      "startTime": "2025-10-13T01:35:00.000Z",
+      "scrapedAt": "2025-01-26T00:00:00.000Z"
+    },
+    {
+      "raceNumber": 3,
+      "raceName": "2歳未勝利",
+      "venue": "京都",
+      "date": "2025-10-13T00:00:00.000Z",
+      "distance": 1400,
+      "surface": "芝",
+      "startTime": "2025-10-13T02:05:00.000Z",
+      "scrapedAt": "2025-01-26T00:00:00.000Z"
+    },
+    {
+      "raceNumber": 4,
+      "raceName": "3歳以上1勝クラス",
+      "venue": "京都",
+      "date": "2025-10-13T00:00:00.000Z",
+      "distance": 1800,
+      "surface": "ダ",
+      "startTime": "2025-10-13T02:35:00.000Z",
+      "scrapedAt": "2025-01-26T00:00:00.000Z"
+    },
+    {
+      "raceNumber": 5,
+      "raceName": "2歳新馬",
+      "venue": "京都",
+      "date": "2025-10-13T00:00:00.000Z",
+      "distance": 1800,
+      "surface": "芝",
+      "startTime": "2025-10-13T03:25:00.000Z",
+      "scrapedAt": "2025-01-26T00:00:00.000Z"
+    },
+    {
+      "raceNumber": 6,
+      "raceName": "2歳新馬",
+      "venue": "京都",
+      "date": "2025-10-13T00:00:00.000Z",
+      "distance": 1600,
+      "surface": "芝",
+      "startTime": "2025-10-13T03:55:00.000Z",
+      "scrapedAt": "2025-01-26T00:00:00.000Z"
+    },
+    {
+      "raceNumber": 7,
+      "raceName": "3歳以上1勝クラス",
+      "venue": "京都",
+      "date": "2025-10-13T00:00:00.000Z",
+      "distance": 1400,
+      "surface": "ダ",
+      "startTime": "2025-10-13T04:25:00.000Z",
+      "scrapedAt": "2025-01-26T00:00:00.000Z"
+    },
+    {
+      "raceNumber": 8,
+      "raceName": "3歳以上1勝クラス",
+      "venue": "京都",
+      "date": "2025-10-13T00:00:00.000Z",
+      "distance": 1900,
+      "surface": "ダ",
+      "startTime": "2025-10-13T04:55:00.000Z",
+      "scrapedAt": "2025-01-26T00:00:00.000Z"
+    },
+    {
+      "raceNumber": 9,
+      "raceName": "蹴上特別",
+      "venue": "京都",
+      "date": "2025-10-13T00:00:00.000Z",
+      "distance": 1800,
+      "surface": "ダ",
+      "startTime": "2025-10-13T05:30:00.000Z",
+      "scrapedAt": "2025-01-26T00:00:00.000Z"
+    },
+    {
+      "raceNumber": 10,
+      "raceName": "堀川特別",
+      "venue": "京都",
+      "date": "2025-10-13T00:00:00.000Z",
+      "distance": 1800,
+      "surface": "芝",
+      "startTime": "2025-10-13T06:05:00.000Z",
+      "scrapedAt": "2025-01-26T00:00:00.000Z"
+    },
+    {
+      "raceNumber": 11,
+      "raceName": "第68回 MBS賞スワンステークス（GⅡ）",
+      "venue": "京都",
+      "date": "2025-10-13T00:00:00.000Z",
+      "distance": 1400,
+      "surface": "芝",
+      "startTime": "2025-10-13T06:45:00.000Z",
+      "scrapedAt": "2025-01-26T00:00:00.000Z"
+    },
+    {
+      "raceNumber": 12,
+      "raceName": "3歳以上1勝クラス",
+      "venue": "京都",
+      "date": "2025-10-13T00:00:00.000Z",
+      "distance": 1200,
+      "surface": "ダ",
+      "startTime": "2025-10-13T07:25:00.000Z",
+      "scrapedAt": "2025-01-26T00:00:00.000Z"
+    }
+  ]
+}

@@ -1,0 +1,87 @@
+{
+  "success": true,
+  "racesCount": 10,
+  "savedCount": 10,
+  "races": [
+    {
+      "raceNumber": 1,
+      "raceName": "毎日王冠",
+      "grade": "GⅡ",
+      "venue": "東京",
+      "date": "2025-10-04T00:00:00.000Z",
+      "scrapedAt": "2025-01-26T00:00:00.000Z"
+    },
+    {
+      "raceNumber": 2,
+      "raceName": "京都大賞典",
+      "grade": "GⅡ",
+      "venue": "京都",
+      "date": "2025-10-04T00:00:00.000Z",
+      "scrapedAt": "2025-01-26T00:00:00.000Z"
+    },
+    {
+      "raceNumber": 3,
+      "raceName": "サウジアラビアロイヤルC",
+      "grade": "GⅢ",
+      "venue": "東京",
+      "date": "2025-10-10T00:00:00.000Z",
+      "scrapedAt": "2025-01-26T00:00:00.000Z"
+    },
+    {
+      "raceNumber": 4,
+      "raceName": "アイルランドT",
+      "grade": "GⅡ",
+      "venue": "東京",
+      "date": "2025-10-11T00:00:00.000Z",
+      "scrapedAt": "2025-01-26T00:00:00.000Z"
+    },
+    {
+      "raceNumber": 5,
+      "raceName": "スワンS",
+      "grade": "GⅡ",
+      "venue": "京都",
+      "date": "2025-10-12T00:00:00.000Z",
+      "scrapedAt": "2025-01-26T00:00:00.000Z"
+    },
+    {
+      "raceNumber": 6,
+      "raceName": "富士S",
+      "grade": "GⅡ",
+      "venue": "東京",
+      "date": "2025-10-17T00:00:00.000Z",
+      "scrapedAt": "2025-01-26T00:00:00.000Z"
+    },
+    {
+      "raceNumber": 7,
+      "raceName": "東京ハイジャンプ",
+      "grade": "GⅡ",
+      "venue": "東京",
+      "date": "2025-10-18T00:00:00.000Z",
+      "scrapedAt": "2025-01-26T00:00:00.000Z"
+    },
+    {
+      "raceNumber": 8,
+      "raceName": "秋華賞",
+      "grade": "GⅠ",
+      "venue": "京都",
+      "date": "2025-10-18T00:00:00.000Z",
+      "scrapedAt": "2025-01-26T00:00:00.000Z"
+    },
+    {
+      "raceNumber": 9,
+      "raceName": "アルテミスS",
+      "grade": "GⅢ",
+      "venue": "東京",
+      "date": "2025-10-24T00:00:00.000Z",
+      "scrapedAt": "2025-01-26T00:00:00.000Z"
+    },
+    {
+      "raceNumber": 10,
+      "raceName": "菊花賞",
+      "grade": "GⅠ",
+      "venue": "京都",
+      "date": "2025-10-25T00:00:00.000Z",
+      "scrapedAt": "2025-01-26T00:00:00.000Z"
+    }
+  ]
+}

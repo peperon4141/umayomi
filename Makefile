@@ -1,6 +1,6 @@
 # Umayomi Horse Racing Prediction Service Makefile
 
-.PHONY: dev dev-build format e2e quality-check pre-commit build kill test scrape-jra scrape-jra-manual test-hello
+.PHONY: dev dev-build format e2e quality-check pre-commit build kill test scrape-jra scrape-jra-manual test-hello save-jra-html
 
 install:
 	pnpm install
@@ -43,11 +43,14 @@ quality-check:
 	make format
 	make e2e
 
-# JRAスクレイピング
-scrape-jra:
-	@curl -X POST \
-		-H "Content-Type: application/json" \
-		http://127.0.0.1:5101/umayomi-fbb2b/us-central1/scrapeJRAData \
+# JRAカレンダーデータスクレイピング
+scrape-jra-calendar:
+	@if [ -z "$(YEAR)" ] || [ -z "$(MONTH)" ]; then \
+		echo "Usage: make scrape-jra-calendar YEAR=2025 MONTH=10"; \
+		exit 1; \
+	fi
+	@curl -X GET \
+		"http://127.0.0.1:5101/umayomi-fbb2b/us-central1/scrapeJRACalendar?year=$(YEAR)&month=$(MONTH)" \
 		--max-time 300 \
 		--connect-timeout 10 \
 		--retry 3 \
@@ -55,12 +58,14 @@ scrape-jra:
 		--show-error \
 		--fail-with-body
 
-# 手動JRAスクレイピング
-scrape-jra-manual:
-	@curl -X POST \
-		-H "Content-Type: application/json" \
-		-H "Authorization: Bearer admin-token" \
-		http://127.0.0.1:5101/umayomi-fbb2b/us-central1/manualJraScraping \
+# JRAレース結果データスクレイピング
+scrape-jra-race-result:
+	@if [ -z "$(YEAR)" ] || [ -z "$(MONTH)" ] || [ -z "$(DAY)" ]; then \
+		echo "Usage: make scrape-jra-race-result YEAR=2025 MONTH=10 DAY=13"; \
+		exit 1; \
+	fi
+	@curl -X GET \
+		"http://127.0.0.1:5101/umayomi-fbb2b/us-central1/scrapeJRARaceResult?year=$(YEAR)&month=$(MONTH)&day=$(DAY)" \
 		--max-time 300 \
 		--connect-timeout 10 \
 		--retry 3 \
@@ -71,7 +76,7 @@ scrape-jra-manual:
 # HelloWorld関数テスト
 test-hello:
 	@curl -X GET \
-		http://127.0.0.1:5101/umayomi-fbb2b/us-central1/helloWorld \
+		"http://127.0.0.1:5101/umayomi-fbb2b/us-central1/helloWorld" \
 		--max-time 30 \
 		--connect-timeout 10 \
 		--show-error \

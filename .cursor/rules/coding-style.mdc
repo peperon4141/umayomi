@@ -15,6 +15,21 @@ alwaysApply: true
 - **コメント**: 必要最小限のみ記述
 - **console.log**: デバッグ時のみ使用、本番コードでは削除
 
+### 3. データの正確性
+- **fallbackのデフォルト変数**: 後で不具合につながりやすいため避ける
+- **実際のデータ**: 可能な限り実際のデータを使用
+- **エラーハンドリング**: データが取得できない場合は適切にエラーを返す
+
+### 4. 一時的な実装の管理
+- **TODOコメント**: 一時的な実装には明確にTODOコメントを付ける
+- **期限の明記**: 可能な限り修正期限を明記する
+- **責任者の明記**: 誰が修正するかを明確にする
+
+### 5. ファイル分割と再利用性
+- **再利用可能な処理**: ファイル分割して定義する
+- **単一責任**: 1つのファイルは1つの責任を持つ
+- **インポート/エクスポート**: 適切なモジュール分割を行う
+
 ## 📝 共通コーディングガイドライン
 
 ### 関数の書き方
@@ -157,6 +172,170 @@ function processData(data) {
 }
 ```
 
+### 4. fallbackのデフォルト変数
+```typescript
+// ❌ 避ける - 後で不具合につながりやすい
+function parseRaceData(html: string): RaceData {
+  const raceName = extractRaceName(html) || 'メインレース' // デフォルト値
+  const grade = extractGrade(html) || 'G1' // デフォルト値
+  const venue = extractVenue(html) || '東京' // デフォルト値
+  const distance = extractDistance(html) || 1600 // デフォルト値
+  
+  return {
+    raceName,
+    grade,
+    venue,
+    distance
+  }
+}
+
+// ✅ 推奨 - 実際のデータのみ使用
+function parseRaceData(html: string): RaceData | null {
+  const raceName = extractRaceName(html)
+  const grade = extractGrade(html)
+  const venue = extractVenue(html)
+  const distance = extractDistance(html)
+  
+  // 必要なデータが揃わない場合はnullを返す
+  if (!raceName || !grade || !venue || !distance) {
+    return null
+  }
+  
+  return {
+    raceName,
+    grade,
+    venue,
+    distance
+  }
+}
+```
+
+### 5. 一時的な実装の管理
+```typescript
+// ❌ 避ける - 一時的な実装が不明確
+function parseJRACalendar(html: string): any[] {
+  // 現在はダミーデータを返す
+  return [
+    {
+      raceNumber: 1,
+      raceName: '毎日王冠',
+      grade: 'G1',
+      distance: 1600,
+      surface: '芝',
+      venue: '東京',
+      date: new Date('2025-10-13'),
+      scrapedAt: new Date(),
+      weather: '晴',
+      trackCondition: '良',
+      startTime: '15:40',
+      description: '3歳以上牝馬限定',
+      prize: 100000000
+    }
+  ]
+}
+
+// ✅ 推奨 - 明確なTODOコメント
+function parseJRACalendar(html: string): any[] {
+  // TODO: HTMLパース処理を実装 - 2024年12月末までに完了予定 (担当: 田中)
+  // 現在はダミーデータを返す
+  return [
+    {
+      raceNumber: 1,
+      raceName: '毎日王冠',
+      grade: 'G1',
+      distance: 1600,
+      surface: '芝',
+      venue: '東京',
+      date: new Date('2025-10-13'),
+      scrapedAt: new Date(),
+      weather: '晴',
+      trackCondition: '良',
+      startTime: '15:40',
+      description: '3歳以上牝馬限定',
+      prize: 100000000
+    }
+  ]
+}
+```
+
+### 6. ファイル分割と再利用性
+```typescript
+// ❌ 避ける - 全ての処理が1つのファイルに集約
+// index.ts (500行以上)
+export const scrapeJRA2025October = onRequest(async (request, response) => {
+  // HTML取得処理
+  const browser = await chromium.launch({ headless: true })
+  const page = await browser.newPage()
+  await page.goto(url)
+  const html = await page.content()
+  await browser.close()
+  
+  // HTMLパース処理
+  const races = []
+  const tableRows = html.match(/<tr[^>]*class="[^"]*race[^"]*"[^>]*>.*?<\/tr>/gi) || []
+  tableRows.forEach((element, index) => {
+    const raceName = extractRaceName(element)
+    const grade = extractGrade(element)
+    // ... 大量のパース処理
+  })
+  
+  // Firestore保存処理
+  const batch = db.batch()
+  races.forEach(race => {
+    const raceId = `${race.date.toISOString().split('T')[0]}_${race.venue}_${race.raceNumber}`
+    const docRef = db.collection('races').doc(raceId)
+    batch.set(docRef, race)
+  })
+  await batch.commit()
+})
+
+// ✅ 推奨 - 適切なファイル分割
+// index.ts
+import { fetchJRAHtmlWithPlaywright } from './utils/htmlFetcher'
+import { parseJRACalendar } from './utils/htmlParser'
+import { saveRacesToFirestore } from './utils/firestoreSaver'
+
+export const scrapeJRA2025October = onRequest(async (request, response) => {
+  const html = await fetchJRAHtmlWithPlaywright(url)
+  const races = parseJRACalendar(html, targetYear, targetMonth)
+  const savedCount = await saveRacesToFirestore(races)
+  response.send({ success: true, racesCount: races.length, savedCount })
+})
+
+// utils/htmlFetcher.ts
+export async function fetchJRAHtmlWithPlaywright(url: string): Promise<string> {
+  const browser = await chromium.launch({ headless: true })
+  try {
+    const page = await browser.newPage()
+    await page.goto(url)
+    return await page.content()
+  } finally {
+    await browser.close()
+  }
+}
+
+// utils/htmlParser.ts
+export function parseJRACalendar(html: string, year: number, month: number): any[] {
+  const raceElements = extractRaceElements(html)
+  return raceElements.map((element, index) => parseRaceElement(element, index, year, month))
+}
+
+// utils/firestoreSaver.ts
+export async function saveRacesToFirestore(races: any[]): Promise<number> {
+  if (!races.length) return 0
+  
+  const batch = db.batch()
+  races.forEach(race => {
+    const raceId = `${race.date.toISOString().split('T')[0]}_${race.venue}_${race.raceNumber}`
+    const docRef = db.collection('races').doc(raceId)
+    batch.set(docRef, race)
+  })
+  
+  await batch.commit()
+  return races.length
+}
+```
+
 ## 📋 共通チェックリスト
 
 ### コードレビュー時
@@ -166,12 +345,22 @@ function processData(data) {
 - [ ] console.logを削除
 - [ ] 条件分岐が簡潔
 - [ ] 関数が単一責任
+- [ ] fallbackのデフォルト変数を使用していない
+- [ ] 実際のデータのみを使用している
+- [ ] 一時的な実装には明確なTODOコメントが付いている
+- [ ] TODOコメントに期限と責任者が明記されている
+- [ ] 再利用可能な処理は適切にファイル分割されている
+- [ ] 1つのファイルが1つの責任を持っている
 
 ### リファクタリング時
 - [ ] ネストを3レベル以下に抑制
 - [ ] 早期リターンを活用
 - [ ] 三項演算子・論理演算子を活用
 - [ ] 冗長な処理を統合
+- [ ] 一時的な実装を適切な実装に置き換える
+- [ ] TODOコメントを削除または更新する
+- [ ] 再利用可能な処理を別ファイルに分割する
+- [ ] 単一責任の原則に従ってファイルを分割する
 
 ## 🎯 ベストプラクティス
 
@@ -180,6 +369,8 @@ function processData(data) {
 3. **保守性**: 変更が容易な構造
 4. **パフォーマンス**: 不要な処理を避ける
 5. **一貫性**: プロジェクト全体で統一されたスタイル
+6. **再利用性**: 汎用的な処理は別ファイルに分割
+7. **単一責任**: 1つのファイルは1つの責任を持つ
 
 ---
 
@@ -225,6 +416,55 @@ const safeExecute = (fn: () => any) => {
     return null;
   }
 };
+```
+
+### 5. ファイル分割の実装
+```typescript
+// 再利用可能な処理を別ファイルに分割
+// utils/htmlFetcher.ts
+export async function fetchJRAHtmlWithPlaywright(url: string): Promise<string> {
+  const browser = await chromium.launch({ headless: true })
+  try {
+    const page = await browser.newPage()
+    await page.goto(url)
+    return await page.content()
+  } finally {
+    await browser.close()
+  }
+}
+
+// utils/htmlParser.ts
+export function parseJRACalendar(html: string, year: number, month: number): any[] {
+  const raceElements = extractRaceElements(html)
+  return raceElements.map((element, index) => parseRaceElement(element, index, year, month))
+}
+
+// utils/firestoreSaver.ts
+export async function saveRacesToFirestore(races: any[]): Promise<number> {
+  if (!races.length) return 0
+  
+  const batch = db.batch()
+  races.forEach(race => {
+    const raceId = `${race.date.toISOString().split('T')[0]}_${race.venue}_${race.raceNumber}`
+    const docRef = db.collection('races').doc(raceId)
+    batch.set(docRef, race)
+  })
+  
+  await batch.commit()
+  return races.length
+}
+
+// index.ts - メインロジックのみ
+import { fetchJRAHtmlWithPlaywright } from './utils/htmlFetcher'
+import { parseJRACalendar } from './utils/htmlParser'
+import { saveRacesToFirestore } from './utils/firestoreSaver'
+
+export const scrapeJRA2025October = onRequest(async (request, response) => {
+  const html = await fetchJRAHtmlWithPlaywright(url)
+  const races = parseJRACalendar(html, targetYear, targetMonth)
+  const savedCount = await saveRacesToFirestore(races)
+  response.send({ success: true, racesCount: races.length, savedCount })
+})
 ```
 
 このコーディングスタイルに従うことで、保守性が高く、読みやすいコードを書くことができます。
