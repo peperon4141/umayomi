@@ -11,7 +11,18 @@
       <div class="bg-white rounded-lg shadow overflow-hidden calendar-container">
         <!-- カレンダーヘッダー -->
         <div class="bg-surface-900 text-surface-0 p-4">
-          <h2 class="text-xl font-bold text-center">{{ year }}年{{ month }}月の競馬カレンダー</h2>
+          <div class="flex justify-between items-center">
+            <h2 class="text-xl font-bold">{{ year }}年{{ month }}月の競馬カレンダー</h2>
+            <a 
+              :href="getJRACalendarUrl()" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              class="flex items-center gap-2 px-3 py-2 bg-surface-0 text-surface-900 rounded-lg hover:bg-surface-100 transition-colors text-sm font-medium"
+            >
+              <i class="pi pi-external-link"></i>
+              JRA公式ページ
+            </a>
+          </div>
         </div>
         
         <!-- 曜日ヘッダー -->
@@ -360,6 +371,13 @@ const viewRaceDetail = (raceId: string) => {
     return
   }
   router.push(`/race/${raceId}`)
+}
+
+// JRAのカレンダーページURLを生成
+const getJRACalendarUrl = () => {
+  const monthNames = ['', 'jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
+  const monthName = monthNames[month.value]
+  return `https://www.jra.go.jp/keiba/calendar${year.value}/${monthName}.html`
 }
 
 // ダッシュボードに戻る

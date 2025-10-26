@@ -1,6 +1,6 @@
 # Umayomi Horse Racing Prediction Service Makefile
 
-.PHONY: dev dev-build format e2e quality-check pre-commit build kill kill-safe test scrape-jra scrape-jra-manual save-jra-html export-firestore export-firestore-force
+.PHONY: dev dev-build dev-both format e2e quality-check pre-commit build test scrape-jra scrape-jra-manual save-jra-html export-firestore export-firestore-force
 
 install:
 	pnpm install
@@ -9,22 +9,29 @@ install:
 # - hosting: Vite dev server (http://127.0.0.1:3000)
 # - firebase: Firebase emulators (http://127.0.0.1:3100)
 dev: install
-	-pnpm turbo dev || true
+	pnpm turbo run dev &
+	pnpm turbo run dev-build --filter=hosting
 
-# Start all services in development mode with build watch
-# - hosting: Vite build watch (outputs to dist/)
-# - firebase: Firebase emulators (http://127.0.0.1:3100)
-dev-build: install
-	pnpm turbo dev-build
+# # Start all services in development mode with build watch
+# # - hosting: Vite build watch (outputs to dist/)
+# # - firebase: Firebase emulators (http://127.0.0.1:3100)
+# dev-build: install
+# 	pnpm turbo dev-build
+
+# # Start hosting dev server and build watch in parallel
+# # - hosting: Vite dev server (http://127.0.0.1:3000) + Vite build watch
+# dev-both: install
+# 	pnpm turbo run dev &
+# 	pnpm turbo run dev-build --filter=hosting
 
 # Format and fix linting issues for all repositories
 format: install
 	pnpm turbo lint:fix
 	pnpm -F functions lint:fix
 
-# Run e2e tests
+# Run e2e tests (with service check)
 e2e:
-	pnpm -F e2e test
+	pnpm turbo e2e
 
 # Run unit tests using Turbo
 test:

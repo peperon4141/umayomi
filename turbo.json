@@ -23,6 +23,11 @@
     "test:run": {
       "dependsOn": ["build"],
       "outputs": ["test-results/**", "coverage/**"]
+    },
+    "e2e": {
+      "dependsOn": ["build"],
+      "outputs": ["test-results/**", "playwright-report/**"],
+      "cache": false
     }
   }
 }

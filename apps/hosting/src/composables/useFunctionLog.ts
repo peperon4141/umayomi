@@ -1,102 +1,99 @@
-import { ref, computed } from 'vue'
-import { collection, query, orderBy, limit, getDocs, getCountFromServer } from 'firebase/firestore'
+import { ref, onMounted, onUnmounted } from 'vue'
+import { 
+  collection, 
+  query, 
+  orderBy, 
+  limit, 
+  onSnapshot, 
+  Timestamp,
+  type QueryConstraint 
+} from 'firebase/firestore'
 import { db } from '@/config/firebase'
 
-// ローカル型定義
-interface FunctionLog {
+export interface FunctionLog {
   id: string
   functionName: string
-  status: 'success' | 'failure'
-  executedAt: any
-  metadata?: {
-    duration?: number
-    errorMessage?: string
-    responseData?: any
-    method?: string
-    url?: string
-    [key: string]: any
-  }
+  timestamp: Date
+  year: number
+  month: number
+  success: boolean
+  message: string
+  error?: string
+  executionTimeMs?: number
+  additionalData?: Record<string, any>
+  createdAt: Date
 }
 
-/**
- * Functions実行ログ管理用のComposable
- */
 export function useFunctionLog() {
   const logs = ref<FunctionLog[]>([])
   const loading = ref(false)
-  const totalCount = ref(0)
-  const currentPage = ref(1)
-  const pageSize = ref(10)
+  const error = ref<string | null>(null)
+  
+  let unsubscribe: (() => void) | null = null
 
-  /**
-   * ページネーション付きでログを取得
-   */
-  const fetchLogs = async (page: number = 1, size: number = 10) => {
-    if (loading.value) return
-
+  const fetchFunctionLogs = async (limitCount: number = 50) => {
     loading.value = true
-    currentPage.value = page
-    pageSize.value = size
+    error.value = null
 
     try {
-      const logsCollection = collection(db, 'function_logs')
+      const constraints: QueryConstraint[] = [
+        orderBy('timestamp', 'desc'),
+        limit(limitCount)
+      ]
+
+      const q = query(collection(db, 'functions_log'), ...constraints)
       
-      // 総件数を取得
-      const countSnapshot = await getCountFromServer(logsCollection)
-      totalCount.value = countSnapshot.data().count
-
-      // ページネーション用のクエリ（Firestore v9ではoffsetが利用できないため、startAfterを使用）
-      const logsQuery = query(
-        logsCollection,
-        orderBy('executedAt', 'desc'),
-        limit(size)
+      unsubscribe = onSnapshot(q, 
+        (snapshot) => {
+          logs.value = snapshot.docs.map(doc => {
+            const data = doc.data()
+            return {
+              id: doc.id,
+              functionName: data.functionName,
+              timestamp: data.timestamp instanceof Timestamp ? data.timestamp.toDate() : data.timestamp,
+              year: data.year,
+              month: data.month,
+              success: data.success,
+              message: data.message,
+              error: data.error,
+              executionTimeMs: data.executionTimeMs,
+              additionalData: data.additionalData || {},
+              createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate() : data.createdAt
+            } as FunctionLog
+          })
+          loading.value = false
+        },
+        (err) => {
+          error.value = err.message
+          loading.value = false
+        }
       )
-
-      const snapshot = await getDocs(logsQuery)
-      logs.value = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      } as FunctionLog))
-
-    } catch (error) {
-      console.error('Error fetching function logs:', error)
-      logs.value = []
-    } finally {
+    } catch (err: any) {
+      error.value = err.message
       loading.value = false
     }
   }
 
-  /**
-   * 総ページ数を計算
-   */
-  const totalPages = computed(() => {
-    return Math.ceil(totalCount.value / pageSize.value)
+  const stopListening = () => {
+    if (unsubscribe) {
+      unsubscribe()
+      unsubscribe = null
+    }
+  }
+
+  onMounted(() => {
+    fetchFunctionLogs()
   })
 
-  /**
-   * ページ変更時の処理
-   */
-  const onPageChange = (event: any) => {
-    const newPage = (event.page || 0) + 1
-    fetchLogs(newPage, pageSize.value)
-  }
-
-  /**
-   * ログをリフレッシュ
-   */
-  const refreshLogs = () => {
-    fetchLogs(currentPage.value, pageSize.value)
-  }
+  onUnmounted(() => {
+    stopListening()
+  })
 
   return {
     logs,
     loading,
-    totalCount,
-    currentPage,
-    pageSize,
-    totalPages,
-    fetchLogs,
-    onPageChange,
-    refreshLogs
+    error,
+    fetchFunctionLogs,
+    stopListening
   }
 }

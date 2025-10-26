@@ -9,6 +9,7 @@
     "test:headed": "playwright test --headed",
     "test:debug": "playwright test --debug",
     "test:ui:headed": "playwright test --ui --headed --project=chromium",
+    "e2e": "pnpm run test",
     "lint": "eslint . --ext .js,.ts",
     "lint:fix": "eslint . --ext .js,.ts --fix"
   },

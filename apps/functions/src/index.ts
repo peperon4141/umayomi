@@ -6,6 +6,7 @@ import { parseJRACalendar } from './parser/jra/calendarParser'
 import { parseJRARaceResult } from './parser/jra/raceResultParser'
 import { saveRacesToFirestore } from './utils/firestoreSaver'
 import { generateJRACalendarUrl, generateJRARaceResultUrl } from './utils/urlGenerator'
+import { saveFunctionLog, createSuccessLog, createErrorLog } from './utils/functionLogSaver'
 
 // Firebase Admin SDKを初期化
 initializeApp()
@@ -17,13 +18,22 @@ initializeApp()
 export const scrapeJRACalendar = onRequest(
   { timeoutSeconds: 300, memory: '1GiB' },
   async (request, response) => {
+    const startTime = Date.now()
     logger.info('JRA scraping function called')
 
     try {
       const { year, month } = request.query
 
       if (!year || !month) {
-        response.status(400).send({success: false, error: 'year and month parameters are required'})
+        const errorMessage = 'year and month parameters are required'
+        
+        await saveFunctionLog(createErrorLog(
+          'scrapeJRACalendar',
+          year as string,
+          month as string,
+          errorMessage
+        ))
+        response.status(400).send({success: false, error: errorMessage})
         return
       }
 
@@ -35,21 +45,148 @@ export const scrapeJRACalendar = onRequest(
       const races = parseJRACalendar(html, targetYear, targetMonth)
       const savedCount = await saveRacesToFirestore(races)
 
+      const executionTimeMs = Date.now() - startTime
+      const message = `${targetYear}年${targetMonth}月のJRAデータの取得・保存が完了しました`
+      
+      // 成功時のログを保存
+      await saveFunctionLog(createSuccessLog(
+        'scrapeJRACalendar',
+        year as string,
+        month as string,
+        message,
+        {
+          racesCount: races.length,
+          savedCount,
+          url,
+          executionTimeMs
+        }
+      ))
+
       response.send({
         success: true,
-        message: `${targetYear}年${targetMonth}月のJRAデータの取得・保存が完了しました`,
+        message,
         racesCount: races.length,
         savedCount,
         url,
         year: targetYear,
-        month: targetMonth
+        month: targetMonth,
+        executionTimeMs
       })
 
     } catch (error) {
+      const executionTimeMs = Date.now() - startTime
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      
       logger.error('JRA scraping failed', { error })
+      
+      // エラー時のログを保存
+      const errorYear = request.query.year as string
+      const errorMonth = request.query.month as string
+      
+      await saveFunctionLog(createErrorLog(
+        'scrapeJRACalendar',
+        errorYear,
+        errorMonth,
+        errorMessage,
+        { executionTimeMs }
+      ))
+      
       response.status(500).send({
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: errorMessage,
+        executionTimeMs
+      })
+    }
+  }
+)
+
+/**
+ * JRAレース結果データを取得・保存するCloud Function
+ * 年、月、日を引数で受け取る
+ */
+export const scrapeJRARaceResult = onRequest(
+  { timeoutSeconds: 300, memory: '1GiB' },
+  async (request, response) => {
+    const startTime = Date.now()
+    logger.info('JRA race result scraping function called')
+
+    try {
+      const { year, month, day } = request.query
+
+      if (!year || !month || !day) {
+        const errorMessage = 'year, month, and day parameters are required'
+        
+        await saveFunctionLog(createErrorLog(
+          'scrapeJRARaceResult',
+          year as string,
+          month as string,
+          errorMessage
+        ))
+        response.status(400).send({success: false, error: errorMessage})
+        return
+      }
+
+      const targetYear = parseInt(year as string)
+      const targetMonth = parseInt(month as string)
+      const targetDay = parseInt(day as string)
+      
+      const url = generateJRARaceResultUrl(targetYear, targetMonth, targetDay)
+      const html = await fetchJRAHtmlWithPlaywright(url)
+      const races = parseJRARaceResult(html, targetYear, targetMonth, targetDay)
+      const savedCount = await saveRacesToFirestore(races)
+
+      const executionTimeMs = Date.now() - startTime
+      const message = `${targetYear}年${targetMonth}月${targetDay}日のJRAレース結果データの取得・保存が完了しました`
+      
+      // 成功時のログを保存
+      await saveFunctionLog(createSuccessLog(
+        'scrapeJRARaceResult',
+        year as string,
+        month as string,
+        message,
+        {
+          racesCount: races.length,
+          savedCount,
+          url,
+          executionTimeMs,
+          day: targetDay
+        }
+      ))
+
+      response.send({
+        success: true,
+        message,
+        racesCount: races.length,
+        savedCount,
+        url,
+        year: targetYear,
+        month: targetMonth,
+        day: targetDay,
+        executionTimeMs
+      })
+
+    } catch (error) {
+      const executionTimeMs = Date.now() - startTime
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      
+      logger.error('JRA race result scraping failed', { error })
+      
+      // エラー時のログを保存
+      const errorYear = request.query.year as string
+      const errorMonth = request.query.month as string
+      
+      await saveFunctionLog(createErrorLog(
+        'scrapeJRARaceResult',
+        errorYear,
+        errorMonth,
+        errorMessage,
+        { executionTimeMs }
+      ))
+      
+      response.status(500).send({
+        success: false,
+        error: errorMessage,
+        executionTimeMs
       })
     }
   }
@@ -62,15 +199,24 @@ export const scrapeJRACalendar = onRequest(
 export const scrapeJRACalendarWithRaceResults = onRequest(
   { timeoutSeconds: 600, memory: '2GiB' },
   async (request, response) => {
+    const startTime = Date.now()
     logger.info('JRA calendar with race results scraping function called')
 
     try {
       const { year, month } = request.query
 
       if (!year || !month) {
+        const errorMessage = 'year and month parameters are required'
+        
+        await saveFunctionLog(createErrorLog(
+          'scrapeJRACalendarWithRaceResults',
+          year as string,
+          month as string,
+          errorMessage
+        ))
         response.status(400).send({
           success: false,
-          error: 'year and month parameters are required'
+          error: errorMessage
         })
         return
       }
@@ -119,9 +265,29 @@ export const scrapeJRACalendarWithRaceResults = onRequest(
       const allRaces = [...calendarRaces, ...allRaceResults]
       const savedCount = await saveRacesToFirestore(allRaces)
 
+      const executionTimeMs = Date.now() - startTime
+      const message = `${targetYear}年${targetMonth}月のJRAカレンダーとレース結果データの取得・保存が完了しました`
+      
+      // 成功時のログを保存
+      await saveFunctionLog(createSuccessLog(
+        'scrapeJRACalendarWithRaceResults',
+        year as string,
+        month as string,
+        message,
+        {
+          calendarRacesCount: calendarRaces.length,
+          raceResultsCount: allRaceResults.length,
+          totalRacesCount: allRaces.length,
+          savedCount,
+          calendarUrl,
+          processedDates: Array.from(processedDates),
+          executionTimeMs
+        }
+      ))
+
       response.send({
         success: true,
-        message: `${targetYear}年${targetMonth}月のJRAカレンダーとレース結果データの取得・保存が完了しました`,
+        message,
         calendarRacesCount: calendarRaces.length,
         raceResultsCount: allRaceResults.length,
         totalRacesCount: allRaces.length,
@@ -129,14 +295,32 @@ export const scrapeJRACalendarWithRaceResults = onRequest(
         calendarUrl,
         processedDates: Array.from(processedDates),
         year: targetYear,
-        month: targetMonth
+        month: targetMonth,
+        executionTimeMs
       })
 
     } catch (error) {
+      const executionTimeMs = Date.now() - startTime
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      
       logger.error('JRA calendar with race results scraping failed', { error })
+      
+      // エラー時のログを保存
+      const errorYear = request.query.year as string
+      const errorMonth = request.query.month as string
+      
+      await saveFunctionLog(createErrorLog(
+        'scrapeJRACalendarWithRaceResults',
+        errorYear,
+        errorMonth,
+        errorMessage,
+        { executionTimeMs }
+      ))
+      
       response.status(500).send({
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: errorMessage,
+        executionTimeMs
       })
     }
   }

@@ -4,6 +4,7 @@
   "description": "Umayomi Cloud Functions",
   "main": "lib/src/index.js",
   "scripts": {
+    "dev": "pnpm run build:watch",
     "build": "tsc",
     "build:watch": "tsc --watch",
     "serve": "npm run build && firebase emulators:start --only functions",
@@ -19,7 +20,7 @@
     "lint:fix": "eslint . --ext .js,.ts --fix"
   },
   "engines": {
-    "node": "18"
+    "node": "22"
   },
   "dependencies": {
     "cheerio": "^1.1.2",

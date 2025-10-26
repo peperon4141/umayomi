@@ -1,5 +1,10 @@
 import { test, expect } from '@playwright/test'
 
+// // Cloud Functionsテスト用の設定
+// test.use({
+//   actionTimeout: 300000, // 5分のタイムアウト
+// })
+
 test.describe('Cloud Functions', () => {
   test('scrapeJRACalendar関数を呼び出してデータを取得できる', async ({ request }) => {
     test.setTimeout(30000) // 30秒のタイムアウト

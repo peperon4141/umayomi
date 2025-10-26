@@ -35,6 +35,8 @@
               <Dropdown
                 v-model="calendarParams.month"
                 :options="monthOptions"
+                optionLabel="label"
+                optionValue="value"
                 placeholder="月を選択"
                 class="w-full"
               />
@@ -78,6 +80,8 @@
               <Dropdown
                 v-model="raceResultParams.month"
                 :options="monthOptions"
+                optionLabel="label"
+                optionValue="value"
                 placeholder="月を選択"
                 class="w-full"
               />
@@ -131,6 +135,8 @@
               <Dropdown
                 v-model="bulkParams.month"
                 :options="monthOptions"
+                optionLabel="label"
+                optionValue="value"
                 placeholder="月を選択"
                 class="w-full"
               />

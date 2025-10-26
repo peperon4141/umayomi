@@ -120,6 +120,84 @@
         <JRAScrapingPanel @data-updated="refreshData" />
       </div>
 
+      <!-- Functions Log -->
+      <div class="mb-8">
+        <Card>
+          <template #header>
+            <div class="p-6 border-b border-surface-border">
+              <h3 class="text-xl font-bold text-surface-900">Functions Log</h3>
+              <p class="text-surface-600 mt-1">スクレイピング処理の実行履歴</p>
+            </div>
+          </template>
+          <template #content>
+            <div class="p-6">
+              <!-- ローディング -->
+              <div v-if="functionLogLoading" class="text-center py-8">
+                <ProgressSpinner />
+                <p class="mt-4 text-surface-600">ログを読み込み中...</p>
+              </div>
+
+              <!-- エラー -->
+              <div v-else-if="functionLogError" class="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+                <i class="pi pi-exclamation-triangle text-red-500 text-4xl mb-4"></i>
+                <h3 class="text-red-800 font-medium mb-2">エラーが発生しました</h3>
+                <p class="text-red-600">{{ functionLogError }}</p>
+              </div>
+
+              <!-- ログ一覧 -->
+              <div v-else-if="functionLogs.length > 0" class="space-y-4">
+                <div v-for="log in functionLogs" :key="log.id" 
+                     :class="log.success ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'"
+                     class="border rounded-lg p-4">
+                  <div class="flex justify-between items-start mb-2">
+                    <div class="flex items-center gap-2">
+                      <Chip 
+                        :label="log.functionName" 
+                        :severity="log.success ? 'success' : 'danger'"
+                        size="small" 
+                      />
+                      <Chip 
+                        :label="`${log.year}年${log.month}月`" 
+                        severity="info"
+                        size="small" 
+                      />
+                      <Chip 
+                        v-if="log.executionTimeMs"
+                        :label="`${log.executionTimeMs}ms`" 
+                        severity="secondary"
+                        size="small" 
+                      />
+                    </div>
+                    <div class="text-sm text-surface-500">
+                      {{ formatLogDate(log.timestamp) }}
+                    </div>
+                  </div>
+                  
+                  <p class="text-sm font-medium mb-2">{{ log.message }}</p>
+                  
+                  <div v-if="log.success && log.additionalData" class="text-sm text-surface-600 space-y-1">
+                    <div v-for="(value, key) in log.additionalData" :key="key">
+                      {{ formatAdditionalDataKey(key) }}: {{ formatAdditionalDataValue(value) }}
+                    </div>
+                  </div>
+                  
+                  <div v-else-if="log.error" class="text-sm text-red-600">
+                    エラー: {{ log.error }}
+                  </div>
+                </div>
+              </div>
+
+              <!-- データなし -->
+              <div v-else class="text-center py-8">
+                <i class="pi pi-list text-6xl text-surface-400 mb-4"></i>
+                <h3 class="text-xl font-semibold text-surface-900 mb-2">ログがありません</h3>
+                <p class="text-surface-600">スクレイピング処理を実行すると、ここにログが表示されます。</p>
+              </div>
+            </div>
+          </template>
+        </Card>
+      </div>
+
       <!-- 管理機能 -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <!-- データ管理 -->
@@ -224,90 +302,6 @@
         </Card>
       </div>
 
-      <!-- Functions実行履歴 -->
-      <Card class="mt-8">
-        <template #header>
-          <div class="p-6 border-b border-surface-border">
-            <div class="flex justify-between items-center">
-              <div>
-                <h3 class="text-xl font-bold text-surface-900">Functions実行履歴</h3>
-                <p class="text-surface-600 mt-1">Cloud Functionsの実行ログ</p>
-              </div>
-              <Button
-                label="更新"
-                icon="pi pi-refresh"
-                severity="secondary"
-                size="small"
-                @click="refreshLogs"
-                :loading="loading"
-              />
-            </div>
-          </div>
-        </template>
-        <template #content>
-          <div class="p-6">
-            <DataTable
-              :value="logs"
-              :loading="loading"
-              :paginator="true"
-              :rows="pageSize"
-              :totalRecords="totalCount"
-              :lazy="true"
-              @page="onPageChange"
-              paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-              :rowsPerPageOptions="[5, 10, 20, 50]"
-              currentPageReportTemplate="全 {totalRecords} 件中 {first} - {last} 件を表示"
-              class="p-datatable-sm"
-            >
-              <Column field="functionName" header="関数名" :sortable="true">
-                <template #body="{ data }">
-                  <div class="flex items-center space-x-2">
-                    <i :class="getFunctionIcon(data.functionName)" class="text-lg"></i>
-                    <span class="font-medium">{{ getFunctionDisplayName(data.functionName) }}</span>
-                  </div>
-                </template>
-              </Column>
-              
-              <Column field="status" header="ステータス" :sortable="true">
-                <template #body="{ data }">
-                  <Badge 
-                    :label="data.status === 'success' ? '成功' : '失敗'"
-                    :severity="data.status === 'success' ? 'success' : 'danger'"
-                  />
-                </template>
-              </Column>
-              
-              <Column field="executedAt" header="実行日時" :sortable="true">
-                <template #body="{ data }">
-                  <span class="text-sm">
-                    {{ formatDate(data.executedAt) }}
-                  </span>
-                </template>
-              </Column>
-              
-              <Column field="metadata.duration" header="実行時間" :sortable="true">
-                <template #body="{ data }">
-                  <span class="text-sm text-surface-600">
-                    {{ data.metadata?.duration ? `${data.metadata.duration}ms` : '-' }}
-                  </span>
-                </template>
-              </Column>
-              
-              <Column header="詳細">
-                <template #body="{ data }">
-                  <Button
-                    icon="pi pi-eye"
-                    severity="secondary"
-                    size="small"
-                    @click="showLogDetail(data)"
-                    v-tooltip.top="'詳細を表示'"
-                  />
-                </template>
-              </Column>
-            </DataTable>
-          </div>
-        </template>
-      </Card>
     </main>
   </div>
 </template>
@@ -322,26 +316,16 @@ import JRAScrapingPanel from '@/components/JRAScrapingPanel.vue'
 import { seedRaceData, clearRaceData } from '@/utils/sampleData'
 import { useToast } from 'primevue/usetoast'
 import { getCurrentYear, getCurrentMonth } from '@/router/routeCalculator'
-// ローカル型定義
-interface FunctionLog {
-  id: string
-  functionName: string
-  status: 'success' | 'failure'
-  executedAt: any
-  metadata?: {
-    duration?: number
-    errorMessage?: string
-    responseData?: any
-    method?: string
-    url?: string
-    [key: string]: any
-  }
-}
+import Card from 'primevue/card'
+import Button from 'primevue/button'
+import Chip from 'primevue/chip'
+import ProgressSpinner from 'primevue/progressspinner'
+import Avatar from 'primevue/avatar'
 
 const router = useRouter()
 const { user, signOut } = useAuth()
 const { races, fetchOctoberRaces } = useRace()
-const { logs, loading, totalCount, pageSize, fetchLogs, onPageChange, refreshLogs } = useFunctionLog()
+const { logs: functionLogs, loading: functionLogLoading, error: functionLogError } = useFunctionLog()
 const toast = useToast()
 
 // 統計データ
@@ -350,7 +334,51 @@ const monthlyRaces = ref(0)
 const activeUsers = ref(1)
 const lastUpdate = ref(`${getCurrentYear()}年${getCurrentMonth()}月15日`)
 
-// ローディング状態
+
+// ログ日付フォーマット関数
+const formatLogDate = (date: Date) => {
+  return date.toLocaleString('ja-JP', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
+  })
+}
+
+// additionalDataのキーを日本語に変換
+const formatAdditionalDataKey = (key: string) => {
+  const keyMap: Record<string, string> = {
+    racesCount: 'レース数',
+    savedCount: '保存数',
+    calendarRacesCount: 'カレンダーレース',
+    raceResultsCount: 'レース結果',
+    totalRacesCount: '総レース数',
+    processedDates: '処理日数',
+    url: 'URL',
+    calendarUrl: 'カレンダーURL',
+    executionTimeMs: '実行時間'
+  }
+  return keyMap[key] || key
+}
+
+// additionalDataの値をフォーマット
+const formatAdditionalDataValue = (value: any) => {
+  if (Array.isArray(value)) {
+    return `${value.length}件`
+  }
+  if (typeof value === 'number') {
+    if (value > 1000) {
+      return `${value}ms`
+    }
+    return `${value}件`
+  }
+  if (typeof value === 'string') {
+    return value
+  }
+  return String(value)
+}
 
 const goToMainApp = () => {
   router.push('/dashboard')
@@ -367,7 +395,6 @@ const handleLogout = async () => {
 
 const refreshData = async () => {
   await fetchOctoberRaces()
-  await refreshLogs()
 }
 
 const handleSeedData = async () => {
@@ -390,66 +417,6 @@ const handleClearData = async () => {
   })
 }
 
-// Functions実行履歴の表示用関数
-const getFunctionIcon = (functionName: string) => {
-  const iconMap: Record<string, string> = {
-    'helloWorld': 'pi pi-check-circle text-primary',
-    'scrapeJRAData': 'pi pi-cloud-download text-green-500',
-    'manualJraScraping': 'pi pi-cog text-orange-500',
-    'scheduledJraScraping': 'pi pi-clock text-purple-500',
-    'setAdminRole': 'pi pi-user text-primary'
-  }
-  return iconMap[functionName] || 'pi pi-code text-surface-500'
-}
-
-const getFunctionDisplayName = (functionName: string) => {
-  const nameMap: Record<string, string> = {
-    'helloWorld': 'Hello World',
-    'scrapeJRAData': 'JRAスクレイピング',
-    'manualJraScraping': '手動JRAスクレイピング',
-    'scheduledJraScraping': '定期JRAスクレイピング',
-    'setAdminRole': '管理者権限設定'
-  }
-  return nameMap[functionName] || functionName
-}
-
-const formatDate = (timestamp: any) => {
-  if (!timestamp) return '-'
-  
-  // Firestore Timestampの場合
-  if (timestamp.toDate) {
-    return timestamp.toDate().toLocaleString('ja-JP')
-  }
-  
-  // Dateオブジェクトの場合
-  if (timestamp instanceof Date) {
-    return timestamp.toLocaleString('ja-JP')
-  }
-  
-  // 文字列の場合
-  return new Date(timestamp).toLocaleString('ja-JP')
-}
-
-const showLogDetail = (log: FunctionLog) => {
-  const detail = {
-    functionName: getFunctionDisplayName(log.functionName),
-    status: log.status === 'success' ? '成功' : '失敗',
-    executedAt: formatDate(log.executedAt),
-    duration: log.metadata?.duration ? `${log.metadata.duration}ms` : '-',
-    method: log.metadata?.method || '-',
-    url: log.metadata?.url || '-',
-    errorMessage: log.metadata?.errorMessage || '-',
-    responseData: log.metadata?.responseData ? JSON.stringify(log.metadata.responseData, null, 2) : '-'
-  }
-  
-  toast.add({
-    severity: 'info',
-    summary: '実行ログ詳細',
-    detail: `関数: ${detail.functionName}\nステータス: ${detail.status}\n実行日時: ${detail.executedAt}\n実行時間: ${detail.duration}\nメソッド: ${detail.method}\nURL: ${detail.url}\nエラー: ${detail.errorMessage}\nレスポンス: ${detail.responseData}`,
-    life: 10000
-  })
-}
-
 onMounted(async () => {
   // Firestoreからレースデータを取得
   await fetchOctoberRaces()
@@ -458,8 +425,5 @@ onMounted(async () => {
   totalRaces.value = races.value.length
   monthlyRaces.value = races.value.length
   activeUsers.value = 1
-  
-  // Functions実行履歴を取得
-  await fetchLogs()
 })
 </script>
