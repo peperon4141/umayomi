@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test'
 
 test.describe('Cloud Functions', () => {
   test('scrapeJRACalendar関数を呼び出してデータを取得できる', async ({ request }) => {
+    test.setTimeout(30000) // 30秒のタイムアウト
     const response = await request.get('http://127.0.0.1:5101/umayomi-fbb2b/us-central1/scrapeJRACalendar', {
       params: {
         year: '2025',
@@ -22,6 +23,7 @@ test.describe('Cloud Functions', () => {
   })
 
   test('scrapeJRARaceResult関数を呼び出してレース結果データを取得できる', async ({ request }) => {
+    test.setTimeout(30000) // 30秒のタイムアウト
     const response = await request.get('http://127.0.0.1:5101/umayomi-fbb2b/us-central1/scrapeJRARaceResult', {
       params: {
         year: '2025',
@@ -44,6 +46,7 @@ test.describe('Cloud Functions', () => {
   })
 
   test('scrapeJRACalendarWithRaceResults関数を呼び出してカレンダーとレース結果データを一括取得できる', async ({ request }) => {
+    test.setTimeout(60000) // 60秒のタイムアウト（この関数は時間がかかる）
     const response = await request.get('http://127.0.0.1:5101/umayomi-fbb2b/us-central1/scrapeJRACalendarWithRaceResults', {
       params: {
         year: '2025',

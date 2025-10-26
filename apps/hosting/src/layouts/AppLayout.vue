@@ -51,19 +51,20 @@
       <!-- Sidebar -->
       <div
         :class="[
-          'w-64 bg-white shadow-lg flex flex-col transition-transform duration-300 ease-in-out',
-          'fixed lg:static inset-y-0 left-0 z-50',
+          'w-48 bg-white shadow-lg flex flex-col transition-transform duration-300 ease-in-out',
+          'fixed lg:fixed inset-y-0 left-0 z-50',
           sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         ]"
+        style="top: 4em; height: calc(100vh - 4em);"
       >
         <!-- Navigation Menu -->
-        <div class="flex-1 p-4" style="padding-top: calc(4em + 1rem);">
+        <div class="flex-1 p-3 overflow-y-auto">
           <Menu :model="sidebarMenuItems" class="w-full border-none sidebar-menu" />
         </div>
       </div>
 
       <!-- Content -->
-      <main class="flex-1">
+      <main class="flex-1 lg:ml-48">
         <!-- Breadcrumb -->
         <div class="bg-white border-b border-gray-200 px-4 flex items-center overflow-hidden" style="height: 3em;">
           <div class="w-full" style="white-space: nowrap; overflow-x: auto;">
@@ -72,7 +73,7 @@
         </div>
         
         <!-- Page Content -->
-        <div class="p-4 sm:p-6">
+        <div class="p-3 sm:p-4">
           <slot />
         </div>
       </main>
@@ -185,7 +186,7 @@ const handleLogout = async () => {
 
 <style scoped>
 .sidebar-menu :deep(.p-menuitem) {
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.5rem;
 }
 
 .sidebar-menu :deep(.p-menuitem:last-child) {
@@ -193,7 +194,7 @@ const handleLogout = async () => {
 }
 
 .sidebar-menu :deep(.p-menuitem-link) {
-  padding: 0.75rem 1rem;
+  padding: 0.5rem 0.75rem;
   border-radius: 0.5rem;
   transition: all 0.2s ease;
 }

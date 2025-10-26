@@ -3,7 +3,16 @@
     <!-- ページヘッダー -->
     <div v-if="raceDetail" class="mb-6">
       <h1 class="text-3xl font-bold text-gray-900">{{ raceDetail.raceNumber }}R {{ raceDetail.raceName }}</h1>
-      <p class="text-gray-600 mt-1">{{ raceDetail.racecourse }} - {{ new Date(raceDetail.date).toLocaleDateString('ja-JP') }}</p>
+      <p class="text-gray-600 mt-1">{{ raceDetail.racecourse }} - {{ formatDate(raceDetail.date) }}</p>
+      
+      <!-- レース情報タグ -->
+      <div class="flex flex-wrap gap-2 mt-3">
+        <Chip :label="`${raceDetail.distance}m`" severity="info" />
+        <Chip :label="raceDetail.surface" severity="secondary" />
+        <Chip :label="raceDetail.weather" severity="success" />
+        <Chip :label="raceDetail.trackCondition" severity="warning" />
+        <Chip v-if="raceDetail.grade" :label="raceDetail.grade" :severity="getGradeSeverity(raceDetail.grade)" />
+      </div>
     </div>
 
     <!-- ローディング -->
@@ -36,52 +45,8 @@
 
     <!-- レース詳細 -->
     <div v-else-if="raceDetail" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <!-- レース情報 -->
-        <div class="lg:col-span-1">
-          <Card>
-            <template #header>
-              <div class="p-4 text-center" :class="getGradeColor(raceDetail.grade || '')">
-                <h3 class="text-xl font-bold text-white">{{ raceDetail.raceNumber }}R</h3>
-                <p class="text-sm text-white opacity-90">{{ raceDetail.raceName }}</p>
-              </div>
-            </template>
-            <template #content>
-              <div class="p-4 space-y-4">
-                <div>
-                  <div class="flex flex-wrap gap-2 mb-3">
-                    <Chip :label="raceDetail.grade" :severity="getGradeSeverity(raceDetail.grade || '')" />
-                    <Chip :label="`${raceDetail.distance}m`" severity="info" />
-                    <Chip :label="raceDetail.surface" severity="secondary" />
-                  </div>
-                </div>
-                
-                <div class="space-y-3">
-                  <div class="flex justify-between">
-                    <span class="text-gray-600">競馬場</span>
-                    <span class="font-medium">{{ raceDetail.racecourse }}</span>
-                  </div>
-                  <div class="flex justify-between">
-                    <span class="text-gray-600">天気</span>
-                    <span class="font-medium">{{ raceDetail.weather }}</span>
-                  </div>
-                  <div class="flex justify-between">
-                    <span class="text-gray-600">馬場状態</span>
-                    <span class="font-medium">{{ raceDetail.trackCondition }}</span>
-                  </div>
-                  <div class="flex justify-between">
-                    <span class="text-gray-600">開催日</span>
-                    <span class="font-medium">{{ new Date(raceDetail.date).toLocaleDateString('ja-JP') }}</span>
-                  </div>
-                </div>
-              </div>
-            </template>
-          </Card>
-        </div>
-
-        <!-- レース結果 -->
-        <div class="lg:col-span-2">
-          <Card>
+      <!-- レース結果 -->
+      <Card>
             <template #header>
               <div class="p-4">
                 <h3 class="text-xl font-bold">レース結果</h3>
@@ -130,8 +95,6 @@
               </div>
             </template>
           </Card>
-        </div>
-      </div>
     </div>
   </AppLayout>
 </template>
@@ -139,7 +102,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useNavigation } from '@/composables/useNavigation'
-import { doc, getDoc } from 'firebase/firestore'
+import { doc, getDoc, Timestamp } from 'firebase/firestore'
 import { db } from '@/config/firebase'
 import AppLayout from '@/layouts/AppLayout.vue'
 import type { Race } from '../../../shared/race'
@@ -151,21 +114,20 @@ const raceDetail = ref<Race | null>(null)
 const loading = ref(false)
 const error = ref<string | null>(null)
 
-
-const getGradeColor = (grade: string) => {
-  switch (grade) {
-    case 'GⅠ': return 'bg-red-600'
-    case 'GⅡ': return 'bg-orange-500'
-    case 'GⅢ': return 'bg-yellow-500'
-    case 'オープン': return 'bg-purple-500'
-    case '3勝クラス': return 'bg-blue-500'
-    case '2勝クラス': return 'bg-green-500'
-    case '1勝クラス': return 'bg-teal-500'
-    case '新馬': return 'bg-indigo-500'
-    case '未勝利': return 'bg-gray-500'
-    default: return 'bg-gray-500'
+// 日付フォーマット関数
+const formatDate = (date: any) => {
+  if (!date) return '日付不明'
+  
+  try {
+    // Timestampの場合はtoDate()を使用、Dateの場合はそのまま使用
+    const dateObj = date instanceof Timestamp ? date.toDate() : date
+    return dateObj.toLocaleDateString('ja-JP')
+  } catch (error) {
+    console.error('日付フォーマットエラー:', error)
+    return '日付エラー'
   }
 }
+
 
 const getGradeSeverity = (grade: string) => {
   switch (grade) {
