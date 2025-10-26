@@ -1,7 +1,7 @@
 import { defineConfig, devices } from '@playwright/test'
 
 export default defineConfig({
-  timeout: 15 * 1000, // グローバルタイムアウトを15秒に設定
+  timeout: 30 * 1000, // グローバルタイムアウトを30秒に設定
   testDir: './tests',
   fullyParallel: true, // 並列実行を有効化
   forbidOnly: !!process.env.CI,

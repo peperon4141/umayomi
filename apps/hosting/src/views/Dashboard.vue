@@ -51,9 +51,14 @@
       </div>
     </div>
 
+    <!-- JRAスクレイピングパネル -->
+    <div class="mb-6">
+      <JRAScrapingPanel @data-updated="loadRaces" />
+    </div>
+
     <!-- 統計カード -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-      <Card class="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
+      <Card class="bg-primary text-primary-contrast">
         <template #content>
           <div class="flex items-center justify-between">
             <div>
@@ -68,7 +73,7 @@
         </template>
       </Card>
 
-      <Card class="bg-gradient-to-r from-green-500 to-green-600 text-white">
+      <Card class="bg-green-600 text-white">
         <template #content>
           <div class="flex items-center justify-between">
             <div>
@@ -83,7 +88,7 @@
         </template>
       </Card>
 
-      <Card class="bg-gradient-to-r from-purple-500 to-purple-600 text-white">
+      <Card class="bg-purple-600 text-white">
         <template #content>
           <div class="flex items-center justify-between">
             <div>
@@ -98,7 +103,7 @@
         </template>
       </Card>
 
-      <Card class="bg-gradient-to-r from-orange-500 to-orange-600 text-white">
+      <Card class="bg-orange-600 text-white">
         <template #content>
           <div class="flex items-center justify-between">
             <div>
@@ -174,13 +179,6 @@
             icon="pi pi-refresh"
             severity="secondary"
             @click="resetFilters"
-          />
-          <Button
-            label="JRAスクレイピング実行"
-            icon="pi pi-cloud-download"
-            severity="info"
-            @click="handleJraScraping"
-            :loading="scrapingLoading"
           />
           <Button
             label="サンプルデータ投入"
@@ -348,11 +346,10 @@ import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useRace } from '@/composables/useRace'
 import AppLayout from '@/layouts/AppLayout.vue'
+import JRAScrapingPanel from '@/components/JRAScrapingPanel.vue'
 import { seedRaceData, clearRaceData } from '@/utils/sampleData'
 import type { RaceFilters } from '../../../shared/race'
-import { useToast } from 'primevue/usetoast'
 
-const toast = useToast()
 const router = useRouter()
 const { 
   loading, 
@@ -370,7 +367,6 @@ const filters = ref<RaceFilters>({
   surface: undefined
 })
 
-const scrapingLoading = ref(false)
 const raceDays = ref<any[]>([])
 
 // 日付範囲の管理
@@ -478,51 +474,6 @@ const viewRaceDetail = (raceId: string) => {
   router.push(`/race/${raceId}`)
 }
 
-
-const handleJraScraping = async () => {
-  scrapingLoading.value = true
-  
-  try {
-    // Cloud Functionsのエンドポイントを呼び出し
-      const response = await fetch('http://127.0.0.1:5101/umayomi-fbb2b/us-central1/scrapeJRAData', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({})
-    })
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
-    }
-
-    const result = await response.json()
-    
-    if (result.success) {
-      toast.add({
-        severity: 'success',
-        summary: 'スクレイピング完了',
-        detail: `${result.savedCount}件のレースデータを取得しました`,
-        life: 5000
-      })
-      
-      // データを再読み込み
-      await loadRaces()
-    } else {
-      throw new Error(result.error || 'スクレイピングに失敗しました')
-    }
-  } catch (error) {
-    console.error('JRA scraping error:', error)
-    toast.add({
-      severity: 'error',
-      summary: 'スクレイピングエラー',
-      detail: error instanceof Error ? error.message : '不明なエラーが発生しました',
-      life: 5000
-    })
-  } finally {
-    scrapingLoading.value = false
-  }
-}
 
 const handleSeedData = async () => {
   await seedRaceData()

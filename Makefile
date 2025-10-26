@@ -1,6 +1,6 @@
 # Umayomi Horse Racing Prediction Service Makefile
 
-.PHONY: dev dev-build format e2e quality-check pre-commit build kill test scrape-jra scrape-jra-manual test-hello save-jra-html
+.PHONY: dev dev-build format e2e quality-check pre-commit build kill kill-safe test scrape-jra scrape-jra-manual save-jra-html export-firestore export-firestore-force
 
 install:
 	pnpm install
@@ -9,7 +9,7 @@ install:
 # - hosting: Vite dev server (http://127.0.0.1:3000)
 # - firebase: Firebase emulators (http://127.0.0.1:3100)
 dev: install
-	pnpm turbo dev
+	-pnpm turbo dev || true
 
 # Start all services in development mode with build watch
 # - hosting: Vite build watch (outputs to dist/)
@@ -73,11 +73,17 @@ scrape-jra-race-result:
 		--show-error \
 		--fail-with-body
 
-# HelloWorld関数テスト
-test-hello:
+# JRAカレンダーとレース結果データ一括スクレイピング
+scrape-jra-calendar-with-results:
+	@if [ -z "$(YEAR)" ] || [ -z "$(MONTH)" ]; then \
+		echo "Usage: make scrape-jra-calendar-with-results YEAR=2025 MONTH=10"; \
+		exit 1; \
+	fi
 	@curl -X GET \
-		"http://127.0.0.1:5101/umayomi-fbb2b/us-central1/helloWorld" \
-		--max-time 30 \
+		"http://127.0.0.1:5101/umayomi-fbb2b/us-central1/scrapeJRACalendarWithRaceResults?year=$(YEAR)&month=$(MONTH)" \
+		--max-time 600 \
 		--connect-timeout 10 \
+		--retry 3 \
+		--retry-delay 1 \
 		--show-error \
 		--fail-with-body

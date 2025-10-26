@@ -56,63 +56,84 @@ export const scrapeJRACalendar = onRequest(
 )
 
 /**
- * 検証用のHelloWorld関数
+ * JRAカレンダーとレース結果データを一括取得・保存するCloud Function
+ * 年と月を引数で受け取り、各日程のレース結果も含めて取得
  */
-export const helloWorld = onRequest(
-  { timeoutSeconds: 30 },
+export const scrapeJRACalendarWithRaceResults = onRequest(
+  { timeoutSeconds: 600, memory: '2GiB' },
   async (request, response) => {
-    logger.info('HelloWorld function called')
-    
-    response.send({
-      success: true,
-      message: 'HelloWorld',
-      timestamp: new Date().toISOString()
-    })
-  }
-)
-
-/**
- * JRAレース結果データを取得・保存するCloud Function
- * 年、月、日を引数で受け取る
- */
-export const scrapeJRARaceResult = onRequest(
-  { timeoutSeconds: 300, memory: '1GiB' },
-  async (request, response) => {
-    logger.info('JRA race result scraping function called')
+    logger.info('JRA calendar with race results scraping function called')
 
     try {
-      const { year, month, day } = request.query
+      const { year, month } = request.query
 
-      if (!year || !month || !day) {
+      if (!year || !month) {
         response.status(400).send({
           success: false,
-          error: 'year, month and day parameters are required'
+          error: 'year and month parameters are required'
         })
         return
       }
 
       const targetYear = parseInt(year as string)
       const targetMonth = parseInt(month as string)
-      const targetDay = parseInt(day as string)
       
-      const url = generateJRARaceResultUrl(targetYear, targetMonth, targetDay)
-      const html = await fetchJRAHtmlWithPlaywright(url)
-      const races = parseJRARaceResult(html, targetYear, targetMonth, targetDay)
-      const savedCount = await saveRacesToFirestore(races)
+      const calendarUrl = generateJRACalendarUrl(targetYear, targetMonth)
+      
+      // 1. カレンダーデータを取得
+      const calendarHtml = await fetchJRAHtmlWithPlaywright(calendarUrl)
+      const calendarRaces = parseJRACalendar(calendarHtml, targetYear, targetMonth)
+      
+      logger.info('Calendar races found', { count: calendarRaces.length })
+      
+      // 2. 各日程のレース結果データを取得
+      const allRaceResults: any[] = []
+      const processedDates = new Set<string>()
+      
+      for (const race of calendarRaces) {
+        const raceDate = race.date
+        const dateKey = raceDate.toISOString().split('T')[0] // YYYY-MM-DD形式
+        
+        // 同じ日付のレース結果は既に処理済みの場合はスキップ
+        if (processedDates.has(dateKey)) {
+          continue
+        }
+        
+        processedDates.add(dateKey)
+        
+        try {
+          const day = raceDate.getUTCDate()
+          const raceResultUrl = generateJRARaceResultUrl(targetYear, targetMonth, day)
+          const raceResultHtml = await fetchJRAHtmlWithPlaywright(raceResultUrl)
+          const raceResults = parseJRARaceResult(raceResultHtml, targetYear, targetMonth, day)
+          
+          allRaceResults.push(...raceResults)
+          logger.info('Race results fetched for date', { date: dateKey, count: raceResults.length })
+        } catch (error) {
+          logger.warn('Failed to fetch race results for date', { date: dateKey, error })
+          // エラーが発生しても処理を続行
+        }
+      }
+      
+      // 3. すべてのデータをFirestoreに保存
+      const allRaces = [...calendarRaces, ...allRaceResults]
+      const savedCount = await saveRacesToFirestore(allRaces)
 
       response.send({
         success: true,
-        message: `${targetYear}年${targetMonth}月${targetDay}日のJRAレース結果データの取得・保存が完了しました`,
-        racesCount: races.length,
+        message: `${targetYear}年${targetMonth}月のJRAカレンダーとレース結果データの取得・保存が完了しました`,
+        calendarRacesCount: calendarRaces.length,
+        raceResultsCount: allRaceResults.length,
+        totalRacesCount: allRaces.length,
         savedCount,
-        url,
+        calendarUrl,
+        processedDates: Array.from(processedDates),
         year: targetYear,
-        month: targetMonth,
-        day: targetDay
+        month: targetMonth
       })
 
     } catch (error) {
-      logger.error('JRA race result scraping failed', { error })
+      logger.error('JRA calendar with race results scraping failed', { error })
       response.status(500).send({
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error'
