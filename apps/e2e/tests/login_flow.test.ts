@@ -21,9 +21,9 @@ test.describe('ログインフロー', () => {
     // メール認証でログイン
     await homePage.loginWithGoogle()
     
-    // レースページ（ダッシュボード）に遷移することを確認
+    // レースページに遷移することを確認
     await expect(page).toHaveURL(/\/races\/year\/\d{4}/)
-    // ダッシュボードページの要素が表示されることを確認
+    // レース一覧ページの要素が表示されることを確認
     await expect(page.locator('h1:has-text("競馬レース一覧")')).toBeVisible()
   })
 
@@ -34,9 +34,9 @@ test.describe('ログインフロー', () => {
     // Googleログインでログイン
     await homePage.loginWithEmailAndPassword('test@example.com', 'password123')
     
-    // レースページ（ダッシュボード）に遷移することを確認
+    // レースページに遷移することを確認
     await expect(page).toHaveURL(/\/races\/year\/\d{4}/)
-    // ダッシュボードページの要素が表示されることを確認
+    // レース一覧ページの要素が表示されることを確認
     await expect(page.locator('h1:has-text("競馬レース一覧")')).toBeVisible()
   })
 

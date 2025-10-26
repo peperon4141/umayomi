@@ -9,8 +9,8 @@ import { getVenueIdFromName } from '@/entity'
 export enum RouteName {
   // 基本ページ
   HOME = 'Home',
-  DASHBOARD = 'Dashboard',
   ADMIN_DASHBOARD = 'AdminDashboard',
+  RACES = 'Races',
   
   // レース関連（直接アクセス）
   RACE_DETAIL_DIRECT = 'RaceDetailDirect',
@@ -46,8 +46,8 @@ export interface RouteOptions {
 // ルート生成のマッピング
 const ROUTE_PATTERNS = {
   [RouteName.HOME]: () => '/',
-  [RouteName.DASHBOARD]: () => '/dashboard',
   [RouteName.ADMIN_DASHBOARD]: () => '/admin',
+  [RouteName.RACES]: () => '/races',
   [RouteName.RACE_DETAIL_DIRECT]: (options: RouteOptions) => `/race/${options.raceId}`,
   [RouteName.RACE_LIST_IN_YEAR]: (options: RouteOptions) => `/races/year/${options.year}`,
   [RouteName.RACE_LIST_IN_MONTH]: (options: RouteOptions) => `/races/year/${options.year}/month/${options.month}`,
@@ -78,37 +78,4 @@ export const generateRoute = (routeName: RouteName, options: RouteOptions = {}):
   validateOptions(routeName, options)
   return ROUTE_PATTERNS[routeName](options)
 }
-
-// 便利なヘルパー関数
-export const getCurrentYearRoute = (): string => 
-  generateRoute(RouteName.RACE_LIST_IN_YEAR, { year: getCurrentYear() })
-
-export const getCurrentMonthRoute = (): string => 
-  generateRoute(RouteName.RACE_LIST_IN_MONTH, { 
-    year: getCurrentYear(), 
-    month: getCurrentMonth() 
-  })
-
-// 日付からルート生成
-export const getRouteFromDate = (date: Date): string => 
-  generateRoute(RouteName.RACE_LIST_IN_MONTH, {
-    year: date.getFullYear(),
-    month: date.getMonth() + 1
-  })
-
-export const getCurrentDateRoute = (): string => getRouteFromDate(new Date())
-
-// 後方互換性のための関数（非推奨）
-export const getCurrentYearRedirect = getCurrentYearRoute
-export const getCurrentMonthRedirect = getCurrentMonthRoute
-export const getRaceYearRoute = (year: number): string =>
-  generateRoute(RouteName.RACE_LIST_IN_YEAR, { year })
-export const getRaceMonthRoute = (year: number, month: number): string =>
-  generateRoute(RouteName.RACE_LIST_IN_MONTH, { year, month })
-export const getRaceDateRoute = (year: number, month: number, placeId: string): string =>
-  generateRoute(RouteName.RACE_LIST_IN_PLACE, { year, month, placeId })
-export const getRaceDetailRoute = (year: number, month: number, placeId: string, raceId: string): string =>
-  generateRoute(RouteName.RACE_DETAIL, { year, month, placeId, raceId })
-export const getDirectRaceDetailRoute = (raceId: string): string =>
-  generateRoute(RouteName.RACE_DETAIL_DIRECT, { raceId })
 

@@ -35,9 +35,9 @@
         </div>
         <div class="mt-4">
           <Button
-            label="ダッシュボードに戻る"
+            label="レース一覧に戻る"
             icon="pi pi-arrow-left"
-            @click="navigateTo(RouteName.DASHBOARD)"
+            @click="navigateToRaceList"
           />
         </div>
       </div>
@@ -110,6 +110,10 @@ import { RouteName } from '@/router/routeCalculator'
 
 const { getParam, navigateTo } = useNavigation()
 
+const navigateToRaceList = () => {
+  navigateTo(RouteName.RACE_LIST_IN_YEAR, { year: new Date().getFullYear() })
+}
+
 const raceDetail = ref<Race | null>(null)
 const loading = ref(false)
 const error = ref<string | null>(null)
@@ -170,7 +174,7 @@ const fetchRaceDetail = async (raceId: string) => {
       } as Race
     } else {
       error.value = 'レースが見つかりません'
-      navigateTo(RouteName.DASHBOARD)
+      navigateToRaceList()
     }
   } catch (err: any) {
     error.value = err.message
@@ -185,7 +189,7 @@ onMounted(() => {
   if (raceId) {
     fetchRaceDetail(raceId)
   } else {
-    navigateTo(RouteName.DASHBOARD)
+    navigateToRaceList()
   }
 })
 </script>

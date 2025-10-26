@@ -10,11 +10,7 @@ import { useRoute } from 'vue-router'
 import { 
   RouteName, 
   generateRoute, 
-  getCurrentYearRoute,
-  getRaceYearRoute, 
-  getRaceMonthRoute, 
-  getRaceDateRoute, 
-  getRaceDetailRoute 
+  getCurrentYear
 } from '@/router/routeCalculator'
 import Breadcrumb from 'primevue/breadcrumb'
 
@@ -46,14 +42,14 @@ const breadcrumbItems = computed(() => {
   
   // レース関連の階層構造に対応
   if (route.path.startsWith('/races')) {
-    items.push({ label: 'レース一覧', url: getCurrentYearRoute() })
+    items.push({ label: 'レース一覧', url: generateRoute(RouteName.RACE_LIST_IN_YEAR, { year: getCurrentYear() }) })
     
     // 年
     if (route.params.year) {
       const year = route.params.year as string
       items.push({ 
         label: `${year}年`, 
-        url: getRaceYearRoute(parseInt(year))
+        url: generateRoute(RouteName.RACE_LIST_IN_YEAR, { year: parseInt(year) })
       })
     }
     
@@ -64,7 +60,7 @@ const breadcrumbItems = computed(() => {
       const monthNames = ['', '1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月']
       items.push({ 
         label: monthNames[parseInt(month)], 
-        url: getRaceMonthRoute(parseInt(year), parseInt(month))
+        url: generateRoute(RouteName.RACE_LIST_IN_MONTH, { year: parseInt(year), month: parseInt(month) })
       })
     }
     
@@ -90,7 +86,7 @@ const breadcrumbItems = computed(() => {
       const placeId = route.params.placeId as string
       items.push({ 
         label: `競馬場: ${placeId}`, 
-        url: getRaceDateRoute(parseInt(year), parseInt(month), placeId)
+        url: generateRoute(RouteName.RACE_LIST_IN_PLACE, { year: parseInt(year), month: parseInt(month), placeId })
       })
     }
     
@@ -102,7 +98,7 @@ const breadcrumbItems = computed(() => {
       const raceId = route.params.raceId as string
       items.push({ 
         label: `レース: ${raceId}`, 
-        url: getRaceDetailRoute(parseInt(year), parseInt(month), placeId, raceId)
+        url: generateRoute(RouteName.RACE_DETAIL, { year: parseInt(year), month: parseInt(month), placeId, raceId })
       })
     }
   } 
@@ -113,19 +109,19 @@ const breadcrumbItems = computed(() => {
     
     if (dateInfo) {
       // レース一覧
-      items.push({ label: 'レース一覧', url: getCurrentYearRoute() })
+      items.push({ label: 'レース一覧', url: generateRoute(RouteName.RACE_LIST_IN_YEAR, { year: getCurrentYear() }) })
       
       // 年
       items.push({ 
         label: `${dateInfo.year}年`, 
-        url: getRaceYearRoute(dateInfo.year)
+        url: generateRoute(RouteName.RACE_LIST_IN_YEAR, { year: dateInfo.year })
       })
       
       // 月
       const monthNames = ['', '1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月']
       items.push({ 
         label: monthNames[dateInfo.month], 
-        url: getRaceMonthRoute(dateInfo.year, dateInfo.month)
+        url: generateRoute(RouteName.RACE_LIST_IN_MONTH, { year: dateInfo.year, month: dateInfo.month })
       })
       
       // レース詳細

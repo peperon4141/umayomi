@@ -5,9 +5,9 @@
         <h1 class="text-3xl font-bold text-gray-900 mb-4">レース一覧</h1>
         <p class="text-gray-600 mb-8">このページは現在開発中です</p>
         <Button
-          label="ダッシュボードに戻る"
+          label="レース一覧に戻る"
           icon="pi pi-arrow-left"
-          @click="goToDashboard"
+          @click="goToRaceList"
         />
       </div>
     </div>
@@ -15,13 +15,14 @@
 </template>
 
 <script setup lang="ts">
-import { useRouter } from 'vue-router'
+import { useNavigation } from '@/composables/useNavigation'
 import AppLayout from '@/layouts/AppLayout.vue'
 import Button from 'primevue/button'
+import { RouteName } from '@/router/routeCalculator'
 
-const router = useRouter()
+const { navigateTo } = useNavigation()
 
-const goToDashboard = () => {
-  router.push('/dashboard')
+const goToRaceList = () => {
+  navigateTo(RouteName.RACES)
 }
 </script>
