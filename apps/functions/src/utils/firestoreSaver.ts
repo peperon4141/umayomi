@@ -1,12 +1,39 @@
 import { getFirestore } from 'firebase-admin/firestore'
 import { logger } from 'firebase-functions'
 
-/**
- * Firestoreインスタンスを取得（遅延初期化）
- */
-function getDb() {
-  return getFirestore()
-}
+// // Firestoreインスタンスをキャッシュ
+// let dbInstance: FirebaseFirestore.Firestore | null = null
+
+// /**
+//  * Firestoreインスタンスを取得（遅延初期化）
+//  */
+// function getDb() {
+//   if (!dbInstance) {
+//     // 開発環境でFirestore Emulatorに接続
+//     const isDevelopment = process.env.NODE_ENV === 'development' || 
+//                          process.env.FUNCTIONS_EMULATOR === 'true' ||
+//                          process.env.MODE === 'development'
+    
+//     if (isDevelopment) {
+//       // Firebase Admin SDKの環境変数を設定（getFirestoreより前に設定）
+//       process.env.FIRESTORE_EMULATOR_HOST = '127.0.0.1:8180'
+//       logger.info('Firestore Emulator環境変数を設定しました (firestoreSaver)', {
+//         firestoreEmulatorHost: process.env.FIRESTORE_EMULATOR_HOST,
+//         nodeEnv: process.env.NODE_ENV,
+//         functionsEmulator: process.env.FUNCTIONS_EMULATOR,
+//         mode: process.env.MODE
+//       })
+//     }
+    
+//     dbInstance = getFirestore()
+    
+//     if (isDevelopment && !process.env.FIRESTORE_EMULATOR_HOST) {
+//       logger.warn('Firestore Emulator環境変数が設定されていません (firestoreSaver)')
+//     }
+//   }
+  
+//   return dbInstance
+// }
 
 /**
  * レースデータをFirestoreに保存
@@ -18,7 +45,7 @@ export async function saveRacesToFirestore(races: any[]): Promise<number> {
   }
   
   try {
-    const db = getDb()
+    const db = getFirestore()
     const batch = db.batch()
     
     races.forEach(race => {

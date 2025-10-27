@@ -6,7 +6,7 @@ export default defineConfig({
   fullyParallel: true, // 並列実行を有効化
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0, // リトライ回数を削減
-  workers: 4, // ワーカー数を増加
+  workers: process.env.CI ? 2 : 6, // CI環境では2、ローカルでは6に増加
   reporter: process.env.CI ? 'github' : 'list',
   use: {
     baseURL: 'http://127.0.0.1:5100', // Firebase Emulator hosting
@@ -29,7 +29,8 @@ export default defineConfig({
       testMatch: '**/cloud_function_firestore.test.ts', // Functionsテストのみ
       use: { 
         ...devices['Desktop Chrome'],
-        actionTimeout: 2 * 60 * 1000, // Cloud Functions用の長いタイムアウト
+        actionTimeout: 90 * 1000, // Cloud Functions用のタイムアウトを90秒に短縮
+        navigationTimeout: 30 * 1000, // ナビゲーションタイムアウトを30秒に設定
       },
     },
   ],
@@ -41,5 +42,5 @@ export default defineConfig({
     timeout: 5 * 1000, // 5秒でタイムアウト（既存サーバーなので短縮）
     stdout: 'pipe',
     stderr: 'pipe',
-  },
+  }
 })

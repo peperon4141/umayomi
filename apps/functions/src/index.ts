@@ -8,6 +8,17 @@ import { saveRacesToFirestore } from './utils/firestoreSaver'
 import { generateJRACalendarUrl, generateJRARaceResultUrl } from './utils/urlGenerator'
 import { saveFunctionLog, createSuccessLog, createErrorLog } from './utils/functionLogSaver'
 
+// Firestore Emulatorに接続（開発環境の場合）
+const isDevelopment = process.env.NODE_ENV === 'development' || 
+                     process.env.FUNCTIONS_EMULATOR === 'true' ||
+                     process.env.MODE === 'development'
+
+if (isDevelopment) {
+  // Firebase Admin SDKの環境変数を設定（initializeAppより前に設定）
+  process.env.FIRESTORE_EMULATOR_HOST = '127.0.0.1:8180'
+  logger.info('Firestore Emulator環境変数を設定しました')
+}
+
 // Firebase Admin SDKを初期化
 initializeApp()
 
@@ -22,7 +33,17 @@ export const scrapeJRACalendar = onRequest(
     logger.info('JRA scraping function called')
 
     try {
-      const { year, month } = request.query
+      const year = request.query.year || request.body.year
+      const month = request.query.month || request.body.month
+      
+      logger.info('Received parameters', { 
+        body: request.body, 
+        query: request.query, 
+        year, 
+        month,
+        yearType: typeof year,
+        monthType: typeof month
+      })
 
       if (!year || !month) {
         const errorMessage = 'year and month parameters are required'
@@ -80,8 +101,8 @@ export const scrapeJRACalendar = onRequest(
       logger.error('JRA scraping failed', { error })
       
       // エラー時のログを保存
-      const errorYear = request.query.year as string
-      const errorMonth = request.query.month as string
+      const errorYear = (request.body || request.query).year as string
+      const errorMonth = (request.body || request.query).month as string
       
       await saveFunctionLog(createErrorLog(
         'scrapeJRACalendar',
@@ -111,7 +132,9 @@ export const scrapeJRARaceResult = onRequest(
     logger.info('JRA race result scraping function called')
 
     try {
-      const { year, month, day } = request.query
+      const year = request.query.year || request.body.year
+      const month = request.query.month || request.body.month
+      const day = request.query.day || request.body.day
 
       if (!year || !month || !day) {
         const errorMessage = 'year, month, and day parameters are required'
@@ -172,8 +195,8 @@ export const scrapeJRARaceResult = onRequest(
       logger.error('JRA race result scraping failed', { error })
       
       // エラー時のログを保存
-      const errorYear = request.query.year as string
-      const errorMonth = request.query.month as string
+      const errorYear = (request.body || request.query).year as string
+      const errorMonth = (request.body || request.query).month as string
       
       await saveFunctionLog(createErrorLog(
         'scrapeJRARaceResult',
@@ -203,7 +226,8 @@ export const scrapeJRACalendarWithRaceResults = onRequest(
     logger.info('JRA calendar with race results scraping function called')
 
     try {
-      const { year, month } = request.query
+      const year = request.query.year || request.body.year
+      const month = request.query.month || request.body.month
 
       if (!year || !month) {
         const errorMessage = 'year and month parameters are required'
@@ -306,8 +330,8 @@ export const scrapeJRACalendarWithRaceResults = onRequest(
       logger.error('JRA calendar with race results scraping failed', { error })
       
       // エラー時のログを保存
-      const errorYear = request.query.year as string
-      const errorMonth = request.query.month as string
+      const errorYear = (request.body || request.query).year as string
+      const errorMonth = (request.body || request.query).month as string
       
       await saveFunctionLog(createErrorLog(
         'scrapeJRACalendarWithRaceResults',

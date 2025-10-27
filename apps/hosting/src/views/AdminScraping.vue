@@ -90,6 +90,17 @@
             
             <!-- 選択されたタスクに応じた入力フィールド -->
             <div v-if="selectedTask" class="space-y-4">
+              <!-- 実行中メッセージ -->
+              <div v-if="isExecuting" class="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <div class="flex items-center space-x-3">
+                  <ProgressSpinner size="small" />
+                  <div>
+                    <p class="text-blue-800 font-medium">スクレイピング処理を実行中...</p>
+                    <p class="text-blue-600 text-sm">しばらくお待ちください</p>
+                  </div>
+                </div>
+              </div>
+              
               <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label class="block text-sm font-medium text-surface-900 mb-2">年</label>
@@ -99,6 +110,7 @@
                     :max="2030"
                     placeholder="年"
                     class="w-full"
+                    :disabled="isExecuting"
                   />
                 </div>
                 <div>
@@ -110,9 +122,10 @@
                     option-value="value"
                     placeholder="月"
                     class="w-full"
+                    :disabled="isExecuting"
                   />
                 </div>
-                <div v-if="selectedTask === 'raceResult'">
+                <div v-if="selectedTask === ScrapingTaskType.RACE_RESULT">
                   <label class="block text-sm font-medium text-surface-900 mb-2">日</label>
                   <InputNumber
                     v-model="day"
@@ -120,6 +133,7 @@
                     :max="31"
                     placeholder="日"
                     class="w-full"
+                    :disabled="isExecuting"
                   />
                 </div>
               </div>
@@ -130,7 +144,8 @@
                   :icon="getTaskIcon()"
                   :severity="getTaskSeverity()"
                   @click="executeTask"
-                  :disabled="!isFormValid"
+                  :disabled="!isFormValid || isExecuting"
+                  :loading="isExecuting"
                 />
               </div>
             </div>
@@ -233,6 +248,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useFunctionLog } from '@/composables/useFunctionLog'
+import { useCloudFunctions, ScrapingTaskType } from '@/composables/useCloudFunctions'
 import Card from 'primevue/card'
 import Button from 'primevue/button'
 import Chip from 'primevue/chip'
@@ -241,18 +257,20 @@ import Dropdown from 'primevue/dropdown'
 import InputNumber from 'primevue/inputnumber'
 
 const { logs: functionLogs, loading: functionLogLoading, error: functionLogError, fetchFunctionLogs } = useFunctionLog()
+const { callScrapingFunction } = useCloudFunctions()
 
 // タスク選択関連
-const selectedTask = ref<string | null>(null)
+const selectedTask = ref<ScrapingTaskType | null>(null)
 const year = ref<number | null>(new Date().getFullYear())
 const month = ref<number | null>(new Date().getMonth() + 1)
 const day = ref<number | null>(new Date().getDate())
+const isExecuting = ref(false)
 
 // タスクオプション
 const taskOptions = ref([
-  { label: 'カレンダーデータ取得', value: 'calendar' },
-  { label: 'レース結果データ取得', value: 'raceResult' },
-  { label: '一括データ取得', value: 'batch' }
+  { label: 'カレンダーデータ取得', value: ScrapingTaskType.CALENDAR },
+  { label: 'レース結果データ取得', value: ScrapingTaskType.RACE_RESULT },
+  { label: '一括データ取得', value: ScrapingTaskType.BATCH }
 ])
 
 // 月オプション
@@ -274,7 +292,7 @@ const monthOptions = ref([
 // フォームバリデーション
 const isFormValid = computed(() => {
   if (!selectedTask.value || !year.value || !month.value) return false
-  if (selectedTask.value === 'raceResult' && !day.value) return false
+  if (selectedTask.value === ScrapingTaskType.RACE_RESULT && !day.value) return false
   return true
 })
 
@@ -287,9 +305,9 @@ const getTaskButtonLabel = () => {
 // タスクボタンのアイコン
 const getTaskIcon = () => {
   switch (selectedTask.value) {
-    case 'calendar': return 'pi pi-calendar'
-    case 'raceResult': return 'pi pi-trophy'
-    case 'batch': return 'pi pi-download'
+    case ScrapingTaskType.CALENDAR: return 'pi pi-calendar'
+    case ScrapingTaskType.RACE_RESULT: return 'pi pi-trophy'
+    case ScrapingTaskType.BATCH: return 'pi pi-download'
     default: return 'pi pi-play'
   }
 }
@@ -297,26 +315,42 @@ const getTaskIcon = () => {
 // タスクボタンの色
 const getTaskSeverity = () => {
   switch (selectedTask.value) {
-    case 'calendar': return 'primary'
-    case 'raceResult': return 'success'
-    case 'batch': return 'info'
+    case ScrapingTaskType.CALENDAR: return 'primary'
+    case ScrapingTaskType.RACE_RESULT: return 'success'
+    case ScrapingTaskType.BATCH: return 'info'
     default: return 'primary'
   }
 }
 
 // タスク実行
 const executeTask = async () => {
-  if (!isFormValid.value) return
+  if (!isFormValid.value || isExecuting.value) return
   
-  console.log('タスク実行:', {
-    task: selectedTask.value,
-    year: year.value,
-    month: month.value,
-    day: day.value
-  })
+  isExecuting.value = true
   
-  // TODO: 実際のCloud Functions呼び出しを実装
-  await refreshData()
+  try {
+    const taskType = selectedTask.value as ScrapingTaskType
+    const params = {
+      year: year.value!,
+      month: month.value!,
+      ...(taskType === ScrapingTaskType.RACE_RESULT && { day: day.value! })
+    }
+
+    console.log('タスク実行:', { taskType, params })
+    
+    const result = await callScrapingFunction(taskType, params)
+    
+    if (result.success) {
+      console.log('タスク実行成功:', result)
+      await refreshData()
+    } else {
+      console.error('タスク実行失敗:', result.error)
+    }
+  } catch (error) {
+    console.error('タスク実行エラー:', error)
+  } finally {
+    isExecuting.value = false
+  }
 }
 
 // 統計データの計算

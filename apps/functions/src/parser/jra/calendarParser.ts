@@ -91,6 +91,8 @@ export function parseRaceElement($: cheerio.CheerioAPI, element: cheerio.Cheerio
       grade,
       venue,
       date,
+      year,
+      month,
       scrapedAt: new Date(Date.UTC(new Date().getFullYear(), new Date().getMonth(), new Date().getDate(), 0, 0, 0, 0))
     }
   } catch (error) {
