@@ -16,10 +16,6 @@ importers:
         version: 2.5.8
 
   apps/e2e:
-    dependencies:
-      firebase-admin:
-        specifier: ^12.7.0
-        version: 12.7.0(encoding@0.1.13)
     devDependencies:
       '@eslint/js':
         specifier: ^9.38.0
@@ -39,6 +35,9 @@ importers:
       eslint:
         specifier: ^9.38.0
         version: 9.38.0(jiti@2.6.1)
+      firebase-admin:
+        specifier: ^12.7.0
+        version: 12.7.0(encoding@0.1.13)
       typescript:
         specifier: ^5.2.2
         version: 5.9.3
