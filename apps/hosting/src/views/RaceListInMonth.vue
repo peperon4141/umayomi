@@ -26,19 +26,19 @@
         </div>
         
         <!-- 曜日ヘッダー -->
-        <div class="grid grid-cols-7 bg-surface-100">
+        <div class="calendar-grid bg-surface-100">
           <div v-for="day in weekDays" :key="day" 
                :class="getWeekDayClass(day)"
-               class="p-3 text-center font-semibold text-sm">
+               class="calendar-cell calendar-header">
             {{ day }}
           </div>
         </div>
         
         <!-- カレンダーグリッド -->
-        <div class="grid grid-cols-7">
+        <div class="calendar-grid">
           <div v-for="date in calendarDates" :key="date.key"
                :class="getDateCellClass(date)"
-               class="min-h-24 p-2 border-r border-b border-surface-200 relative">
+               class="calendar-cell">
             
             <!-- 日付 -->
             <div class="text-sm font-medium mb-1">{{ date.day }}</div>
@@ -195,19 +195,6 @@
       </div>
     </div>
 
-    <!-- データなし -->
-    <div v-else-if="!loading && !error" class="flex items-center justify-center min-h-96">
-      <div class="text-center">
-        <i class="pi pi-calendar text-6xl text-gray-400 mb-4"></i>
-        <h3 class="text-xl font-semibold text-gray-900 mb-2">レースデータがありません</h3>
-        <p class="text-gray-600 mb-6">{{ year }}年{{ month }}月のレース結果が見つかりませんでした。</p>
-        <Button
-          label="データを再読み込み"
-          icon="pi pi-refresh"
-          @click="loadRaces"
-        />
-      </div>
-    </div>
   </AppLayout>
 </template>
 
@@ -394,10 +381,9 @@ onMounted(() => {
 <style scoped>
 .calendar-grid {
   display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
+  grid-template-columns: repeat(7, 1fr);
   gap: 0;
   width: 100%;
-  table-layout: fixed;
 }
 
 .calendar-cell {
@@ -406,24 +392,26 @@ onMounted(() => {
   border-right: 1px solid var(--p-surface-200);
   border-bottom: 1px solid var(--p-surface-200);
   position: relative;
-  width: 100%;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  width: 100%;
 }
 
-.calendar-cell:last-child {
+.calendar-cell:nth-child(7n) {
   border-right: none;
 }
 
 /* 曜日ヘッダー用のスタイル */
-.calendar-grid.bg-surface-100 .calendar-cell {
+.calendar-header {
   min-height: 3rem;
   padding: 0.75rem 0.5rem;
   border-bottom: 2px solid var(--p-surface-200);
   justify-content: center;
   align-items: center;
+  font-weight: 600;
+  font-size: 0.875rem;
 }
 
 /* レスポンシブ対応 */
@@ -434,9 +422,10 @@ onMounted(() => {
     font-size: 0.75rem;
   }
   
-  .calendar-grid.bg-surface-100 .calendar-cell {
+  .calendar-header {
     min-height: 2rem;
     padding: 0.5rem 0.25rem;
+    font-size: 0.75rem;
   }
 }
 
@@ -448,11 +437,5 @@ onMounted(() => {
 
 .calendar-container .calendar-grid {
   min-width: 100%;
-}
-
-/* 各列の幅を強制的に等間隔にする */
-.calendar-grid > * {
-  flex: 1 1 0;
-  min-width: 0;
 }
 </style>
