@@ -129,7 +129,7 @@ test.describe('ログインフロー', () => {
     
     // 管理画面にアクセスできることを確認
     await expect(page).toHaveURL('/admin')
-    await expect(page.locator('h1')).toBeVisible()
+    await expect(page.locator('h1:has-text("管理ダッシュボード")')).toBeVisible()
   })
 
   test('GoogleログインでAdminユーザーは、アドミンユーザーページにアクセスできる', async ({ page }) => {
@@ -145,6 +145,6 @@ test.describe('ログインフロー', () => {
     
     // 管理画面にアクセスできることを確認
     await expect(page).toHaveURL('/admin')
-    await expect(page.locator('h1')).toBeVisible()
+    await expect(page.locator('h1:has-text("管理ダッシュボード")')).toBeVisible()
   })
 })

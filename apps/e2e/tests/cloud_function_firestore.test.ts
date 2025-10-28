@@ -1,6 +1,5 @@
 import { test, expect } from '@playwright/test'
 import { initializeApp, getApps } from 'firebase-admin/app'
-import { getFirestore } from 'firebase-admin/firestore'
 
 // Firebase Emulator用の環境変数を設定（開発時のみ）
 process.env.FIRESTORE_EMULATOR_HOST = '127.0.0.1:8180'
@@ -14,8 +13,6 @@ if (!getApps().length) {
     // Firebase Emulatorを使用するため、認証情報は不要
   })
 }
-
-const db = getFirestore()
 
 // // Cloud Functionsテスト用の設定
 // test.use({
