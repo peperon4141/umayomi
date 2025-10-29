@@ -164,13 +164,7 @@
                 <h3 class="text-xl font-bold text-surface-900">Functions Log</h3>
                 <p class="text-surface-600 mt-1">スクレイピング処理の実行履歴</p>
               </div>
-              <Button
-                icon="pi pi-refresh"
-                severity="secondary"
-                text
-                @click="refreshData"
-                v-tooltip.top="'ログを更新'"
-              />
+              <Button icon="pi pi-refresh" severity="secondary" text @click="refreshData" v-tooltip.top="'ログを更新'" />
             </div>
           </div>
         </template>
@@ -196,26 +190,11 @@
                    class="border rounded-lg p-4">
                 <div class="flex justify-between items-start mb-2">
                   <div class="flex items-center gap-2">
-                    <Chip 
-                      :label="log.functionName" 
-                      :severity="log.success ? 'success' : 'danger'"
-                      size="small" 
-                    />
-                    <Chip 
-                      :label="`${log.year}年${log.month}月`" 
-                      severity="info"
-                      size="small" 
-                    />
-                    <Chip 
-                      v-if="log.executionTimeMs"
-                      :label="`${log.executionTimeMs}ms`" 
-                      severity="secondary"
-                      size="small" 
-                    />
+                    <Chip :label="log.functionName" :severity="log.success ? 'success' : 'danger'" size="small" />
+                    <Chip :label="`${log.year}年${log.month}月`" severity="info" size="small" />
+                    <Chip v-if="log.executionTimeMs" :label="`${log.executionTimeMs}ms`" severity="secondary" size="small" />
                   </div>
-                  <div class="text-sm text-surface-500">
-                    {{ formatLogDate(log.timestamp) }}
-                  </div>
+                  <div class="text-sm text-surface-500">{{ formatLogDate(log.timestamp) }}</div>
                 </div>
                 
                 <p class="text-sm font-medium mb-2">{{ log.message }}</p>

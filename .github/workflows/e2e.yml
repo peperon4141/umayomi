@@ -48,7 +48,8 @@ jobs:
       
     - name: Start Firebase emulators
       run: |
-        make dev
+        make dev &
+        sleep 20
         
     - name: Wait for Firebase emulators
       run: |
