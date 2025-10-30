@@ -1,0 +1,103 @@
+{
+  "success": true,
+  "racesCount": 12,
+  "savedCount": 12,
+  "races": [
+    {
+      "raceNumber": 1,
+      "raceName": "京成杯オータムH",
+      "grade": "GⅢ",
+      "venue": "中山",
+      "date": "2025-09-06T00:00:00.000Z",
+      "scrapedAt": "2025-01-26T00:00:00.000Z"
+    },
+    {
+      "raceNumber": 2,
+      "raceName": "札幌2歳S",
+      "grade": "GⅢ",
+      "venue": "札幌",
+      "date": "2025-09-06T00:00:00.000Z",
+      "scrapedAt": "2025-01-26T00:00:00.000Z"
+    },
+    {
+      "raceNumber": 3,
+      "raceName": "紫苑S",
+      "grade": "GⅡ",
+      "venue": "中山",
+      "date": "2025-09-07T00:00:00.000Z",
+      "scrapedAt": "2025-01-26T00:00:00.000Z"
+    },
+    {
+      "raceNumber": 4,
+      "raceName": "セントウルS",
+      "grade": "GⅡ",
+      "venue": "阪神",
+      "date": "2025-09-07T00:00:00.000Z",
+      "scrapedAt": "2025-01-26T00:00:00.000Z"
+    },
+    {
+      "raceNumber": 5,
+      "raceName": "チャレンジC",
+      "grade": "GⅢ",
+      "venue": "阪神",
+      "date": "2025-09-13T00:00:00.000Z",
+      "scrapedAt": "2025-01-26T00:00:00.000Z"
+    },
+    {
+      "raceNumber": 6,
+      "raceName": "ローズS",
+      "grade": "GⅡ",
+      "venue": "阪神",
+      "date": "2025-09-14T00:00:00.000Z",
+      "scrapedAt": "2025-01-26T00:00:00.000Z"
+    },
+    {
+      "raceNumber": 7,
+      "raceName": "セントライト記念",
+      "grade": "GⅡ",
+      "venue": "中山",
+      "date": "2025-09-15T00:00:00.000Z",
+      "scrapedAt": "2025-01-26T00:00:00.000Z"
+    },
+    {
+      "raceNumber": 8,
+      "raceName": "阪神ジャンプS",
+      "grade": "GⅢ",
+      "venue": "阪神",
+      "date": "2025-09-20T00:00:00.000Z",
+      "scrapedAt": "2025-01-26T00:00:00.000Z"
+    },
+    {
+      "raceNumber": 9,
+      "raceName": "オールカマー",
+      "grade": "GⅡ",
+      "venue": "中山",
+      "date": "2025-09-21T00:00:00.000Z",
+      "scrapedAt": "2025-01-26T00:00:00.000Z"
+    },
+    {
+      "raceNumber": 10,
+      "raceName": "神戸新聞杯",
+      "grade": "GⅡ",
+      "venue": "阪神",
+      "date": "2025-09-21T00:00:00.000Z",
+      "scrapedAt": "2025-01-26T00:00:00.000Z"
+    },
+    {
+      "raceNumber": 11,
+      "raceName": "シリウスS",
+      "grade": "GⅢ",
+      "venue": "阪神",
+      "date": "2025-09-27T00:00:00.000Z",
+      "scrapedAt": "2025-01-26T00:00:00.000Z"
+    },
+    {
+      "raceNumber": 12,
+      "raceName": "スプリンターズS",
+      "grade": "GⅠ",
+      "venue": "中山",
+      "date": "2025-09-28T00:00:00.000Z",
+      "scrapedAt": "2025-01-26T00:00:00.000Z"
+    }
+  ]
+}

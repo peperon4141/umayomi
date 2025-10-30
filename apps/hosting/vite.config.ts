@@ -25,6 +25,7 @@ export default defineConfig(({ mode }) => {
     server: {
       port: 3100,
       host: '127.0.0.1',
+      clearScreen: false
     },
     build: {
       outDir: '../firebase/hosting_contents',

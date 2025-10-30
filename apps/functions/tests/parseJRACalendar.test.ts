@@ -4,26 +4,52 @@ import { join } from 'path'
 import { parseJRACalendar, extractRaceElements, parseRaceElement } from '../src/parser/jra/calendarParser'
 
 describe('parseJRACalendar', () => {
-  // テスト用のHTMLファイルと期待値を読み込み
-  const htmlPath = join(__dirname, 'mock', 'jra', 'keiba_calendar2025_oct.html')
-  const expectedPath = join(__dirname, 'mock', 'jra', 'keiba_calendar2025_oct_expected.json')
-  
-  const htmlContent = readFileSync(htmlPath, 'utf-8')
-  const expectedData = JSON.parse(readFileSync(expectedPath, 'utf-8'))
+  describe('2025年10月', () => {
+    // テスト用のHTMLファイルと期待値を読み込み
+    const htmlPath = join(__dirname, 'mock', 'jra', 'keiba_calendar2025_oct.html')
+    const expectedPath = join(__dirname, 'mock', 'jra', 'keiba_calendar2025_oct_expected.json')
+    
+    const htmlContent = readFileSync(htmlPath, 'utf-8')
+    const expectedData = JSON.parse(readFileSync(expectedPath, 'utf-8'))
 
-  it('HTMLからレース情報を正しく抽出できる', () => {
-    const result = parseJRACalendar(htmlContent, 2025, 10)
+    it('HTMLからレース情報を正しく抽出できる', () => {
+      const result = parseJRACalendar(htmlContent, 2025, 10)
+      
+      // 結果が期待値と一致することを確認
+      expect(result).toBeDefined()
+      expect(result.length).toBeGreaterThan(0)
+      
+      // 期待値のレース名が含まれていることを確認
+      const resultRaceNames = result.map((race: any) => race.raceName)
+      const expectedRaceNames = expectedData.races.map((race: any) => race.raceName)
+      
+      expectedRaceNames.forEach((expectedName: string) => {
+        expect(resultRaceNames).toContain(expectedName)
+      })
+    })
+  })
+
+  describe('2025年9月', () => {
+    const htmlPath = join(__dirname, 'mock', 'jra', 'keiba_calendar2025_sep.html')
+    const expectedPath = join(__dirname, 'mock', 'jra', 'keiba_calendar2025_sep_expected.json')
     
-    // 結果が期待値と一致することを確認
-    expect(result).toBeDefined()
-    expect(result.length).toBeGreaterThan(0)
-    
-    // 期待値のレース名が含まれていることを確認
-    const resultRaceNames = result.map((race: any) => race.raceName)
-    const expectedRaceNames = expectedData.races.map((race: any) => race.raceName)
-    
-    expectedRaceNames.forEach((expectedName: string) => {
-      expect(resultRaceNames).toContain(expectedName)
+    const htmlContent = readFileSync(htmlPath, 'utf-8')
+    const expectedData = JSON.parse(readFileSync(expectedPath, 'utf-8'))
+
+    it('9月のHTMLから9日間のレース情報を正しく抽出できる', () => {
+      const result = parseJRACalendar(htmlContent, 2025, 9)
+      
+      // 結果が期待値と一致することを確認
+      expect(result).toBeDefined()
+      expect(result.length).toBe(expectedData.racesCount)
+      
+      // 期待値のレース名が含まれていることを確認
+      const resultRaceNames = result.map((race: any) => race.raceName)
+      const expectedRaceNames = expectedData.races.map((race: any) => race.raceName)
+      
+      expectedRaceNames.forEach((expectedName: string) => {
+        expect(resultRaceNames).toContain(expectedName)
+      })
     })
   })
 })

@@ -1,12 +1,12 @@
 {
-  "name": "umayomi-functions",
+  "name": "functions",
   "version": "1.0.0",
   "description": "Umayomi Cloud Functions",
   "main": "lib/src/index.js",
   "scripts": {
     "dev": "pnpm run build:watch",
     "build": "tsc",
-    "build:watch": "tsc --watch",
+    "build:watch": "tsc --watch --preserveWatchOutput",
     "serve": "npm run build && firebase emulators:start --only functions",
     "shell": "npm run build && firebase functions:shell",
     "start": "npm run shell",

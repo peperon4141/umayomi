@@ -107,7 +107,7 @@ export function parseRaceElement($: cheerio.CheerioAPI, element: cheerio.Cheerio
 function extractRaceName(text: string): string | null {
   // グレード情報を除去してレース名を抽出
   const gradePatterns = [
-    /\(GⅠ\)/, /\(GⅡ\)/, /\(GⅢ\)/, /\(G1\)/, /\(G2\)/, /\(G3\)/, /\(J・GⅡ\)/
+    /\(GⅠ\)/, /\(GⅡ\)/, /\(GⅢ\)/, /\(G1\)/, /\(G2\)/, /\(G3\)/, /\(J・GⅡ\)/, /\(J・GⅢ\)/
   ]
   
   let raceName = text
@@ -127,6 +127,7 @@ function extractGrade(text: string): string | null {
   if (text.includes('GⅡ') || text.includes('G2')) return 'GⅡ'
   if (text.includes('GⅢ') || text.includes('G3')) return 'GⅢ'
   if (text.includes('J・GⅡ')) return 'J・GⅡ'
+  if (text.includes('J・GⅢ')) return 'GⅢ'
   return null
 }
 
@@ -134,27 +135,19 @@ function extractGrade(text: string): string | null {
  * 親要素から競馬場を抽出
  */
 function extractVenueFromParent($: cheerio.CheerioAPI, element: cheerio.Cheerio<any>): string | null {
-  // レース要素の親のtd要素から競馬場を抽出
-  const $td = element.closest('td')
-  if ($td.length === 0) return null
+  // レース要素の親のk_line要素から競馬場を抽出
+  const $kline = element.closest('.k_line')
+  if ($kline.length === 0) return null
   
-  const tdText = $td.text()
+  // k_line要素内の.rc要素から競馬場名を抽出
+  const venue = $kline.find('.rc').text().trim()
   
-  // レース名の前にある競馬場名を抽出
-  const raceName = extractRaceName(element.text())
-  if (!raceName) return null
+  if (!venue) return null
   
-  // 正規表現で競馬場名を抽出（レース名の直前）
-  const venuePatterns = [
-    new RegExp(`(東京|京都|新潟)${raceName}`),
-    new RegExp(`(東京|京都|新潟)\\s*${raceName}`)
-  ]
-  
-  for (const pattern of venuePatterns) {
-    const match = tdText.match(pattern)
-    if (match) {
-      return match[1]
-    }
+  // JRAの競馬場名をそのまま返す
+  const validVenues = ['東京', '京都', '新潟', '中山', '阪神', '札幌', '函館', '福島', '中京', '小倉']
+  if (validVenues.includes(venue)) {
+    return venue
   }
   
   return null
