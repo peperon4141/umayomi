@@ -1,7 +1,7 @@
 <template>
   <AppLayout>
     <!-- ページヘッダー -->
-    <div class="mb-3">
+    <div class="mb-2">
       <h1 class="text-2xl font-bold text-gray-900">{{ year }}年の競馬レース一覧</h1>
       <p class="text-sm text-gray-600 mt-1">開催月を選択してください</p>
     </div>
@@ -55,7 +55,7 @@
     </div>
 
     <!-- 月一覧 -->
-    <div v-else class="max-w-7xl mx-auto px-2 sm:px-4 lg:px-6 py-2">
+    <div v-else class="max-w-7xl mx-auto p-2">
       <!-- カード表示 -->
       <div v-if="viewMode === 'card'" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <Card

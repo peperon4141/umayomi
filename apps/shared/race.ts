@@ -14,12 +14,13 @@ export interface Race {
   racecourse: string
   raceNumber: number
   raceName: string
-  grade: string
-  distance: number
-  surface: string
-  weather: string
-  trackCondition: string
-  results: RaceResult[]
+  grade?: string
+  distance?: number
+  surface?: string
+  weather?: string
+  trackCondition?: string
+  startTime?: Date | string | any
+  results?: RaceResult[]
   scrapedAt: Date
 }
 

@@ -1,6 +1,6 @@
 # Umayomi Horse Racing Prediction Service Makefile
 
-.PHONY: dev format e2e quality-check build test scrape-jra scrape-jra-manual save-jra-html export-firestore export-firestore-force
+.PHONY: dev format e2e check build test scrape-jra scrape-jra-manual save-jra-html export-firestore export-firestore-force
 
 install:
 	pnpm install
@@ -41,7 +41,7 @@ build:
 	pnpm turbo build
 
 # 🚀 統合品質チェック（必須）
-quality-check:
+check:
 	make build
 	make format
 	make e2e

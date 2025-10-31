@@ -1,13 +1,13 @@
 <template>
   <AppLayout>
     <!-- ページヘッダー -->
-    <div class="mb-6">
+    <div class="mb-2">
       <h1 class="text-3xl font-bold text-gray-900">{{ year }}年{{ month }}月のレース一覧</h1>
       <p class="text-gray-600 mt-1">{{ races.length }}件のレースが見つかりました</p>
     </div>
 
     <!-- カレンダー表示 -->
-    <div v-if="viewMode === 'calendar'" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div v-if="viewMode === 'calendar'" class="max-w-7xl mx-auto p-2">
       <div class="bg-white rounded-lg shadow overflow-hidden calendar-container">
         <!-- カレンダーヘッダー -->
         <div class="bg-surface-900 text-surface-0 p-4">
@@ -181,7 +181,7 @@
             <div class="bg-surface-900 text-surface-0 p-4">
               <div class="flex justify-between items-center">
                 <h3 class="text-lg font-bold">{{ race.raceNumber }}R {{ race.raceName }}</h3>
-                <Chip :label="race.grade" :severity="getGradeSeverity(race.grade)" size="small" />
+                <Chip v-if="race.grade" :label="race.grade" :severity="getGradeSeverity(race.grade)" size="small" />
               </div>
               <div class="flex gap-2 mt-2">
                 <Chip :label="race.distance ? `${race.distance}m` : '距離未定'" size="small" severity="secondary" />
@@ -293,7 +293,8 @@ const loadRaces = async () => {
 }
 
 // グレードの重要度を取得
-const getGradeSeverity = (grade: string) => {
+const getGradeSeverity = (grade: string | undefined) => {
+  if (!grade) return 'secondary'
   switch (grade) {
     case 'GⅠ':
       return 'danger'

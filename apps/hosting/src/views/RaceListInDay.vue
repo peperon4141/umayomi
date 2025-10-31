@@ -1,32 +1,22 @@
 <template>
   <AppLayout>
     <!-- ページヘッダー -->
-    <div class="mb-4 sm:mb-6">
-      <h1 class="text-2xl sm:text-3xl font-bold text-surface-900">{{ dayName }}</h1>
+    <div class="mb-2">
+      <div class="flex items-center gap-3">
+        <h1 class="text-2xl sm:text-3xl font-bold text-surface-900">{{ dayName }}</h1>
+        <a
+          :href="getJRAUrlForDay()"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-primary hover:text-primary-600 transition-colors inline-flex items-center"
+          v-tooltip.top="'JRA公式サイトでレース結果を見る'"
+        >
+          <i class="pi pi-external-link text-lg"></i>
+        </a>
+      </div>
       <p class="text-sm sm:text-base text-surface-600 mt-1">その日のレース一覧</p>
     </div>
 
-    <!-- 表示切り替えボタン -->
-    <div class="mb-4 sm:mb-6 flex justify-end">
-      <div class="flex bg-surface-100 rounded-lg p-1">
-        <Button
-          :class="{ 'bg-surface-0 shadow-sm': viewMode === 'card' }"
-          icon="pi pi-th-large"
-          @click="viewMode = 'card'"
-          text
-          rounded
-          size="small"
-        />
-        <Button
-          :class="{ 'bg-surface-0 shadow-sm': viewMode === 'list' }"
-          icon="pi pi-list"
-          @click="viewMode = 'list'"
-          text
-          rounded
-          size="small"
-        />
-      </div>
-    </div>
 
     <!-- ローディング -->
     <div v-if="loading" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -54,94 +44,76 @@
       </div>
     </div>
 
-    <!-- レース一覧 -->
-    <div v-else class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <!-- カード表示 -->
-      <div v-if="viewMode === 'card'" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <Card
-          v-for="race in dayRaces"
-          :key="race.id"
-          class="cursor-pointer hover:shadow-lg transition-shadow duration-200 rounded-xl overflow-hidden"
-          @click="selectRace(race)"
+    <!-- レース一覧（競馬場ごとにグループ化、横並び配置） -->
+    <div v-else class="max-w-7xl mx-auto p-2">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- 競馬場ごとのセクション -->
+        <div 
+          v-for="(venueRaces, venue) in racesByVenue" 
+          :key="venue"
+          class="bg-surface-0 rounded-lg shadow-sm overflow-hidden"
         >
-          <template #header>
-            <div class="bg-surface-900 text-surface-0 p-4 text-center">
-              <h3 class="text-lg font-bold">{{ race.raceName }}</h3>
-              <p class="text-sm opacity-90">{{ race.racecourse }}</p>
-            </div>
-          </template>
-          <template #content>
-            <div class="p-4">
-              <div class="flex justify-between items-center mb-4">
-                <span class="text-sm text-surface-600">距離</span>
-                <Chip :label="race.distance ? `${race.distance}m` : '距離未定'" severity="info" />
-              </div>
-              <div class="flex justify-between items-center mb-4">
-                <span class="text-sm text-surface-600">グレード</span>
-                <Chip :label="race.grade" :severity="getGradeSeverity(race.grade)" />
-              </div>
-              <div class="flex justify-between items-center">
-                <span class="text-sm text-surface-600">発走時刻</span>
-                <span class="text-sm font-medium">{{ race.raceName }}</span>
-              </div>
-            </div>
-          </template>
-        </Card>
-      </div>
-
-      <!-- DataTable表示 -->
-      <div v-else>
-        <DataTable 
-          :value="dayRaces" 
-          :paginator="true" 
-          :rows="10"
-          :rowsPerPageOptions="[5, 10, 20]"
-          paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-          currentPageReportTemplate="全 {totalRecords} 件中 {first} 〜 {last} 件を表示"
-          responsiveLayout="scroll"
-          :scrollable="true"
-          scrollHeight="400px"
-          class="p-datatable-sm"
-        >
-          <Column field="raceName" header="レース名" :sortable="true">
-            <template #body="slotProps">
-              <div class="font-semibold">{{ slotProps.data.raceName }}</div>
-              <div class="text-sm text-surface-600">{{ slotProps.data.racecourse }}</div>
-            </template>
-          </Column>
-          <Column field="distance" header="距離" :sortable="true">
-            <template #body="slotProps">
-              <Chip :label="`${slotProps.data.distance}m`" severity="info" size="small" />
-            </template>
-          </Column>
-          <Column field="grade" header="グレード" :sortable="true">
-            <template #body="slotProps">
-              <Chip :label="slotProps.data.grade" :severity="getGradeSeverity(slotProps.data.grade)" size="small" />
-            </template>
-          </Column>
-          <Column field="raceName" header="レース名" :sortable="true">
-            <template #body="slotProps">
-              <span class="font-medium">{{ slotProps.data.raceName }}</span>
-            </template>
-          </Column>
-          <Column header="アクション" :exportable="false">
-            <template #body="slotProps">
-              <Button
-                label="詳細"
-                icon="pi pi-arrow-right"
-                size="small"
-                @click="selectRace(slotProps.data)"
-              />
-            </template>
-          </Column>
-        </DataTable>
+          <!-- 競馬場ヘッダー -->
+          <div class="bg-green-700 text-surface-0 px-6 py-3">
+            <h2 class="text-lg font-bold">{{ venue }}</h2>
+          </div>
+          
+          <!-- レーステーブル -->
+          <div class="overflow-x-auto">
+            <table class="w-full border-collapse">
+              <thead>
+                <tr class="bg-green-800 text-surface-0">
+                  <th class="p-2 text-left font-semibold border-r border-green-900">レース<br>番号</th>
+                  <th class="p-2 text-left font-semibold border-r border-green-900">レース名・条件</th>
+                  <th class="p-2 text-left font-semibold">発走時刻</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr 
+                  v-for="race in venueRaces" 
+                  :key="race.id"
+                  class="border-b border-surface-200 hover:bg-surface-50 cursor-pointer transition-colors"
+                  @click="selectRace(race)"
+                >
+                  <!-- レース番号 -->
+                  <td class="p-2 bg-green-50 border-r border-surface-200">
+                    <div class="text-center">
+                      <div class="text-lg font-bold text-green-800">{{ race.raceNumber }}</div>
+                      <div class="text-xs text-green-600">レース</div>
+                    </div>
+                  </td>
+                  
+                  <!-- レース名・条件 -->
+                  <td class="p-2 border-r border-surface-200">
+                    <div class="space-y-1">
+                      <div class="font-semibold text-surface-900">{{ race.raceName }}</div>
+                      <div class="text-sm text-surface-600">
+                        <span v-if="race.grade">{{ race.grade }} / </span>
+                        <span v-if="race.distance">{{ formatDistance(race.distance) }} / </span>
+                        <span>{{ race.surface || 'コース未定' }}</span>
+                      </div>
+                    </div>
+                  </td>
+                  
+                  <!-- 発走時刻 -->
+                  <td class="p-2 text-center">
+                    <span v-if="race.startTime" class="font-medium text-surface-900">
+                      {{ formatStartTime(race.startTime) }}
+                    </span>
+                    <span v-else class="text-surface-400">未定</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
   </AppLayout>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useNavigation } from '@/composables/useNavigation'
 import { useRace } from '@/composables/useRace'
 import AppLayout from '@/layouts/AppLayout.vue'
@@ -149,27 +121,93 @@ import type { Race } from '../../../shared/race'
 import { convertVenueToId } from '@/router/routeCalculator'
 import { getVenueNameFromId } from '@/entity'
 import { RouteName } from '@/router/routeCalculator'
-import Card from 'primevue/card'
-import Chip from 'primevue/chip'
-import Button from 'primevue/button'
-import DataTable from 'primevue/datatable'
-import Column from 'primevue/column'
 
 const { navigateTo, navigateTo404, getParams, getQuery } = useNavigation()
 const { races, loading, error, fetchOctoberRaces } = useRace()
 
 const dayRaces = ref<Race[]>([])
 const dayName = ref('')
-const viewMode = ref<'card' | 'list'>('card')
 
-const getGradeSeverity = (grade: string) => {
-  switch (grade) {
-    case 'GⅠ': return 'danger'
-    case 'GⅡ': return 'warning'
-    case 'GⅢ': return 'info'
-    case 'オープン': return 'success'
-    default: return 'secondary'
+// 競馬場ごとにレースをグループ化
+const racesByVenue = computed(() => {
+  const grouped: { [key: string]: Race[] } = {}
+  
+  dayRaces.value.forEach(race => {
+    // 後方互換性のため、racecourseまたはvenueを確認
+    const venue = (race as any).racecourse || (race as any).venue || '不明'
+    if (!grouped[venue]) {
+      grouped[venue] = []
+    }
+    grouped[venue].push(race)
+  })
+  
+  // レース番号でソート
+  Object.keys(grouped).forEach(venue => {
+    grouped[venue].sort((a, b) => (a.raceNumber || 0) - (b.raceNumber || 0))
+  })
+  
+  return grouped
+})
+
+// 距離をフォーマット
+const formatDistance = (distance: number | null | undefined): string => {
+  if (!distance) return '距離未定'
+  return `${distance.toLocaleString()}m`
+}
+
+// 発走時刻をフォーマット
+const formatStartTime = (startTime: any): string => {
+  if (!startTime) return '未定'
+  
+  // FirestoreのTimestampオブジェクトの場合
+  if (startTime && typeof startTime === 'object' && 'seconds' in startTime) {
+    const date = new Date(startTime.seconds * 1000)
+    const hours = date.getHours()
+    const minutes = date.getMinutes()
+    return `${hours}時${minutes.toString().padStart(2, '0')}分`
   }
+  
+  // Dateオブジェクトの場合
+  if (startTime instanceof Date) {
+    const hours = startTime.getHours()
+    const minutes = startTime.getMinutes()
+    return `${hours}時${minutes.toString().padStart(2, '0')}分`
+  }
+  
+  // 文字列の場合（"15:40"形式）
+  if (typeof startTime === 'string') {
+    const [hours, minutes] = startTime.split(':')
+    if (hours && minutes) {
+      return `${parseInt(hours)}時${minutes}分`
+    }
+  }
+  
+  return '未定'
+}
+
+// その日のJRAレース結果ページURLを生成
+const getJRAUrlForDay = (): string => {
+  const params = getParams()
+  const yearParam = params.year
+  const monthParam = params.month
+  const dayParam = params.day
+  
+  if (!yearParam || !monthParam || !dayParam) {
+    return '#'
+  }
+  
+  const year = parseInt(yearParam)
+  const month = parseInt(monthParam)
+  const day = parseInt(dayParam)
+  
+  if (isNaN(year) || isNaN(month) || isNaN(day)) {
+    return '#'
+  }
+  
+  const monthStr = month.toString().padStart(2, '0')
+  const dayStr = day.toString().padStart(2, '0')
+  
+  return `https://www.jra.go.jp/keiba/calendar${year}/${year}/${month}/${monthStr}${dayStr}.html`
 }
 
 // その日のレースデータを取得
@@ -205,7 +243,9 @@ const loadDayRacesByPlace = async (year: number, month: number, day: number, pla
     // 指定された日付と競馬場のレースをフィルタリング
     const filteredRaces = races.value.filter(race => {
       const raceDate = race.date instanceof Date ? race.date : (race.date as any).toDate()
-      const venueId = convertVenueToId(race.racecourse || '東京')
+      // 後方互換性のため、racecourseまたはvenueを確認
+  const venue = (race as any).racecourse || (race as any).venue || '東京'
+  const venueId = convertVenueToId(venue)
       return raceDate.getFullYear() === year && 
              raceDate.getMonth() === month - 1 && 
              raceDate.getDate() === day &&
@@ -245,7 +285,9 @@ const selectRace = (race: Race) => {
     return
   }
   
-  const venueId = convertVenueToId(race.racecourse || '東京')
+  // 後方互換性のため、racecourseまたはvenueを確認
+  const venue = (race as any).racecourse || (race as any).venue || '東京'
+  const venueId = convertVenueToId(venue)
   navigateTo(RouteName.RACE_DETAIL, { year, month, placeId: venueId, raceId: race.id })
 }
 

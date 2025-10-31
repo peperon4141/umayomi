@@ -49,16 +49,28 @@ export async function saveRacesToFirestore(races: any[]): Promise<number> {
     const batch = db.batch()
     
     races.forEach(race => {
-      const raceId = `${race.date.toISOString().split('T')[0]}_${race.venue}_${race.raceNumber}`
+      // venueをracecourseにマッピング（後方互換性のため両方を確認）
+      const venue = race.venue || race.racecourse
+      const raceId = `${race.date.toISOString().split('T')[0]}_${venue}_${race.raceNumber}`
       const docRef = db.collection('races').doc(raceId)
       
       const raceData = {
         ...race,
+        // venueをracecourseに統一
+        racecourse: venue,
+        venue: undefined, // 古いフィールドを削除
         date: race.date,
         scrapedAt: race.scrapedAt,
         createdAt: new Date(),
         updatedAt: new Date()
       }
+      
+      // undefinedフィールドを削除
+      Object.keys(raceData).forEach(key => {
+        if (raceData[key] === undefined) {
+          delete raceData[key]
+        }
+      })
       
       batch.set(docRef, raceData)
     })

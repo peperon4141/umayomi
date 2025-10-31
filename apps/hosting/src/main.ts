@@ -3,6 +3,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import PrimeVue from 'primevue/config'
 import ConfirmationService from 'primevue/confirmationservice'
 import ToastService from 'primevue/toastservice'
+import Tooltip from 'primevue/tooltip'
 import 'primeflex/primeflex.css'
 
 import App from './App.vue'
@@ -63,5 +64,6 @@ app.use(router)
 app.use(PrimeVue, primeVueConfig)
 app.use(ConfirmationService)
 app.use(ToastService)
+app.directive('tooltip', Tooltip)
 
 app.mount('#app')

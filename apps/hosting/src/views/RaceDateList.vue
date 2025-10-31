@@ -34,7 +34,7 @@
                   </div>
                   <div class="text-surface-700 text-xs">{{ race.raceName }}</div>
                   <div class="flex gap-1 flex-wrap">
-                    <Chip :label="race.grade" size="small" :severity="getGradeSeverity(race.grade)" class="text-xs" />
+                    <Chip v-if="race.grade" :label="race.grade" size="small" :severity="getGradeSeverity(race.grade)" class="text-xs" />
                     <Chip :label="`${race.distance}m`" size="small" severity="secondary" class="text-xs" />
                     <Chip :label="race.surface" size="small" severity="contrast" class="text-xs" />
                   </div>
@@ -127,7 +127,8 @@ const selectDate = (day: any) => {
   navigateTo(RouteName.RACE_LIST_IN_DAY, { year, month, day: dayNumber })
 }
 
-const getGradeSeverity = (grade: string) => {
+const getGradeSeverity = (grade: string | undefined) => {
+  if (!grade) return 'secondary'
   switch (grade) {
     case 'GⅠ': return 'danger'
     case 'GⅡ': return 'warning'

@@ -1,7 +1,7 @@
 <template>
   <AppLayout>
     <!-- ページヘッダー -->
-    <div v-if="raceDetail" class="mb-6">
+    <div v-if="raceDetail" class="mb-2">
       <h1 class="text-3xl font-bold text-gray-900">{{ raceDetail.raceNumber }}R {{ raceDetail.raceName }}</h1>
       <p class="text-gray-600 mt-1">{{ raceDetail.racecourse }} - {{ formatDate(raceDetail.date) }}</p>
       
@@ -44,7 +44,7 @@
     </div>
 
     <!-- レース詳細 -->
-    <div v-else-if="raceDetail" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div v-else-if="raceDetail" class="max-w-7xl mx-auto p-2">
       <!-- レース結果 -->
       <Card>
             <template #header>
@@ -133,7 +133,8 @@ const formatDate = (date: any) => {
 }
 
 
-const getGradeSeverity = (grade: string) => {
+const getGradeSeverity = (grade: string | undefined) => {
+  if (!grade) return 'contrast'
   switch (grade) {
     case 'GⅠ':
       return 'danger'

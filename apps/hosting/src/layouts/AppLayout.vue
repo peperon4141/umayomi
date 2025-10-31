@@ -133,15 +133,6 @@ const sidebarMenuItems = computed(() => [
         sidebarOpen.value = false // メニューを閉じる
       } 
     },
-    { 
-      label: '設定', 
-      icon: 'pi pi-cog', 
-      command: () => { 
-        // 設定ページへの遷移（将来実装）
-        console.log('設定ページへ遷移')
-        sidebarOpen.value = false
-      } 
-    },
     ...(isAdmin.value ? [{ 
       label: '管理者画面', 
       icon: 'pi pi-shield', 
