@@ -1,13 +1,13 @@
 <template>
   <AppLayout>
     <!-- ページヘッダー -->
-    <div class="mb-6">
+    <div class="mb-2">
       <h1 class="text-3xl font-bold text-surface-900">{{ monthName }}</h1>
       <p class="text-surface-600 mt-1">開催日を選択してください</p>
     </div>
 
     <!-- 日付一覧 -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div class="max-w-7xl mx-auto px-2 sm:px-4 py-2 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
         <Card
           v-for="day in raceDays"
           :key="day.id"
@@ -15,14 +15,14 @@
           @click="selectDate(day)"
         >
           <template #header>
-            <div class="bg-surface-900 text-surface-0 p-4 text-center">
+            <div class="bg-surface-900 text-surface-0 p-3 text-center">
               <h3 class="text-lg font-bold">{{ day.date }}</h3>
               <p class="text-sm opacity-90">{{ day.venue }}</p>
             </div>
           </template>
           <template #content>
-            <div class="p-4">
-              <div class="flex justify-between items-center mb-4">
+            <div class="p-3">
+              <div class="flex justify-between items-center mb-3">
                 <span class="text-sm text-surface-600">レース数</span>
                 <Chip :label="`${day.races.length}レース`" severity="info" />
               </div>

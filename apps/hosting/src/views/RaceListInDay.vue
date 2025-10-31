@@ -19,7 +19,7 @@
 
 
     <!-- ローディング -->
-    <div v-if="loading" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div v-if="loading" class="max-w-7xl mx-auto px-2 sm:px-4 py-2">
       <div class="text-center">
         <i class="pi pi-spin pi-spinner text-4xl text-surface-500 mb-4"></i>
         <p class="text-surface-600">レースデータを読み込み中...</p>
@@ -27,8 +27,8 @@
     </div>
 
     <!-- エラー -->
-    <div v-else-if="error" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div class="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+    <div v-else-if="error" class="max-w-7xl mx-auto px-2 sm:px-4 py-2">
+      <div class="bg-red-50 border border-red-200 rounded-lg p-3 text-center">
         <i class="pi pi-exclamation-triangle text-red-500 text-4xl mb-4"></i>
         <h3 class="text-red-800 font-medium mb-2">エラーが発生しました</h3>
         <p class="text-red-600">{{ error }}</p>
@@ -36,7 +36,7 @@
     </div>
 
     <!-- データなし -->
-    <div v-else-if="dayRaces.length === 0" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div v-else-if="dayRaces.length === 0" class="max-w-7xl mx-auto px-2 sm:px-4 py-2">
       <div class="text-center">
         <i class="pi pi-calendar text-6xl text-surface-400 mb-4"></i>
         <h3 class="text-xl font-semibold text-surface-900 mb-2">レースデータがありません</h3>
@@ -45,8 +45,8 @@
     </div>
 
     <!-- レース一覧（競馬場ごとにグループ化、横並び配置） -->
-    <div v-else class="max-w-7xl mx-auto p-2">
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div v-else class="max-w-7xl mx-auto px-2 sm:px-4">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
         <!-- 競馬場ごとのセクション -->
         <div 
           v-for="(venueRaces, venue) in racesByVenue" 
@@ -54,7 +54,7 @@
           class="bg-surface-0 rounded-lg shadow-sm overflow-hidden"
         >
           <!-- 競馬場ヘッダー -->
-          <div class="bg-green-700 text-surface-0 px-6 py-3">
+          <div class="bg-green-700 text-surface-0 px-3 py-2">
             <h2 class="text-lg font-bold">{{ venue }}</h2>
           </div>
           

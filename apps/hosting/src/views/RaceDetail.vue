@@ -16,7 +16,7 @@
     </div>
 
     <!-- ローディング -->
-    <div v-if="loading" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div v-if="loading" class="max-w-7xl mx-auto px-2 sm:px-4 py-2">
       <div class="text-center">
         <ProgressSpinner />
         <p class="mt-4 text-gray-600">レース詳細を読み込み中...</p>
@@ -24,8 +24,8 @@
     </div>
 
     <!-- エラー -->
-    <div v-else-if="error" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div class="bg-red-50 border border-red-200 rounded-lg p-6">
+    <div v-else-if="error" class="max-w-7xl mx-auto px-2 sm:px-4 py-2">
+      <div class="bg-red-50 border border-red-200 rounded-lg p-3">
         <div class="flex items-center">
           <i class="pi pi-exclamation-triangle text-red-500 text-xl mr-3"></i>
           <div>
@@ -44,17 +44,17 @@
     </div>
 
     <!-- レース詳細 -->
-    <div v-else-if="raceDetail" class="max-w-7xl mx-auto p-2">
+    <div v-else-if="raceDetail" class="max-w-7xl mx-auto px-2 sm:px-4">
       <!-- レース結果 -->
       <Card>
             <template #header>
-              <div class="p-4">
+              <div class="p-3">
                 <h3 class="text-xl font-bold">レース結果</h3>
                 <p class="text-gray-600">{{ raceDetail.results?.length || 0 }}頭</p>
               </div>
             </template>
             <template #content>
-              <div class="p-4">
+              <div class="p-3">
                 <DataTable
                   :value="raceDetail.results || []"
                   :paginator="false"

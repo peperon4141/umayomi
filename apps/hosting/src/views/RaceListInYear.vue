@@ -38,7 +38,7 @@
 
     <!-- エラー -->
     <div v-else-if="error" class="max-w-7xl mx-auto px-2 sm:px-4 lg:px-6 py-2">
-      <div class="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+      <div class="bg-red-50 border border-red-200 rounded-lg p-3 text-center">
         <i class="pi pi-exclamation-triangle text-red-500 text-4xl mb-4"></i>
         <h3 class="text-red-800 font-medium mb-2">エラーが発生しました</h3>
         <p class="text-red-600">{{ error }}</p>

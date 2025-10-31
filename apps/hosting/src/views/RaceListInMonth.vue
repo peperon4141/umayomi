@@ -89,7 +89,7 @@
     </div>
 
     <!-- 表示切り替えとアクションボタン -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+    <div class="max-w-7xl mx-auto px-2 sm:px-4 py-2">
       <div class="flex justify-between items-center">
         <!-- 表示切り替えボタン -->
         <div class="flex bg-surface-100 rounded-lg p-1">
@@ -122,14 +122,14 @@
     </div>
 
     <!-- ローディング -->
-    <div v-if="loading" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div class="space-y-6">
-        <div class="text-center mb-8">
+    <div v-if="loading" class="max-w-7xl mx-auto px-2 sm:px-4 py-2">
+      <div class="space-y-3">
+        <div class="text-center mb-4">
           <Skeleton width="300px" height="2rem" class="mx-auto mb-2" />
           <Skeleton width="200px" height="1rem" class="mx-auto" />
         </div>
         
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           <Card v-for="n in 6" :key="n" class="rounded-xl overflow-hidden">
             <template #header>
               <Skeleton width="100%" height="80px" />
@@ -150,8 +150,8 @@
     </div>
 
     <!-- エラー -->
-    <div v-else-if="error" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-      <div class="bg-red-50 border border-red-200 rounded-lg p-6">
+    <div v-else-if="error" class="max-w-7xl mx-auto px-2 sm:px-4 py-2">
+      <div class="bg-red-50 border border-red-200 rounded-lg p-3">
         <div class="flex items-center">
           <i class="pi pi-exclamation-triangle text-red-500 text-xl mr-3"></i>
           <div>
@@ -170,8 +170,8 @@
     </div>
 
     <!-- レース一覧（リスト表示） -->
-    <div v-else-if="viewMode === 'list' && races.length > 0" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div v-else-if="viewMode === 'list' && races.length > 0" class="max-w-7xl mx-auto px-2 sm:px-4 pb-2">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
         <Card
           v-for="race in races"
           :key="race.id"
