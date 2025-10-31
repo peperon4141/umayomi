@@ -79,6 +79,10 @@
                 <span class="text-sm text-surface-600">総レース数</span>
                 <Chip :label="`${getTotalRaces(month)}レース`" severity="success" />
               </div>
+              <div class="flex justify-between items-center mb-4">
+                <span class="text-sm text-surface-600">重賞レース数</span>
+                <Chip :label="`${getCalendarRacesCount(month)}レース`" severity="info" />
+              </div>
               <div class="text-sm text-surface-500">
                 <div v-for="day in month.days.slice(0, 3)" :key="day.id" class="mb-1">
                   {{ day.date }} - {{ day.venue }}
@@ -127,7 +131,10 @@
           </Column>
           <Column header="総レース数" :sortable="true">
             <template #body="slotProps">
-              <Chip :label="`${getTotalRaces(slotProps.data)}レース`" severity="success" size="small" />
+              <div class="flex flex-col gap-1">
+                <Chip :label="`${getTotalRaces(slotProps.data)}レース`" severity="success" size="small" />
+                <Chip :label="`重賞: ${getCalendarRacesCount(slotProps.data)}レース`" severity="info" size="small" />
+              </div>
             </template>
           </Column>
           <Column header="アクション" :exportable="false">
@@ -215,6 +222,17 @@ const raceMonths = computed(() => {
 
 const getTotalRaces = (month: any) => {
   return month.days.reduce((total: number, day: any) => total + day.races.length, 0)
+}
+
+// カレンダーページの重賞レースのみをカウント（GⅠ、GⅡ、GⅢ、J・GⅡ）
+const getCalendarRacesCount = (month: any) => {
+  return month.days.reduce((total: number, day: any) => {
+    const gradeRaces = day.races.filter((race: any) => {
+      const grade = race.grade || ''
+      return grade.includes('GⅠ') || grade.includes('GⅡ') || grade.includes('GⅢ') || grade.includes('G1') || grade.includes('G2') || grade.includes('G3') || grade.includes('J・G')
+    })
+    return total + gradeRaces.length
+  }, 0)
 }
 
 const selectMonth = (month: any) => {

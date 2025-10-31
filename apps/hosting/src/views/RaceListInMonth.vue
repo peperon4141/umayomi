@@ -38,31 +38,50 @@
         <div class="calendar-grid">
           <div v-for="date in calendarDates" :key="date.key"
                :class="getDateCellClass(date)"
-               class="calendar-cell">
+               class="calendar-cell cursor-pointer hover:bg-surface-50 transition-colors"
+               @click="date.races && date.races.length > 0 && viewDayDetail(date)">
             
             <!-- 日付 -->
-            <div class="text-sm font-medium mb-1">{{ date.day }}</div>
+            <div class="text-sm font-medium mb-2" :class="isToday(date) ? 'text-primary font-bold' : ''">
+              {{ date.day }}
+              <span v-if="isToday(date)" class="ml-1 text-xs">今日</span>
+            </div>
             
-            <!-- レース情報 -->
+            <!-- サマリー表示 -->
             <div v-if="date.races && date.races.length > 0" class="space-y-1">
-              <div v-for="race in date.races.slice(0, 2)" :key="race.id" 
-                   class="text-xs cursor-pointer border-2 border-surface-200 hover:bg-surface-100 p-1 rounded"
-                   @click="viewRaceDetail(race.id)">
-                <div class="flex items-center gap-1 mb-1">
-                  <Chip :label="race.racecourse" 
-                        :severity="getVenueSeverity(race.racecourse)" 
-                        size="small" />
-                </div>
-                <div class="text-surface-600 truncate">{{ race.raceName }}</div>
+              <!-- 会場表示 -->
+              <div class="flex flex-wrap gap-1 mb-1">
+                <Chip 
+                  v-for="venue in getUniqueVenues(date.races)" 
+                  :key="venue"
+                  :label="venue" 
+                  :severity="getVenueSeverity(venue)" 
+                  size="small"
+                  class="text-xs"
+                />
               </div>
-              <div v-if="date.races.length > 2" class="text-xs text-surface-500">
-                +{{ date.races.length - 2 }}レース
+              
+              <!-- 重賞レース表示 -->
+              <div v-if="getMajorRaces(date.races).length > 0" class="space-y-1">
+                <div 
+                  v-for="race in getMajorRaces(date.races).slice(0, 2)" 
+                  :key="race.id"
+                  class="text-xs bg-surface-900 text-surface-0 px-2 py-1 rounded truncate"
+                  @click.stop="viewRaceDetail(race.id)"
+                >
+                  {{ race.raceName }} {{ race.grade }}
+                </div>
+              </div>
+              
+              <!-- レース数表示 -->
+              <div v-if="date.races.length > getMajorRaces(date.races).length" class="text-xs text-surface-500 mt-1">
+                +{{ date.races.length - getMajorRaces(date.races).length }}レース
               </div>
             </div>
             
             <!-- 今日のマーカー -->
             <div v-if="isToday(date)" class="absolute top-1 right-1">
-              <div class="w-2 h-2 bg-red-500 rounded-full"></div>
+              <div class="w-2 h-2 bg-primary rounded-full"></div>
             </div>
           </div>
         </div>
@@ -165,9 +184,9 @@
                 <Chip :label="race.grade" :severity="getGradeSeverity(race.grade)" size="small" />
               </div>
               <div class="flex gap-2 mt-2">
-                <Chip :label="`${race.distance}m`" size="small" severity="secondary" />
-                <Chip :label="race.surface" size="small" severity="contrast" />
-                <Chip :label="race.weather" size="small" severity="info" />
+                <Chip :label="race.distance ? `${race.distance}m` : '距離未定'" size="small" severity="secondary" />
+                <Chip :label="race.surface || 'コース未定'" size="small" severity="contrast" />
+                <Chip :label="race.weather || '天候未定'" size="small" severity="info" />
               </div>
             </div>
           </template>
@@ -179,7 +198,7 @@
               </div>
               <div class="flex justify-between items-center">
                 <span class="text-sm text-surface-600">馬場状態</span>
-                <span class="font-medium">{{ race.trackCondition }}</span>
+                <span class="font-medium">{{ race.trackCondition || '馬場未定' }}</span>
               </div>
             </div>
           </template>
@@ -350,6 +369,13 @@ const isToday = (date: any) => {
          date.date.getFullYear() === today.getFullYear()
 }
 
+// 日付詳細ページに遷移
+const viewDayDetail = (date: any) => {
+  if (!date.isCurrentMonth) return
+  const day = date.date.getDate()
+  router.push(`/races/year/${year.value}/month/${month.value}/day/${day}`)
+}
+
 // レース詳細ページに遷移
 const viewRaceDetail = (raceId: string) => {
   console.log('viewRaceDetail called with raceId:', raceId)
@@ -358,6 +384,25 @@ const viewRaceDetail = (raceId: string) => {
     return
   }
   router.push(`/race/${raceId}`)
+}
+
+// その日のユニークな会場を取得
+const getUniqueVenues = (dayRaces: any[]) => {
+  const venues = new Set<string>()
+  dayRaces.forEach(race => {
+    if (race.racecourse) {
+      venues.add(race.racecourse)
+    }
+  })
+  return Array.from(venues)
+}
+
+// 重賞レースを取得（GⅠ、GⅡ、GⅢ）
+const getMajorRaces = (dayRaces: any[]) => {
+  return dayRaces.filter(race => {
+    const grade = race.grade || ''
+    return grade.includes('GⅠ') || grade.includes('GⅡ') || grade.includes('GⅢ') || grade.includes('J・G')
+  })
 }
 
 // JRAのカレンダーページURLを生成

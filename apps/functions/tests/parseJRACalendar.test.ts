@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { readFileSync } from 'fs'
 import { join } from 'path'
-import { parseJRACalendar, extractRaceElements, parseRaceElement } from '../src/parser/jra/calendarParser'
+import { parseJRACalendar, extractRaceElements, parseRaceElement, extractRaceDates } from '../src/parser/jra/calendarParser'
 
 describe('parseJRACalendar', () => {
   describe('2025年10月', () => {
@@ -94,6 +94,53 @@ describe('parseRaceElement', () => {
     const result = parseRaceElement($, element, 0, 2025, 10)
     
     expect(result).toBeNull()
+  })
+})
+
+describe('extractRaceDates', () => {
+  describe('2025年9月', () => {
+    const htmlPath = join(__dirname, 'mock', 'jra', 'keiba_calendar2025_sep.html')
+    const htmlContent = readFileSync(htmlPath, 'utf-8')
+
+    it('9月のHTMLから9日間の開催日を正しく抽出できる', () => {
+      const cheerio = require('cheerio')
+      const $ = cheerio.load(htmlContent)
+      const dates = extractRaceDates($, 2025, 9)
+      
+      expect(dates).toBeDefined()
+      expect(Array.isArray(dates)).toBe(true)
+      expect(dates.length).toBe(9)
+      
+      // 期待される開催日: 6, 7, 13, 14, 15, 20, 21, 27, 28日
+      const expectedDays = [6, 7, 13, 14, 15, 20, 21, 27, 28]
+      const resultDays = dates.map(date => date.getUTCDate())
+      
+      expectedDays.forEach(expectedDay => {
+        expect(resultDays).toContain(expectedDay)
+      })
+      
+      expect(resultDays.length).toBe(expectedDays.length)
+    })
+  })
+
+  describe('2025年10月', () => {
+    const htmlPath = join(__dirname, 'mock', 'jra', 'keiba_calendar2025_oct.html')
+    const htmlContent = readFileSync(htmlPath, 'utf-8')
+
+    it('10月のHTMLから開催日を正しく抽出できる', () => {
+      const cheerio = require('cheerio')
+      const $ = cheerio.load(htmlContent)
+      const dates = extractRaceDates($, 2025, 10)
+      
+      expect(dates).toBeDefined()
+      expect(Array.isArray(dates)).toBe(true)
+      expect(dates.length).toBeGreaterThan(0)
+      
+      // 日付が正しくソートされていることを確認
+      for (let i = 1; i < dates.length; i++) {
+        expect(dates[i].getTime()).toBeGreaterThanOrEqual(dates[i - 1].getTime())
+      }
+    })
   })
 })
 

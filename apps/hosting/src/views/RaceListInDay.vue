@@ -74,7 +74,7 @@
             <div class="p-4">
               <div class="flex justify-between items-center mb-4">
                 <span class="text-sm text-surface-600">距離</span>
-                <Chip :label="`${race.distance}m`" severity="info" />
+                <Chip :label="race.distance ? `${race.distance}m` : '距離未定'" severity="info" />
               </div>
               <div class="flex justify-between items-center mb-4">
                 <span class="text-sm text-surface-600">グレード</span>

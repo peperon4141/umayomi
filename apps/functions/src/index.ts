@@ -2,7 +2,8 @@ import { onRequest } from 'firebase-functions/v2/https'
 import { logger } from 'firebase-functions'
 import { initializeApp } from 'firebase-admin/app'
 import { fetchJRAHtmlWithPlaywright } from './utils/htmlFetcher'
-import { parseJRACalendar } from './parser/jra/calendarParser'
+import { parseJRACalendar, extractRaceDates } from './parser/jra/calendarParser'
+import * as cheerio from 'cheerio'
 import { parseJRARaceResult } from './parser/jra/raceResultParser'
 import { saveRacesToFirestore } from './utils/firestoreSaver'
 import { generateJRACalendarUrl, generateJRARaceResultUrl } from './utils/urlGenerator'
@@ -256,12 +257,18 @@ export const scrapeJRACalendarWithRaceResults = onRequest(
       
       logger.info('Calendar races found', { count: calendarRaces.length })
       
-      // 2. 各日程のレース結果データを取得
+      // 2. カレンダーページから開催日をすべて抽出
+      const $ = cheerio.load(calendarHtml)
+      const raceDates = extractRaceDates($, targetYear, targetMonth)
+      
+      logger.info('Race dates extracted from calendar', { count: raceDates.length })
+      
+      // 3. 各日程のレース結果データを取得
       const allRaceResults: any[] = []
       const processedDates = new Set<string>()
       
-      for (const race of calendarRaces) {
-        const raceDate = race.date
+      // カレンダーから抽出した開催日を優先して処理
+      for (const raceDate of raceDates) {
         const dateKey = raceDate.toISOString().split('T')[0] // YYYY-MM-DD形式
         
         // 同じ日付のレース結果は既に処理済みの場合はスキップ
@@ -285,7 +292,7 @@ export const scrapeJRACalendarWithRaceResults = onRequest(
         }
       }
       
-      // 3. すべてのデータをFirestoreに保存
+      // 4. すべてのデータをFirestoreに保存
       const allRaces = [...calendarRaces, ...allRaceResults]
       const savedCount = await saveRacesToFirestore(allRaces)
 

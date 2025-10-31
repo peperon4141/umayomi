@@ -65,6 +65,35 @@ export function extractRaceElements($: cheerio.CheerioAPI): cheerio.Cheerio<any>
 }
 
 /**
+ * HTMLから開催日を抽出（カレンダーページの開催日をすべて取得）
+ */
+export function extractRaceDates($: cheerio.CheerioAPI, year: number, month: number): Date[] {
+  const dates: Date[] = []
+  const processedDates = new Set<string>()
+  
+  // 開催日を示す.kaisaiクラスを持つtd要素から日付を抽出
+  $('.rc_table .kaisai').each((_, elem) => {
+    const $td = $(elem).closest('td')
+    const classNames = $td.attr('class') || ''
+    const dayMatch = classNames.match(/rc-day(\d+)/)
+    
+    if (dayMatch) {
+      const day = parseInt(dayMatch[1])
+      const date = new Date(Date.UTC(year, month - 1, day, 0, 0, 0, 0))
+      const dateKey = date.toISOString().split('T')[0]
+      
+      // 重複を避ける
+      if (!processedDates.has(dateKey)) {
+        processedDates.add(dateKey)
+        dates.push(date)
+      }
+    }
+  })
+  
+  return dates.sort((a, b) => a.getTime() - b.getTime())
+}
+
+/**
  * レース要素からデータを抽出
  */
 export function parseRaceElement($: cheerio.CheerioAPI, element: cheerio.Cheerio<any>, index: number, year: number, month: number): any | null {
@@ -93,6 +122,11 @@ export function parseRaceElement($: cheerio.CheerioAPI, element: cheerio.Cheerio
       date,
       year,
       month,
+      // カレンダーページには距離データがないため、デフォルト値を設定
+      distance: null,
+      surface: null,
+      weather: null,
+      trackCondition: null,
       scrapedAt: new Date(Date.UTC(new Date().getFullYear(), new Date().getMonth(), new Date().getDate(), 0, 0, 0, 0))
     }
   } catch (error) {

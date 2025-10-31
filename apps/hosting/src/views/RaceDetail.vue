@@ -7,10 +7,10 @@
       
       <!-- レース情報タグ -->
       <div class="flex flex-wrap gap-2 mt-3">
-        <Chip :label="`${raceDetail.distance}m`" severity="info" />
-        <Chip :label="raceDetail.surface" severity="secondary" />
-        <Chip :label="raceDetail.weather" severity="success" />
-        <Chip :label="raceDetail.trackCondition" severity="warning" />
+        <Chip :label="raceDetail.distance ? `${raceDetail.distance}m` : '距離未定'" severity="info" />
+        <Chip :label="raceDetail.surface || 'コース未定'" severity="secondary" />
+        <Chip :label="raceDetail.weather || '天候未定'" severity="success" />
+        <Chip :label="raceDetail.trackCondition || '馬場未定'" severity="warning" />
         <Chip v-if="raceDetail.grade" :label="raceDetail.grade" :severity="getGradeSeverity(raceDetail.grade)" />
       </div>
     </div>
