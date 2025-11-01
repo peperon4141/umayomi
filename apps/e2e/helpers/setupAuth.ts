@@ -44,4 +44,3 @@ export async function ensureTestUser(email: string, password: string): Promise<v
     console.warn(`Failed to create test user ${email}:`, error.message)
   }
 }
-
