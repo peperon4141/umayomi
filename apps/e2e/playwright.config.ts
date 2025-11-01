@@ -6,8 +6,10 @@ export default defineConfig({
   fullyParallel: true, // 並列実行を有効化
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0, // リトライ回数を削減
-  workers: process.env.CI ? 2 : 6, // CI環境では2、ローカルでは6に増加
-  reporter: process.env.CI ? 'github' : 'list',
+  workers: 4, // CI環境では2、ローカルでは6に増加
+  reporter: process.env.CI 
+    ? [['github'], ['html', { outputFolder: 'playwright-report' }]] 
+    : 'list',
   use: {
     baseURL: 'http://127.0.0.1:5100', // Firebase Emulator hosting
     trace: 'on-first-retry',

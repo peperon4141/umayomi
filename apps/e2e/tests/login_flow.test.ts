@@ -1,8 +1,14 @@
 import { test, expect } from '@playwright/test'
 import { HomePage } from '../pageObjects/HomePage'
 import type { DashboardPage } from '../pageObjects/DashboardPage'
+import { ensureTestUser } from '../helpers/setupAuth'
 
 test.describe('ログインフロー', () => {
+  // テスト実行前にテストユーザーを作成
+  test.beforeAll(async () => {
+    await ensureTestUser('test@example.com', 'password123')
+  })
+
   test('誰でもホームページにアクセスできる', async ({ page }) => {
     // ホームページにアクセス
     const homePage = await HomePage.visit(page)
