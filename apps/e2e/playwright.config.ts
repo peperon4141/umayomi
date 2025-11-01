@@ -38,12 +38,23 @@ export default defineConfig({
   ],
   // Firebase Emulatorの起動と待機処理
   webServer: {
-    // CI環境ではPlaywrightがFirebase Emulatorを起動して待機する
     command: 'cd ../firebase && pnpm run start',
     url: 'http://127.0.0.1:5100',
-    reuseExistingServer: process.env.CI ? false : true, // CI環境では常に起動
-    timeout: 120 * 1000, // Firebase Emulatorの起動に時間がかかるため120秒に設定
-    stdout: 'inherit', // エラーログを確認できるように
-    stderr: 'inherit', // エラーログを確認できるように
+    reuseExistingServer: process.env.CI ? false : true,
+    timeout: 120 * 1000,
+    stdout: 'inherit',
+    stderr: 'inherit',
+    // Functionsエミュレーターも起動するまで待機
+    ready: async () => {
+      try {
+        const response = await fetch('http://127.0.0.1:5101/umayomi-fbb2b/us-central1/scrapeJRARaceResult?year=2025&month=10&day=13', { 
+          signal: AbortSignal.timeout(3000) 
+        })
+        // 200、400、500でもエンドポイントが存在することを意味する
+        return response.status === 200 || response.status === 400 || response.status === 500
+      } catch {
+        return false
+      }
+    },
   }
 })
