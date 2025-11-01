@@ -36,7 +36,7 @@ e2e:
 test:
 	pnpm turbo test
 
-# Build all projects using Turbo
+# Build all projects using Turbo (including functions, hosting, and shared)
 build:
 	pnpm turbo build
 
