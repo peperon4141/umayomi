@@ -40,8 +40,8 @@ export default defineConfig({
     command: 'cd ../firebase && pnpm run start',
     url: 'http://127.0.0.1:5100',
     reuseExistingServer: process.env.CI ? false : true, // CI環境では常に起動
-    timeout: 20 * 1000, // Firebase Emulatorの起動に時間がかかるため120秒に設定
-    stdout: 'pipe',
-    stderr: 'pipe',
+    timeout: 120 * 1000, // Firebase Emulatorの起動に時間がかかるため120秒に設定
+    stdout: 'inherit', // エラーログを確認できるように
+    stderr: 'inherit', // エラーログを確認できるように
   }
 })
