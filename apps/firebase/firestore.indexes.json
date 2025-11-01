@@ -23,6 +23,13 @@
         { "fieldPath": "deckId", "order": "ASCENDING" },
         { "fieldPath": "order", "order": "DESCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "functions_log",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "timestamp", "order": "DESCENDING" }
+      ]
     }
   ],
   "fieldOverrides": []

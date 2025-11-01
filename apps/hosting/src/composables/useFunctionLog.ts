@@ -1,4 +1,4 @@
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onUnmounted, watch } from 'vue'
 import { 
   collection, 
   query, 
@@ -8,7 +8,8 @@ import {
   Timestamp,
   type QueryConstraint 
 } from 'firebase/firestore'
-import { db } from '@/config/firebase'
+import { db, auth } from '@/config/firebase'
+import { useAuth } from './useAuth'
 
 export interface FunctionLog {
   id: string
@@ -30,8 +31,16 @@ export function useFunctionLog() {
   const error = ref<string | null>(null)
   
   let unsubscribe: (() => void) | null = null
+  const { user, loading: authLoading } = useAuth()
 
   const fetchFunctionLogs = async (limitCount: number = 50) => {
+    // 認証状態を確認
+    if (!auth.currentUser) {
+      error.value = '認証が必要です'
+      loading.value = false
+      return
+    }
+
     loading.value = true
     error.value = null
 
@@ -81,8 +90,17 @@ export function useFunctionLog() {
     }
   }
 
-  onMounted(() => {
-    fetchFunctionLogs()
+  // 認証状態が確定したらログを取得
+  watch([user, authLoading], ([currentUser, isLoading]) => {
+    if (!isLoading && currentUser) {
+      if (!unsubscribe) {
+        fetchFunctionLogs()
+      }
+    } else if (!isLoading && !currentUser) {
+      stopListening()
+      logs.value = []
+      error.value = '認証が必要です'
+    }
   })
 
   onUnmounted(() => {

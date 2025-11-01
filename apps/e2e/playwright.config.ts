@@ -46,15 +46,26 @@ export default defineConfig({
     stderr: 'inherit',
     // Functionsエミュレーターも起動するまで待機
     ready: async () => {
-      try {
-        const response = await fetch('http://127.0.0.1:5101/umayomi-fbb2b/us-central1/scrapeJRARaceResult?year=2025&month=10&day=13', { 
-          signal: AbortSignal.timeout(3000) 
-        })
-        // 200、400、500でもエンドポイントが存在することを意味する
-        return response.status === 200 || response.status === 400 || response.status === 500
-      } catch {
-        return false
+      // 複数回チェックして、関数がロードされるまで待機
+      const functionsUrl = 'http://127.0.0.1:5101/umayomi-fbb2b/us-central1/scrapeJRARaceResult?year=2025&month=10&day=13'
+      for (let i = 0; i < 10; i++) {
+        try {
+          const response = await fetch(functionsUrl, { 
+            signal: AbortSignal.timeout(3000) 
+          })
+          const status = response.status
+          // 200、400、500はエンドポイントが存在することを意味する
+          // 404はエンドポイントが存在しない（まだ起動していない）ことを意味する
+          if (status === 200 || status === 400 || status === 500) {
+            return true
+          }
+        } catch {
+          // 接続エラーはエンドポイントがまだ起動していないことを意味する
+        }
+        // 次のチェックまで少し待機
+        await new Promise(resolve => setTimeout(resolve, 1000))
       }
+      return false
     },
   }
 })
