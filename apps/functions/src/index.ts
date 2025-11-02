@@ -28,7 +28,7 @@ initializeApp()
  * 年と月を引数で受け取る
  */
 export const scrapeJRACalendar = onRequest(
-  { timeoutSeconds: 300, memory: '1GiB' },
+  { timeoutSeconds: 300, memory: '1GiB', region: 'asia-northeast1' },
   async (request, response) => {
     const startTime = Date.now()
     logger.info('JRA scraping function called')
@@ -127,7 +127,7 @@ export const scrapeJRACalendar = onRequest(
  * 年、月、日を引数で受け取る
  */
 export const scrapeJRARaceResult = onRequest(
-  { timeoutSeconds: 300, memory: '1GiB' },
+  { timeoutSeconds: 300, memory: '1GiB', region: 'asia-northeast1' },
   async (request, response) => {
     const startTime = Date.now()
     logger.info('JRA race result scraping function called')
@@ -221,7 +221,7 @@ export const scrapeJRARaceResult = onRequest(
  * 年と月を引数で受け取り、各日程のレース結果も含めて取得
  */
 export const scrapeJRACalendarWithRaceResults = onRequest(
-  { timeoutSeconds: 600, memory: '2GiB' },
+  { timeoutSeconds: 600, memory: '2GiB', region: 'asia-northeast1' },
   async (request, response) => {
     const startTime = Date.now()
     logger.info('JRA calendar with race results scraping function called')

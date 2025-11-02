@@ -157,3 +157,6 @@ coverage/
 
 # Local development
 .local/
+
+# Ignore Firebase Functions build output
+apps/firebase/functions/lib/

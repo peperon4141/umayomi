@@ -46,9 +46,23 @@ check:
 	make format
 	make e2e
 
+deploy-functions:
+	pnpm -F functions run build
+# 	cp apps/functions/package.json apps/firebase/functions/package.json
+	pnpm exec firebase deploy --config apps/firebase/firebase.json --only functions
+
+deploy-firestore:
+	firebase deploy --only firestore
+
+deploy-hosting:
+	pnpm -F hosting run build
+	cd apps/firebase && firebase deploy --only hosting -m
+
 # Firebaseデプロイ
 deploy:
-	pnpm --filter firebase run deploy
+	make deploy-functions
+	make deploy-firestore
+	make deploy-hosting
 
 # JRAカレンダーデータスクレイピング
 scrape-jra-calendar:
