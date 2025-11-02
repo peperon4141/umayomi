@@ -1,0 +1,396 @@
+---
+alwaysApply: true
+---
+
+# PrimeVue コンポーネントリスト
+
+## ⚙️ AutoResolver について
+
+### コンポーネントの自動インポート
+このプロジェクトでは、`unplugin-vue-components`と`@primevue/auto-import-resolver`を使用してPrimeVueコンポーネントの自動インポートを設定しています。
+
+### 重要なポイント
+- **基本的にコンポーネントの読み込みは不要**: AutoResolverが自動的にインポートを処理するため、`import Button from 'primevue/button'`のような明示的なインポート文は不要です
+- **直接コンポーネントを使用**: テンプレート内で`<Button>`や`<Card>`などを直接使用できます
+- **型定義の自動生成**: `components.d.ts`に型定義が自動生成されます
+
+### 使用方法
+
+#### ❌ 不要なインポート（AutoResolverにより自動処理される）
+```vue
+<script setup lang="ts">
+// 以下のようなインポートは不要
+import Button from 'primevue/button'
+import Card from 'primevue/card'
+import DataTable from 'primevue/datatable'
+</script>
+```
+
+#### ✅ 推奨：直接コンポーネントを使用
+```vue
+<template>
+  <Card>
+    <Button label="クリック" />
+    <DataTable :value="items">
+      <Column field="name" header="名前" />
+    </DataTable>
+  </Card>
+</template>
+
+<script setup lang="ts">
+// インポート不要 - AutoResolverが自動処理
+const items = ref([...])
+</script>
+```
+
+### 設定場所
+- **Vite設定**: `apps/hosting/vite.config.ts`
+- **Resolver**: `PrimeVueResolver()`が`unplugin-vue-components`に登録されています
+
+### 参考リンク
+- **PrimeVue AutoResolver**: @https://primevue.org/installation/#unplugin-vue-components
+- **unplugin-vue-components**: @https://github.com/antfu/unplugin-vue-components
+
+---
+
+## フォーム系コンポーネント
+
+### Button
+- **役割**: クリックアクションを実行するボタンコンポーネント
+- **リンク**: @https://primevue.org/button/
+
+### InputText
+- **役割**: 単一行テキスト入力フィールド
+- **リンク**: @https://primevue.org/inputtext/
+
+### Textarea
+- **役割**: 複数行テキスト入力フィールド
+- **リンク**: @https://primevue.org/textarea/
+
+### InputNumber
+- **役割**: 数値入力専用のフィールド
+- **リンク**: @https://primevue.org/inputnumber/
+
+### Dropdown
+- **役割**: 選択肢から1つの値を選択するドロップダウンメニュー
+- **リンク**: @https://primevue.org/dropdown/
+
+### MultiSelect
+- **役割**: 複数の値を選択できるドロップダウンメニュー
+- **リンク**: @https://primevue.org/multiselect/
+
+### Listbox
+- **役割**: 単一または複数のアイテムを選択できるリストボックス
+- **リンク**: @https://primevue.org/listbox/
+
+### Checkbox
+- **役割**: 真偽値入力のチェックボックス
+- **リンク**: @https://primevue.org/checkbox/
+
+### RadioButton
+- **役割**: 排他的選択のラジオボタン
+- **リンク**: @https://primevue.org/radiobutton/
+
+### Calendar
+- **役割**: 日付選択用のカレンダーコンポーネント
+- **リンク**: @https://primevue.org/calendar/
+
+### Password
+- **役割**: パスワード入力専用フィールド（表示/非表示切り替え機能付き）
+- **リンク**: @https://primevue.org/password/
+
+### SelectButton
+- **役割**: ボタン形式の選択コンポーネント
+- **リンク**: @https://primevue.org/selectbutton/
+
+### ToggleButton
+- **役割**: オン/オフを切り替えるトグルボタン
+- **リンク**: @https://primevue.org/togglebutton/
+
+### Slider
+- **役割**: 数値範囲を選択するスライダー
+- **リンク**: @https://primevue.org/slider/
+
+### InputSwitch
+- **役割**: スイッチ形式の真偽値入力コンポーネント
+- **リンク**: @https://primevue.org/inputswitch/
+
+### AutoComplete
+- **役割**: オートコンプリート機能付きテキスト入力
+- **リンク**: @https://primevue.org/autocomplete/
+
+### CascadeSelect
+- **役割**: 階層的な選択肢を持つカスケードセレクト
+- **リンク**: @https://primevue.org/cascadeselect/
+
+### Chips
+- **役割**: 複数のタグや値を入力・表示するチップ入力コンポーネント
+- **リンク**: @https://primevue.org/chips/
+
+### ColorPicker
+- **役割**: 色を選択するカラーピッカー
+- **リンク**: @https://primevue.org/colorpicker/
+
+### Editor
+- **役割**: リッチテキストエディタ
+- **リンク**: @https://primevue.org/editor/
+
+### FileUpload
+- **役割**: ファイルアップロード用コンポーネント
+- **リンク**: @https://primevue.org/fileupload/
+
+### InputMask
+- **役割**: マスク付き入力フィールド（電話番号、郵便番号など）
+- **リンク**: @https://primevue.org/inputmask/
+
+### InputOtp
+- **役割**: OTP（ワンタイムパスワード）入力用コンポーネント
+- **リンク**: @https://primevue.org/inputotp/
+
+### Knob
+- **役割**: 円形の数値入力コンポーネント
+- **リンク**: @https://primevue.org/knob/
+
+### KeyFilter
+- **役割**: キー入力フィルタリングコンポーネント
+- **リンク**: @https://primevue.org/keyfilter/
+
+### Rating
+- **役割**: 星評価入力コンポーネント
+- **リンク**: @https://primevue.org/rating/
+
+### TriStateCheckbox
+- **役割**: 3つの状態（チェック済み、未チェック、不定）を持つチェックボックス
+- **リンク**: @https://primevue.org/tristatecheckbox/
+
+## データ表示系コンポーネント
+
+### DataTable
+- **役割**: 表形式でデータを表示し、ソート、フィルタリング、ページネーションなどの機能を提供
+- **リンク**: @https://primevue.org/datatable/
+
+### Column
+- **役割**: DataTableの列定義コンポーネント
+- **リンク**: @https://primevue.org/datatable/#column
+
+### DataView
+- **役割**: データをグリッドまたはリスト形式で表示
+- **リンク**: @https://primevue.org/dataview/
+
+### OrderList
+- **役割**: コレクション内のアイテムを並べ替えるコンポーネント
+- **リンク**: @https://primevue.org/orderlist/
+
+### PickList
+- **役割**: 異なるリスト間でアイテムを並べ替えるコンポーネント
+- **リンク**: @https://primevue.org/picklist/
+
+### Tree
+- **役割**: 階層的なデータ構造を表示するツリーコンポーネント
+- **リンク**: @https://primevue.org/tree/
+
+### TreeTable
+- **役割**: 階層的なデータを表形式で表示
+- **リンク**: @https://primevue.org/treetable/
+
+### TreeSelect
+- **役割**: ツリー構造から値を選択するコンポーネント
+- **リンク**: @https://primevue.org/treeselect/
+
+### Card
+- **役割**: コンテンツをグループ化して表示するカードコンポーネント
+- **リンク**: @https://primevue.org/card/
+
+### Panel
+- **役割**: コンテンツの区切りとヘッダー・フッターを提供するパネル
+- **リンク**: @https://primevue.org/panel/
+
+### Fieldset
+- **役割**: 関連するコンテンツをグループ化し、折りたたみ可能なフィールドセット
+- **リンク**: @https://primevue.org/fieldset/
+
+### Divider
+- **役割**: コンテンツを視覚的に分離する区切り線
+- **リンク**: @https://primevue.org/divider/
+
+### Badge
+- **役割**: 数値やステータスを表示するバッジ
+- **リンク**: @https://primevue.org/badge/
+
+### Tag
+- **役割**: ラベルやステータス表示用のタグコンポーネント
+- **リンク**: @https://primevue.org/tag/
+
+### Chip
+- **役割**: 小さな情報やラベルを表示するチップコンポーネント
+- **リンク**: @https://primevue.org/chip/
+
+### Avatar
+- **役割**: ユーザーのアイコンや画像を表示するアバターコンポーネント
+- **リンク**: @https://primevue.org/avatar/
+
+### AvatarGroup
+- **役割**: 複数のアバターをグループ化して表示
+- **リンク**: @https://primevue.org/avatargroup/
+
+### Image
+- **役割**: 画像表示コンポーネント（プレビュー機能付き）
+- **リンク**: @https://primevue.org/image/
+
+### Galleria
+- **役割**: 画像ギャラリー表示コンポーネント
+- **リンク**: @https://primevue.org/galleria/
+
+### Carousel
+- **役割**: スライドショー形式でコンテンツを表示
+- **リンク**: @https://primevue.org/carousel/
+
+### Timeline
+- **役割**: 時系列のイベントを表示するタイムラインコンポーネント
+- **リンク**: @https://primevue.org/timeline/
+
+### DataScroller
+- **役割**: スクロールに応じてデータを読み込むコンポーネント
+- **リンク**: @https://primevue.org/datascroller/
+
+### VirtualScroller
+- **役割**: 大量のデータを仮想スクロールで効率的に表示
+- **リンク**: @https://primevue.org/virtualscroller/
+
+## フィードバック系コンポーネント
+
+### Dialog
+- **役割**: モーダルダイアログを表示するコンポーネント
+- **リンク**: @https://primevue.org/dialog/
+
+### ConfirmDialog
+- **役割**: 確認ダイアログを表示するコンポーネント
+- **リンク**: @https://primevue.org/confirmdialog/
+
+### OverlayPanel
+- **役割**: コンテンツの上に表示されるオーバーレイパネル
+- **リンク**: @https://primevue.org/overlaypanel/
+
+### Sidebar
+- **役割**: サイドバーパネルコンポーネント
+- **リンク**: @https://primevue.org/sidebar/
+
+### Toast
+- **役割**: 通知メッセージを表示するトーストコンポーネント
+- **リンク**: @https://primevue.org/toast/
+
+### ProgressBar
+- **役割**: 進捗状況を表示するプログレスバー
+- **リンク**: @https://primevue.org/progressbar/
+
+### ProgressSpinner
+- **役割**: ローディング状態を表示するスピナー
+- **リンク**: @https://primevue.org/progressspinner/
+
+### Skeleton
+- **役割**: コンテンツのローディング中に表示するスケルトンスクリーン
+- **リンク**: @https://primevue.org/skeleton/
+
+### Message
+- **役割**: メッセージを表示するコンポーネント（info、success、warn、error）
+- **リンク**: @https://primevue.org/message/
+
+### InlineMessage
+- **役割**: インラインでメッセージを表示するコンポーネント
+- **リンク**: @https://primevue.org/inlinemessage/
+
+### Tooltip
+- **役割**: ホバー時に表示されるツールチップ
+- **リンク**: @https://primevue.org/tooltip/
+
+### BlockUI
+- **役割**: コンテンツをブロックして表示するコンポーネント
+- **リンク**: @https://primevue.org/blockui/
+
+### ConfirmPopup
+- **役割**: ポップアップ形式の確認ダイアログ
+- **リンク**: @https://primevue.org/confirmpopup/
+
+### Terminal
+- **役割**: ターミナル風のコマンド入力コンポーネント
+- **リンク**: @https://primevue.org/terminal/
+
+## ナビゲーション系コンポーネント
+
+### Menu
+- **役割**: メニューを表示するコンポーネント
+- **リンク**: @https://primevue.org/menu/
+
+### Menubar
+- **役割**: 水平メニューバーコンポーネント
+- **リンク**: @https://primevue.org/menubar/
+
+### ContextMenu
+- **役割**: 右クリックメニューを表示するコンポーネント
+- **リンク**: @https://primevue.org/contextmenu/
+
+### Breadcrumb
+- **役割**: 階層的なナビゲーションを示すパンくずリスト
+- **リンク**: @https://primevue.org/breadcrumb/
+
+### Dock
+- **役割**: ドック形式のナビゲーションメニュー
+- **リンク**: @https://primevue.org/dock/
+
+### MegaMenu
+- **役割**: 大規模メニューを表示するコンポーネント
+- **リンク**: @https://primevue.org/megamenu/
+
+### PanelMenu
+- **役割**: パネル形式の階層メニュー
+- **リンク**: @https://primevue.org/panelmenu/
+
+### Steps
+- **役割**: 段階的なプロセスを示すステップコンポーネント
+- **リンク**: @https://primevue.org/steps/
+
+### TabView
+- **役割**: タブでコンテンツを切り替えるコンポーネント
+- **リンク**: @https://primevue.org/tabview/
+
+### Accordion
+- **役割**: 折りたたみ可能なコンテンツセクションを提供するアコーディオン
+- **リンク**: @https://primevue.org/accordion/
+
+### TabMenu
+- **役割**: タブ形式のメニューナビゲーション
+- **リンク**: @https://primevue.org/tabmenu/
+
+### TieredMenu
+- **役割**: 階層的なメニューを表示するコンポーネント
+- **リンク**: @https://primevue.org/tieredmenu/
+
+## レイアウト系コンポーネント
+
+### Splitter
+- **役割**: 分割可能なレイアウトコンポーネント
+- **リンク**: @https://primevue.org/splitter/
+
+### ScrollPanel
+- **役割**: スクロール可能な領域を提供するパネル
+- **リンク**: @https://primevue.org/scrollpanel/
+
+### Toolbar
+- **役割**: アクションボタン群を配置するツールバー
+- **リンク**: @https://primevue.org/toolbar/
+
+### Paginator
+- **役割**: ページネーションコントロールコンポーネント
+- **リンク**: @https://primevue.org/paginator/
+
+### DeferredContent
+- **役割**: 遅延ロード用コンテンツコンポーネント
+- **リンク**: @https://primevue.org/deferredcontent/
+
+### Chart
+- **役割**: チャート表示コンポーネント
+- **リンク**: @https://primevue.org/chart/
+
+### OrganizationChart
+- **役割**: 組織図を表示するコンポーネント
+- **リンク**: @https://primevue.org/organizationchart/

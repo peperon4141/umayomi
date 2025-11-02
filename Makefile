@@ -46,6 +46,10 @@ check:
 	make format
 	make e2e
 
+# Firebaseデプロイ
+deploy:
+	pnpm --filter firebase run deploy
+
 # JRAカレンダーデータスクレイピング
 scrape-jra-calendar:
 	@if [ -z "$(YEAR)" ] || [ -z "$(MONTH)" ]; then \
