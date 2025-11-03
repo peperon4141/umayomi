@@ -8,6 +8,7 @@
     "build:watch": "vite build --watch",
     "build": "vue-tsc && vite build",
     "preview": "vite preview",
+    "deploy:dry-run": "pnpm run build && firebase deploy --config ../firebase.json --only hosting --dry-run",
     "test": "vitest run",
     "lint": "vue-tsc --noEmit && eslint . --ext .js,.ts",
     "lint:fix": "eslint . --ext .js,.ts --fix"

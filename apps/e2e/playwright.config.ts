@@ -38,7 +38,7 @@ export default defineConfig({
   ],
   // Firebase Emulatorの起動と待機処理
   webServer: {
-    command: 'cd ../firebase && pnpm run start',
+    command: 'cd ../.. && pnpm -F functions run build && cd apps/firebase && pnpm run start',
     url: 'http://127.0.0.1:5100',
     reuseExistingServer: process.env.CI ? false : true,
     timeout: 120 * 1000,
@@ -47,7 +47,7 @@ export default defineConfig({
     // Functionsエミュレーターも起動するまで待機
     ready: async () => {
       // 複数回チェックして、関数がロードされるまで待機
-      const functionsUrl = 'http://127.0.0.1:5101/umayomi-fbb2b/us-central1/scrapeJRARaceResult?year=2025&month=10&day=13'
+      const functionsUrl = 'http://127.0.0.1:5101/umayomi-fbb2b/asia-northeast1/scrapeJRARaceResult?year=2025&month=10&day=13'
       for (let i = 0; i < 10; i++) {
         try {
           const response = await fetch(functionsUrl, { 

@@ -12,17 +12,6 @@ dev: install
 	pnpm turbo run dev &
 	pnpm turbo run build:watch
 
-# # Start all services in development mode with build watch
-# # - hosting: Vite build watch (outputs to dist/)
-# # - firebase: Firebase emulators (http://127.0.0.1:3100)
-# dev-build: install
-# 	pnpm turbo dev-build
-
-# # Start hosting dev server and build watch in parallel
-# # - hosting: Vite dev server (http://127.0.0.1:3000) + Vite build watch
-# dev-both: install
-# 	pnpm turbo run dev &
-# 	pnpm turbo run dev-build --filter=hosting
 
 # Format and fix linting issues for all repositories
 format: install
@@ -44,7 +33,12 @@ build:
 check:
 	make build
 	make format
+	make test
 	make e2e
+	make deploy-dry-run
+
+deploy-dry-run:
+	pnpm turbo deploy:dry-run
 
 deploy-functions:
 	pnpm -F functions run build
@@ -63,47 +57,50 @@ deploy:
 	make deploy-firestore
 	make deploy-hosting
 
-# JRAカレンダーデータスクレイピング
+# JRAカレンダーデータスクレイピング（エミュレーター環境用）
 scrape-jra-calendar:
 	@if [ -z "$(YEAR)" ] || [ -z "$(MONTH)" ]; then \
 		echo "Usage: make scrape-jra-calendar YEAR=2025 MONTH=10"; \
 		exit 1; \
 	fi
 	@curl -X GET \
-		"http://127.0.0.1:5101/umayomi-fbb2b/us-central1/scrapeJRACalendar?year=$(YEAR)&month=$(MONTH)" \
+		"http://127.0.0.1:5101/umayomi-fbb2b/asia-northeast1/scrapeJRACalendar?year=$(YEAR)&month=$(MONTH)" \
 		--max-time 300 \
 		--connect-timeout 10 \
 		--retry 3 \
 		--retry-delay 1 \
 		--show-error \
-		--fail-with-body
+		--fail-with-body \
+		|| (echo "Error: エミュレーターが起動していることを確認してください (make dev)" && exit 1)
 
-# JRAレース結果データスクレイピング
+# JRAレース結果データスクレイピング（エミュレーター環境用）
 scrape-jra-race-result:
 	@if [ -z "$(YEAR)" ] || [ -z "$(MONTH)" ] || [ -z "$(DAY)" ]; then \
 		echo "Usage: make scrape-jra-race-result YEAR=2025 MONTH=10 DAY=13"; \
 		exit 1; \
 	fi
 	@curl -X GET \
-		"http://127.0.0.1:5101/umayomi-fbb2b/us-central1/scrapeJRARaceResult?year=$(YEAR)&month=$(MONTH)&day=$(DAY)" \
+		"http://127.0.0.1:5101/umayomi-fbb2b/asia-northeast1/scrapeJRARaceResult?year=$(YEAR)&month=$(MONTH)&day=$(DAY)" \
 		--max-time 300 \
 		--connect-timeout 10 \
 		--retry 3 \
 		--retry-delay 1 \
 		--show-error \
-		--fail-with-body
+		--fail-with-body \
+		|| (echo "Error: エミュレーターが起動していることを確認してください (make dev)" && exit 1)
 
-# JRAカレンダーとレース結果データ一括スクレイピング
+# JRAカレンダーとレース結果データ一括スクレイピング（エミュレーター環境用）
 scrape-jra-calendar-with-results:
 	@if [ -z "$(YEAR)" ] || [ -z "$(MONTH)" ]; then \
 		echo "Usage: make scrape-jra-calendar-with-results YEAR=2025 MONTH=10"; \
 		exit 1; \
 	fi
 	@curl -X GET \
-		"http://127.0.0.1:5101/umayomi-fbb2b/us-central1/scrapeJRACalendarWithRaceResults?year=$(YEAR)&month=$(MONTH)" \
+		"http://127.0.0.1:5101/umayomi-fbb2b/asia-northeast1/scrapeJRACalendarWithRaceResults?year=$(YEAR)&month=$(MONTH)" \
 		--max-time 600 \
 		--connect-timeout 10 \
 		--retry 3 \
 		--retry-delay 1 \
 		--show-error \
-		--fail-with-body
+		--fail-with-body \
+		|| (echo "Error: エミュレーターが起動していることを確認してください (make dev)" && exit 1)

@@ -54,16 +54,7 @@ jobs:
         VITE_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.VITE_FIREBASE_MESSAGING_SENDER_ID }}
         VITE_FIREBASE_APP_ID: ${{ secrets.VITE_FIREBASE_APP_ID }}
         VITE_USE_FIREBASE_EMULATOR: true
-      
-    - name: Verify hosting contents
-      run: |
-        if [ ! -f apps/firebase/hosting_contents/index.html ]; then
-          echo "Error: hosting_contents/index.html not found!"
-          exit 1
-        fi
-        echo "✅ hosting_contents/index.html found"
-        ls -la apps/firebase/hosting_contents/
-      
+
     - name: Run E2E tests
       run: pnpm -F e2e test
         

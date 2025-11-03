@@ -28,7 +28,7 @@ export default defineConfig(({ mode }) => {
       clearScreen: false
     },
     build: {
-      outDir: '../firebase/hosting_contents',
+      outDir: 'dist',
       emptyOutDir: true,
     },
     define: {

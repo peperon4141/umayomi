@@ -24,6 +24,10 @@
       "dependsOn": ["build"],
       "outputs": ["test-results/**", "playwright-report/**"],
       "cache": false
+    },
+    "deploy:dry-run": {
+      "dependsOn": ["build"],
+      "cache": false
     }
   }
 }

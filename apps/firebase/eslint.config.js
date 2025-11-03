@@ -5,7 +5,7 @@ import { rules } from '../eslint-rules.js'
 
 export default [
   {
-    ignores: ['**/node_modules/**', '**/dist/**', '**/firebase-data/**', '**/hosting_contents/**']
+    ignores: ['**/node_modules/**', '**/dist/**', '**/firebase-data/**']
   },
   js.configs.recommended,
   {

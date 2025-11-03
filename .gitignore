@@ -125,11 +125,9 @@ Thumbs.db
 firebase-debug.log
 firestore-debug.log
 firebase-data/
-hosting_contents/
 
 # Firebase emulator data
 apps/firebase/firebase-data/
-apps/firebase/hosting_contents/
 apps/firebase/firebase-export-*
 
 # Firebase Functions build output
