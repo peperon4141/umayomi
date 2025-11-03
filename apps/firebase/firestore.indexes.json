@@ -1,12 +1,4 @@
 {
-  "indexes": [
-    {
-      "collectionGroup": "functions_log",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "timestamp", "order": "DESCENDING" }
-      ]
-    }
-  ],
+  "indexes": [],
   "fieldOverrides": []
 }

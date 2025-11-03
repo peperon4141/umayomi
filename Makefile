@@ -48,15 +48,14 @@ check:
 
 deploy-functions:
 	pnpm -F functions run build
-# 	cp apps/functions/package.json apps/firebase/functions/package.json
-	pnpm exec firebase deploy --config apps/firebase/firebase.json --only functions
+	pnpm exec firebase deploy --config apps/firebase.json --only functions
 
 deploy-firestore:
-	firebase deploy --only firestore
+	pnpm exec firebase deploy --config apps/firebase.json --only firestore
 
 deploy-hosting:
 	pnpm -F hosting run build
-	cd apps/firebase && firebase deploy --only hosting -m
+	pnpm exec firebase deploy --config apps/firebase.json --only hosting
 
 # Firebaseデプロイ
 deploy:

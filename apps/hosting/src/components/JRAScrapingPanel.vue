@@ -192,6 +192,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useToast } from 'primevue/usetoast'
+import { getFunctionUrl } from '../utils/functionUrl'
 
 const toast = useToast()
 
@@ -238,8 +239,9 @@ const handleCalendarScraping = async () => {
   calendarLoading.value = true
   
   try {
+    const url = getFunctionUrl('scrapeJRACalendar')
     const response = await fetch(
-      `http://127.0.0.1:5101/umayomi-fbb2b/us-central1/scrapeJRACalendar?year=${calendarParams.value.year}&month=${calendarParams.value.month}`,
+      `${url}?year=${calendarParams.value.year}&month=${calendarParams.value.month}`,
       {
         method: 'GET',
         headers: {
@@ -285,8 +287,9 @@ const handleRaceResultScraping = async () => {
   raceResultLoading.value = true
   
   try {
+    const url = getFunctionUrl('scrapeJRARaceResult')
     const response = await fetch(
-      `http://127.0.0.1:5101/umayomi-fbb2b/us-central1/scrapeJRARaceResult?year=${raceResultParams.value.year}&month=${raceResultParams.value.month}&day=${raceResultParams.value.day}`,
+      `${url}?year=${raceResultParams.value.year}&month=${raceResultParams.value.month}&day=${raceResultParams.value.day}`,
       {
         method: 'GET',
         headers: {
@@ -332,8 +335,9 @@ const handleBulkScraping = async () => {
   bulkLoading.value = true
   
   try {
+    const url = getFunctionUrl('scrapeJRACalendarWithRaceResults')
     const response = await fetch(
-      `http://127.0.0.1:5101/umayomi-fbb2b/us-central1/scrapeJRACalendarWithRaceResults?year=${bulkParams.value.year}&month=${bulkParams.value.month}`,
+      `${url}?year=${bulkParams.value.year}&month=${bulkParams.value.month}`,
       {
         method: 'GET',
         headers: {

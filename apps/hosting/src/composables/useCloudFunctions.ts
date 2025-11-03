@@ -1,4 +1,5 @@
 import { ref } from 'vue'
+import { getFunctionUrl } from '../utils/functionUrl'
 
 export enum CloudFunctionName {
   SCRAPE_JRA_CALENDAR = 'scrapeJRACalendar',
@@ -71,7 +72,7 @@ export function useCloudFunctions() {
       }
 
       // Cloud Functionsを呼び出し（onRequest関数の場合は直接HTTPリクエスト）
-      const functionUrl = `http://127.0.0.1:5101/umayomi-fbb2b/us-central1/${functionName}`
+      const functionUrl = getFunctionUrl(functionName)
       
       const response = await fetch(functionUrl, {
         method: 'POST',
@@ -87,12 +88,13 @@ export function useCloudFunctions() {
 
       const result = await response.json()
       return result as ScrapingTaskResult
-    } catch (err: any) {
-      error.value = err.message
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error'
+      error.value = errorMessage
       return {
         success: false,
         message: 'Cloud Functions呼び出しに失敗しました',
-        error: err.message
+        error: errorMessage
       }
     } finally {
       loading.value = false

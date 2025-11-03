@@ -23,7 +23,7 @@ test.describe('Cloud Functions', () => {
   test.skip('scrapeJRACalendar関数を呼び出してデータを取得できる', async ({ request }) => {
     // スキップ理由: 実際のスクレイピングは重く、外部サイトに依存するため
     test.setTimeout(15000) // 15秒に短縮（実際は約6秒）
-    const response = await request.get('http://127.0.0.1:5101/umayomi-fbb2b/us-central1/scrapeJRACalendar?year=2025&month=10')
+    const response = await request.get('http://127.0.0.1:5101/umayomi-fbb2b/asia-northeast1/scrapeJRACalendar?year=2025&month=10')
 
     expect(response.status()).toBe(200)
     
@@ -39,7 +39,7 @@ test.describe('Cloud Functions', () => {
 
   test('scrapeJRARaceResult関数を呼び出してレース結果データを取得できる', async ({ request }) => {
     test.setTimeout(15000) // 15秒に短縮（実際は約6秒）
-    const response = await request.get('http://127.0.0.1:5101/umayomi-fbb2b/us-central1/scrapeJRARaceResult?year=2025&month=10&day=13')
+    const response = await request.get('http://127.0.0.1:5101/umayomi-fbb2b/asia-northeast1/scrapeJRARaceResult?year=2025&month=10&day=13')
 
     expect(response.status()).toBe(200)
     
@@ -141,7 +141,7 @@ test.describe('Cloud Functions', () => {
   test.skip('scrapeJRACalendarWithRaceResults関数を呼び出してカレンダーとレース結果データを一括取得できる', async ({ request }) => {
     // スキップ理由: 実際のスクレイピングは重く（45秒）、外部サイトに依存するため
     test.setTimeout(50000) // 50秒に短縮（実際は約45秒）
-    const response = await request.get('http://127.0.0.1:5101/umayomi-fbb2b/us-central1/scrapeJRACalendarWithRaceResults?year=2025&month=10')
+    const response = await request.get('http://127.0.0.1:5101/umayomi-fbb2b/asia-northeast1/scrapeJRACalendarWithRaceResults?year=2025&month=10')
 
     expect(response.status()).toBe(200)
     
