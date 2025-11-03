@@ -1,0 +1,313 @@
+---
+alwaysApply: false
+---
+
+# firebase-functions-test 使用方法ガイド
+
+## 概要
+
+`firebase-functions-test`はFirebase Cloud Functionsを単体テストするためのライブラリです。実際のFirebaseプロジェクトに依存せず、関数のロジックをテストできます。
+
+## インストール
+
+```bash
+pnpm add -D firebase-functions-test
+```
+
+## 基本的な使い方
+
+### 1. テスト環境の初期化
+
+```typescript
+import firebaseFunctionsTest from 'firebase-functions-test'
+
+// オフラインモード（推奨）: モックを使用してFirebaseサービスをエミュレート
+const testEnv = firebaseFunctionsTest()
+
+// または、実際のFirebaseプロジェクトを使用（本番データに注意）
+const testEnv = firebaseFunctionsTest({
+  projectId: 'your-project-id',
+  // databaseURL: 'https://your-project.firebaseio.com', // Realtime Database使用時
+})
+
+// テスト終了後にクリーンアップ
+afterAll(() => {
+  testEnv.cleanup()
+})
+```
+
+### 2. onRequest関数のテスト（HTTP Functions）
+
+```typescript
+import { describe, it, expect, beforeEach, afterAll } from 'vitest'
+import firebaseFunctionsTest from 'firebase-functions-test'
+import { scrapeJRACalendar } from '../src/index'
+
+const testEnv = firebaseFunctionsTest()
+
+describe('scrapeJRACalendar', () => {
+  afterAll(() => {
+    testEnv.cleanup()
+  })
+
+  it('正常なリクエストで成功する', async () => {
+    // 関数をラップ（v2のonRequest関数の場合）
+    // v1関数の場合は: testEnv.wrap(scrapeJRACalendar)
+    
+    // v2関数は直接呼び出し可能
+    const mockRequest = {
+      query: { year: '2025', month: '10' },
+      body: {}
+    }
+    
+    const mockResponse = {
+      status: vi.fn().mockReturnThis(),
+      send: vi.fn(),
+      json: vi.fn()
+    }
+
+    // 関数を直接呼び出し（v2 onRequest）
+    await scrapeJRACalendar(mockRequest as any, mockResponse as any)
+
+    expect(mockResponse.status).toHaveBeenCalledWith(200)
+    expect(mockResponse.send).toHaveBeenCalledWith(
+      expect.objectContaining({ success: true })
+    )
+  })
+
+  it('yearとmonthが不足している場合、エラーを返す', async () => {
+    const mockRequest = {
+      query: {},
+      body: {}
+    }
+    
+    const mockResponse = {
+      status: vi.fn().mockReturnThis(),
+      send: vi.fn()
+    }
+
+    await scrapeJRACalendar(mockRequest as any, mockResponse as any)
+
+    expect(mockResponse.status).toHaveBeenCalledWith(400)
+    expect(mockResponse.send).toHaveBeenCalledWith(
+      expect.objectContaining({ 
+        success: false,
+        error: expect.stringContaining('required')
+      })
+    )
+  })
+})
+```
+
+### 3. onCall関数のテスト（Callable Functions）
+
+```typescript
+import { onCall } from 'firebase-functions/v2/https'
+import firebaseFunctionsTest from 'firebase-functions-test'
+
+const testEnv = firebaseFunctionsTest()
+
+// Callable関数の例
+export const myCallableFunction = onCall(async (request) => {
+  const { data } = request
+  return { result: `Hello ${data.name}` }
+})
+
+describe('myCallableFunction', () => {
+  afterAll(() => {
+    testEnv.cleanup()
+  })
+
+  it('正常なデータで成功する', async () => {
+    const wrapped = testEnv.wrap(myCallableFunction)
+    const result = await wrapped({ data: { name: 'Test' } })
+    
+    expect(result).toEqual({ result: 'Hello Test' })
+  })
+})
+```
+
+### 4. Firestoreトリガー関数のテスト
+
+```typescript
+import { onDocumentWritten } from 'firebase-functions/v2/firestore'
+import firebaseFunctionsTest from 'firebase-functions-test'
+
+const testEnv = firebaseFunctionsTest()
+
+// Firestoreトリガー関数の例
+export const onRaceCreated = onDocumentWritten(
+  'races/{raceId}',
+  async (event) => {
+    const beforeData = event.data?.before?.data()
+    const afterData = event.data?.after?.data()
+    
+    if (!beforeData && afterData) {
+      // 新規作成
+      console.log('新規レース作成:', afterData.raceName)
+    }
+  }
+)
+
+describe('onRaceCreated', () => {
+  afterAll(() => {
+    testEnv.cleanup()
+  })
+
+  it('新規ドキュメント作成時に処理される', async () => {
+    const wrapped = testEnv.wrap(onRaceCreated)
+    
+    const beforeSnap = testEnv.firestore.makeDocumentSnapshot(
+      null,
+      'races/race123'
+    )
+    const afterSnap = testEnv.firestore.makeDocumentSnapshot(
+      { raceName: 'テストレース', date: '2025-10-13' },
+      'races/race123'
+    )
+    
+    const change = testEnv.makeChange(beforeSnap, afterSnap)
+    await wrapped(change)
+    
+    // 処理の検証（例: ログの確認など）
+  })
+})
+```
+
+### 5. Firestoreのモックデータ作成
+
+```typescript
+import firebaseFunctionsTest from 'firebase-functions-test'
+
+const testEnv = firebaseFunctionsTest()
+
+describe('Firestore操作のテスト', () => {
+  afterAll(() => {
+    testEnv.cleanup()
+  })
+
+  it('ドキュメントスナップショットを作成', () => {
+    const snap = testEnv.firestore.makeDocumentSnapshot(
+      { name: 'テスト', value: 100 },
+      'collection/doc123'
+    )
+    
+    expect(snap.data()).toEqual({ name: 'テスト', value: 100 })
+    expect(snap.id).toBe('doc123')
+    expect(snap.ref.path).toBe('collection/doc123')
+  })
+
+  it('コレクションスナップショットを作成', () => {
+    const doc1 = testEnv.firestore.makeDocumentSnapshot(
+      { name: 'Doc1' },
+      'collection/doc1'
+    )
+    const doc2 = testEnv.firestore.makeDocumentSnapshot(
+      { name: 'Doc2' },
+      'collection/doc2'
+    )
+    
+    const querySnap = testEnv.firestore.makeQuerySnapshot(
+      [doc1, doc2]
+    )
+    
+    expect(querySnap.size).toBe(2)
+    expect(querySnap.docs.map(d => d.data())).toEqual([
+      { name: 'Doc1' },
+      { name: 'Doc2' }
+    ])
+  })
+
+  it('変更イベントを作成', () => {
+    const before = testEnv.firestore.makeDocumentSnapshot(
+      { value: 1 },
+      'collection/doc1'
+    )
+    const after = testEnv.firestore.makeDocumentSnapshot(
+      { value: 2 },
+      'collection/doc1'
+    )
+    
+    const change = testEnv.makeChange(before, after)
+    
+    expect(change.before.data()).toEqual({ value: 1 })
+    expect(change.after.data()).toEqual({ value: 2 })
+  })
+})
+```
+
+### 6. Authenticationイベントのテスト
+
+```typescript
+import { beforeUserCreated } from 'firebase-functions/v2/identity'
+import firebaseFunctionsTest from 'firebase-functions-test'
+
+const testEnv = firebaseFunctionsTest()
+
+export const onUserCreate = beforeUserCreated(async (event) => {
+  const { uid, email } = event.data
+  // ユーザー作成前の処理
+})
+
+describe('onUserCreate', () => {
+  afterAll(() => {
+    testEnv.cleanup()
+  })
+
+  it('ユーザー作成イベントを処理', async () => {
+    const wrapped = testEnv.wrap(onUserCreate)
+    
+    const userRecord = testEnv.auth.makeUserRecord({
+      uid: 'user123',
+      email: 'test@example.com'
+    })
+    
+    await wrapped(userRecord)
+    
+    // 処理の検証
+  })
+})
+```
+
+## Vitestとの統合
+
+現在のプロジェクトでは`vitest`を使用しているため、以下のように統合:
+
+```typescript
+import { describe, it, expect, afterAll, vi } from 'vitest'
+import firebaseFunctionsTest from 'firebase-functions-test'
+
+const testEnv = firebaseFunctionsTest()
+
+describe('Cloud Functions Tests', () => {
+  afterAll(() => {
+    testEnv.cleanup()
+  })
+
+  // テストケース...
+})
+```
+
+## 重要なポイント
+
+1. **v1関数とv2関数の違い**
+   - v1関数: `testEnv.wrap(function)`でラップが必要
+   - v2関数: 直接呼び出し可能（HTTP関数の場合）
+
+2. **クリーンアップ**
+   - `afterAll()`で`testEnv.cleanup()`を必ず呼び出す
+
+3. **オフラインモード vs オンラインモード**
+   - オフラインモード（デフォルト）: モックを使用、外部依存なし
+   - オンラインモード: 実際のFirebaseプロジェクトを使用（本番データに注意）
+
+4. **Firestore Emulatorとの併用**
+   - エミュレーターを使用する場合は、環境変数を設定:
+     ```typescript
+     process.env.FIRESTORE_EMULATOR_HOST = '127.0.0.1:8180'
+     ```
+
+## 参考リンク
+
+- 公式ドキュメント: https://firebase.google.com/docs/functions/unit-testing
+- GitHub: https://github.com/firebase/firebase-functions-test
