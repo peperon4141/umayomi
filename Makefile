@@ -12,7 +12,6 @@ dev: install
 	pnpm turbo run dev &
 	pnpm turbo run build:watch
 
-
 # Format and fix linting issues for all repositories
 format: install
 	pnpm turbo lint:fix
@@ -42,6 +41,7 @@ deploy-dry-run:
 
 deploy-functions:
 	pnpm -F functions run build
+	cd apps/functions && pnpm install --prod=false && cd ../..
 	pnpm exec firebase deploy --config apps/firebase.json --only functions
 
 deploy-firestore:

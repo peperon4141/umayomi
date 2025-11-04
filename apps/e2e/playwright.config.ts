@@ -38,34 +38,11 @@ export default defineConfig({
   ],
   // Firebase Emulatorの起動と待機処理
   webServer: {
-    command: 'cd ../.. && pnpm -F functions run build && cd apps/firebase && pnpm run start',
+    command: 'cd ../.. && pnpm -F firebase run stop && pnpm -F functions run build && cd apps/firebase && pnpm run start',
     url: 'http://127.0.0.1:5100',
     reuseExistingServer: process.env.CI ? false : true,
     timeout: 120 * 1000,
-    stdout: 'inherit',
-    stderr: 'inherit',
-    // Functionsエミュレーターも起動するまで待機
-    ready: async () => {
-      // 複数回チェックして、関数がロードされるまで待機
-      const functionsUrl = 'http://127.0.0.1:5101/umayomi-fbb2b/asia-northeast1/scrapeJRARaceResult?year=2025&month=10&day=13'
-      for (let i = 0; i < 10; i++) {
-        try {
-          const response = await fetch(functionsUrl, { 
-            signal: AbortSignal.timeout(3000) 
-          })
-          const status = response.status
-          // 200、400、500はエンドポイントが存在することを意味する
-          // 404はエンドポイントが存在しない（まだ起動していない）ことを意味する
-          if (status === 200 || status === 400 || status === 500) {
-            return true
-          }
-        } catch {
-          // 接続エラーはエンドポイントがまだ起動していないことを意味する
-        }
-        // 次のチェックまで少し待機
-        await new Promise(resolve => setTimeout(resolve, 1000))
-      }
-      return false
-    },
+    stdout: 'pipe',
+    stderr: 'pipe',
   }
 })

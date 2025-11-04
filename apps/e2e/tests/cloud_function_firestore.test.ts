@@ -39,7 +39,14 @@ test.describe('Cloud Functions', () => {
 
   test('scrapeJRARaceResult関数を呼び出してレース結果データを取得できる', async ({ request }) => {
     test.setTimeout(15000) // 15秒に短縮（実際は約6秒）
-    const response = await request.get('http://127.0.0.1:5101/umayomi-fbb2b/asia-northeast1/scrapeJRARaceResult?year=2025&month=10&day=13')
+    // Functionsエミュレーターが起動するまでリトライ（最大3回）
+    let response
+    let retries = 0
+    while (retries < 3) {
+      response = await request.get('http://127.0.0.1:5101/umayomi-fbb2b/asia-northeast1/scrapeJRARaceResult?year=2025&month=10&day=13')
+      if (response.status() === 200) break
+      retries++
+    }
 
     expect(response.status()).toBe(200)
     

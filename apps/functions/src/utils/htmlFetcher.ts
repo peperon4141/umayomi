@@ -3,11 +3,15 @@ import { logger } from 'firebase-functions'
 
 /**
  * Playwrightを使用してJRAサイトからHTMLを取得
+ * 
+ * Firebase Functions v2 (Gen2) では、Cloud Runベースのため
+ * ブラウザバイナリはイメージに含まれるため、特別なパス設定は不要
+ * ~/.cache/ms-playwright 以下に自動的にインストールされる
  */
 export async function fetchJRAHtmlWithPlaywright(url: string): Promise<string> {
   const browser = await chromium.launch({
     headless: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox']
+    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
   })
   
   try {

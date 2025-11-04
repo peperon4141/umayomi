@@ -15,6 +15,7 @@
       "eslint.config.js",
       ".eslintignore",
       "node_modules/**",
+      "!node_modules/.cache/**",
       ".turbo/**",
       "firebase-debug.log",
       "*.log"

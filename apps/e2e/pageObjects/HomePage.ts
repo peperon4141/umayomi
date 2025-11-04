@@ -13,7 +13,15 @@ export class HomePage {
 
   // 静的メソッドでページ移動を簡潔に
   static async visit(page: Page): Promise<HomePage> {
-    await page.goto('/', { timeout: 30000 }) // gotoは待機を含む
+    await page.goto('/', { timeout: 30000, waitUntil: 'load' })
+    // ホームページにいることを確認
+    const currentUrl = new URL(page.url())
+    if (currentUrl.pathname !== '/') {
+      // ホームページにいない場合は再遷移
+      await page.goto('/', { timeout: 30000, waitUntil: 'load' })
+    }
+    // ログインボタンが表示されるまで待つ（タイムアウトは15秒）
+    await page.waitForSelector('button[aria-label="ログインダイアログを開く"]', { state: 'visible', timeout: 15000 })
     return new HomePage(page)
   }
 
@@ -44,6 +52,7 @@ export class HomePage {
 
   // 操作メソッド
   async loginWithEmailAndPassword(email: string, password: string): Promise<DashboardPage> {
+    // ログインボタンをクリック（既にvisit()で待機済み）
     await this.page.locator('button[aria-label="ログインダイアログを開く"]').first().click({ timeout: 10000 })
     await this.page.waitForSelector('.p-dialog')
     
@@ -59,6 +68,7 @@ export class HomePage {
   }
 
   async loginWithGoogle(): Promise<DashboardPage> {
+    // ログインダイアログを開く（既にvisit()で待機済み）
     await this.page.locator('button[aria-label="ログインダイアログを開く"]').first().click({ timeout: 10000 })
     await this.page.waitForSelector('.p-dialog')
     await this.switchToEmailButton.click()

@@ -133,6 +133,9 @@ apps/firebase/firebase-export-*
 # Firebase Functions build output
 apps/functions/lib/
 
+# Hosting build output
+apps/hosting/dist/
+
 # Test results
 test-results/
 playwright-report/
