@@ -18,9 +18,8 @@
       データに基づいた競馬予想を始めましょう。
     </p>
     
-    <!-- Google Login Button (Primary) - Only show when email form is hidden -->
+    <!-- Google Login Button -->
     <Button
-      v-if="!showEmailForm"
       @click="handleGoogleLogin"
       :loading="loading"
       :disabled="loading"
@@ -32,7 +31,7 @@
       aria-label="Googleでログイン"
     />
     
-    <!-- Email Login Form (Initially Hidden) -->
+    <!-- Email Login Form (Hidden) -->
     <div v-if="showEmailForm" class="space-y-4">
       <div>
         <label for="email" class="block text-sm font-medium mb-1">
@@ -95,23 +94,6 @@
     
     <!-- Footer Text -->
     <div class="mt-4 text-center">
-      <Button
-        v-if="!showEmailForm"
-        @click="showEmailForm = true"
-        text
-        severity="info"
-        label="Googleアカウントをお持ちでない方"
-        class="text-sm"
-        aria-label="メール認証に切り替え"
-      />
-      <Button
-        v-else
-        @click="showEmailForm = false"
-        text
-        severity="secondary"
-        label="← Googleログインに戻る"
-        class="text-sm"
-      />
     </div>
   </Dialog>
 </template>

@@ -41,7 +41,7 @@ deploy-dry-run:
 
 deploy-functions:
 	pnpm -F functions run build
-	cd apps/functions && pnpm install --prod=false && cd ../..
+	cd apps/functions && pnpm install --prod=false && pnpm exec playwright install chromium && cd ../..
 	pnpm exec firebase deploy --config apps/firebase.json --only functions
 
 deploy-firestore:

@@ -1,0 +1,119 @@
+# Firebase Functions ドキュメント
+
+## デプロイ方法
+
+```bash
+make deploy-functions  # ビルド → インストール → デプロイ
+```
+
+## ディレクトリ構成
+
+```
+src/
+├── index.ts              # Cloud Functions定義（onRequest）
+├── parser/jra/           # JRAデータパーサー
+└── utils/                # htmlFetcher（Playwright）、firestoreSaver等
+lib/                      # ビルド成果物（TypeScript → JavaScript）
+```
+
+## Cloud Functions の種類
+
+### onRequest (HTTP Functions) - 現在使用中
+```typescript
+import { onRequest } from 'firebase-functions/v2/https'
+export const scrapeJRACalendar = onRequest(
+  { timeoutSeconds: 300, memory: '1GiB', region: 'asia-northeast1', cors: true },
+  async (request, response) => {
+    // request.query または request.body でパラメータ取得
+    response.send({ success: true })
+  }
+)
+```
+- HTTPリクエスト（GET/POST）で呼び出し可能
+- URL直接アクセスや`fetch`で呼び出し
+- 認証なしでアクセス可能（必要に応じて手動でチェック）
+
+### onCall (Callable Functions)
+```typescript
+import { onCall } from 'firebase-functions/v2/https'
+export const myFunction = onCall(async (request) => {
+  const { data } = request  // クライアントから渡されたデータ
+  const auth = request.auth  // 認証情報が自動付与
+  return { result: 'success' }
+})
+```
+- クライアントSDKから直接呼び出し可能
+- 認証情報（`request.auth`）が自動付与
+- エラーハンドリングが自動化
+
+### onDocumentCreated (Firestore Triggers)
+```typescript
+import { onDocumentCreated } from 'firebase-functions/v2/firestore'
+export const onRaceCreated = onDocumentCreated(
+  'races/{raceId}',
+  async (event) => {
+    const data = event.data?.data()  // 作成されたドキュメントデータ
+  }
+)
+```
+- Firestoreドキュメント作成時に自動実行
+- `onDocumentUpdated`, `onDocumentDeleted` もあり
+
+### onSchedule (Scheduled Functions)
+```typescript
+import { onSchedule } from 'firebase-functions/v2/scheduler'
+export const dailyScraping = onSchedule(
+  {
+    schedule: '0 2 * * *',  // 毎日2時（UTC）
+    timeZone: 'Asia/Tokyo',
+    memory: '1GiB',
+    timeoutSeconds: 300
+  },
+  async (event) => {
+    // 定期実行処理
+  }
+)
+```
+- Cron形式でスケジュール実行（静的・デプロイ時に固定）
+- 例: `'0 2 * * *'` = 毎日2時、`'*/10 * * * *'` = 10分ごと
+- タイムゾーン指定可能（`timeZone: 'Asia/Tokyo'`）
+
+### 動的な時刻指定（Cloud Scheduler API）
+```typescript
+import { CloudSchedulerClient } from '@google-cloud/scheduler'
+import { onRequest } from 'firebase-functions/v2/https'
+
+// 動的にスケジュールを作成する関数
+export const createScheduledJob = onRequest(async (request, response) => {
+  const scheduler = new CloudSchedulerClient()
+  const { targetTime, functionUrl } = request.body
+  
+  // 指定時刻をCron形式に変換
+  const schedule = convertToCron(targetTime)
+  
+  await scheduler.createJob({
+    parent: `projects/${PROJECT_ID}/locations/asia-northeast1`,
+    job: {
+      name: `projects/${PROJECT_ID}/locations/asia-northeast1/jobs/dynamic-job`,
+      schedule,
+      timeZone: 'Asia/Tokyo',
+      httpTarget: {
+        uri: functionUrl,
+        httpMethod: 'POST'
+      }
+    }
+  })
+  
+  response.send({ success: true })
+})
+```
+- Cloud Scheduler APIで動的にジョブを作成可能
+- 実行時刻をコード内で計算して設定
+- または、Firestoreにスケジュール保存し、`onSchedule`で定期チェックして実行
+
+## Playwright使用のポイント
+
+1. `postinstall`スクリプトで`playwright install chromium`を自動実行
+2. `memory: '1GiB'`以上、`timeoutSeconds: 300`を設定
+3. `firebase.json`で`!node_modules/playwright/**`を除外リストから除外
+

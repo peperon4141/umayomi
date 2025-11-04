@@ -16,6 +16,7 @@
       ".eslintignore",
       "node_modules/**",
       "!node_modules/.cache/**",
+      "!node_modules/playwright/**",
       ".turbo/**",
       "firebase-debug.log",
       "*.log"

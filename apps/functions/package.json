@@ -7,7 +7,7 @@
     "dev": "pnpm run build:watch",
     "build": "tsc",
     "build:watch": "tsc --watch --preserveWatchOutput",
-    "prepare": "playwright install chromium",
+    "postinstall": "playwright install chromium || echo 'Warning: Playwright browser installation failed, but continuing...'",
     "serve": "pnpm run build && firebase emulators:start --only functions",
     "shell": "pnpm run build && firebase functions:shell",
     "start": "npm run shell",
