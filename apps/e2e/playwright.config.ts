@@ -1,24 +1,23 @@
 import { defineConfig, devices } from '@playwright/test'
 
 export default defineConfig({
-  timeout: 30 * 1000, // グローバルタイムアウトを30秒に設定
+  timeout: 30 * 1000, // グローバルタイムアウト
   testDir: './tests',
-  fullyParallel: true, // 並列実行を有効化
+  fullyParallel: true,
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 1 : 0, // リトライ回数を削減
-  workers: 4, // CI環境では2、ローカルでは6に増加
+  retries: process.env.CI ? 1 : 0,
+  workers: 4,
   reporter: process.env.CI 
     ? [['github'], ['html', { outputFolder: 'playwright-report' }]] 
     : 'list',
   use: {
-    baseURL: 'http://127.0.0.1:5100', // Firebase Emulator hosting
+    baseURL: 'http://127.0.0.1:5100',
     trace: 'on-first-retry',
-    // ヘッドレスモード用の設定
-    headless: true, // ヘッドレスモードで実行
-    video: 'retain-on-failure', // 失敗時にビデオを保存
-    screenshot: 'only-on-failure', // 失敗時にスクリーンショットを保存
-    actionTimeout: 5000, // アクションタイムアウトを5秒に設定（通常テスト用）
-    navigationTimeout: 10000 // ナビゲーションタイムアウトを10秒に設定
+    headless: true,
+    video: 'retain-on-failure',
+    screenshot: 'only-on-failure',
+    actionTimeout: 5000, // アクションタイムアウト
+    navigationTimeout: 10000 // ナビゲーションタイムアウト
   },
   projects: [
     {

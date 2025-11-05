@@ -13,17 +13,11 @@ export class HomePage {
 
   // 静的メソッドでページ移動を簡潔に
   static async visit(page: Page): Promise<HomePage> {
-    await page.goto('/', { timeout: 30000, waitUntil: 'load' })
-    // ホームページにいることを確認
-    const currentUrl = new URL(page.url())
-    if (currentUrl.pathname !== '/') {
-      // ホームページにいない場合は再遷移
-      await page.goto('/', { timeout: 30000, waitUntil: 'load' })
-    }
+    await page.goto('/', { waitUntil: 'load' })
     // ログインボタンまたはタイトルが表示されるまで待つ（ログイン済みの場合はリダイレクトされるため）
     await Promise.race([
-      page.waitForSelector('button[aria-label="ログインダイアログを開く"]', { state: 'visible', timeout: 5000 }).catch(() => null),
-      page.waitForSelector('h1[aria-label="メインタイトル"]', { state: 'visible', timeout: 5000 }).catch(() => null)
+      page.waitForSelector('button[aria-label="ログインダイアログを開く"]', { state: 'visible', timeout: 3000 }).catch(() => null),
+      page.waitForSelector('h1[aria-label="メインタイトル"]', { state: 'visible', timeout: 3000 }).catch(() => null)
     ])
     return new HomePage(page)
   }
