@@ -11,7 +11,7 @@ import { JRDBFieldType } from '../parsers/utils'
 export const kyhFormat: JRDBFormatDefinition = {
   dataType: 'KYH',
   description: 'JRDB競走馬データ（KYH）- 標準版',
-  recordLength: 545,
+  recordLength: 552,
   encoding: 'ShiftJIS',
   lineEnding: 'CRLF',
   specificationUrl: 'https://jrdb.com/program/Kyh/kyh_doc.txt',
@@ -402,14 +402,8 @@ export const kyhFormat: JRDBFormatDefinition = {
       length: 16,
       type: JRDBFieldType.STRING,
       description: '調教タイム19'
-    },
-    {
-      name: '調教タイム20',
-      start: 545,
-      length: 16,
-      type: JRDBFieldType.STRING,
-      description: '調教タイム20'
     }
+    // 注意: 調教タイム20は仕様書に存在しない（KYHのレコード長は552バイト）
   ]
 }
 

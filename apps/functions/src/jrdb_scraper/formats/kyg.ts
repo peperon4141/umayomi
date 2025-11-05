@@ -402,14 +402,8 @@ export const kygFormat: JRDBFormatDefinition = {
       length: 16,
       type: JRDBFieldType.STRING,
       description: '調教タイム19'
-    },
-    {
-      name: '調教タイム20',
-      start: 545,
-      length: 16,
-      type: JRDBFieldType.STRING,
-      description: '調教タイム20'
     }
+    // 注意: 調教タイム20は仕様書に存在しない（KYGのレコード長は545バイト）
   ]
 }
 

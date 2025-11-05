@@ -530,7 +530,12 @@ export async function convertToParquet(
       if (typeof value === 'string') {
         parquetSchemaObj[key] = { type: 'UTF8', optional: true }
       } else if (typeof value === 'number') {
-        parquetSchemaObj[key] = { type: 'INT64', optional: true }
+        // 整数か小数かを判定（小数点以下がある場合はDOUBLE、ない場合はINT64）
+        if (Number.isInteger(value)) {
+          parquetSchemaObj[key] = { type: 'INT64', optional: true }
+        } else {
+          parquetSchemaObj[key] = { type: 'DOUBLE', optional: true }
+        }
       } else if (typeof value === 'boolean') {
         parquetSchemaObj[key] = { type: 'BOOLEAN', optional: true }
       } else {
@@ -547,7 +552,48 @@ export async function convertToParquet(
   
   try {
     for (const record of records) {
-      await writer.appendRow(record)
+      // スキーマに合わせてレコードの値を変換
+      const convertedRecord: Record<string, unknown> = {}
+      for (const [key, value] of Object.entries(record)) {
+        const fieldSchema = parquetSchemaObj[key]
+        if (!fieldSchema) {
+          // スキーマにないフィールドはスキップ
+          continue
+        }
+        
+        // null値の処理：optionalフィールドの場合はundefinedにする
+        if (value === null) {
+          if (fieldSchema.optional) {
+            convertedRecord[key] = undefined
+          } else {
+            // 必須フィールドの場合はデフォルト値を使用
+            if (fieldSchema.type === 'INT64') {
+              convertedRecord[key] = 0
+            } else if (fieldSchema.type === 'DOUBLE') {
+              convertedRecord[key] = 0.0
+            } else if (fieldSchema.type === 'UTF8') {
+              convertedRecord[key] = ''
+            } else if (fieldSchema.type === 'BOOLEAN') {
+              convertedRecord[key] = false
+            } else {
+              convertedRecord[key] = undefined
+            }
+          }
+        } else {
+          // 型をスキーマに合わせて変換
+          if ((fieldSchema.type === 'INT64' || fieldSchema.type === 'DOUBLE') && typeof value === 'number') {
+            convertedRecord[key] = value
+          } else if (fieldSchema.type === 'UTF8' && typeof value === 'string') {
+            convertedRecord[key] = value
+          } else if (fieldSchema.type === 'BOOLEAN' && typeof value === 'boolean') {
+            convertedRecord[key] = value
+          } else {
+            // 型が一致しない場合は文字列に変換
+            convertedRecord[key] = String(value)
+          }
+        }
+      }
+      await writer.appendRow(convertedRecord)
     }
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error)

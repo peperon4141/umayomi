@@ -96,3 +96,4 @@ curl -X GET "http://127.0.0.1:5101/umayomi-fbb2b/asia-northeast1/fetchRaceKYData
 curl -X GET "http://127.0.0.1:5101/umayomi-fbb2b/asia-northeast1/fetchRaceKYData?year=2025&month=9&day=28&racecourse=阪神&kaisaiRound=1&kaisaiDay=1&raceNumber=7"
 ```
 
+
