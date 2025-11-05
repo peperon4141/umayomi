@@ -76,6 +76,26 @@ export default [
     }
   },
   {
+    files: ['scripts/**/*.js'],
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: 'commonjs',
+      globals: {
+        'require': 'readonly',
+        '__dirname': 'readonly',
+        '__filename': 'readonly',
+        'process': 'readonly',
+        'module': 'readonly',
+        'exports': 'readonly',
+        'global': 'readonly'
+      }
+    },
+    rules: {
+      'no-console': 'off',
+      'no-unused-vars': ['error', { argsIgnorePattern: '^_' }]
+    }
+  },
+  {
     files: ['lib/**/*.js'],
     languageOptions: {
       ecmaVersion: 2022,

@@ -40,6 +40,9 @@
       }
     ]
   },
+  "storage": {
+    "rules": "firebase/storage.rules"
+  },
   "emulators": {
     "functions": {
       "port": 5101,
@@ -51,6 +54,10 @@
     },
     "firestore": {
       "port": 8180,
+      "host": "127.0.0.1"
+    },
+    "storage": {
+      "port": 9198,
       "host": "127.0.0.1"
     },
     "hosting": {

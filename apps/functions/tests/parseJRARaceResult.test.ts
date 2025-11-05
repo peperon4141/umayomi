@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { readFileSync } from 'fs'
 import { join } from 'path'
 import * as cheerio from 'cheerio'
-import { parseJRARaceResult, extractRaceInfo } from '../src/parser/jra/raceResultParser'
+import { parseJRARaceResult, extractRaceInfo } from '../src/jra_scraper/parser/raceResultParser'
 
 describe('parseJRARaceResult', () => {
   // テスト用のHTMLファイルと期待値を読み込み

@@ -1,0 +1,23 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // JRDBデータ: 認証済みユーザーのみ読み取り可能、Cloud Functionsからのみ書き込み可能
+    match /jrdb_data/{allPaths=**} {
+      allow read: if request.auth != null;
+      allow write: if false; // Cloud Functionsからのみ書き込み可能（Admin SDK使用）
+    }
+    
+    // モデルファイル: 認証済みユーザーのみ読み取り可能、Cloud Functionsからのみ書き込み可能
+    match /models/{allPaths=**} {
+      allow read: if request.auth != null;
+      allow write: if false; // Cloud Functionsからのみ書き込み可能（Admin SDK使用）
+    }
+    
+    // その他のファイルは認証済みユーザーのみ読み取り可能
+    match /{allPaths=**} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+  }
+}
+

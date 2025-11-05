@@ -1,0 +1,135 @@
+# JRDBデータ仕様書一覧
+
+参考: [JRDBデータのご案内](https://jrdb.com/program/data.html)
+
+## データ形式について
+
+- **ファイル形式**: lha圧縮形式（.lzh）
+- **データ形式**: 固定長テキスト形式
+- **今後**: zip形式の追加予定（作成中）
+
+## コード表
+
+### 基本コード表
+- [JRDBデータコード表](https://jrdb.com/program/jrdb_code.txt) (txt) (2018/11/16更新:場コード追加)
+- [馬具コード表](https://jrdb.com/program/bagu_code.txt) (txt)
+- [脚元コード表](https://jrdb.com/program/ashimoto_code.txt) (txt)
+- [特記コード表](https://jrdb.com/program/tokki_code.txt) (txt)
+- [系統コード表](https://jrdb.com/program/keito_code.txt) (txt)
+- [調教コースコード表](https://jrdb.com/program/cyokyo_course_code.txt) (txt)
+- [追い状態コード表](https://jrdb.com/program/oi_code.txt) (txt)
+
+### コードデータベース
+- [JRDBコードACCESSファイル(jrdb_code.mdb)LZH圧縮版 61KB](https://jrdb.com/program/jrdb_code.lzh) (2020/01/29更新)
+- [JRDBコードACCESSファイル(jrdb_code.mdb)ZIP圧縮版 58KB](https://jrdb.com/program/jrdb_code.zip) (2020/01/29更新)
+- [JRDBコードACCESSファイル(jrdb_code.mdb)非圧縮版 928KB](https://jrdb.com/program/jrdb_code.mdb) (2020/01/29更新)
+
+## データタイプ別仕様書
+
+### ◆登録馬データ
+
+| 更新曜日・時間 | データ名 | 概要 | 仕様書 | 内容説明 | サンプル |
+|---|---|---|---|---|---|
+| 月木 20:00 | JRDB登録馬データ（KTA） | 月：特別レース登録馬データ<br>木：全場全レース登録馬データ | [仕様](https://jrdb.com/program/Kta/kta_doc.txt) | - | [サンプル](https://jrdb.com/program/Kta/KTA040627.txt) |
+
+### ◆成績情報系
+
+| 更新曜日・時間 | データ名 | 概要 | 仕様書 | 内容説明 | サンプル |
+|---|---|---|---|---|---|
+| 木 17:00 | JRDB成績データ（SED） | 成績分析用 | [仕様](https://jrdb.com/program/Sed/sed_doc.txt) | [使用説明](https://jrdb.com/program/Sed/sedsiyo_doc.txt) | [サンプル](https://jrdb.com/program/Sed/SED080913.txt) |
+| 木 17:00 | JRDB成績データ（SEC） | 成績分析用 | [仕様](https://jrdb.com/program/Sec/sec_doc.txt) | [使用説明](https://jrdb.com/program/Se/Sesiyo_doc2a.txt) | [サンプル](https://jrdb.com/program/Sec/SEC020908.txt) |
+| 木 17:00 | JRDB成績拡張データ（SKB） | 成績分析用・拡張データ | [仕様](https://jrdb.com/program/Skb/skb_doc.txt) | [使用説明](https://jrdb.com/program/Skb/skbsiyo_doc.txt) | [サンプル](https://jrdb.com/program/Skb/SKB020908.txt) |
+| 木 17:00 | JRDB成績レースデータ（SRB） | 成績分析用 | [仕様](https://jrdb.com/program/Srb/srb_doc.txt) | - | [サンプル](https://jrdb.com/program/Srb/SRB080913.txt) |
+| 木 17:00 | JRDB成績レースデータ（SRA） | 成績分析用 | [仕様](https://jrdb.com/program/Sra/sra_doc.txt) | - | [サンプル](https://jrdb.com/program/Sra/SRA020908.txt) |
+
+**注意**: SRAはSECに同梱
+
+### ◆騎手・調教師データ
+
+| 更新曜日・時間 | データ名 | 概要 | 仕様書 | 内容説明 | サンプル |
+|---|---|---|---|---|---|
+| 木 19:00 | JRDB調教師データ（CZA） | 全調教師 | [仕様](https://jrdb.com/program/Cs/Cs_doc1.txt) | [使用説明](https://jrdb.com/program/Cs/CKsiyo_doc1.txt) | - |
+| 木 19:00 | JRDB調教師データ（CSA） | 差分(今週出走分,先週成績更新分) | [仕様](https://jrdb.com/program/Cs/Cs_doc1.txt) | [使用説明](https://jrdb.com/program/Cs/CKsiyo_doc1.txt) | [サンプル](https://jrdb.com/program/Cs/CSA020907.txt) |
+| 木 19:00 | JRDB騎手データ（KZA） | 全騎手 | [仕様](https://jrdb.com/program/Ks/Ks_doc1.txt) | [使用説明](https://jrdb.com/program/Ks/CKsiyo_doc1.txt) | - |
+| 木 19:00 | JRDB騎手データ（KSA） | 差分(今週出走分,先週成績更新分) | [仕様](https://jrdb.com/program/Ks/Ks_doc1.txt) | [使用説明](https://jrdb.com/program/Ks/CKsiyo_doc1.txt) | [サンプル](https://jrdb.com/program/Ks/KSA020907.txt) |
+| 木 19:00 | JRDB抹消馬データ（MZA） | 抹消馬 | [仕様](https://jrdb.com/program/Msa/msa_doc.txt) | - | - |
+| 木 19:00 | JRDB抹消馬データ（MSA） | 差分 | [仕様](https://jrdb.com/program/Msa/msa_doc.txt) | - | [サンプル](https://jrdb.com/program/Msa/MSA020907.txt) |
+
+### ◆前日情報系
+
+| 更新曜日・時間 | データ名 | 概要 | 仕様書 | 内容説明 | サンプル |
+|---|---|---|---|---|---|
+| 金土 19:00 | JRDBデータパック（JRDB） | 前日情報系データの一括パック | - | - | - |
+| 金土 19:00 | JRDB競走馬データ（KYI） | 競走馬ごとのデータ。<br>IDM、各指数を格納、放牧先を追加 | [仕様](https://jrdb.com/program/Kyi/kyi_doc.txt) | [使用説明](https://jrdb.com/program/Kyi/ky_siyo_doc.txt) | [サンプル](https://jrdb.com/program/Kyi/KYI150712.txt) |
+| 金土 19:00 | JRDB競走馬データ（KYH） | 競走馬ごとのデータ。<br>IDM、各指数を格納 | [仕様](https://jrdb.com/program/Kyh/kyh_doc.txt) | [使用説明](https://jrdb.com/program/Kyh/ky_siyo_doc.txt) | [サンプル](https://jrdb.com/program/Kyh/KYH080913.txt) |
+| 金土 19:00 | JRDB競走馬データ（KYG） | 競走馬ごとのデータ。<br>IDM、各指数を格納 | [仕様](https://jrdb.com/program/Kyg/kyg_doc.txt) | [使用説明](https://jrdb.com/program/Kyg/ky_siyo_doc.txt) | [サンプル](https://jrdb.com/program/Kyg/KYG040627.txt) |
+| 金土 19:00 | JRDB競走馬拡張データ（KKA） | 競走馬ごとの拡張データ | [仕様](https://jrdb.com/program/Kka/kka_doc.txt) | - | [サンプル](https://jrdb.com/program/Kka/KKA020908.txt) |
+| 金土 19:00 | JRDB馬基本データ（UKC） | 馬に関するデータを格納 | [仕様](https://jrdb.com/program/Ukc/ukc_doc.txt) | - | [サンプル](https://jrdb.com/program/Ukc/UKC020908.txt) |
+| 金土 19:00 | JRDB情報データ（JOA） | 情報からの詳細データ | [仕様](https://jrdb.com/program/Jo/Jodata_doc2.txt) | [使用説明](https://jrdb.com/program/Jo/Josiyo_doc.txt) | [サンプル](https://jrdb.com/program/Jo/JOA020908.txt) |
+| 金土 19:00 | JRDB基準オッズデータ（OZ） | 単複・馬連の基準オッズデータ | [仕様](https://jrdb.com/program/Oz/Ozdata_doc.txt) | [使用説明](https://jrdb.com/program/Oz/Ozsiyo_doc.txt) | [サンプル](https://jrdb.com/program/Oz/OZ020908.txt) |
+| 金土 19:00 | ワイド基準オッズデータ（OW） | ワイドの基準オッズデータ | [仕様](https://jrdb.com/program/Oz/Owdata_doc.txt) | - | [サンプル](https://jrdb.com/program/Oz/OW020908.txt) |
+| 金土 19:00 | 馬単基準オッズデータ（OU） | 馬単の基準オッズデータ | [仕様](https://jrdb.com/program/Ou/Oudata_doc.txt) | - | [サンプル](https://jrdb.com/program/Ou/OU020908.txt) |
+| 金土 19:00 | ３連複基準オッズデータ（OT） | ３連複の基準オッズデータ | [仕様](https://jrdb.com/program/Ot/Otdata_doc.txt) | - | [サンプル](https://jrdb.com/program/Ot/OT020908.txt) |
+| 金土 19:00 | ３連単基準オッズデータ（OV） | ３連単の基準オッズデータ | [仕様](https://jrdb.com/program/Ov/Ovdata_doc.txt) | - | [サンプル](https://jrdb.com/program/Ov/OV020908.txt) |
+| 金土 19:00 | JRDB前走データ（ZED） | 過去５走の成績データ | [仕様](https://jrdb.com/program/Ze/Zedata_doc.txt) | [使用説明](https://jrdb.com/program/Ze/Zesiyo_doc.txt) | [サンプル](https://jrdb.com/program/Ze/ZED080913.txt) |
+| 金土 19:00 | JRDB前走データ（ZEC） | 過去５走の成績データ | [仕様](https://jrdb.com/program/Ze/Zedata_doc.txt) | [使用説明](https://jrdb.com/program/Ze/Zesiyo_doc.txt) | [サンプル](https://jrdb.com/program/Ze/ZEC020908.txt) |
+| 金土 19:00 | JRDB前走拡張データ（ZKB） | 過去５走の成績拡張データ | [仕様](https://jrdb.com/program/Zk/Zkbdata_doc.txt) | [使用説明](https://jrdb.com/program/Zk/Zkbsiyo_doc.txt) | [サンプル](https://jrdb.com/program/Zk/ZKB020908.txt) |
+| 金土 19:00 | JRDB開催データ（KAB） | 馬場・天候予想等の開催に対するデータ | [仕様](https://jrdb.com/program/Ka/kab_doc.txt) | [使用説明](https://jrdb.com/program/Ka/kabsiyo_doc.txt) | [サンプル](https://jrdb.com/program/Ka/KAB020908.txt) |
+| 金土 19:00 | JRDB開催データ（KAA） | 馬場・天候予想等の開催に対するデータ | [仕様](https://jrdb.com/program/Ka/kaa_doc.txt) | [使用説明](https://jrdb.com/program/Ka/kaasiyo_doc.txt) | [サンプル](https://jrdb.com/program/Ka/KAA020908.txt) |
+| 金土 19:00 | JRDB番組データ（BAC） | レース番組情報 | [仕様](https://jrdb.com/program/Ba/bac_doc.txt) | [使用説明](https://jrdb.com/program/Ba/bacsiyo_doc.txt) | [サンプル](https://jrdb.com/program/Ba/BAC020908.txt) |
+| 金土 19:00 | JRDB番組データ（BAB） | レース番組情報 | [仕様](https://jrdb.com/program/Ba/bab_doc.txt) | [使用説明](https://jrdb.com/program/Ba/babsiyo_doc.txt) | [サンプル](https://jrdb.com/program/Ba/BAB020908.txt) |
+| 金土 19:00 | JRDB調教分析データ（CYB） | 調教分析データ | [仕様](https://jrdb.com/program/Cy/cyb_doc.txt) | [使用説明](https://jrdb.com/program/Cy/cybsiyo_doc.txt) | [サンプル](https://jrdb.com/program/Cy/CYB020908.txt) |
+| 金土 19:00 | JRDB調教分析データ（CYA） | 調教分析データ | [仕様](https://jrdb.com/program/Cy/cya_doc.txt) | [使用説明](https://jrdb.com/program/Cy/cyasiyo_doc.txt) | [サンプル](https://jrdb.com/program/Cy/CYA020908.txt) |
+| 金土 19:00 | JRDB調教本追切データ（CHA） | 調教分析データ | [仕様](https://jrdb.com/program/Ch/cha_doc.txt) | [使用説明](https://jrdb.com/program/Ch/chasiyo_doc.txt) | [サンプル](https://jrdb.com/program/Ch/CHA020908.txt) |
+
+**注意**: KKAはJRDBパックに同梱
+
+### ◆当日情報系
+
+| 更新曜日・時間 | データ名 | 概要 | 仕様書 | 内容説明 | サンプル |
+|---|---|---|---|---|---|
+| 土日 17:00 | JRDB直前情報データ（TYB）（最終版） | 直前情報 | [仕様](https://jrdb.com/program/Ty/tyb_doc.txt) | [使用説明](https://jrdb.com/program/Ty/tybsiyo_doc.txt) | - |
+| 土日 17:00 | JRDB払戻情報データ（HJC） | 払戻情報に関するデータを格納<br>注意事項(2024.09.29) | [仕様](https://jrdb.com/program/Hj/hjc_doc.txt) | [使用説明](https://jrdb.com/program/Hj/hjcsiyo_doc.txt) | [サンプル](https://jrdb.com/program/Hj/HJC080913.txt) |
+| 土日 17:00 | JRDB払戻情報データ（HJA） | 払戻情報に関するデータを格納 | [仕様](https://jrdb.com/program/Hj/hja_doc.txt) | [使用説明](https://jrdb.com/program/Hj/hjasiyo_doc.txt) | - |
+| 土日 17:00 | JRDB成績速報データ（SED） | 成績分析用 | [仕様](https://jrdb.com/program/Sed/sed_doc.txt) | [使用説明](https://jrdb.com/program/Sed/sedsiyo_doc.txt) | [サンプル](https://jrdb.com/program/Sed/SED080913.txt) |
+| 土日 17:00 | JRDB成績速報データ（SEC） | 成績分析用 | [仕様](https://jrdb.com/program/Sec/sec_doc.txt) | [使用説明](https://jrdb.com/program/Se/Sesiyo_doc2a.txt) | [サンプル](https://jrdb.com/program/Sec/SEC020908.txt) |
+
+## データの使用方法
+
+競走馬データを中心として、以下の方法でデータをリンクします：
+
+1. **レースキー**で番組データ、基準オッズデータをリンク
+2. **レースキー+馬番**で情報データ、直前データをリンク
+3. **血統登録番号**で馬基本データをリンク
+4. **競走成績キー**で前走データをリンク
+5. **騎手データ**を使用して騎手マスタを作成
+6. **調教師データ**を使用して調教師マスタを作成
+7. **騎手コード、調教師コード**で騎手マスタ、調教師マスタをリンク
+
+## データファイル名の命名規則
+
+データファイル名は以下の形式です：
+
+```
+{データ種別コード}{日付}.lzh
+```
+
+例：
+- `KYG251102.lzh` → 競走馬データ（KYG）、2025年11月02日のデータ
+- `KYH150105.lzh` → 競走馬データ（KYH）、2015年1月5日のデータ
+
+**注意**: データタイプによって、日付の意味が異なる場合があります：
+- 基本的にレース開催日
+- 週単位で更新されるデータ（KS*, CS*, MS*）は、その週の開始日または終了日が含まれる
+
+## データアクセス制限
+
+- **アクセス時間**: 平日 08:00-19:00
+- **アクセス制限**: 過去データへのアクセスは制限される場合があります
+- **過去データ**: 過去データの取得は週単位で対応
+
+## 参考リンク
+
+- [JRDBデータのご案内](https://jrdb.com/program/data.html)
+- [JRDB競走馬データ（KYG）仕様書](https://jrdb.com/program/Kyg/kyg_doc.txt)
+

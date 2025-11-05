@@ -50,6 +50,9 @@ deploy-function-scrape-calendar-with-results:
 deploy-firestore:
 	npx firebase-tools deploy --config apps/firebase.json --only firestore
 
+deploy-storage:
+	npx firebase-tools deploy --config apps/firebase.json --only storage
+
 deploy-hosting:
 	pnpm -F hosting run build
 	npx firebase-tools deploy --config apps/firebase.json --only hosting
@@ -60,38 +63,6 @@ deploy:
 	make deploy-firestore
 	make deploy-hosting
 
-# JRAカレンダーデータスクレイピング（エミュレーター環境用）
-scrape-jra-calendar:
-	@if [ -z "$(YEAR)" ] || [ -z "$(MONTH)" ]; then \
-		echo "Usage: make scrape-jra-calendar YEAR=2025 MONTH=10"; \
-		exit 1; \
-	fi
-	@curl -X GET \
-		"http://127.0.0.1:5101/umayomi-fbb2b/asia-northeast1/scrapeJRACalendar?year=$(YEAR)&month=$(MONTH)" \
-		--max-time 300 \
-		--connect-timeout 10 \
-		--retry 3 \
-		--retry-delay 1 \
-		--show-error \
-		--fail-with-body \
-		|| (echo "Error: エミュレーターが起動していることを確認してください (make dev)" && exit 1)
-
-# JRAレース結果データスクレイピング（エミュレーター環境用）
-scrape-jra-race-result:
-	@if [ -z "$(YEAR)" ] || [ -z "$(MONTH)" ] || [ -z "$(DAY)" ]; then \
-		echo "Usage: make scrape-jra-race-result YEAR=2025 MONTH=10 DAY=13"; \
-		exit 1; \
-	fi
-	@curl -X GET \
-		"http://127.0.0.1:5101/umayomi-fbb2b/asia-northeast1/scrapeJRARaceResult?year=$(YEAR)&month=$(MONTH)&day=$(DAY)" \
-		--max-time 300 \
-		--connect-timeout 10 \
-		--retry 3 \
-		--retry-delay 1 \
-		--show-error \
-		--fail-with-body \
-		|| (echo "Error: エミュレーターが起動していることを確認してください (make dev)" && exit 1)
-
 # JRAカレンダーとレース結果データ一括スクレイピング（エミュレーター環境用）
 scrape-jra-calendar-with-results:
 	@if [ -z "$(YEAR)" ] || [ -z "$(MONTH)" ]; then \
@@ -100,6 +71,24 @@ scrape-jra-calendar-with-results:
 	fi
 	@curl -X GET \
 		"http://127.0.0.1:5101/umayomi-fbb2b/asia-northeast1/scrapeJRACalendarWithRaceResults?year=$(YEAR)&month=$(MONTH)" \
+		--max-time 600 \
+		--connect-timeout 10 \
+		--retry 3 \
+		--retry-delay 1 \
+		--show-error \
+		--fail-with-body \
+		|| (echo "Error: エミュレーターが起動していることを確認してください (make dev)" && exit 1)
+
+# JRDBデータをParquet形式に変換してStorageに保存（エミュレーター環境用）
+convert-jrdb-to-parquet:
+	@if [ -z "$(URL)" ]; then \
+		echo "Usage: make convert-jrdb-to-parquet URL=https://jrdb.com/member/data/Jrdb/JRDB251102.lzh"; \
+		exit 1; \
+	fi
+	@curl -X POST \
+		"http://127.0.0.1:5101/umayomi-fbb2b/asia-northeast1/convertJRDBToParquet" \
+		-H "Content-Type: application/json" \
+		-d "{\"url\": \"$(URL)\"}" \
 		--max-time 600 \
 		--connect-timeout 10 \
 		--retry 3 \

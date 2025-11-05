@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { readFileSync } from 'fs'
 import { join } from 'path'
-import { parseJRACalendar, extractRaceElements, parseRaceElement, extractRaceDates } from '../src/parser/jra/calendarParser'
+import { parseJRACalendar, extractRaceElements, parseRaceElement, extractRaceDates } from '../src/jra_scraper/parser/calendarParser'
 
 describe('parseJRACalendar', () => {
   describe('2025年10月', () => {
