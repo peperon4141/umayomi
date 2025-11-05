@@ -1,25 +1,26 @@
 {
+  "extends": "./tsconfig.json",
   "compilerOptions": {
     "module": "commonjs",
     "noImplicitReturns": true,
-    "noUnusedLocals": true,
+    "noUnusedLocals": false,
     "outDir": "lib",
     "sourceMap": true,
     "strict": true,
     "target": "es2017",
     "skipLibCheck": true,
     "moduleResolution": "node",
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "types": ["vitest/globals"]
   },
-  "compileOnSave": true,
   "include": [
-    "src"
+    "src",
+    "tests"
   ],
   "exclude": [
-    "tests",
     "scripts",
-    "**/*.test.ts",
-    "**/*.spec.ts",
-    "vitest.config.ts"
+    "lib",
+    "node_modules"
   ]
 }
+

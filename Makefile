@@ -41,15 +41,18 @@ deploy-dry-run:
 
 deploy-functions:
 	pnpm -F functions run build
-	cd apps/functions && pnpm install --prod=false && pnpm exec playwright install chromium && cd ../..
-	pnpm exec firebase deploy --config apps/firebase.json --only functions
+	npx firebase-tools deploy --config apps/firebase.json --only functions
+
+deploy-function-scrape-calendar-with-results:
+	pnpm -F functions run build
+	npx firebase-tools deploy --config apps/firebase.json --only functions:scrapeJRACalendarWithRaceResults
 
 deploy-firestore:
-	pnpm exec firebase deploy --config apps/firebase.json --only firestore
+	npx firebase-tools deploy --config apps/firebase.json --only firestore
 
 deploy-hosting:
 	pnpm -F hosting run build
-	pnpm exec firebase deploy --config apps/firebase.json --only hosting
+	npx firebase-tools deploy --config apps/firebase.json --only hosting
 
 # Firebaseデプロイ
 deploy:

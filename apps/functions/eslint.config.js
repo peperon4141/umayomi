@@ -5,16 +5,42 @@ import tsparser from '@typescript-eslint/parser'
 export default [
   js.configs.recommended,
   {
-    ignores: ['lib/**', 'node_modules/**']
+    ignores: [
+      'lib/**',
+      'node_modules/**',
+      '**/*.js.map',
+      '**/*.d.ts'
+    ]
   },
   {
-    files: ['src/**/*.ts', 'tests/**/*.ts'],
+    files: ['src/**/*.ts'],
     languageOptions: {
       parser: tsparser,
       parserOptions: {
         ecmaVersion: 2022,
         sourceType: 'module',
         project: './tsconfig.json'
+      }
+    },
+    plugins: {
+      '@typescript-eslint': tseslint
+    },
+    rules: {
+      'no-console': 'warn',
+      'prefer-const': 'error',
+      'no-var': 'error',
+      'no-undef': 'off', // TypeScriptが型チェックを行うため
+      '@typescript-eslint/no-unused-vars': 'error'
+    }
+  },
+  {
+    files: ['tests/**/*.ts'],
+    languageOptions: {
+      parser: tsparser,
+      parserOptions: {
+        ecmaVersion: 2022,
+        sourceType: 'module',
+        project: './tsconfig.test.json'
       }
     },
     plugins: {

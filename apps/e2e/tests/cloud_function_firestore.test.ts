@@ -38,16 +38,21 @@ test.describe('Cloud Functions', () => {
   })
 
   test('scrapeJRARaceResult関数を呼び出してレース結果データを取得できる', async ({ request }) => {
-    test.setTimeout(15000)
-    // Functionsエミュレーターが起動するまでリトライ（最大2回、即座に再試行）
+    test.setTimeout(30000)
+    // Functionsエミュレーターが起動するまでリトライ（最大10回、1秒待機）
     let response
-    for (let i = 0; i < 2; i++) {
+    for (let i = 0; i < 10; i++) {
       response = await request.get('http://127.0.0.1:5101/umayomi-fbb2b/asia-northeast1/scrapeJRARaceResult?year=2025&month=10&day=13')
       if (response.status() === 200) break
+      // 404の場合は待機して再試行（Functionsエミュレーターが起動中）
+      if (response.status() === 404 && i < 9) {
+        await new Promise(resolve => setTimeout(resolve, 1000))
+      }
     }
 
+    if (!response) throw new Error('Response is undefined')
     expect(response.status()).toBe(200)
-    
+
     const data = await response.json()
     // ✅ 良い例: 1つのオブジェクトを1つのexpectで検証
     expect(data).toEqual({

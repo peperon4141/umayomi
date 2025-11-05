@@ -2,12 +2,12 @@
   "name": "functions",
   "version": "1.0.0",
   "description": "Umayomi Cloud Functions",
-  "main": "lib/src/index.js",
+  "main": "lib/index.js",
   "scripts": {
     "dev": "pnpm run build:watch",
     "build": "tsc",
     "build:watch": "tsc --watch --preserveWatchOutput",
-    "postinstall": "playwright install chromium || echo 'Warning: Playwright browser installation failed, but continuing...'",
+    "postinstall": "export PLAYWRIGHT_BROWSERS_PATH=./node_modules/playwright/.local-browsers && npx playwright install chromium || exit 1",
     "serve": "pnpm run build && firebase emulators:start --only functions",
     "shell": "pnpm run build && firebase functions:shell",
     "start": "npm run shell",
@@ -27,7 +27,7 @@
   "dependencies": {
     "cheerio": "^1.1.2",
     "firebase-admin": "^12.0.0",
-    "firebase-functions": "^4.8.0",
+    "firebase-functions": "^6.6.0",
     "playwright": "^1.56.1"
   },
   "devDependencies": {

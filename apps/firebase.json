@@ -14,12 +14,10 @@
       "vitest.config.ts",
       "eslint.config.js",
       ".eslintignore",
-      "node_modules/**",
-      "!node_modules/.cache/**",
-      "!node_modules/playwright/**",
       ".turbo/**",
       "firebase-debug.log",
-      "*.log"
+      "*.log",
+      "node_modules/**"
     ]
   },
   "firestore": {

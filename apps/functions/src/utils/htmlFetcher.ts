@@ -1,23 +1,65 @@
 import { chromium } from 'playwright'
 import { logger } from 'firebase-functions'
+import * as path from 'path'
+import * as fs from 'fs'
 
 /**
  * Playwrightを使用してJRAサイトからHTMLを取得
  * 
- * Firebase Functions v2 (Gen2) では、Cloud Runベースのため
- * ブラウザバイナリはイメージに含まれるため、特別なパス設定は不要
- * ~/.cache/ms-playwright 以下に自動的にインストールされる
+ * Cloud BuildでpostinstallスクリプトによりPlaywrightブラウザがインストールされる
  */
 export async function fetchJRAHtmlWithPlaywright(url: string): Promise<string> {
   let browser: any = null
   
   try {
-    logger.info('Launching Chromium browser', { url })
+    logger.info('Launching Chromium browser', { 
+      url,
+      cwd: process.cwd()
+    })
     
-    browser = await chromium.launch({
+    // Playwrightブラウザのパスを設定（必須）
+    if (!process.env.PLAYWRIGHT_BROWSERS_PATH) {
+      throw new Error(
+        'PLAYWRIGHT_BROWSERS_PATH環境変数が設定されていません。' +
+        'postinstallスクリプトでPlaywrightブラウザがインストールされているか確認してください。'
+      )
+    }
+    
+    // ブラウザの実行ファイルパスを動的に検出
+    const browsersPath = process.env.PLAYWRIGHT_BROWSERS_PATH
+    let executablePath: string | undefined
+    
+    // browsersPathディレクトリ内のchromium_headless_shell-*ディレクトリを検索
+    if (fs.existsSync(browsersPath)) {
+      const entries = fs.readdirSync(browsersPath)
+      const chromiumDir = entries.find(entry => entry.startsWith('chromium_headless_shell-'))
+      
+      if (chromiumDir) {
+        const candidatePath = path.join(browsersPath, chromiumDir, 'chrome-linux', 'headless_shell')
+        if (fs.existsSync(candidatePath)) {
+          executablePath = candidatePath
+        }
+      }
+    }
+    
+    logger.info('Playwrightブラウザの設定', {
+      browsersPath,
+      executablePath,
+      executableExists: executablePath ? fs.existsSync(executablePath) : false,
+      cwd: process.cwd()
+    })
+    
+    // executablePathが見つかった場合は明示的に指定、見つからなかった場合はPlaywrightに自動検出を任せる
+    const launchOptions: any = {
       headless: true,
       args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
-    })
+    }
+    
+    if (executablePath) {
+      launchOptions.executablePath = executablePath
+    }
+    
+    browser = await chromium.launch(launchOptions)
     
     logger.info('Browser launched successfully')
     

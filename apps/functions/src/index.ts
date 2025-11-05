@@ -1,6 +1,8 @@
 import { onRequest } from 'firebase-functions/v2/https'
 import { logger } from 'firebase-functions'
 import { initializeApp } from 'firebase-admin/app'
+import * as path from 'path'
+import * as fs from 'fs'
 import { fetchJRAHtmlWithPlaywright } from './utils/htmlFetcher'
 import { parseJRACalendar, extractRaceDates } from './parser/jra/calendarParser'
 import * as cheerio from 'cheerio'
@@ -18,6 +20,53 @@ if (isDevelopment) {
   // Firebase Admin SDKの環境変数を設定（initializeAppより前に設定）
   process.env.FIRESTORE_EMULATOR_HOST = '127.0.0.1:8180'
   logger.info('Firestore Emulator環境変数を設定しました')
+}
+
+// Playwrightブラウザのパスを設定（実行時に必須）
+// node_modules/playwright/.local-browsers を使用（Cloud Build/Cloud Runでpostinstallによりインストールされる）
+if (!process.env.PLAYWRIGHT_BROWSERS_PATH) {
+  const cwd = process.cwd()
+  // Playwrightのデフォルトインストール先（node_modules配下）
+  const defaultBrowserPath = path.join(cwd, 'node_modules', 'playwright', '.local-browsers')
+  
+  // ローカル開発環境の候補（workspace配下）
+  const localWorkspacePath = path.resolve(cwd, '../../playwright-browsers')
+  
+  // 候補パスを順にチェック
+  const candidatePaths = [
+    defaultBrowserPath, // node_modules配下（Cloud Build/Cloud Run環境、postinstallでここにインストール）
+    localWorkspacePath // ローカル開発環境（workspace配下）
+  ]
+  
+  let foundPath: string | null = null
+  for (const candidatePath of candidatePaths) {
+    if (fs.existsSync(candidatePath)) {
+      foundPath = candidatePath
+      logger.info('Playwrightブラウザのパスを発見', {
+        path: candidatePath,
+        exists: true
+      })
+      break
+    }
+  }
+  
+  if (foundPath) {
+    process.env.PLAYWRIGHT_BROWSERS_PATH = foundPath
+    logger.info('PLAYWRIGHT_BROWSERS_PATHを設定しました', {
+      browsersPath: process.env.PLAYWRIGHT_BROWSERS_PATH
+    })
+  } else {
+    // node_modules配下をデフォルトとして設定（postinstallでインストールされるはず）
+    process.env.PLAYWRIGHT_BROWSERS_PATH = defaultBrowserPath
+    logger.warn('Playwrightブラウザのパスが見つかりませんでした。デフォルトパスを設定しました', {
+      browsersPath: process.env.PLAYWRIGHT_BROWSERS_PATH,
+      warning: 'postinstallでブラウザがインストールされているか確認してください。'
+    })
+  }
+} else {
+  logger.info('PLAYWRIGHT_BROWSERS_PATHは既に設定されています', {
+    browsersPath: process.env.PLAYWRIGHT_BROWSERS_PATH
+  })
 }
 
 // Firebase Admin SDKを初期化
@@ -97,21 +146,51 @@ export const scrapeJRACalendar = onRequest(
 
     } catch (error) {
       const executionTimeMs = Date.now() - startTime
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      const errorMessage = error instanceof Error ? error.message : String(error)
+      const errorStack = error instanceof Error ? error.stack : undefined
+      const errorName = error instanceof Error ? error.name : 'Unknown'
+      const errorType = error?.constructor?.name || 'Unknown'
       
-      logger.error('JRA scraping failed', { error })
+      // logger.errorにシリアライズ可能な形式でエラー情報を渡す
+      try {
+        logger.error('JRA scraping failed', {
+          errorMessage,
+          errorName,
+          errorType,
+          errorStack,
+          executionTimeMs
+        })
+      } catch (logError) {
+        // logger.error自体が失敗した場合は、より安全な方法でログを出力
+        logger.error('JRA scraping failed', {
+          errorMessage: String(error),
+          executionTimeMs,
+          logError: logError instanceof Error ? logError.message : String(logError)
+        })
+      }
       
-      // エラー時のログを保存
-      const errorYear = (request.body || request.query).year as string
-      const errorMonth = (request.body || request.query).month as string
-      
-      await saveFunctionLog(createErrorLog(
-        'scrapeJRACalendar',
-        errorYear,
-        errorMonth,
-        errorMessage,
-        { executionTimeMs }
-      ))
+      // エラー時のログを保存（エラーハンドリング内でのエラーを防ぐ）
+      try {
+        const errorYear = (request.body || request.query).year as string
+        const errorMonth = (request.body || request.query).month as string
+        
+        await saveFunctionLog(createErrorLog(
+          'scrapeJRACalendar',
+          errorYear,
+          errorMonth,
+          errorMessage,
+          { 
+            executionTimeMs,
+            errorStack,
+            errorType
+          }
+        ))
+      } catch (saveLogError) {
+        // ログ保存の失敗は処理を停止させない
+        logger.warn('Failed to save error log', {
+          saveLogError: saveLogError instanceof Error ? saveLogError.message : String(saveLogError)
+        })
+      }
       
       response.status(500).send({
         success: false,
@@ -191,21 +270,54 @@ export const scrapeJRARaceResult = onRequest(
 
     } catch (error) {
       const executionTimeMs = Date.now() - startTime
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      const errorMessage = error instanceof Error ? error.message : String(error)
+      const errorStack = error instanceof Error ? error.stack : undefined
+      const errorName = error instanceof Error ? error.name : 'Unknown'
+      const errorType = error?.constructor?.name || 'Unknown'
       
-      logger.error('JRA race result scraping failed', { error })
+      // logger.errorにシリアライズ可能な形式でエラー情報を渡す
+      try {
+        logger.error('JRA race result scraping failed', {
+          errorMessage,
+          errorName,
+          errorType,
+          errorStack,
+          executionTimeMs,
+          year: request.query.year || request.body.year,
+          month: request.query.month || request.body.month,
+          day: request.query.day || request.body.day
+        })
+      } catch (logError) {
+        // logger.error自体が失敗した場合は、より安全な方法でログを出力
+        logger.error('JRA race result scraping failed', {
+          errorMessage: String(error),
+          executionTimeMs,
+          logError: logError instanceof Error ? logError.message : String(logError)
+        })
+      }
       
-      // エラー時のログを保存
-      const errorYear = (request.body || request.query).year as string
-      const errorMonth = (request.body || request.query).month as string
-      
-      await saveFunctionLog(createErrorLog(
-        'scrapeJRARaceResult',
-        errorYear,
-        errorMonth,
-        errorMessage,
-        { executionTimeMs }
-      ))
+      // エラー時のログを保存（エラーハンドリング内でのエラーを防ぐ）
+      try {
+        const errorYear = (request.body || request.query).year as string
+        const errorMonth = (request.body || request.query).month as string
+        
+        await saveFunctionLog(createErrorLog(
+          'scrapeJRARaceResult',
+          errorYear,
+          errorMonth,
+          errorMessage,
+          { 
+            executionTimeMs,
+            errorStack,
+            errorType
+          }
+        ))
+      } catch (saveLogError) {
+        // ログ保存の失敗は処理を停止させない
+        logger.warn('Failed to save error log', {
+          saveLogError: saveLogError instanceof Error ? saveLogError.message : String(saveLogError)
+        })
+      }
       
       response.status(500).send({
         success: false,
@@ -281,13 +393,23 @@ export const scrapeJRACalendarWithRaceResults = onRequest(
         try {
           const day = raceDate.getUTCDate()
           const raceResultUrl = generateJRARaceResultUrl(targetYear, targetMonth, day)
+          logger.info('Fetching race results for date', { date: dateKey, day, url: raceResultUrl })
+          
           const raceResultHtml = await fetchJRAHtmlWithPlaywright(raceResultUrl)
           const raceResults = parseJRARaceResult(raceResultHtml, targetYear, targetMonth, day)
           
           allRaceResults.push(...raceResults)
           logger.info('Race results fetched for date', { date: dateKey, count: raceResults.length })
         } catch (error) {
-          logger.warn('Failed to fetch race results for date', { date: dateKey, error })
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+          const errorStack = error instanceof Error ? error.stack : undefined
+          
+          logger.warn('Failed to fetch race results for date', { 
+            date: dateKey, 
+            error: errorMessage,
+            stack: errorStack,
+            errorType: error?.constructor?.name
+          })
           // エラーが発生しても処理を続行
         }
       }
@@ -332,21 +454,53 @@ export const scrapeJRACalendarWithRaceResults = onRequest(
 
     } catch (error) {
       const executionTimeMs = Date.now() - startTime
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      const errorMessage = error instanceof Error ? error.message : String(error)
+      const errorStack = error instanceof Error ? error.stack : undefined
+      const errorName = error instanceof Error ? error.name : 'Unknown'
+      const errorType = error?.constructor?.name || 'Unknown'
       
-      logger.error('JRA calendar with race results scraping failed', { error })
+      // logger.errorにシリアライズ可能な形式でエラー情報を渡す
+      try {
+        logger.error('JRA calendar with race results scraping failed', {
+          errorMessage,
+          errorName,
+          errorType,
+          errorStack,
+          executionTimeMs,
+          year: request.query.year || request.body.year,
+          month: request.query.month || request.body.month
+        })
+      } catch (logError) {
+        // logger.error自体が失敗した場合は、より安全な方法でログを出力
+        logger.error('JRA calendar with race results scraping failed', {
+          errorMessage: String(error),
+          executionTimeMs,
+          logError: logError instanceof Error ? logError.message : String(logError)
+        })
+      }
       
-      // エラー時のログを保存
-      const errorYear = (request.body || request.query).year as string
-      const errorMonth = (request.body || request.query).month as string
-      
-      await saveFunctionLog(createErrorLog(
-        'scrapeJRACalendarWithRaceResults',
-        errorYear,
-        errorMonth,
-        errorMessage,
-        { executionTimeMs }
-      ))
+      // エラー時のログを保存（エラーハンドリング内でのエラーを防ぐ）
+      try {
+        const errorYear = (request.body || request.query).year as string
+        const errorMonth = (request.body || request.query).month as string
+        
+        await saveFunctionLog(createErrorLog(
+          'scrapeJRACalendarWithRaceResults',
+          errorYear,
+          errorMonth,
+          errorMessage,
+          { 
+            executionTimeMs,
+            errorStack,
+            errorType
+          }
+        ))
+      } catch (saveLogError) {
+        // ログ保存の失敗は処理を停止させない
+        logger.warn('Failed to save error log', {
+          saveLogError: saveLogError instanceof Error ? saveLogError.message : String(saveLogError)
+        })
+      }
       
       response.status(500).send({
         success: false,
