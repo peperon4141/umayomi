@@ -7,6 +7,7 @@ import { execSync } from 'child_process'
 // @ts-expect-error - parquetjsには型定義がない
 import { ParquetWriter, ParquetSchema } from 'parquetjs'
 import { JRDBDataType } from '../../../shared/src/jrdb'
+import { parseJRDBDataFromBuffer } from './parsers/jrdbParser'
 
 /**
  * lzhファイルを展開してテキストデータを取得
@@ -114,8 +115,12 @@ export function convertShiftJISToUTF8(buffer: Buffer): string {
 export function extractDataTypeFromExtractedBuffer(buffer: Buffer): JRDBDataType | null {
   // JRDBデータ種別の有効な値のリスト
   const validDataTypes: JRDBDataType[] = [
-    'KY', 'UK', 'ZE', 'ZK', 'BA', 'OZ', 'OW', 'OU', 'OT', 'OV',
-    'JO', 'KK', 'TY', 'HJ', 'SE', 'SR', 'SK', 'KZ', 'KS', 'CZ', 'CS', 'MZ', 'MS'
+    JRDBDataType.KY, JRDBDataType.KYI, JRDBDataType.KYH, JRDBDataType.KYG, JRDBDataType.KKA,
+    JRDBDataType.UK, JRDBDataType.ZE, JRDBDataType.ZK, JRDBDataType.BA, JRDBDataType.OZ,
+    JRDBDataType.OW, JRDBDataType.OU, JRDBDataType.OT, JRDBDataType.OV, JRDBDataType.JO,
+    JRDBDataType.KK, JRDBDataType.TY, JRDBDataType.HJ, JRDBDataType.SE, JRDBDataType.SR,
+    JRDBDataType.SK, JRDBDataType.KZ, JRDBDataType.KS, JRDBDataType.CZ, JRDBDataType.CS,
+    JRDBDataType.MZ, JRDBDataType.MS
   ]
   
   try {
@@ -147,22 +152,29 @@ export function extractDataTypeFromExtractedBuffer(buffer: Buffer): JRDBDataType
           previewText: previewText.substring(0, 300) 
         })
         
-        // コードが2文字の場合はそのまま、3文字の場合は最初の2文字を使用
-        let dataTypeCode = code.length === 2 ? code : code.substring(0, 2)
+        // コードがvalidDataTypesに存在するか確認（KYI, KYH, KYG, KKAなどの3文字コードも含む）
+        let dataTypeCode: JRDBDataType | null = null
         
-        // KYG, UKGなどの特殊パターンの場合
-        if (code === 'KYG' || code === 'UKG') {
-          dataTypeCode = code.substring(0, 2)  // KY または UK
+        // まず3文字コードを確認（KYI, KYH, KYG, KKAなど）
+        const codeEnum = Object.values(JRDBDataType).find(v => v === code)
+        if (codeEnum && validDataTypes.includes(codeEnum)) {
+          dataTypeCode = codeEnum
+        } else if (code.length >= 2) {
+          // 2文字コードを確認（KY, UKなど）
+          const twoCharCode = code.substring(0, 2)
+          const twoCharCodeEnum = Object.values(JRDBDataType).find(v => v === twoCharCode)
+          if (twoCharCodeEnum && validDataTypes.includes(twoCharCodeEnum)) {
+            dataTypeCode = twoCharCodeEnum
+          }
         }
         
-        // JRDBDataTypeに存在するか確認
-        if (validDataTypes.includes(dataTypeCode as JRDBDataType)) {
+        if (dataTypeCode) {
           logger.info('Data type determined from file name', { 
             originalCode: code,
             dataTypeCode,
             match: match[0]
           })
-          return dataTypeCode as JRDBDataType
+          return dataTypeCode
         }
       }
     }
@@ -505,12 +517,6 @@ export async function convertToParquet(
     throw new Error('cannot write parquet file with zero rows')
   }
 
-  logger.info('Starting Parquet conversion', { 
-    recordCount: records.length, 
-    outputPath,
-    firstRecordKeys: Object.keys(records[0])
-  })
-
   // Parquetスキーマを定義
   const parquetSchemaObj: Record<string, { type: string; optional?: boolean }> = {}
   
@@ -533,11 +539,6 @@ export async function convertToParquet(
     }
   }
 
-  logger.info('Parquet schema created', { 
-    schemaKeys: Object.keys(parquetSchemaObj),
-    schema: parquetSchemaObj
-  })
-
   // ParquetSchemaオブジェクトを作成
   const parquetSchema = new ParquetSchema(parquetSchemaObj)
 
@@ -545,16 +546,9 @@ export async function convertToParquet(
   const writer = await ParquetWriter.openFile(parquetSchema, outputPath)
   
   try {
-    logger.info('Writing records to Parquet file', { recordCount: records.length })
-    let writtenCount = 0
     for (const record of records) {
       await writer.appendRow(record)
-      writtenCount++
-      if (writtenCount % 100 === 0) {
-        logger.info('Progress', { written: writtenCount, total: records.length })
-      }
     }
-    logger.info('All records written', { writtenCount, total: records.length })
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error)
     logger.error('Error writing to Parquet file', { 
@@ -565,10 +559,7 @@ export async function convertToParquet(
     throw error
   } finally {
     await writer.close()
-    logger.info('Parquet writer closed')
   }
-
-  logger.info('Parquetファイルを作成しました', { outputPath, recordCount: records.length })
 }
 
 /**
@@ -579,89 +570,54 @@ export async function convertLzhToParquet(
   dataType: JRDBDataType | null,
   year: number,
   outputPath: string
-): Promise<{ actualDataType: JRDBDataType }> {
-  logger.info('lzhファイルをParquetに変換開始', { dataType, year, bufferSize: lzhBuffer.length })
+): Promise<{ actualDataType: JRDBDataType; records: Record<string, unknown>[] }> {
 
   // 1. lzhファイルを展開
   const extractedBuffer = await extractLzhFile(lzhBuffer)
-  logger.info('LZH extraction completed', {
-    originalSize: lzhBuffer.length,
-    extractedSize: extractedBuffer.length
-  })
   
-  // 展開後のバッファからデータ種別を推測
-  // dataTypeがnullの場合は必ず推測を試みる。それ以外の場合でも推測結果を優先する
-  const extractedDataType = extractDataTypeFromExtractedBuffer(extractedBuffer)
-  
+  // データ種別の決定：引数で指定されたdataTypeを優先、未指定の場合のみ推測
   let actualDataType: JRDBDataType
-  if (extractedDataType) {
-    actualDataType = extractedDataType
-    if (dataType === null) {
-      logger.info('データ種別を展開後のファイル名から推測しました', {
-        extractedDataType,
-        originalDataType: dataType
-      })
-    } else if (dataType !== extractedDataType) {
-      logger.info('データ種別を展開後のファイル名から再推測しました（上書き）', {
-        extractedDataType,
-        originalDataType: dataType
-      })
-    }
-  } else if (dataType === null) {
-    logger.warn('データ種別の推測に失敗しました。デフォルト値KYを使用します', {
-      bufferPreview: extractedBuffer.slice(0, 200).toString('hex')
-    })
-    actualDataType = 'KY' // デフォルト値
-  } else {
+  if (dataType !== null) {
     actualDataType = dataType
+  } else {
+    const extractedDataType = extractDataTypeFromExtractedBuffer(extractedBuffer)
+    if (extractedDataType) {
+      actualDataType = extractedDataType
+    } else {
+      logger.warn('データ種別の推測に失敗しました。デフォルト値KYを使用します')
+      actualDataType = JRDBDataType.KY
+    }
   }
   
   // 2. ShiftJISからUTF-8に変換
   let text: string
   try {
-    // まずバイナリデータの先頭を確認
-    const bufferPreview = extractedBuffer.slice(0, Math.min(100, extractedBuffer.length))
-    logger.info('Buffer preview before encoding conversion', {
-      bufferSize: extractedBuffer.length,
-      previewHex: bufferPreview.toString('hex'),
-      previewAscii: bufferPreview.toString('ascii', 0, Math.min(50, bufferPreview.length))
-    })
-    
     text = convertShiftJISToUTF8(extractedBuffer)
-    logger.info('ShiftJIS to UTF-8 conversion completed', { 
-      textLength: text.length,
-      firstChars: text.substring(0, 200)
-    })
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error)
-    logger.error('Failed to convert ShiftJIS to UTF-8', { 
-      error: errorMessage,
-      bufferSize: extractedBuffer.length,
-      bufferPreview: extractedBuffer.slice(0, 100).toString('hex')
-    })
+    logger.error('Failed to convert ShiftJIS to UTF-8', { error: errorMessage })
     throw new Error(`Failed to convert encoding: ${errorMessage}`)
   }
   
-  // 3. テキストを解析（実際のデータ種別を使用）
-  const records = parseJRDBText(text, actualDataType)
-  logger.info('Text parsing completed', { recordCount: records.length, textLength: text.length, actualDataType })
+  // 3. データ種別に応じて適切なパーサーを使用してパース
+  let records: Record<string, unknown>[]
+  
+  // 汎用パーサーを使用
+  records = parseJRDBDataFromBuffer(extractedBuffer, actualDataType)
+  
+  // 汎用パーサーで対応していない場合は、古いパーサーを使用
+  if (records.length === 0) {
+    records = parseJRDBText(text, actualDataType)
+  }
   
   if (records.length === 0) {
-    // 最初の数行をログに出力してデバッグ
-    const lines = text.split('\n').slice(0, 10)
-    logger.warn('No records parsed', { 
-      textLength: text.length,
-      firstLines: lines,
-      extractedBufferPreview: extractedBuffer.slice(0, 100).toString('hex')
-    })
+    logger.warn('No records parsed')
     throw new Error('cannot write parquet file with zero rows')
   }
   
   // 4. Parquet形式に変換
   await convertToParquet(records, outputPath, {})
   
-  logger.info('lzhファイルをParquetに変換完了', { dataType: actualDataType, year, recordCount: records.length })
-  
-  return { actualDataType }
+  return { actualDataType, records }
 }
 

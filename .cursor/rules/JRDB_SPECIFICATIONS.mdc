@@ -60,9 +60,9 @@
 | 更新曜日・時間 | データ名 | 概要 | 仕様書 | 内容説明 | サンプル |
 |---|---|---|---|---|---|
 | 金土 19:00 | JRDBデータパック（JRDB） | 前日情報系データの一括パック | - | - | - |
-| 金土 19:00 | JRDB競走馬データ（KYI） | 競走馬ごとのデータ。<br>IDM、各指数を格納、放牧先を追加 | [仕様](https://jrdb.com/program/Kyi/kyi_doc.txt) | [使用説明](https://jrdb.com/program/Kyi/ky_siyo_doc.txt) | [サンプル](https://jrdb.com/program/Kyi/KYI150712.txt) |
-| 金土 19:00 | JRDB競走馬データ（KYH） | 競走馬ごとのデータ。<br>IDM、各指数を格納 | [仕様](https://jrdb.com/program/Kyh/kyh_doc.txt) | [使用説明](https://jrdb.com/program/Kyh/ky_siyo_doc.txt) | [サンプル](https://jrdb.com/program/Kyh/KYH080913.txt) |
-| 金土 19:00 | JRDB競走馬データ（KYG） | 競走馬ごとのデータ。<br>IDM、各指数を格納 | [仕様](https://jrdb.com/program/Kyg/kyg_doc.txt) | [使用説明](https://jrdb.com/program/Kyg/ky_siyo_doc.txt) | [サンプル](https://jrdb.com/program/Kyg/KYG040627.txt) |
+| 金土 19:00 | JRDB競走馬データ（KYI） | 競走馬ごとのデータ。<br>IDM、各指数を格納、**放牧先を追加** | [仕様](https://jrdb.com/program/Kyi/kyi_doc.txt) | [使用説明](https://jrdb.com/program/Kyi/ky_siyo_doc.txt) | [サンプル](https://jrdb.com/program/Kyi/KYI150712.txt) |
+| 金土 19:00 | JRDB競走馬データ（KYH） | 競走馬ごとのデータ。<br>IDM、各指数を格納（標準版） | [仕様](https://jrdb.com/program/Kyh/kyh_doc.txt) | [使用説明](https://jrdb.com/program/Kyh/ky_siyo_doc.txt) | [サンプル](https://jrdb.com/program/Kyh/KYH080913.txt) |
+| 金土 19:00 | JRDB競走馬データ（KYG） | 競走馬ごとのデータ。<br>IDM、各指数を格納（KYHと同形式） | [仕様](https://jrdb.com/program/Kyg/kyg_doc.txt) | [使用説明](https://jrdb.com/program/Kyg/ky_siyo_doc.txt) | [サンプル](https://jrdb.com/program/Kyg/KYG040627.txt) |
 | 金土 19:00 | JRDB競走馬拡張データ（KKA） | 競走馬ごとの拡張データ | [仕様](https://jrdb.com/program/Kka/kka_doc.txt) | - | [サンプル](https://jrdb.com/program/Kka/KKA020908.txt) |
 | 金土 19:00 | JRDB馬基本データ（UKC） | 馬に関するデータを格納 | [仕様](https://jrdb.com/program/Ukc/ukc_doc.txt) | - | [サンプル](https://jrdb.com/program/Ukc/UKC020908.txt) |
 | 金土 19:00 | JRDB情報データ（JOA） | 情報からの詳細データ | [仕様](https://jrdb.com/program/Jo/Jodata_doc2.txt) | [使用説明](https://jrdb.com/program/Jo/Josiyo_doc.txt) | [サンプル](https://jrdb.com/program/Jo/JOA020908.txt) |
@@ -88,45 +88,213 @@
 
 | 更新曜日・時間 | データ名 | 概要 | 仕様書 | 内容説明 | サンプル |
 |---|---|---|---|---|---|
-| 土日 17:00 | JRDB直前情報データ（TYB）（最終版） | 直前情報 | [仕様](https://jrdb.com/program/Ty/tyb_doc.txt) | [使用説明](https://jrdb.com/program/Ty/tybsiyo_doc.txt) | - |
+| 土日 17:00 | JRDB直前情報データ（TYB）（最終版） | 直前情報 | [仕様](https://jrdb.com/program/Ty/tyb_doc.txt) | [使用説明](https://jrdb.com/program/Ty/tybsiyo_doc.txt) | [メンバーページ](https://jrdb.com/member/data/Tyb/index.html) |
 | 土日 17:00 | JRDB払戻情報データ（HJC） | 払戻情報に関するデータを格納<br>注意事項(2024.09.29) | [仕様](https://jrdb.com/program/Hj/hjc_doc.txt) | [使用説明](https://jrdb.com/program/Hj/hjcsiyo_doc.txt) | [サンプル](https://jrdb.com/program/Hj/HJC080913.txt) |
 | 土日 17:00 | JRDB払戻情報データ（HJA） | 払戻情報に関するデータを格納 | [仕様](https://jrdb.com/program/Hj/hja_doc.txt) | [使用説明](https://jrdb.com/program/Hj/hjasiyo_doc.txt) | - |
 | 土日 17:00 | JRDB成績速報データ（SED） | 成績分析用 | [仕様](https://jrdb.com/program/Sed/sed_doc.txt) | [使用説明](https://jrdb.com/program/Sed/sedsiyo_doc.txt) | [サンプル](https://jrdb.com/program/Sed/SED080913.txt) |
 | 土日 17:00 | JRDB成績速報データ（SEC） | 成績分析用 | [仕様](https://jrdb.com/program/Sec/sec_doc.txt) | [使用説明](https://jrdb.com/program/Se/Sesiyo_doc2a.txt) | [サンプル](https://jrdb.com/program/Sec/SEC020908.txt) |
 
-## データの使用方法
+## JRDBデータの種類と概要
 
-競走馬データを中心として、以下の方法でデータをリンクします：
+JRDBデータは以下のカテゴリに分類されます：
 
-1. **レースキー**で番組データ、基準オッズデータをリンク
-2. **レースキー+馬番**で情報データ、直前データをリンク
-3. **血統登録番号**で馬基本データをリンク
-4. **競走成績キー**で前走データをリンク
-5. **騎手データ**を使用して騎手マスタを作成
-6. **調教師データ**を使用して調教師マスタを作成
+| カテゴリ | 名称 | 頭文字 | データID | 概要 | 提供時間 |
+|---|---|---|---|---|---|
+| **前日系** | 競走馬データ | KY | KYI/KYH/KYG | 競走馬ごとのデータ<br>IDM、各指数を格納<br/>**KYI**: 放牧先情報を追加（最も詳細）<br/>**KYH**: 標準版<br/>**KYG**: 標準版（KYHと同形式）<br/>**使い分け**: KYIを推奨（放牧先情報が必要な場合）、KYH/KYGは同じ内容 | 開催前日19:00頃 |
+| | 馬基本データ | UK | UKC | 馬に関するデータを格納 | 開催前日19:00頃 |
+| | 前走データ | ZE | ZED/ZEC | 過去５走の成績データ<br>競走成績キーで競走馬データとリンクする | 開催前日19:00頃 |
+| | 前走拡張データ | ZK | ZKB | 過去５走の成績拡張データ | 開催前日19:00頃 |
+| | 番組データ | BA | BAC/BAB | 今回のレース情報<br>レース名、レースの条件など<br>レースキーで番組データとリンクする | 開催前日19:00頃 |
+| | 基準オッズデータ | OZ | OZ | 単複、馬連の基準オッズデータ<br>レースキーで番組データとリンクする | 開催前日19:00頃 |
+| | 基準オッズデータ | OW | OW | ワイドの基準オッズデータ<br>レースキーで番組データとリンクする | 開催前日19:00頃 |
+| | 基準馬単データ | OU | OU | 馬単の基準オッズデータ<br>レースキーで番組データとリンクする | 開催前日19:00頃 |
+| | 基準３連複データ | OT | OT | ３連複の基準オッズデータ<br>レースキーで番組データとリンクする | 開催前日19:00頃 |
+| | 基準３連単データ | OV | OV | ３連単の基準オッズデータ<br>レースキーで番組データとリンクする | 開催前日19:00頃 |
+| | 情報データ | JO | JOA | 情報からの詳細データ<br>レースキー+馬番でリンク | 開催前日19:00頃 |
+| | 競走馬拡張データ | KK | KKA | 競走馬ごとの各集計データ | 開催前日19:00頃 |
+| | 調教分析データ | CY | CYB/CYA | 調教分析データ<br>レースキー+馬番でリンク | 開催前日19:00頃 |
+| | 調教本追切データ | CH | CHA | 調教本追切データ<br>レースキー+馬番でリンク | 開催前日19:00頃 |
+| **直前系** | 直前情報データ | TY | TYB | 直前情報（オッズ＋パドック）<br>レースキー+馬番でリンク | 発走１５分前頃 |
+| **成績系** | 払戻情報データ | HJ | HJC/HJA | 払戻情報に関するデータを格納<br>レースキーでリンク | レース確定後 |
+| | 成績データ | SE | SED/SEC | 成績分析用<br>速報版（レース確定後）<br>通常版（木曜の午後） | 木曜の午後 / レース確定後 |
+| | 成績レースデータ | SR | SRB/SRA | レース分析用<br>レースキーでリンク | 木曜の午後 |
+| | 成績拡張データ | SK | SKB | 成績分析用(コメント等) | 木曜の午後 |
+| **マスタ系** | 騎手データ | KZ | KZA | 全騎手分：騎手マスタを作成 | 木曜19:00頃 |
+| | 騎手データ | KS | KSA | 今週出走分：騎手マスタを更新 | 木曜19:00頃 |
+| | 調教師データ | CZ | CZA | 全調教師分：調教師マスタを作成 | 木曜19:00頃 |
+| | 調教師データ | CS | CSA | 今週出走分：調教師マスタを更新 | 木曜19:00頃 |
+| | 抹消馬データ | MZ | MZA | 1999年以降の出走馬の抹消馬情報 | 木曜19:00頃 |
+| | 抹消馬データ | MS | MSA | 先週～今週にかけての抹消馬情報 | 木曜19:00頃 |
+
+**注意**: "*"が付いているデータ（CY, CH）は現在テスト提供中です。
+
+## データの使用方法と連携
+
+競走馬データ（KY）を中心として、以下の方法でデータをリンクします：
+
+1. **レースキー**で番組データ（BA）、基準オッズデータ（OZ/OW/OU/OT/OV）をリンク
+2. **レースキー+馬番**で情報データ（JO）、直前データ（TY）をリンク
+3. **血統登録番号**で馬基本データ（UK）をリンク
+4. **競走成績キー**で前走データ（ZE）をリンク
+5. **騎手データ**（KZ/KS）を使用して騎手マスタを作成
+6. **調教師データ**（CZ/CS）を使用して調教師マスタを作成
 7. **騎手コード、調教師コード**で騎手マスタ、調教師マスタをリンク
+
+## JRDBデータの連携図
+
+以下に、データの連携関係を図示します（各データIDを明示）：
+
+### Mermaid図（推奨）
+
+```mermaid
+graph TB
+    KY[競走馬データ KY<br/>KYI/KYH/KYG]
+    BA[番組データ BA<br/>BAC/BAB]
+    OZ[基準オッズデータ OZ<br/>OZ/OW/OU/OT/OV]
+    HJ[払戻情報データ HJ<br/>HJC/HJA]
+    SR[成績レースデータ SR<br/>SRB/SRA]
+    JO[情報データ JO<br/>JOA]
+    TY[直前データ TY<br/>TYB]
+    CY[調教分析データ CY<br/>CYB/CYA]
+    CH[調教本追切データ CH<br/>CHA]
+    UK[馬基本データ UK<br/>UKC]
+    ZE[前走データ ZE<br/>ZED/ZEC]
+    SE[成績データ SE<br/>SED/SEC]
+    KZ[騎手マスタ KZ/KS<br/>KZA/KSA]
+    CZ[調教師マスタ CZ/CS<br/>CZA/CSA]
+    
+    KY -->|レースキー| BA
+    KY -->|レースキー| OZ
+    KY -->|レースキー| HJ
+    KY -->|レースキー| SR
+    KY -->|レースキー+馬番| JO
+    KY -->|レースキー+馬番| TY
+    KY -->|レースキー+馬番| CY
+    KY -->|レースキー+馬番| CH
+    KY -->|血統登録番号| UK
+    KY -->|前走競走成績キー| ZE
+    KY -->|競走成績キー| SE
+    SE -.->|競走成績キー| ZE
+    KY -->|騎手コード| KZ
+    SE -->|騎手コード| KZ
+    KY -->|調教師コード| CZ
+    SE -->|調教師コード| CZ
+    
+    classDef centerNode fill:#ffeb3b,stroke:#f57f17,stroke-width:3px
+    classDef raceKeyNode fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    classDef raceHorseKeyNode fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    classDef pedigreeKeyNode fill:#e8f5e9,stroke:#388e3c,stroke-width:2px
+    classDef resultKeyNode fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    classDef masterNode fill:#fce4ec,stroke:#c2185b,stroke-width:2px
+    
+    class KY centerNode
+    class BA,OZ,HJ,SR raceKeyNode
+    class JO,TY,CY,CH raceHorseKeyNode
+    class UK pedigreeKeyNode
+    class ZE,SE resultKeyNode
+    class KZ,CZ masterNode
+```
+
+**注意**: Mermaid図が表示されない場合は、以下の方法を試してください：
+- [Mermaid Live Editor](https://mermaid.live/) にコードをコピー＆ペーストして表示
+- Cursorの拡張機能「Markdown Preview Mermaid Support」をインストール（ネットワークエラーの場合は手動インストールを検討）
+
+### テキスト形式の連携図（フォールバック）
+
+Mermaidが表示できない場合の参考図：
+
+```
+競走馬データ(KY: KYI/KYH/KYG) [中心]
+    │
+    ├─[レースキー]→ 番組データ(BA: BAC/BAB)
+    ├─[レースキー]→ 基準オッズデータ(OZ: OZ/OW/OU/OT/OV)
+    ├─[レースキー]→ 払戻情報データ(HJ: HJC/HJA)
+    ├─[レースキー]→ 成績レースデータ(SR: SRB/SRA)
+    │
+    ├─[レースキー+馬番]→ 情報データ(JO: JOA)
+    ├─[レースキー+馬番]→ 直前データ(TY: TYB)
+    ├─[レースキー+馬番]→ 調教分析データ(CY: CYB/CYA)
+    ├─[レースキー+馬番]→ 調教本追切データ(CH: CHA)
+    │
+    ├─[血統登録番号]→ 馬基本データ(UK: UKC)
+    │
+    ├─[前走競走成績キー]→ 前走データ(ZE: ZED/ZEC)
+    ├─[競走成績キー]→ 成績データ(SE: SED/SEC)
+    │
+    ├─[騎手コード]→ 騎手マスタ(KZ/KS: KZA/KSA)
+    └─[調教師コード]→ 調教師マスタ(CZ/CS: CZA/CSA)
+
+成績データ(SE) ─[競走成績キー]→ 前走データ(ZE)
+```
+
+### 連携のポイント
+
+- **競走馬データ（KY）が中心**: すべてのデータは競走馬データを起点としてリンクされます
+- **レースキー**: 番組データ（BA）、基準オッズデータ（OZ/OW/OU/OT/OV）、払戻情報データ（HJ）、成績レースデータ（SR）をリンク
+- **レースキー+馬番**: 情報データ（JO）、直前データ（TY）、調教分析データ（CY）、調教本追切データ（CH）をリンク
+- **血統登録番号**: 馬基本データ（UK）をリンク
+- **競走成績キー**: 前走データ（ZE）、成績データ（SE）をリンク
+- **騎手コード・調教師コード**: 騎手マスタ（KZ/KS）、調教師マスタ（CZ/CS）をリンク
 
 ## データファイル名の命名規則
 
-データファイル名は以下の形式です：
+データファイル名は以下の2つの形式があります：
 
+### 1. 日付別単体データ
 ```
 {データ種別コード}{日付}.lzh
 ```
 
 例：
 - `KYG251102.lzh` → 競走馬データ（KYG）、2025年11月02日のデータ
-- `KYH150105.lzh` → 競走馬データ（KYH）、2015年1月5日のデータ
+- `TYB251102.lzh` → 直前情報データ（TYB）、2025年11月02日のデータ
 
-**注意**: データタイプによって、日付の意味が異なる場合があります：
-- 基本的にレース開催日
-- 週単位で更新されるデータ（KS*, CS*, MS*）は、その週の開始日または終了日が含まれる
+### 2. 年度パックデータ
+```
+{データ種別コード}_{年度}.lzh
+```
 
-## データアクセス制限
+例：
+- `TYB_2024.lzh` → 直前情報データ（TYB）、2024年分の年度パック
+- `TYB_2023.lzh` → 直前情報データ（TYB）、2023年分の年度パック
+
+**注意**: 
+- データタイプによって、日付の意味が異なる場合があります：
+  - 基本的にレース開催日
+  - 週単位で更新されるデータ（KS*, CS*, MS*）は、その週の開始日または終了日が含まれる
+- 年度パックは、1年分のデータをまとめたもので、過去データの一括取得に便利
+- 年度パックの提供有無はデータタイプによって異なる
+
+## データアクセス方法
+
+### メンバーページからのアクセス
+
+JRDB会員ページから、データタイプごとの過去データ一覧ページにアクセスできます：
+
+- **URL形式**: `https://jrdb.com/member/data/{データ種別コード}/index.html`
+  - 例: `https://jrdb.com/member/data/Tyb/index.html`（直前情報データ）
+
+### データ提供形式
+
+各データタイプのページには、以下の2つのセクションがあります：
+
+1. **年度パックコーナー**: 年度ごとのパックデータ（例: `TYB_2024.lzh`, `TYB_2023.lzh`）
+   - 1年分のデータをまとめたもの
+   - 過去データの一括取得に便利
+   - 提供期間: 1999年〜現在年（データタイプによって異なる）
+
+2. **単体データコーナー**: 日付別の単体データ（例: `TYB251102.lzh`, `TYB251101.lzh`）
+   - 特定の日付のデータ
+   - 最新データを中心に提供
+
+### データアクセス制限
 
 - **アクセス時間**: 平日 08:00-19:00
 - **アクセス制限**: 過去データへのアクセスは制限される場合があります
-- **過去データ**: 過去データの取得は週単位で対応
+- **過去データ**: 
+  - 単体データ: 最新データを中心に提供（過去データは週単位で対応）
+  - 年度パック: 年度ごとのパックデータとして提供（1999年以降）
+- **認証**: 会員ページへのアクセスには認証が必要
 
 ## 参考リンク
 

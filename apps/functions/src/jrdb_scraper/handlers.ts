@@ -5,6 +5,8 @@ import { convertLzhToParquet } from './converter'
 import { uploadJRDBParquetToStorageWithFileName, createTempDir, cleanupTempFile } from '../utils/storageUploader'
 import { downloadJRDBFile, extractFileNameFromUrl, extractBaseFileNameFromUrl, parseFileName } from './downloader'
 import { JRDBDataType } from '../../../shared/src/jrdb'
+import { fetchRaceKYData } from './fetchRaceKYData'
+import { fetchDailyKYIData } from './fetchDailyKYIData'
 
 /**
  * Request型（Firebase FunctionsのRequest型の簡易版）
@@ -14,6 +16,12 @@ interface Request {
     url?: string
     dataType?: string
     year?: string
+    month?: string
+    day?: string
+    racecourse?: string
+    kaisaiRound?: string
+    kaisaiDay?: string
+    raceNumber?: string
   }
   body?: {
     url?: string
@@ -272,3 +280,157 @@ export async function handleConvertJRDBToParquet(request: Request, response: Res
   }
 }
 
+/**
+ * 特定レースのKY系データをすべて取得する処理
+ * 2025-11-02 東京 11レースをサンプルとして実装
+ */
+export async function handleFetchRaceKYData(request: Request, response: Response): Promise<void> {
+  const startTime = Date.now()
+  logger.info('Fetch race KY data function called')
+
+  try {
+    // リクエストパラメータからレース情報を取得（queryパラメータのみ、必須）
+    if (!request.query?.year || !request.query?.month || !request.query?.day || !request.query?.racecourse || !request.query?.raceNumber) {
+      const errorMessage = 'year, month, day, racecourse, raceNumber parameters are required'
+      logger.error(errorMessage)
+      response.status(400).send({ success: false, error: errorMessage })
+      return
+    }
+
+    const year = parseInt(String(request.query.year))
+    const month = parseInt(String(request.query.month))
+    const day = parseInt(String(request.query.day))
+    const racecourse = request.query.racecourse as string
+    const raceNumber = parseInt(String(request.query.raceNumber))
+    
+    // 開催回数と日目はオプショナル（デフォルト値なし、未指定の場合はエラー）
+    if (!request.query?.kaisaiRound || !request.query?.kaisaiDay) {
+      const errorMessage = 'kaisaiRound and kaisaiDay parameters are required'
+      logger.error(errorMessage)
+      response.status(400).send({ success: false, error: errorMessage })
+      return
+    }
+
+    const kaisaiRound = parseInt(String(request.query.kaisaiRound))
+    const kaisaiDay = parseInt(String(request.query.kaisaiDay))
+
+    logger.info('Fetching KY data for race', {
+      year,
+      month,
+      day,
+      racecourse,
+      kaisaiRound,
+      kaisaiDay,
+      raceNumber
+    })
+
+    // KY系データを取得
+    const result = await fetchRaceKYData(
+      year,
+      month,
+      day,
+      racecourse,
+      kaisaiRound,
+      kaisaiDay,
+      raceNumber
+    )
+
+    const executionTimeMs = Date.now() - startTime
+
+    response.send({
+      success: true,
+      message: `KY系データの取得が完了しました（レースキー: ${result.raceKey}）`,
+      raceKey: result.raceKey,
+      dataTypes: result.dataTypes,
+      results: result.results,
+      executionTimeMs
+    })
+
+  } catch (error) {
+    const executionTimeMs = Date.now() - startTime
+    const errorMessage = error instanceof Error ? error.message : String(error)
+    const errorStack = error instanceof Error ? error.stack : undefined
+
+    logger.error('Fetch race KY data failed', {
+      errorMessage,
+      errorStack,
+      executionTimeMs
+    })
+
+    response.status(500).send({
+      success: false,
+      error: errorMessage,
+      executionTimeMs
+    })
+  }
+}
+
+/**
+ * 日単位でKYIデータを取得する処理
+ * 2025-11-02をサンプルとして実装
+ */
+export async function handleFetchDailyKYIData(request: Request, response: Response): Promise<void> {
+  const startTime = Date.now()
+  logger.info('Fetch daily KYI data function called')
+
+  try {
+    // リクエストパラメータから日付情報を取得（queryパラメータのみ、必須）
+    if (!request.query?.year || !request.query?.month || !request.query?.day) {
+      const errorMessage = 'year, month, day parameters are required'
+      logger.error(errorMessage)
+      response.status(400).send({ success: false, error: errorMessage })
+      return
+    }
+
+    const year = parseInt(String(request.query.year))
+    const month = parseInt(String(request.query.month))
+    const day = parseInt(String(request.query.day))
+
+    logger.info('Fetching KYI data for date', {
+      year,
+      month,
+      day
+    })
+
+    // KYIデータを取得
+    const result = await fetchDailyKYIData(year, month, day)
+
+    const executionTimeMs = Date.now() - startTime
+
+    if (result.success) {
+      response.send({
+        success: true,
+        message: `KYIデータの取得が完了しました（日付: ${result.date}）`,
+        date: result.date,
+        recordCount: result.recordCount,
+        storagePath: result.storagePath,
+        fileName: result.fileName,
+        executionTimeMs
+      })
+    } else {
+      response.status(500).send({
+        success: false,
+        error: result.error,
+        date: result.date,
+        executionTimeMs
+      })
+    }
+
+  } catch (error) {
+    const executionTimeMs = Date.now() - startTime
+    const errorMessage = error instanceof Error ? error.message : String(error)
+    const errorStack = error instanceof Error ? error.stack : undefined
+
+    logger.error('Fetch daily KYI data failed', {
+      errorMessage,
+      errorStack,
+      executionTimeMs
+    })
+
+    response.status(500).send({
+      success: false,
+      error: errorMessage,
+      executionTimeMs
+    })
+  }
+}

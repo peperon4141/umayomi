@@ -7,7 +7,7 @@ import { config } from 'dotenv'
 import {
   handleScrapeJRACalendarWithRaceResults
 } from './jra_scraper/handlers'
-import { handleConvertJRDBToParquet } from './jrdb_scraper/handlers'
+import { handleConvertJRDBToParquet, handleFetchRaceKYData, handleFetchDailyKYIData } from './jrdb_scraper/handlers'
 
 // 開発環境の場合、.envファイルを読み込む
 const isDevelopment = process.env.NODE_ENV === 'development' || 
@@ -101,4 +101,36 @@ export const scrapeJRACalendarWithRaceResults = onRequest(
 export const convertJRDBToParquet = onRequest(
   { timeoutSeconds: 600, memory: '2GiB', region: 'asia-northeast1', cors: true },
   handleConvertJRDBToParquet
+)
+
+/**
+ * 特定レースのKY系データ（KYI/KYH/KYG/KKA）をすべて取得するCloud Function
+ * 
+ * 必須パラメータ（query）:
+ * - year: 年
+ * - month: 月
+ * - day: 日
+ * - racecourse: 競馬場名
+ * - kaisaiRound: 開催回数
+ * - kaisaiDay: 日目
+ * - raceNumber: レース番号
+ */
+export const fetchRaceKYData = onRequest(
+  { timeoutSeconds: 600, memory: '2GiB', region: 'asia-northeast1', cors: true },
+  handleFetchRaceKYData
+)
+
+/**
+ * 日単位でKYIデータを取得するCloud Function
+ * 
+ * 必須パラメータ（query）:
+ * - year: 年（例: 2025）
+ * - month: 月（例: 11）
+ * - day: 日（例: 2）
+ * 
+ * 例: https://.../fetchDailyKYIData?year=2025&month=11&day=2
+ */
+export const fetchDailyKYIData = onRequest(
+  { timeoutSeconds: 600, memory: '2GiB', region: 'asia-northeast1', cors: true },
+  handleFetchDailyKYIData
 )

@@ -3,6 +3,7 @@ import { readFileSync, existsSync, unlinkSync } from 'fs'
 import { join } from 'path'
 import { tmpdir } from 'os'
 import { convertLzhToParquet } from '../src/jrdb_scraper/converter'
+import { JRDBDataType } from '../../shared/src/jrdb'
 // @ts-ignore - parquetjsには型定義がない
 import { ParquetReader } from 'parquetjs'
 
@@ -40,7 +41,7 @@ describe('convertJRDBLzhToParquet', () => {
         // LZHファイルをParquetに変換
         await convertLzhToParquet(
           lzhBuffer,
-          'KY',
+          JRDBDataType.KY,
           2025,
           outputPath
         )
