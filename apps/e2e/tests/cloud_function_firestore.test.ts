@@ -37,6 +37,7 @@ test.describe('Cloud Functions', () => {
     expect(data.month).toBe(10)
   })
 
+
   test.skip('scrapeJRACalendarWithRaceResults関数を呼び出してカレンダーとレース結果データを一括取得できる', async ({ request }) => {
     // スキップ理由: 実際のスクレイピングは重く（45秒）、外部サイトに依存するため
     test.setTimeout(50000) // 50秒に短縮（実際は約45秒）
