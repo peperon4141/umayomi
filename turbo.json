@@ -2,18 +2,18 @@
   "$schema": "https://turbo.build/schema.json",
   "globalDependencies": ["**/.env.*local"],
   "tasks": {
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "lint": {},
+    "lint:fix": {},
     "build": {
       "cache": false,
       "dependsOn": ["^build"],
       "outputs": ["dist/**", ".next/**", "!.next/cache/**", "lib/**"]
     },
     "build:watch": {
-      "cache": false,
-      "persistent": true
-    },
-    "lint": {},
-    "lint:fix": {},
-    "dev": {
       "cache": false,
       "persistent": true
     },
