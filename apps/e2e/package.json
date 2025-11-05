@@ -4,12 +4,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "playwright test",
-    "test:ui": "playwright test --ui --headed",
-    "test:headed": "playwright test --headed",
-    "test:debug": "playwright test --debug",
-    "test:ui:headed": "playwright test --ui --headed --project=chromium",
-    "e2e": "pnpm run test",
+    "e2e": "playwright test",
+    "e2e:ui": "playwright test --ui --headed",
+    "e2e:headed": "playwright test --headed",
+    "e2e:debug": "playwright test --debug",
+    "e2e:ui:headed": "playwright test --ui --headed --project=chromium",
     "lint": "eslint . --ext .js,.ts",
     "lint:fix": "eslint . --ext .js,.ts --fix"
   },
