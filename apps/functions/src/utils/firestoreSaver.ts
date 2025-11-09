@@ -67,9 +67,8 @@ export async function saveRacesToFirestore(races: any[]): Promise<number> {
       
       // undefinedフィールドを削除
       Object.keys(raceData).forEach(key => {
-        if (raceData[key] === undefined) {
-          delete raceData[key]
-        }
+        if (raceData[key] === undefined) delete raceData[key]
+        
       })
       
       batch.set(docRef, raceData)

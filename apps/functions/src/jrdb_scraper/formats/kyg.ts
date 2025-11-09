@@ -1,409 +1,143 @@
-import type { JRDBFormatDefinition } from '../parsers/utils'
-import { JRDBFieldType } from '../parsers/utils'
+import type { JRDBFormatDefinition } from '../parsers/formatParser'
+import { JRDBFieldType } from '../parsers/fieldParser'
 
 /**
- * KYG（JRDB競走馬データ - 標準版、KYHと同形式）のフォーマット定義
+ * KYG（JRDB競走馬データ（KYG）- 基本情報のみ）のフォーマット定義
  * 
- * 仕様書: https://jrdb.com/program/Kyg/kyg_doc.txt
- * 使用説明: https://jrdb.com/program/Kyg/ky_siyo_doc.txt
- * サンプル: https://jrdb.com/program/Kyg/KYG040627.txt
+ * 
+ * レコード長: 545バイト
  */
 export const kygFormat: JRDBFormatDefinition = {
   dataType: 'KYG',
-  description: 'JRDB競走馬データ（KYG）- 標準版（KYHと同形式）',
+  description: 'JRDB競走馬データ（KYG）- 基本情報のみ',
   recordLength: 545,
   encoding: 'ShiftJIS',
   lineEnding: 'CRLF',
-  specificationUrl: 'https://jrdb.com/program/Kyg/kyg_doc.txt',
-  usageGuideUrl: 'https://jrdb.com/program/Kyg/ky_siyo_doc.txt',
-  sampleUrl: 'https://jrdb.com/program/Kyg/KYG040627.txt',
   fields: [
-    {
-      name: 'レースキー',
-      start: 1,
-      length: 16,
-      type: JRDBFieldType.STRING,
-      description: 'レースキー（年月日8桁+場コード2桁+開催回数1桁+日目1桁+レース番号2桁+馬番2桁）'
-    },
-    {
-      name: 'IDM',
-      start: 17,
-      length: 6,
-      type: JRDBFieldType.FLOAT,
-      description: 'IDM（インデックス）'
-    },
-    {
-      name: '情報コード',
-      start: 23,
-      length: 2,
-      type: JRDBFieldType.STRING,
-      description: '情報コード'
-    },
-    {
-      name: '総合指数',
-      start: 25,
-      length: 6,
-      type: JRDBFieldType.FLOAT,
-      description: '総合指数'
-    },
-    {
-      name: 'パドック指数',
-      start: 31,
-      length: 6,
-      type: JRDBFieldType.FLOAT,
-      description: 'パドック指数'
-    },
-    {
-      name: '直前指数',
-      start: 37,
-      length: 6,
-      type: JRDBFieldType.FLOAT,
-      description: '直前指数'
-    },
-    {
-      name: '芝適性',
-      start: 43,
-      length: 6,
-      type: JRDBFieldType.FLOAT,
-      description: '芝適性'
-    },
-    {
-      name: 'ダート適性',
-      start: 49,
-      length: 6,
-      type: JRDBFieldType.FLOAT,
-      description: 'ダート適性'
-    },
-    {
-      name: '距離適性',
-      start: 55,
-      length: 6,
-      type: JRDBFieldType.FLOAT,
-      description: '距離適性'
-    },
-    {
-      name: 'クラス指数',
-      start: 61,
-      length: 6,
-      type: JRDBFieldType.FLOAT,
-      description: 'クラス指数'
-    },
-    {
-      name: 'ペース指数',
-      start: 67,
-      length: 4,
-      type: JRDBFieldType.INTEGER,
-      description: 'ペース指数'
-    },
-    {
-      name: '上がり指数',
-      start: 71,
-      length: 2,
-      type: JRDBFieldType.INTEGER,
-      description: '上がり指数'
-    },
-    {
-      name: '位置指数',
-      start: 73,
-      length: 6,
-      type: JRDBFieldType.FLOAT,
-      description: '位置指数'
-    },
-    {
-      name: 'ペース指数2',
-      start: 79,
-      length: 4,
-      type: JRDBFieldType.INTEGER,
-      description: 'ペース指数2'
-    },
-    {
-      name: '上がり指数2',
-      start: 83,
-      length: 2,
-      type: JRDBFieldType.INTEGER,
-      description: '上がり指数2'
-    },
-    {
-      name: '逃げ指数',
-      start: 85,
-      length: 2,
-      type: JRDBFieldType.INTEGER,
-      description: '逃げ指数'
-    },
-    {
-      name: '先行指数',
-      start: 87,
-      length: 2,
-      type: JRDBFieldType.INTEGER,
-      description: '先行指数'
-    },
-    {
-      name: '差し指数',
-      start: 89,
-      length: 2,
-      type: JRDBFieldType.INTEGER,
-      description: '差し指数'
-    },
-    {
-      name: '追込指数',
-      start: 91,
-      length: 2,
-      type: JRDBFieldType.INTEGER,
-      description: '追込指数'
-    },
-    {
-      name: 'ペース指数3',
-      start: 93,
-      length: 4,
-      type: JRDBFieldType.INTEGER,
-      description: 'ペース指数3'
-    },
-    {
-      name: '位置指数2',
-      start: 97,
-      length: 6,
-      type: JRDBFieldType.FLOAT,
-      description: '位置指数2'
-    },
-    {
-      name: 'クラス指数2',
-      start: 103,
-      length: 4,
-      type: JRDBFieldType.INTEGER,
-      description: 'クラス指数2'
-    },
-    {
-      name: '速度指数',
-      start: 107,
-      length: 6,
-      type: JRDBFieldType.FLOAT,
-      description: '速度指数'
-    },
-    {
-      name: '馬場指数',
-      start: 113,
-      length: 6,
-      type: JRDBFieldType.FLOAT,
-      description: '馬場指数'
-    },
-    {
-      name: '距離指数',
-      start: 119,
-      length: 6,
-      type: JRDBFieldType.FLOAT,
-      description: '距離指数'
-    },
-    {
-      name: '騎手コード',
-      start: 125,
-      length: 4,
-      type: JRDBFieldType.STRING,
-      description: '騎手コード'
-    },
-    {
-      name: '騎手名',
-      start: 129,
-      length: 8,
-      type: JRDBFieldType.STRING,
-      description: '騎手名（全角8文字）'
-    },
-    {
-      name: '調教師コード',
-      start: 137,
-      length: 4,
-      type: JRDBFieldType.STRING,
-      description: '調教師コード'
-    },
-    {
-      name: '調教師名',
-      start: 141,
-      length: 8,
-      type: JRDBFieldType.STRING,
-      description: '調教師名（全角8文字）'
-    },
-    {
-      name: '所属',
-      start: 149,
-      length: 4,
-      type: JRDBFieldType.STRING,
-      description: '所属（美浦/栗東）'
-    },
-    {
-      name: '血統登録番号',
-      start: 153,
-      length: 8,
-      type: JRDBFieldType.STRING,
-      description: '血統登録番号'
-    },
-    {
-      name: '前走競走成績キー1',
-      start: 161,
-      length: 16,
-      type: JRDBFieldType.STRING,
-      description: '前走競走成績キー1'
-    },
-    {
-      name: '前走競走成績キー2',
-      start: 177,
-      length: 16,
-      type: JRDBFieldType.STRING,
-      description: '前走競走成績キー2'
-    },
-    {
-      name: '前走競走成績キー3',
-      start: 193,
-      length: 16,
-      type: JRDBFieldType.STRING,
-      description: '前走競走成績キー3'
-    },
-    {
-      name: '前走競走成績キー4',
-      start: 209,
-      length: 16,
-      type: JRDBFieldType.STRING,
-      description: '前走競走成績キー4'
-    },
-    {
-      name: '前走競走成績キー5',
-      start: 225,
-      length: 16,
-      type: JRDBFieldType.STRING,
-      description: '前走競走成績キー5'
-    },
-    {
-      name: '調教タイム1',
-      start: 241,
-      length: 16,
-      type: JRDBFieldType.STRING,
-      description: '調教タイム1（MMDDHHMM形式など）'
-    },
-    {
-      name: '調教タイム2',
-      start: 257,
-      length: 16,
-      type: JRDBFieldType.STRING,
-      description: '調教タイム2'
-    },
-    {
-      name: '調教タイム3',
-      start: 273,
-      length: 16,
-      type: JRDBFieldType.STRING,
-      description: '調教タイム3'
-    },
-    {
-      name: '調教タイム4',
-      start: 289,
-      length: 16,
-      type: JRDBFieldType.STRING,
-      description: '調教タイム4'
-    },
-    {
-      name: '調教タイム5',
-      start: 305,
-      length: 16,
-      type: JRDBFieldType.STRING,
-      description: '調教タイム5'
-    },
-    {
-      name: '調教タイム6',
-      start: 321,
-      length: 16,
-      type: JRDBFieldType.STRING,
-      description: '調教タイム6'
-    },
-    {
-      name: '調教タイム7',
-      start: 337,
-      length: 16,
-      type: JRDBFieldType.STRING,
-      description: '調教タイム7'
-    },
-    {
-      name: '調教タイム8',
-      start: 353,
-      length: 16,
-      type: JRDBFieldType.STRING,
-      description: '調教タイム8'
-    },
-    {
-      name: '調教タイム9',
-      start: 369,
-      length: 16,
-      type: JRDBFieldType.STRING,
-      description: '調教タイム9'
-    },
-    {
-      name: '調教タイム10',
-      start: 385,
-      length: 16,
-      type: JRDBFieldType.STRING,
-      description: '調教タイム10'
-    },
-    {
-      name: '調教タイム11',
-      start: 401,
-      length: 16,
-      type: JRDBFieldType.STRING,
-      description: '調教タイム11'
-    },
-    {
-      name: '調教タイム12',
-      start: 417,
-      length: 16,
-      type: JRDBFieldType.STRING,
-      description: '調教タイム12'
-    },
-    {
-      name: '調教タイム13',
-      start: 433,
-      length: 16,
-      type: JRDBFieldType.STRING,
-      description: '調教タイム13'
-    },
-    {
-      name: '調教タイム14',
-      start: 449,
-      length: 16,
-      type: JRDBFieldType.STRING,
-      description: '調教タイム14'
-    },
-    {
-      name: '調教タイム15',
-      start: 465,
-      length: 16,
-      type: JRDBFieldType.STRING,
-      description: '調教タイム15'
-    },
-    {
-      name: '調教タイム16',
-      start: 481,
-      length: 16,
-      type: JRDBFieldType.STRING,
-      description: '調教タイム16'
-    },
-    {
-      name: '調教タイム17',
-      start: 497,
-      length: 16,
-      type: JRDBFieldType.STRING,
-      description: '調教タイム17'
-    },
-    {
-      name: '調教タイム18',
-      start: 513,
-      length: 16,
-      type: JRDBFieldType.STRING,
-      description: '調教タイム18'
-    },
-    {
-      name: '調教タイム19',
-      start: 529,
-      length: 16,
-      type: JRDBFieldType.STRING,
-      description: '調教タイム19'
-    }
-    // 注意: 調教タイム20は仕様書に存在しない（KYGのレコード長は545バイト）
+    { name: '場コード', start: 1, length: 2, type: JRDBFieldType.INTEGER_NINE, description: '場コード' },
+    { name: '年', start: 3, length: 2, type: JRDBFieldType.INTEGER_NINE, description: '年' },
+    { name: '回', start: 5, length: 1, type: JRDBFieldType.INTEGER_NINE, description: '回' },
+    { name: '日', start: 6, length: 1, type: JRDBFieldType.STRING_HEX, description: '16進数(数字 or 小文字アルファベット)' },
+    { name: 'R', start: 7, length: 2, type: JRDBFieldType.INTEGER_NINE, description: 'Ｒ' },
+    { name: '馬番', start: 9, length: 2, type: JRDBFieldType.INTEGER_NINE, description: '馬番' },
+    { name: '血統登録番号', start: 11, length: 8, type: JRDBFieldType.STRING, description: '血統登録番号' },
+    { name: '馬名', start: 19, length: 36, type: JRDBFieldType.STRING, description: '全角１８文字' },
+    { name: 'ＩＤＭ', start: 55, length: 5, type: JRDBFieldType.STRING, description: 'ＩＤＭ' },
+    { name: '騎手指数', start: 60, length: 5, type: JRDBFieldType.STRING, description: '騎手指数' },
+    { name: '情報指数', start: 65, length: 5, type: JRDBFieldType.STRING, description: '情報指数' },
+    { name: '予備1', start: 70, length: 5, type: JRDBFieldType.STRING, description: '将来拡張用' },
+    { name: '予備2', start: 75, length: 5, type: JRDBFieldType.STRING, description: '将来拡張用' },
+    { name: '予備3', start: 80, length: 5, type: JRDBFieldType.STRING, description: '将来拡張用' },
+    { name: '総合指数', start: 85, length: 5, type: JRDBFieldType.STRING, description: '総合指数' },
+    { name: '脚質', start: 90, length: 1, type: JRDBFieldType.INTEGER_NINE, description: '脚質' },
+    { name: '距離適性', start: 91, length: 1, type: JRDBFieldType.INTEGER_NINE, description: '距離適性' },
+    { name: '上昇度', start: 92, length: 1, type: JRDBFieldType.INTEGER_NINE, description: '上昇度' },
+    { name: 'ローテーション', start: 93, length: 3, type: JRDBFieldType.INTEGER_ZERO_BLANK, description: '間に金曜日が入っている数で決定' },
+    { name: '基準オッズ', start: 96, length: 5, type: JRDBFieldType.STRING, description: '基準オッズ' },
+    { name: '基準人気順位', start: 101, length: 2, type: JRDBFieldType.INTEGER_ZERO_BLANK, description: '基準人気順位' },
+    { name: '基準複勝オッズ', start: 103, length: 5, type: JRDBFieldType.STRING, description: '基準複勝オッズ' },
+    { name: '基準複勝人気順位', start: 108, length: 2, type: JRDBFieldType.INTEGER_ZERO_BLANK, description: '基準複勝人気順位' },
+    { name: '特定情報◎', start: 110, length: 3, type: JRDBFieldType.INTEGER_ZERO_BLANK, description: '情報・専門紙の印数（特定）' },
+    { name: '特定情報○', start: 113, length: 3, type: JRDBFieldType.INTEGER_ZERO_BLANK, description: '特定情報○' },
+    { name: '特定情報▲', start: 116, length: 3, type: JRDBFieldType.INTEGER_ZERO_BLANK, description: '特定情報▲' },
+    { name: '特定情報△', start: 119, length: 3, type: JRDBFieldType.INTEGER_ZERO_BLANK, description: '特定情報△' },
+    { name: '特定情報×', start: 122, length: 3, type: JRDBFieldType.INTEGER_ZERO_BLANK, description: '特定情報×' },
+    { name: '総合情報◎', start: 125, length: 3, type: JRDBFieldType.INTEGER_ZERO_BLANK, description: '情報・専門紙の印数（総合）' },
+    { name: '総合情報○', start: 128, length: 3, type: JRDBFieldType.INTEGER_ZERO_BLANK, description: '総合情報○' },
+    { name: '総合情報▲', start: 131, length: 3, type: JRDBFieldType.INTEGER_ZERO_BLANK, description: '総合情報▲' },
+    { name: '総合情報△', start: 134, length: 3, type: JRDBFieldType.INTEGER_ZERO_BLANK, description: '総合情報△' },
+    { name: '総合情報×', start: 137, length: 3, type: JRDBFieldType.INTEGER_ZERO_BLANK, description: '総合情報×' },
+    { name: '人気指数', start: 140, length: 5, type: JRDBFieldType.INTEGER_ZERO_BLANK, description: '第２版で変更' },
+    { name: '調教指数', start: 145, length: 5, type: JRDBFieldType.STRING, description: '調教指数' },
+    { name: '厩舎指数', start: 150, length: 5, type: JRDBFieldType.STRING, description: '厩舎指数' },
+    { name: '調教矢印コード', start: 155, length: 1, type: JRDBFieldType.INTEGER_NINE, description: '調教矢印コード' },
+    { name: '厩舎評価コード', start: 156, length: 1, type: JRDBFieldType.INTEGER_NINE, description: '厩舎評価コード' },
+    { name: '騎手期待連対率', start: 157, length: 4, type: JRDBFieldType.STRING, description: '騎手期待連対率' },
+    { name: '激走指数', start: 161, length: 3, type: JRDBFieldType.INTEGER_ZERO_BLANK, description: '激走指数' },
+    { name: '蹄コード', start: 164, length: 2, type: JRDBFieldType.INTEGER_NINE, description: '蹄コード' },
+    { name: '重適正コード', start: 166, length: 1, type: JRDBFieldType.INTEGER_NINE, description: '重適正コード' },
+    { name: 'クラスコード', start: 167, length: 2, type: JRDBFieldType.INTEGER_NINE, description: 'クラスコード' },
+    { name: '予備', start: 169, length: 2, type: JRDBFieldType.STRING, description: 'スペース' },
+    { name: 'ブリンカー', start: 171, length: 1, type: JRDBFieldType.STRING, description: '1:初装着,2:再装着,3:ブリンカ' },
+    { name: '騎手名', start: 172, length: 12, type: JRDBFieldType.STRING, description: '全角６文字' },
+    { name: '負担重量', start: 184, length: 3, type: JRDBFieldType.INTEGER_NINE, description: '0.1Kg単位' },
+    { name: '見習い区分', start: 187, length: 1, type: JRDBFieldType.INTEGER_NINE, description: '1:☆(1K減),2:△(2K減),3:▲(3K減)' },
+    { name: '調教師名', start: 188, length: 12, type: JRDBFieldType.STRING, description: '全角６文字' },
+    { name: '調教師所属', start: 200, length: 4, type: JRDBFieldType.STRING, description: '全角２文字' },
+    { name: '前走1競走成績キー', start: 204, length: 16, type: JRDBFieldType.INTEGER_NINE, description: '前走１競走成績キー' },
+    { name: '前走2競走成績キー', start: 220, length: 16, type: JRDBFieldType.INTEGER_NINE, description: '前走２競走成績キー' },
+    { name: '前走3競走成績キー', start: 236, length: 16, type: JRDBFieldType.INTEGER_NINE, description: '前走３競走成績キー' },
+    { name: '前走4競走成績キー', start: 252, length: 16, type: JRDBFieldType.INTEGER_NINE, description: '前走４競走成績キー' },
+    { name: '前走5競走成績キー', start: 268, length: 16, type: JRDBFieldType.INTEGER_NINE, description: '前走５競走成績キー' },
+    { name: '前走1レースキー', start: 284, length: 8, type: JRDBFieldType.INTEGER_NINE, description: '前走１レースキー' },
+    { name: '前走2レースキー', start: 292, length: 8, type: JRDBFieldType.INTEGER_NINE, description: '前走２レースキー' },
+    { name: '前走3レースキー', start: 300, length: 8, type: JRDBFieldType.INTEGER_NINE, description: '前走３レースキー' },
+    { name: '前走4レースキー', start: 308, length: 8, type: JRDBFieldType.INTEGER_NINE, description: '前走４レースキー' },
+    { name: '前走5レースキー', start: 316, length: 8, type: JRDBFieldType.INTEGER_NINE, description: '前走５レースキー' },
+    { name: '枠番', start: 324, length: 1, type: JRDBFieldType.INTEGER_NINE, description: '枠番' },
+    { name: '予備', start: 325, length: 2, type: JRDBFieldType.STRING, description: 'スペース' },
+    { name: '総合印', start: 327, length: 1, type: JRDBFieldType.INTEGER_NINE, description: '印コード' },
+    { name: 'ＩＤＭ印', start: 328, length: 1, type: JRDBFieldType.INTEGER_NINE, description: '印コード' },
+    { name: '情報印', start: 329, length: 1, type: JRDBFieldType.INTEGER_NINE, description: '印コード' },
+    { name: '騎手印', start: 330, length: 1, type: JRDBFieldType.INTEGER_NINE, description: '印コード' },
+    { name: '厩舎印', start: 331, length: 1, type: JRDBFieldType.INTEGER_NINE, description: '印コード' },
+    { name: '調教印', start: 332, length: 1, type: JRDBFieldType.INTEGER_NINE, description: '印コード' },
+    { name: '激走印', start: 333, length: 1, type: JRDBFieldType.INTEGER_NINE, description: '1:激走馬' },
+    { name: '芝適性コード', start: 334, length: 1, type: JRDBFieldType.STRING, description: '1:◎, 2:○, 3:△' },
+    { name: 'ダ適性コード', start: 335, length: 1, type: JRDBFieldType.STRING, description: '1:◎, 2:○, 3:△' },
+    { name: '騎手コード', start: 336, length: 5, type: JRDBFieldType.INTEGER_NINE, description: '騎手マスタとリンク' },
+    { name: '調教師コード', start: 341, length: 5, type: JRDBFieldType.INTEGER_NINE, description: '調教師マスタとリンク' },
+    { name: '予備', start: 346, length: 1, type: JRDBFieldType.STRING, description: 'スペース' },
+    { name: '獲得賞金', start: 347, length: 6, type: JRDBFieldType.INTEGER_ZERO_BLANK, description: '単位万円(含む付加賞)' },
+    { name: '収得賞金', start: 353, length: 5, type: JRDBFieldType.INTEGER_ZERO_BLANK, description: '単位万円' },
+    { name: '条件クラス', start: 358, length: 1, type: JRDBFieldType.INTEGER_NINE, description: '条件グループコード参照' },
+    { name: 'テン指数', start: 359, length: 5, type: JRDBFieldType.STRING, description: '予想テン指数' },
+    { name: 'ペース指数', start: 364, length: 5, type: JRDBFieldType.STRING, description: '予想ペース指数' },
+    { name: '上がり指数', start: 369, length: 5, type: JRDBFieldType.STRING, description: '予想上がり指数' },
+    { name: '位置指数', start: 374, length: 5, type: JRDBFieldType.STRING, description: '予想位置指数' },
+    { name: 'ペース予想', start: 379, length: 1, type: JRDBFieldType.STRING, description: 'H,M,S' },
+    { name: '道中順位', start: 380, length: 2, type: JRDBFieldType.INTEGER_ZERO_BLANK, description: '道中順位' },
+    { name: '道中差', start: 382, length: 2, type: JRDBFieldType.INTEGER_ZERO_BLANK, description: '半馬身(約0.1秒)単位' },
+    { name: '道中内外', start: 384, length: 1, type: JRDBFieldType.INTEGER_NINE, description: '2:内 ～ 4:外' },
+    { name: '後3Ｆ順位', start: 385, length: 2, type: JRDBFieldType.INTEGER_ZERO_BLANK, description: '後３Ｆ順位' },
+    { name: '後3Ｆ差', start: 387, length: 2, type: JRDBFieldType.INTEGER_ZERO_BLANK, description: '半馬身(約0.1秒)単位' },
+    { name: '後3Ｆ内外', start: 389, length: 1, type: JRDBFieldType.INTEGER_NINE, description: '2:内 ～ 5:大外' },
+    { name: 'ゴール順位', start: 390, length: 2, type: JRDBFieldType.INTEGER_ZERO_BLANK, description: 'ゴール順位' },
+    { name: 'ゴール差', start: 392, length: 2, type: JRDBFieldType.INTEGER_ZERO_BLANK, description: '半馬身(約0.1秒)単位' },
+    { name: 'ゴール内外', start: 394, length: 1, type: JRDBFieldType.INTEGER_NINE, description: '1:最内 ～ 5:大外' },
+    { name: '展開記号', start: 395, length: 1, type: JRDBFieldType.STRING, description: '展開記号コード参照' },
+    { name: '距離適性2', start: 396, length: 1, type: JRDBFieldType.INTEGER_NINE, description: '距離適性２' },
+    { name: '枠確定馬体重', start: 397, length: 3, type: JRDBFieldType.INTEGER_NINE, description: 'データ無:スペース' },
+    { name: '枠確定馬体重増減', start: 400, length: 3, type: JRDBFieldType.STRING, description: '符号+数字２桁,データ無:スペース' },
+    { name: '取消フラグ', start: 403, length: 1, type: JRDBFieldType.INTEGER_NINE, description: '1:取消' },
+    { name: '性別コード', start: 404, length: 1, type: JRDBFieldType.INTEGER_NINE, description: '1:牡,2:牝,3,セン' },
+    { name: '馬主名', start: 405, length: 40, type: JRDBFieldType.STRING, description: '全角２０文字' },
+    { name: '馬主会コード', start: 445, length: 2, type: JRDBFieldType.INTEGER_NINE, description: '参考データ。' },
+    { name: '馬記号コード', start: 447, length: 2, type: JRDBFieldType.INTEGER_NINE, description: 'コード表参照' },
+    { name: '激走順位', start: 449, length: 2, type: JRDBFieldType.INTEGER_ZERO_BLANK, description: 'レース出走馬中での順位' },
+    { name: 'LS指数順位', start: 451, length: 2, type: JRDBFieldType.INTEGER_ZERO_BLANK, description: 'LS指数順位' },
+    { name: 'テン指数順位', start: 453, length: 2, type: JRDBFieldType.INTEGER_ZERO_BLANK, description: 'テン指数順位' },
+    { name: 'ペース指数順位', start: 455, length: 2, type: JRDBFieldType.INTEGER_ZERO_BLANK, description: 'ペース指数順位' },
+    { name: '上がり指数順位', start: 457, length: 2, type: JRDBFieldType.INTEGER_ZERO_BLANK, description: '上がり指数順位' },
+    { name: '位置指数順位', start: 459, length: 2, type: JRDBFieldType.INTEGER_ZERO_BLANK, description: '位置指数順位' },
+    { name: '騎手期待単勝率', start: 461, length: 4, type: JRDBFieldType.STRING, description: '騎手期待単勝率' },
+    { name: '騎手期待3着内率', start: 465, length: 4, type: JRDBFieldType.STRING, description: '騎手期待３着内率' },
+    { name: '輸送区分', start: 469, length: 1, type: JRDBFieldType.STRING, description: '輸送区分' },
+    { name: '走法', start: 470, length: 8, type: JRDBFieldType.INTEGER_NINE, description: 'コード表参照' },
+    { name: '体型', start: 478, length: 24, type: JRDBFieldType.STRING, description: 'コード表参照' },
+    { name: '体型総合1', start: 502, length: 3, type: JRDBFieldType.INTEGER_NINE, description: '特記コード参照' },
+    { name: '体型総合2', start: 505, length: 3, type: JRDBFieldType.INTEGER_NINE, description: '特記コード参照' },
+    { name: '体型総合3', start: 508, length: 3, type: JRDBFieldType.INTEGER_NINE, description: '特記コード参照' },
+    { name: '馬特記1', start: 511, length: 3, type: JRDBFieldType.INTEGER_NINE, description: '特記コード参照' },
+    { name: '馬特記2', start: 514, length: 3, type: JRDBFieldType.INTEGER_NINE, description: '特記コード参照' },
+    { name: '馬特記3', start: 517, length: 3, type: JRDBFieldType.INTEGER_NINE, description: '特記コード参照' },
+    { name: '馬スタート指数', start: 520, length: 4, type: JRDBFieldType.STRING, description: '馬スタート指数' },
+    { name: '馬出遅率', start: 524, length: 4, type: JRDBFieldType.STRING, description: '馬出遅率' },
+    { name: '参考前走', start: 528, length: 2, type: JRDBFieldType.INTEGER_NINE, description: '参考となる前走（２走分格納）' },
+    { name: '参考前走騎手コード', start: 530, length: 5, type: JRDBFieldType.STRING, description: '参考となる前走の騎手' },
+    { name: '万券指数', start: 535, length: 3, type: JRDBFieldType.INTEGER_ZERO_BLANK, description: '万券指数' },
+    { name: '万券印', start: 538, length: 1, type: JRDBFieldType.INTEGER_NINE, description: '万券印' },
+    { name: '予備', start: 539, length: 5, type: JRDBFieldType.STRING, description: 'スペース' },
+    { name: '改行', start: 544, length: 2, type: JRDBFieldType.STRING, description: 'ＣＲ・ＬＦ' },
   ]
 }
-

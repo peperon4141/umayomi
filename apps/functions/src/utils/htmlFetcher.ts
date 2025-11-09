@@ -18,12 +18,11 @@ export async function fetchJRAHtmlWithPlaywright(url: string): Promise<string> {
     })
     
     // Playwrightブラウザのパスを設定（必須）
-    if (!process.env.PLAYWRIGHT_BROWSERS_PATH) {
-      throw new Error(
+    if (!process.env.PLAYWRIGHT_BROWSERS_PATH) throw new Error(
         'PLAYWRIGHT_BROWSERS_PATH環境変数が設定されていません。' +
         'postinstallスクリプトでPlaywrightブラウザがインストールされているか確認してください。'
       )
-    }
+    
     
     // ブラウザの実行ファイルパスを動的に検出
     const browsersPath = process.env.PLAYWRIGHT_BROWSERS_PATH
@@ -36,9 +35,8 @@ export async function fetchJRAHtmlWithPlaywright(url: string): Promise<string> {
       
       if (chromiumDir) {
         const candidatePath = path.join(browsersPath, chromiumDir, 'chrome-linux', 'headless_shell')
-        if (fs.existsSync(candidatePath)) {
-          executablePath = candidatePath
-        }
+        if (fs.existsSync(candidatePath)) executablePath = candidatePath
+        
       }
     }
     
@@ -55,9 +53,8 @@ export async function fetchJRAHtmlWithPlaywright(url: string): Promise<string> {
       args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
     }
     
-    if (executablePath) {
-      launchOptions.executablePath = executablePath
-    }
+    if (executablePath) launchOptions.executablePath = executablePath
+    
     
     browser = await chromium.launch(launchOptions)
     
@@ -97,21 +94,20 @@ export async function fetchJRAHtmlWithPlaywright(url: string): Promise<string> {
     if (errorMessage.includes('Executable doesn\'t exist') || 
         errorMessage.includes('Browser has not been found') ||
         errorMessage.includes('chromium') ||
-        errorMessage.includes('executable')) {
-      throw new Error(
+        errorMessage.includes('executable')) throw new Error(
         `Playwrightブラウザがインストールされていません: ${errorMessage}. ` +
         `デプロイ時に 'playwright install chromium' が実行されているか確認してください。`
       )
-    }
+    
     
     throw new Error(`HTML取得に失敗しました: ${errorMessage}`)
   } finally {
-    if (browser) {
+    if (browser) 
       try {
         await browser.close()
       } catch (closeError) {
         logger.warn('Failed to close browser', { error: closeError })
       }
-    }
+    
   }
 }

@@ -19,9 +19,8 @@ export function parseJRACalendar(html: string, year: number, month: number): any
       raceElements.forEach((element, index) => {
         try {
           const raceData = parseRaceElement($, element, index, year, month)
-          if (raceData) {
-            races.push(raceData)
-          }
+          if (raceData) races.push(raceData)
+          
         } catch (error) {
           logger.warn('Failed to parse race element', { index, error })
         }
@@ -56,9 +55,8 @@ export function extractRaceElements($: cheerio.CheerioAPI): cheerio.Cheerio<any>
     const text = $raceDiv.text().trim()
     
     // 空でない要素のみを抽出
-    if (text) {
-      elements.push($raceDiv)
-    }
+    if (text) elements.push($raceDiv)
+    
   })
   
   return elements
@@ -145,9 +143,9 @@ function extractRaceName(text: string): string | null {
   ]
   
   let raceName = text
-  for (const pattern of gradePatterns) {
+  for (const pattern of gradePatterns) 
     raceName = raceName.replace(pattern, '').trim()
-  }
+  
   
   // 空でない場合はレース名として返す
   return raceName || null
@@ -180,9 +178,8 @@ function extractVenueFromParent($: cheerio.CheerioAPI, element: cheerio.Cheerio<
   
   // JRAの競馬場名をそのまま返す
   const validVenues = ['東京', '京都', '新潟', '中山', '阪神', '札幌', '函館', '福島', '中京', '小倉']
-  if (validVenues.includes(venue)) {
-    return venue
-  }
+  if (validVenues.includes(venue)) return venue
+  
   
   return null
 }

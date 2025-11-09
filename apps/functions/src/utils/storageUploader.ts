@@ -3,7 +3,6 @@ import { Storage } from '@google-cloud/storage'
 import { logger } from 'firebase-functions'
 import * as fs from 'fs'
 import * as path from 'path'
-import { JRDBDataType } from '../../../shared/src/jrdb'
 
 /**
  * Firebase Storageにファイルをアップロード
@@ -25,7 +24,6 @@ export async function uploadFileToStorage(
     isDevelopment
   })
   
-  // 開発環境では、@google-cloud/storageを直接使用してStorage Emulatorに接続
   let bucket: any
   if (isDevelopment) {
     const storage = new Storage({
@@ -33,23 +31,45 @@ export async function uploadFileToStorage(
       projectId: 'umayomi-fbb2b'
     })
     bucket = storage.bucket('umayomi-fbb2b.firebasestorage.app')
-  } else {
+  } else 
     bucket = getStorage().bucket()
-  }
   
+
   try {
-    await bucket.upload(localFilePath, {
+    const uploadOptions: {
+      destination: string
+      metadata: {
+        contentType: string
+        metadata?: Record<string, string>
+      }
+    } = {
       destination: storagePath,
       metadata: {
-        contentType: 'application/octet-stream',
-        metadata: metadata || {}
+        contentType: 'application/octet-stream'
       }
-    })
+    }
+    
+    if (metadata && Object.keys(metadata).length > 0) uploadOptions.metadata.metadata = metadata
+
+    await bucket.upload(localFilePath, uploadOptions)
+
+    if (metadata && Object.keys(metadata).length > 0) 
+      try {
+        const file = bucket.file(storagePath)
+        await file.setMetadata({ metadata })
+      } catch (metadataError) {
+        logger.warn('メタデータの更新に失敗しました', {
+          error: metadataError instanceof Error ? metadataError.message : String(metadataError),
+          storagePath
+        })
+      }
+    
 
     logger.info('Storageにファイルをアップロードしました', {
       storagePath,
       localFilePath,
-      isDevelopment
+      isDevelopment,
+      customMetadata: metadata
     })
   } catch (error) {
     logger.error('Storageへのアップロードに失敗しました', {
@@ -61,48 +81,6 @@ export async function uploadFileToStorage(
     })
     throw error
   }
-}
-
-/**
- * JRDBデータのParquetファイルをStorageにアップロード
- * ファイル名ベースで保存する場合
- */
-export async function uploadJRDBParquetToStorageWithFileName(
-  localFilePath: string,
-  fileName: string
-): Promise<string> {
-  const storagePath = `jrdb_data/${fileName}.parquet`
-  
-  const metadata: Record<string, string> = {
-    fileName,
-    uploadedAt: new Date().toISOString()
-  }
-
-  await uploadFileToStorage(localFilePath, storagePath, metadata)
-
-  return storagePath
-}
-
-/**
- * JRDBデータのParquetファイルをStorageにアップロード（データ種別・年ベース）
- * @deprecated ファイル名ベースの保存を推奨
- */
-export async function uploadJRDBParquetToStorage(
-  localFilePath: string,
-  dataType: JRDBDataType,
-  year: number
-): Promise<string> {
-  const storagePath = `jrdb_data/${dataType}/${dataType}_${year}.parquet`
-  
-  const metadata: Record<string, string> = {
-    dataType,
-    year: year.toString(),
-    uploadedAt: new Date().toISOString()
-  }
-
-  await uploadFileToStorage(localFilePath, storagePath, metadata)
-
-  return storagePath
 }
 
 /**
@@ -123,13 +101,29 @@ export function cleanupTempFile(filePath: string): void {
 }
 
 /**
+ * 一時ディレクトリを削除
+ */
+export function cleanupTempDir(dirPath: string): void {
+  try {
+    if (fs.existsSync(dirPath)) {
+      fs.rmSync(dirPath, { recursive: true, force: true })
+      logger.info('一時ディレクトリを削除しました', { dirPath })
+    }
+  } catch (error) {
+    logger.warn('一時ディレクトリの削除に失敗しました', {
+      error: error instanceof Error ? error.message : String(error),
+      dirPath
+    })
+  }
+}
+
+/**
  * 一時ディレクトリを作成
  */
 export function createTempDir(): string {
   const tempDir = path.join(process.cwd(), 'temp')
-  if (!fs.existsSync(tempDir)) {
-    fs.mkdirSync(tempDir, { recursive: true })
-  }
+  if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir, { recursive: true })
+  
   return tempDir
 }
 

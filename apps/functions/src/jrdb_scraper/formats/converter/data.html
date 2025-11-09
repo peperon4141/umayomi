@@ -1,0 +1,913 @@
+<html style="--vsc-domain: &quot;jrdb.com&quot;;"><head>
+	<title>ＪＲＤＢデータのご案内</title>
+	<meta name="keyword" content="競馬,時系列オッズ,パドック情報,直前情報,競馬新聞,JRDB,予想,音声,馬柱">
+<style type="text/css">
+<!--
+a {text-decoration:none;}
+a:hover {text-decoration:underline;}
+a:visited {color:purple;}
+
+#TMenu	{font-size:12pt;}
+#Title	{font-size:10pt; letter-spacing:1px;}
+#IndexNews	{font-size:10pt;}
+#IndexTitle	{font-size:10pt;}
+#IndexLeft	{font-size:9pt;}
+#Dot		{font-size:8pt;}
+#Mini		{font-size:7pt;}
+-->
+</style>
+
+</head>
+<body text="#000000" bgcolor="#FFFFFF" link="#0000ff" vlink="#0000ff" alink="#ff0000">
+
+<table border="0" width="700" cellspacing="0" cellpadding="0">
+<tbody><tr>
+<td>
+***(ＪＲＤＢデータのご案内)***<p>
+
+■ＪＲＤＢデータについて<br>
+</p><ul>
+ＪＲＤＢでは、プログラム分析用に固定長テキスト形式のデータを提供しています。
+「馬名」「馬番」といった基本的なデータから、分析用に加工した指数データや、
+予想データ等、数々のデータを取り揃えています。
+<p>
+</p></ul>
+<br>
+■データ形式について<br>
+　lha圧縮形式（.lzh）にて提供しています。<br>
+　今後zip形式を追加する予定です。(現在作成中)<br>
+<br>
+　データ名は、データ識別名＋版数＋年月日６桁（yyMMdd）となっています。<br>
+<br>
+　例）KYH150105.lzh<br>
+　　　競走馬データ（KY）<br>
+　　　"H"版<br>
+　　　2015年1月5日のデータ<br>
+<br>
+<br>
+■データの「年月日６桁部分」について補足説明 (2019.08.25 追加)<br>
+　データの「年月日６桁部分」は基本的にレース日ですが、<br>
+　・騎手マスタ(KS*)<br>
+　・調教師マスタ(CS*)<br>
+　・末梢馬データ(MS*)<br>
+　は、他のデータと「年月日６桁部分」の設定が異なっています。<br>
+<br>
+　その週の最初の日付（通常は土曜日）の場合はその週が始まる前までの成績です。※１<br>
+　その週の最後の日付（通常は日曜日）の場合はその週の結果を踏まえての成績です。※２<br>
+<br>
+　また、騎手の勝数などの成績は週単位で更新しています。<br>
+　そして、土曜日の成績が日曜日のデータに反映されることはありません。<br>
+<br>
+　通常<br>
+　　※１はその週の前の木曜日<br>
+　　※２はその週の終了後の月曜日<br>
+　に更新しています。<br>
+<br>
+　基本的にマスタデータとしての使用を前提にしていますので、<br>
+　最新のデータを更新していくことでマスタデータとしての整合性が取れるようになっています。<br>
+<br>
+<br>
+■レース当日のデータアクセス制限について (2025.07.28 追加)<br>
+　サーバ運用の円滑化を図るため、次の制限を導入させていただきます。<br>
+　土、日など直前情報時間帯において次のデータへのアクセスを制限します。<br>
+<br>
+　〇制限する時間帯<br>
+　　レース当日 08:00～19:00<br>
+<br>
+　〇制限するアクセス<br>
+　・ＪＲＤＢデータの過去データのダウンロード<br>
+　　この過去データというのは、昨年以前のデータとします。<br>
+　　（年替わり時などは、柔軟に運用します）
+　　※過去データの整備は、週中でお願いします。<br>
+<br>
+■コード表<br>
+<ul>
+<li><a href="jrdb_code.txt"><b>JRDBデータコード表</b></a>(txt)(2018/11/16更新:場コード追加)<b></b>
+
+</li><li><a href="bagu_code.txt">馬具コード表</a>(txt)
+</li><li><a href="ashimoto_code.txt">脚元コード表</a>(txt)
+</li><li><a href="tokki_code.txt">特記コード表</a>(txt)
+</li><li><a href="keito_code.txt">系統コード表</a>(txt)
+</li><li><a href="cyokyo_course_code.txt"><b>調教コースコード表</b></a>(txt)
+</li><li><a href="oi_code.txt"><b>追い状態コード表</b></a>(txt)<p>
+
+</p></li><li><a href="jrdb_code.lzh">ＪＲＤＢコードACCESSファイル(jrdb_code.mdb)LZH圧縮版 61KB</a>(2020/01/29更新)<br>
+</li><li><a href="jrdb_code.zip">ＪＲＤＢコードACCESSファイル(jrdb_code.mdb)ZIP圧縮版 58KB</a>(2020/01/29更新)<br>
+</li><li><a href="jrdb_code.mdb">ＪＲＤＢコードACCESSファイル(jrdb_code.mdb)非圧縮版 928KB</a>(2020/01/29更新)<br>
+		コード表をＡＣＣＥＳＳ用のデータベースファイルに登録しています。<br>
+		圧縮版はlha圧縮されていますので、解凍してご使用ください。<br>
+		「DBman」、「ゴールド　ジェネレーター」で使用します。<p> 
+</p></li></ul>
+
+
+■ＪＲＤＢデータ仕様<br>
+<br>
+
+<div style="font-size:11pt;background-color:#abc;padding:2px;">◆登録馬データ</div>
+<table border="1" width="700" cellspacing="1" cellpadding="3">
+<tbody><tr align="center">
+<td width="100" align="center" colspan="2" bgcolor="#555555" style="color:#fff;">更新曜日・時間</td>
+<td width="220" align="center" bgcolor="#555555" style="color:#fff;">
+データ名</td>
+<td width="140" bgcolor="#555555" style="color:#fff;">
+概要</td>
+<td width="70" bgcolor="#555555" style="color:#fff;">
+仕様</td>
+<td width="70" bgcolor="#555555" style="color:#fff;">
+内容説明</td>
+<td width="70" bgcolor="#555555" style="color:#fff;">
+サンプル</td>
+</tr>
+<tr>
+<td width="50" align="center">
+月木</td>
+<td width="50">20:00</td>
+<td width="220" bgcolor="#ffDDBB">
+JRDB登録馬データ（KTA）</td>
+<td width="220">
+月：特別レース登録馬データ<br>
+木：全場全レース登録馬データ
+</td>
+<td width="70">
+<a href="Kta/kta_doc.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+<td width="70">
+　</td>
+<td width="70">
+<a href="Kta/KTA040627.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+</tr>
+</tbody></table>
+<br>
+
+<div style="font-size:11pt;background-color:#abc;padding:2px;">◆成績情報系</div>
+<table border="1" width="700" cellspacing="1" cellpadding="3">
+
+<tbody><tr align="center">
+<td width="100" align="center" colspan="2" bgcolor="#555555" style="color:#fff;">更新曜日・時間</td>
+<td width="220" align="center" bgcolor="#555555" style="color:#fff;">
+データ名</td>
+<td width="140" bgcolor="#555555" style="color:#fff;">
+概要</td>
+<td width="70" bgcolor="#555555" style="color:#fff;">
+仕様</td>
+<td width="70" bgcolor="#555555" style="color:#fff;">
+内容説明</td>
+<td width="70" bgcolor="#555555" style="color:#fff;">
+サンプル</td>
+</tr>
+
+<tr>
+<td width="50" align="center">
+木</td>
+<td width="50">17:00</td>
+<td width="220" bgcolor="#99ccff">
+<b>JRDB成績データ（SED）</b></td>
+<td width="140">
+成績分析用</td>
+<td width="70">
+<a href="Sed/sed_doc.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+<td width="70">
+<a href="Sed/sedsiyo_doc.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+<td width="70">
+<a href="Sed/SED080913.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+</tr>
+
+<tr>
+<td width="50" align="center">
+木</td>
+<td width="50">17:00</td>
+<td width="220" bgcolor="#99ccff">
+JRDB成績データ（SEC）</td>
+<td width="140">
+成績分析用</td>
+<td width="70">
+<a href="Sec/sec_doc.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+<td width="70">
+<a href="Se/Sesiyo_doc2a.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+<td width="70">
+<a href="Sec/SEC020908.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+</tr>
+
+<tr>
+<td width="50" align="center">
+木</td>
+<td width="50">17:00</td>
+<td width="220" bgcolor="#99ccff">
+JRDB成績拡張データ（SKB）</td>
+<td width="140">
+成績分析用・拡張データ</td>
+<td width="70">
+<a href="Skb/skb_doc.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+<td width="70">
+<a href="Skb/skbsiyo_doc.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+<td width="70">
+<a href="Skb/SKB020908.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+</tr>
+
+<tr>
+<td width="50" align="center">
+木</td>
+<td width="50">17:00</td>
+<td width="220" bgcolor="#99ccff">
+<b>JRDB成績レースデータ（SRB）</b></td>
+<td width="140">
+成績分析用</td>
+<td width="70">
+<a href="Srb/srb_doc.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+<td width="70">
+　<!-- <a href="Sra/srasiyo_doc.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a> --></td>
+<td width="70">
+<a href="Srb/SRB080913.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+</tr>
+
+<tr>
+<td width="50" align="center">
+木</td>
+<td width="50">17:00</td>
+<td width="220" bgcolor="#99ccff">
+JRDB成績レースデータ（SRA）</td>
+<td width="140">
+成績分析用</td>
+<td width="70">
+<a href="Sra/sra_doc.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+<td width="70">
+　<!-- <a href="Sra/srasiyo_doc.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a> --></td>
+<td width="70">
+<a href="Sra/SRA020908.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+</tr>
+
+</tbody></table>
+
+<div align="right">※SRAはSECに同梱</div><p>
+
+</p><div style="font-size:11pt;background-color:#abc;padding:2px;">◆騎手・調教師データ</div>
+<table border="1" width="700" cellspacing="1" cellpadding="3">
+
+<tbody><tr align="center">
+<td width="100" align="center" colspan="2" bgcolor="#555555" style="color:#fff;">更新曜日・時間</td>
+<td width="220" align="center" bgcolor="#555555" style="color:#fff;">
+データ名</td>
+<td width="140" bgcolor="#555555" style="color:#fff;">
+概要</td>
+<td width="70" bgcolor="#555555" style="color:#fff;">
+仕様</td>
+<td width="70" bgcolor="#555555" style="color:#fff;">
+内容説明</td>
+<td width="70" bgcolor="#555555" style="color:#fff;">
+サンプル</td>
+</tr>
+
+<tr>
+<td width="50" align="center">
+木</td>
+<td width="50">19:00</td>
+<td width="220" bgcolor="#A52A00">
+<font color="#ffffff">JRDB調教師データ（CZA）</font></td>
+<td width="140">
+全調教師</td>
+<td width="70">
+<a href="Cs/Cs_doc1.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+<td width="70">
+<a href="Cs/CKsiyo_doc1.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+<td width="70">
+　</td>
+</tr>
+
+<tr>
+<td width="50" align="center">
+木</td>
+<td width="50">19:00</td>
+<td width="220" bgcolor="#A52A00">
+<font color="#ffffff">JRDB調教師データ（CSA）</font></td>
+<td width="140">
+差分(今週出走分,先週成績更新分)</td>
+<td width="70">
+<a href="Cs/Cs_doc1.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+<td width="70">
+<a href="Cs/CKsiyo_doc1.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+<td width="70">
+<a href="Cs/CSA020907.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+</tr>
+
+<tr>
+<td width="50" align="center">
+木</td>
+<td width="50">19:00</td>
+<td width="220" bgcolor="#00005E">
+<font color="#ffffff">JRDB騎手データ（KZA）</font></td>
+<td width="140">
+全騎手</td>
+<td width="70">
+<a href="Ks/Ks_doc1.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+<td width="70">
+<a href="Ks/CKsiyo_doc1.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+<td width="70">
+　</td>
+</tr>
+
+<tr>
+<td width="50" align="center">
+木</td>
+<td width="50">19:00</td>
+<td width="220" bgcolor="#00005E">
+<font color="#ffffff">JRDB騎手データ（KSA）</font></td>
+<td width="140">
+差分(今週出走分,先週成績更新分)</td>
+<td width="70">
+<a href="Ks/Ks_doc1.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+<td width="70">
+<a href="Ks/CKsiyo_doc1.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+<td width="70">
+<a href="Ks/KSA020907.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+</tr>
+
+<tr>
+<td width="50" align="center">
+木</td>
+<td width="50">19:00</td>
+<td width="220" bgcolor="#CCFFCC">
+JRDB抹消馬データ（MZA）</td>
+<td width="140">
+抹消馬</td>
+<td width="70">
+<a href="Msa/msa_doc.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+<td width="70">
+　</td>
+<td width="70">
+　</td>
+</tr>
+
+<tr>
+<td width="50" align="center">
+木</td>
+<td width="50">19:00</td>
+<td width="220" bgcolor="#CCFFCC">
+JRDB抹消馬データ（MSA）</td>
+<td width="140">
+差分</td>
+<td width="70">
+<a href="Msa/msa_doc.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+<td width="70">
+　</td>
+<td width="70">
+<a href="Msa/MSA020907.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+</tr>
+
+</tbody></table><p>
+
+</p><div style="font-size:11pt;background-color:#abc;padding:2px;">◆前日情報系</div>
+<table border="1" width="700" cellspacing="1" cellpadding="3">
+
+<tbody><tr align="center">
+<td width="100" align="center" colspan="2" bgcolor="#555555" style="color:#fff;">更新曜日・時間</td>
+<td width="220" align="center" bgcolor="#555555" style="color:#fff;">
+データ名</td>
+<td width="140" bgcolor="#555555" style="color:#fff;">
+概要</td>
+<td width="70" bgcolor="#555555" style="color:#fff;">
+仕様</td>
+<td width="70" bgcolor="#555555" style="color:#fff;">
+内容説明</td>
+<td width="70" bgcolor="#555555" style="color:#fff;">
+サンプル</td>
+</tr>
+
+<tr>
+<td width="50" align="center">
+金土</td>
+<td width="50">19:00</td>
+<td width="220" bgcolor="#ff99cc">
+JRDBデータパック（JRDB）</td>
+<td width="140">
+前日情報系データの一括パック</td>
+<td width="70" align="center">
+　</td>
+<td width="70" align="center">
+　</td>
+<td width="70" align="center">
+　</td>
+</tr>
+
+<tr>
+<td width="50" align="center">
+金土</td>
+<td width="50">19:00</td>
+<td width="220" bgcolor="#ff99cc">
+<b>JRDB競走馬データ（KYI）</b></td>
+<td width="140">
+競走馬ごとのデータ。<br>IDM、各指数を格納、放牧先を追加</td>
+<td width="70">
+<a href="Kyi/kyi_doc.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+<td width="70">
+<a href="Kyi/ky_siyo_doc.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+<td width="70">
+<a href="Kyi/KYI150712.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+</tr>
+
+<tr>
+<td width="50" align="center">
+金土</td>
+<td width="50">19:00</td>
+<td width="220" bgcolor="#ff99cc">
+<b>JRDB競走馬データ（KYH）</b></td>
+<td width="140">
+競走馬ごとのデータ。<br>IDM、各指数を格納</td>
+<td width="70">
+<a href="Kyh/kyh_doc.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+<td width="70">
+<a href="Kyh/ky_siyo_doc.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+<td width="70">
+<a href="Kyh/KYH080913.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+</tr>
+
+<tr>
+<td width="50" align="center">
+金土</td>
+<td width="50">19:00</td>
+<td width="220" bgcolor="#ff99cc">
+JRDB競走馬データ（KYG）</td>
+<td width="140">
+競走馬ごとのデータ。<br>IDM、各指数を格納</td>
+<td width="70">
+<a href="Kyg/kyg_doc.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+<td width="70">
+<a href="Kyg/ky_siyo_doc.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+<td width="70">
+<a href="Kyg/KYG040627.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+</tr>
+
+<tr>
+<td width="50" align="center">
+金土</td>
+<td width="50">19:00</td>
+<td width="220" bgcolor="#ff99cc">
+JRDB競走馬拡張データ（KKA）</td>
+<td width="140">
+競走馬ごとの拡張データ</td>
+<td width="70">
+<a href="Kka/kka_doc.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+<td width="70">
+　</td>
+<td width="70">
+<a href="Kka/KKA020908.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+</tr>
+
+<tr>
+<td width="50" align="center">
+金土</td>
+<td width="50">19:00</td>
+<td width="220" bgcolor="#ff99cc">
+JRDB馬基本データ（UKC）</td>
+<td width="140">
+馬に関するデータを格納</td>
+<td width="70">
+<a href="Ukc/ukc_doc.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+<td width="70">
+　</td>
+<td width="70">
+<a href="Ukc/UKC020908.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+</tr>
+
+<tr>
+<td width="50" align="center">
+金土</td>
+<td width="50">19:00</td>
+<td width="220" bgcolor="#ff99cc">
+JRDB情報データ（JOA）</td>
+<td width="140">
+情報からの詳細データ</td>
+<td width="70">
+<a href="Jo/Jodata_doc2.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+<td width="70">
+<a href="Jo/Josiyo_doc.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+<td width="70">
+<a href="Jo/JOA020908.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+</tr>
+
+<tr>
+<td width="50" align="center">
+金土</td>
+<td width="50">19:00</td>
+<td width="220" bgcolor="#ff99cc">
+JRDB基準オッズデータ（OZ）</td>
+<td width="140">
+単複・馬連の基準オッズデータ</td>
+<td width="70">
+<a href="Oz/Ozdata_doc.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+<td width="70">
+<a href="Oz/Ozsiyo_doc.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+<td width="70">
+<a href="Oz/OZ020908.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+</tr>
+
+<tr>
+<td width="50" align="center">
+金土</td>
+<td width="50">19:00</td>
+<td width="220" bgcolor="#ff99cc">
+ワイド基準オッズデータ（OW）</td>
+<td width="140">
+ワイドの基準オッズデータ</td>
+<td width="70">
+<a href="Oz/Owdata_doc.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+<td width="70">
+　</td>
+<td width="70">
+<a href="Oz/OW020908.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+</tr>
+
+<tr>
+<td width="50" align="center">
+金土</td>
+<td width="50">19:00</td>
+<td width="220" bgcolor="#ff99cc">
+馬単基準オッズデータ（OU）</td>
+<td width="140">
+馬単の基準オッズデータ</td>
+<td width="70">
+<a href="Ou/Oudata_doc.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+<td width="70">
+　</td>
+<td width="70">
+<a href="Ou/OU020908.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+</tr>
+
+<tr>
+<td width="50" align="center">
+金土</td>
+<td width="50">19:00</td>
+<td width="220" bgcolor="#ff99cc">
+３連複基準オッズデータ（OT）</td>
+<td width="140">
+３連複の基準オッズデータ</td>
+<td width="70">
+<a href="Ot/Otdata_doc.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+<td width="70">
+　</td>
+<td width="70">
+<a href="Ot/OT020908.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+</tr>
+
+<tr>
+<td width="50" align="center">
+金土</td>
+<td width="50">19:00</td>
+<td width="220" bgcolor="#ff99cc">
+３連単基準オッズデータ（OV）</td>
+<td width="140">
+３連単の基準オッズデータ</td>
+<td width="70">
+<a href="Ov/ovdata_doc.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+<td width="70">
+　</td>
+<td width="70">
+<a href="Ov/OV040828.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+</tr>
+
+<tr>
+<td width="50" align="center">
+金土</td>
+<td width="50">19:00</td>
+<td width="220" bgcolor="#ff99cc">
+JRDB前走データ（ZED）</td>
+<td width="140">
+過去５走の成績データ</td>
+<td width="70">
+<a href="Zed/zed_doc.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+<td width="70">
+　</td>
+<td width="70">
+<a href="Zed/ZED020908.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+</tr>
+<tr>
+<td width="50" align="center">
+金土</td>
+<td width="50">19:00</td>
+<td width="220" bgcolor="#ff99cc">
+JRDB前走データ（ZEC）</td>
+<td width="140">
+過去５走の成績データ</td>
+<td width="70">
+<a href="Zec/zec_doc.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+<td width="70">
+　</td>
+<td width="70">
+<a href="Zec/ZEC020908.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+</tr>
+
+<tr>
+<td width="50" align="center">
+金土</td>
+<td width="50">19:00</td>
+<td width="220" bgcolor="#ff99cc">
+JRDB前走拡張データ（ZKB）</td>
+<td width="140">
+過去５走の成績拡張データ</td>
+<td width="70">
+<a href="Zkb/zkb_doc.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+<td width="70">
+　</td>
+<td width="70">
+<a href="Zkb/ZKB020908.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+</tr>
+
+<tr>
+<td width="50" align="center">
+金土</td>
+<td width="50">19:00</td>
+<td width="220" bgcolor="#ff99cc">
+<b>JRDB開催データ（KAB）</b></td>
+<td width="140">
+馬場・天候予想等の開催に対するデータ</td>
+<td width="70">
+<a href="Kab/kab_doc.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+<td width="70">
+　</td>
+<td width="70">
+<a href="Kab/KAB080913.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+</tr>
+
+<tr>
+<td width="50" align="center">
+金土</td>
+<td width="50">19:00</td>
+<td width="220" bgcolor="#ff99cc">
+JRDB開催データ（KAA）</td>
+<td width="140">
+馬場・天候予想等の開催に対するデータ</td>
+<td width="70">
+<a href="Kaa/kaa_doc.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+<td width="70">
+　</td>
+<td width="70">
+<a href="Kaa/KAA040627.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+</tr>
+
+<tr>
+<td width="50" align="center">
+金土</td>
+<td width="50">19:00</td>
+<td width="220" bgcolor="#ff99cc">
+<b>JRDB番組データ（BAC）</b></td>
+<td width="140">
+レース番組情報</td>
+<td width="70">
+<a href="Bac/bac_doc.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+<td width="70">
+　</td>
+<td width="70">
+<a href="Bac/BAC080913.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+</tr>
+
+
+<tr>
+<td width="50" align="center">
+金土</td>
+<td width="50">19:00</td>
+<td width="220" bgcolor="#ff99cc">
+JRDB番組データ（BAB）</td>
+<td width="140">
+レース番組情報</td>
+<td width="70">
+<a href="Bab/bab_doc.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+<td width="70">
+　</td>
+<td width="70">
+<a href="Bab/BAB040627.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+</tr>
+
+<tr>
+<td width="50" align="center">
+金土</td>
+<td width="50">19:00</td>
+<td width="220" bgcolor="#ff99cc">
+<b>JRDB調教分析データ（CYB）</b></td>
+<td width="140">
+調教分析データ</td>
+<td width="70">
+<a href="Cyb/cyb_doc.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+<td width="70">
+<a href="Cyb/cybsiyo_doc.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+<td width="70">
+<a href="Cyb/CYB081018.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+</tr>
+
+<tr>
+<td width="50" align="center">
+金土</td>
+<td width="50">19:00</td>
+<td width="220" bgcolor="#ff99cc">
+JRDB調教分析データ（CYA）</td>
+<td width="140">
+調教分析データ</td>
+<td width="70">
+<a href="Cya/cya_doc.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+<td width="70">
+<a href="Cya/cyasiyo_doc.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+<td width="70">
+<a href="Cya/CYA020908.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+</tr>
+
+<tr>
+<td width="50" align="center">
+金土</td>
+<td width="50">19:00</td>
+<td width="220" bgcolor="#ff99cc">
+<b>JRDB調教本追切データ（CHA）</b></td>
+<td width="140">
+調教分析データ</td>
+<td width="70">
+<a href="Cha/cha_doc.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+<td width="70">
+　</td>
+<td width="70">
+<a href="Cha/CHA081018.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+</tr>
+</tbody></table>
+
+<div align="right">※KKAはJRDBパックに同梱</div><p>
+
+</p><div style="font-size:11pt;background-color:#abc;padding:2px;">◆当日情報系</div>
+<table border="1" width="700" cellspacing="1" cellpadding="3">
+
+<tbody><tr align="center">
+<td width="100" align="center" colspan="2" bgcolor="#555555" style="color:#fff;">更新曜日・時間</td>
+<td width="220" align="center" bgcolor="#555555" style="color:#fff;">
+データ名</td>
+<td width="140" bgcolor="#555555" style="color:#fff;">
+概要</td>
+<td width="70" bgcolor="#555555" style="color:#fff;">
+仕様</td>
+<td width="70" bgcolor="#555555" style="color:#fff;">
+内容説明</td>
+<td width="70" bgcolor="#555555" style="color:#fff;">
+サンプル</td>
+</tr>
+
+<tr>
+<td width="50" align="center">
+土日</td>
+<td width="50">17:00</td>
+<td width="220" bgcolor="#0000ff">
+<font color="#ffffff">JRDB直前情報データ（TYB）（最終版）</font></td>
+<td width="140">
+直前情報</td>
+<td width="70">
+<a href="Tyb/tyb_doc.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+<td width="70">
+　</td>
+<td width="70">
+<a href="Tyb/TYB210912.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+</tr>
+
+<tr>
+<td width="50" align="center">
+土日</td>
+<td width="50">17:00</td>
+<td width="220" bgcolor="#0000ff">
+<font color="#ffffff">JRDB払戻情報データ（HJC）</font></td>
+<td width="140">
+払戻情報に関するデータを格納 <br>
+<a href="http://member.jrdb.com/c-board/c-board.cgi?cmd=one;no=5166;id=GG">注意事項(2024.09.29)</a>
+</td>
+<td width="70">
+<a href="Hjc/hjcdata_doc.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+<td width="70">
+３連単有</td>
+<td width="70">
+<a href="Hjc/HJC240929.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+</tr>
+
+<tr>
+<td width="50" align="center">
+土日</td>
+<td width="50">17:00</td>
+<td width="220" bgcolor="#0000ff">
+<font color="#ffffff">JRDB払戻情報データ（HJA）</font></td>
+<td width="140">
+払戻情報に関するデータを格納</td>
+<td width="70">
+<a href="Hj/hja_doc.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+<td width="70">
+　</td>
+<td width="70">
+<a href="Hj/HJA020908.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+</tr>
+
+<tr>
+<td width="50" align="center">
+土日</td>
+<td width="50">17:00</td>
+<td width="220" bgcolor="#99ccff">
+JRDB成績速報データ（SED）</td>
+<td width="140">
+成績分析用</td>
+<td width="70">
+<a href="Sed/sedsoku_doc.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+<td width="70">
+<a href="Se/Sesiyo_doc2a.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+<td width="70">
+　</td>
+</tr>
+
+<tr>
+<td width="50" align="center">
+土日</td>
+<td width="50">17:00</td>
+<td width="220" bgcolor="#99ccff">
+JRDB成績速報データ（SEC）</td>
+<td width="140">
+成績分析用</td>
+<td width="70">
+<a href="Sec/secsoku_doc.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+<td width="70">
+<a href="Se/Sesiyo_doc2a.txt"><img src="../pic/miru.gif" alt="見る" width="70" height="25" border="0"></a></td>
+<td width="70">
+　</td>
+</tr>
+
+</tbody></table><p>
+
+</p><hr noshade="" size="1">
+
+◆旧形式データは、<a href="data_old.html">●こちら</a>
+
+<hr noshade="" size="1">
+
+***(ＪＲＤＢデータの連携)***<p>
+
+</p><ul>
+<li>競走馬データを中心として、"レースキー"で番組データ、基準オッズデータ、"レースキー+馬番"で情報データ、直前データをリンクします。
+</li><li>馬基本データとは、血統登録番号でリンクします。
+</li><li>前走データとは競走成績キーでリンクします。
+</li><li>騎手データを使用して、騎手マスタを作成します。
+</li><li>調教師データを使用して、調教師マスタを作成します。
+</li><li>競走馬データ、成績データの騎手コード、調教師コードで騎手マスタ、調教師マスタをリンクします。
+</li></ul>
+
+<pre><tt>
+   ************************          ************************
+   *番組データ            *          *馬基本データ           *
+   *  レースキー          *---+      *  血統登録番号         *
+   *（１レース／１レコード）* |      *（１馬／１レコード）    *
+   ************************   |      ************************
+                              |                 |
+                              |                 |リンク（血統登録番号）
+   ************************   |      ***********************
+   *払戻情報データ         *   |      *競走馬データ         *
+   *  レースキー           *--リンク--*  レースキー         *
+   *  (1レース/1レコード)  *   |      *  前走競走成績キー   *--リンク------+
+   ************************   |      *  前走レースキー     *              |
+                              |      *  血統登録番号       *              |
+   ************************   |      *  騎手コード         *              |
+   *基準オッスデータ       *   |      *  調教師コード        *             |
+   *    ワイド            *   |      *  (1馬/1レコード)    *              |
+   *    馬単、３連複       *   |      ***********************             |
+   *  レースキー           *---+        |                                 |
+   *  (1レース/1レコード)  *            |リンク                           |
+   ************************            |（レースキー+馬番）               |
+                                       |                                 |
+   ************************            |   **************************     |
+   *情報データ            *            |   *前走データ／成績データ  *     |
+   *  レースキー+馬番     *------------+   *   競走成績キー         *-----+
+   *  (1馬/1レコード)     *            |   *   レースキー           *-----+
+   ************************            |   *   騎手コード           *     |
+                                       |   *   調教師コード         *     |
+                                       |   *   (1馬/1レコード)      *     |
+                                       |   **************************     |
+   ************************            |                                  |
+   *直前データ            *            |   **************************     |
+   *  レースキー+馬番     *------------+   *成績レースデータ        *     |
+   *  (1馬/1レコード)     *                *  レースキー            *-----+
+   ************************                *  (1レース/1レコード)   *
+                                           **************************
+
+   ************************
+   *騎手マスタ            * 
+   *  騎手コード          *＜------------競走馬データ、成績データからリンク
+   *  (1騎手/1レコード)   *
+   ************************
+
+   ************************
+   *調教師マスタ          * 
+   *  調教師コード        *＜-------------競走馬データ、成績データからリンク
+   *  (1調教師/1レコード) *
+   ************************
+</tt></pre>
+
+</td></tr>
+
+<tr>
+<td>
+
+<hr noshade="" size="1">
+<center>
+<i><font size="-2">Copyright 1998-2007.All Right Reserved By <a href="mailto:jrdb@jrdb.com">JRDB</a>.<br>
+Presented By SamuraiJAPAN.</font></i></center>
+<hr noshade="" size="1">
+
+</td></tr>
+
+</tbody></table>
+
+
+</body></html>

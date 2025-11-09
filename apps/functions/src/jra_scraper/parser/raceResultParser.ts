@@ -69,8 +69,7 @@ export function extractRaceInfo($: cheerio.CheerioAPI): any[] {
     const surface = $row.find('td.name p.race_cond span.type').text().includes('芝') ? '芝' : 'ダ'
     const startTime = $row.find('td.time').text().trim()
 
-    if (raceNumber && raceName && distance && startTime) {
-      races.push({
+    if (raceNumber && raceName && distance && startTime) races.push({
         raceNumber,
         raceName,
         venue: '東京',
@@ -78,7 +77,7 @@ export function extractRaceInfo($: cheerio.CheerioAPI): any[] {
         surface,
         startTime
       })
-    }
+    
   })
 
   // 京都競馬場のレース情報を抽出
@@ -93,8 +92,7 @@ export function extractRaceInfo($: cheerio.CheerioAPI): any[] {
     const surface = $row.find('td.name p.race_cond span.type').text().includes('芝') ? '芝' : 'ダ'
     const startTime = $row.find('td.time').text().trim()
 
-    if (raceNumber && raceName && distance && startTime) {
-      races.push({
+    if (raceNumber && raceName && distance && startTime) races.push({
         raceNumber,
         raceName,
         venue: '京都',
@@ -102,7 +100,7 @@ export function extractRaceInfo($: cheerio.CheerioAPI): any[] {
         surface,
         startTime
       })
-    }
+    
   })
 
   return races
@@ -114,9 +112,8 @@ export function extractRaceInfo($: cheerio.CheerioAPI): any[] {
 function parseStartTime(year: number, month: number, day: number, timeStr: string): Date {
   // "9時50分" 形式を解析
   const timeMatch = timeStr.match(/(\d+)時(\d+)分/)
-  if (!timeMatch) {
-    throw new Error(`Invalid time format: ${timeStr}`)
-  }
+  if (!timeMatch) throw new Error(`Invalid time format: ${timeStr}`)
+  
   
   const hour = parseInt(timeMatch[1])
   const minute = parseInt(timeMatch[2])

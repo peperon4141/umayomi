@@ -2,6 +2,40 @@
 
 参考: [JRDBデータのご案内](https://jrdb.com/program/data.html)
 
+## ローカル仕様書ファイル
+
+プロジェクト内にダウンロード済みの仕様書ファイルが保存されています：
+
+**保存場所**: `apps/functions/src/jrdb_scraper/formats/specs/`
+
+以下の仕様書ファイルが利用可能です：
+- `kyi_doc.txt` - KYI（競走馬データ）仕様書
+- `kyh_doc.txt` - KYH（競走馬データ）仕様書
+- `kyg_doc.txt` - KYG（競走馬データ）仕様書
+- `kka_doc.txt` - KKA（競走馬拡張データ）仕様書
+- `bac_doc.txt` - BAC（番組データ）仕様書
+- `bab_doc.txt` - BAB（番組データ）仕様書
+- `ozdata_doc.txt` - OZ（基準オッズデータ）仕様書
+- `owdata_doc.txt` - OW（ワイド基準オッズデータ）仕様書
+- `oudata_doc.txt` - OU（馬単基準オッズデータ）仕様書
+- `otdata_doc.txt` - OT（３連複基準オッズデータ）仕様書
+- `ovdata_doc.txt` - OV（３連単基準オッズデータ）仕様書
+- `hjcdata_doc.txt` - HJC（払戻情報データ）仕様書
+- `hja_doc.txt` - HJA（払戻情報データ）仕様書
+- `srb_doc.txt` - SRB（成績レースデータ）仕様書
+- `sra_doc.txt` - SRA（成績レースデータ）仕様書
+- `sed_doc.txt` - SED（成績速報データ）仕様書
+- `sec_doc.txt` - SEC（成績速報データ）仕様書
+- `zed_doc.txt` - ZED（前走データ）仕様書
+- `zec_doc.txt` - ZEC（前走データ）仕様書
+- `ukc_doc.txt` - UKC（馬基本データ）仕様書
+- `Jodata_doc2.txt` - JOA（情報データ）仕様書
+- `tyb_doc.txt` - TYB（直前情報データ）仕様書
+- `Ks_doc1.txt` - KZA/KSA（騎手データ）仕様書
+- `Cs_doc1.txt` - CZA/CSA（調教師データ）仕様書
+
+**注意**: これらの仕様書ファイルは、フォーマット定義の実装時に参照してください。仕様書の内容に基づいて、`apps/functions/src/jrdb_scraper/formats/*.ts`の各フォーマット定義ファイルを更新・実装します。
+
 ## データ形式について
 
 - **ファイル形式**: lha圧縮形式（.lzh）

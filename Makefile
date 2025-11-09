@@ -79,16 +79,15 @@ scrape-jra-calendar-with-results:
 		--fail-with-body \
 		|| (echo "Error: エミュレーターが起動していることを確認してください (make dev)" && exit 1)
 
-# JRDBデータをParquet形式に変換してStorageに保存（エミュレーター環境用）
-convert-jrdb-to-parquet:
-	@if [ -z "$(URL)" ]; then \
-		echo "Usage: make convert-jrdb-to-parquet URL=https://jrdb.com/member/data/Jrdb/JRDB251102.lzh"; \
+# JRDB日単位データ取得（エミュレーター環境用）
+fetch-jrdb-daily-data:
+	@if [ -z "$(YEAR)" ] || [ -z "$(MONTH)" ] || [ -z "$(DAY)" ] || [ -z "$(DATATYPE)" ]; then \
+		echo "Usage: make fetch-jrdb-daily-data YEAR=2025 MONTH=11 DAY=2 DATATYPE=BAC"; \
+		echo "Available JRDB data types: BAC, BAB, ZED, ZEC, HJC, HJB, SRB, SRA, UKC, JOA, TYB, SED, SEC, KZA, KSA, CZA, CSA, OZ, OW, OU, OT, OV"; \
 		exit 1; \
 	fi
-	@curl -X POST \
-		"http://127.0.0.1:5101/umayomi-fbb2b/asia-northeast1/convertJRDBToParquet" \
-		-H "Content-Type: application/json" \
-		-d "{\"url\": \"$(URL)\"}" \
+	@curl -X GET \
+		"http://127.0.0.1:5101/umayomi-fbb2b/asia-northeast1/fetchJRDBDailyData?year=$(YEAR)&month=$(MONTH)&day=$(DAY)&dataType=$(DATATYPE)" \
 		--max-time 600 \
 		--connect-timeout 10 \
 		--retry 3 \
@@ -96,3 +95,4 @@ convert-jrdb-to-parquet:
 		--show-error \
 		--fail-with-body \
 		|| (echo "Error: エミュレーターが起動していることを確認してください (make dev)" && exit 1)
+

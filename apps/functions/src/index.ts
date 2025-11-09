@@ -7,7 +7,7 @@ import { config } from 'dotenv'
 import {
   handleScrapeJRACalendarWithRaceResults
 } from './jra_scraper/handlers'
-import { handleConvertJRDBToParquet, handleFetchRaceKYData, handleFetchDailyKYIData } from './jrdb_scraper/handlers'
+import { handleFetchJRDBDailyData } from './jrdb_scraper/handlers'
 
 // 開発環境の場合、.envファイルを読み込む
 const isDevelopment = process.env.NODE_ENV === 'development' || 
@@ -20,9 +20,8 @@ if (isDevelopment) {
   if (fs.existsSync(envPath)) {
     config({ path: envPath })
     logger.info('.envファイルを読み込みました', { envPath })
-  } else {
-    logger.warn('.envファイルが見つかりません', { envPath })
-  }
+  } else logger.warn('.envファイルが見つかりません', { envPath })
+  
 }
 
 if (isDevelopment) {
@@ -52,7 +51,7 @@ if (!process.env.PLAYWRIGHT_BROWSERS_PATH) {
   ]
   
   let foundPath: string | null = null
-  for (const candidatePath of candidatePaths) {
+  for (const candidatePath of candidatePaths) 
     if (fs.existsSync(candidatePath)) {
       foundPath = candidatePath
       logger.info('Playwrightブラウザのパスを発見', {
@@ -61,7 +60,7 @@ if (!process.env.PLAYWRIGHT_BROWSERS_PATH) {
       })
       break
     }
-  }
+  
   
   if (foundPath) {
     process.env.PLAYWRIGHT_BROWSERS_PATH = foundPath
@@ -76,11 +75,11 @@ if (!process.env.PLAYWRIGHT_BROWSERS_PATH) {
       warning: 'postinstallでブラウザがインストールされているか確認してください。'
     })
   }
-} else {
+} else 
   logger.info('PLAYWRIGHT_BROWSERS_PATHは既に設定されています', {
     browsersPath: process.env.PLAYWRIGHT_BROWSERS_PATH
   })
-}
+
 
 // Firebase Admin SDKを初期化
 initializeApp()
@@ -95,42 +94,18 @@ export const scrapeJRACalendarWithRaceResults = onRequest(
 )
 
 /**
- * JRDBデータをlzh形式からParquet形式に変換してFirebase Storageに保存するCloud Function
- * lzhファイルをアップロードしてParquetに変換し、Storageに保存
- */
-export const convertJRDBToParquet = onRequest(
-  { timeoutSeconds: 600, memory: '2GiB', region: 'asia-northeast1', cors: true },
-  handleConvertJRDBToParquet
-)
-
-/**
- * 特定レースのKY系データ（KYI/KYH/KYG/KKA）をすべて取得するCloud Function
- * 
- * 必須パラメータ（query）:
- * - year: 年
- * - month: 月
- * - day: 日
- * - racecourse: 競馬場名
- * - kaisaiRound: 開催回数
- * - kaisaiDay: 日目
- * - raceNumber: レース番号
- */
-export const fetchRaceKYData = onRequest(
-  { timeoutSeconds: 600, memory: '2GiB', region: 'asia-northeast1', cors: true },
-  handleFetchRaceKYData
-)
-
-/**
- * 日単位でKYIデータを取得するCloud Function
+ * JRDBから日単位で指定されたデータタイプを取得するCloud Function（デバッグ用）
  * 
  * 必須パラメータ（query）:
  * - year: 年（例: 2025）
  * - month: 月（例: 11）
  * - day: 日（例: 2）
+ * - dataType: JRDBデータタイプ（例: BAC, HJC, TYB, UKC, OZ, OW, OU, OT, OV, SRB, SRA, JOA, TYB, UKC, ZED, ZEC, SED, SEC, KZA, KSA, CZA, CSA）
  * 
- * 例: https://.../fetchDailyKYIData?year=2025&month=11&day=2
+ * 例: https://.../fetchJRDBDailyData?year=2025&month=11&day=2&dataType=BAC
  */
-export const fetchDailyKYIData = onRequest(
+export const fetchJRDBDailyData = onRequest(
   { timeoutSeconds: 600, memory: '2GiB', region: 'asia-northeast1', cors: true },
-  handleFetchDailyKYIData
+  handleFetchJRDBDailyData
 )
+

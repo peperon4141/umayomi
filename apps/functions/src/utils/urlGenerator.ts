@@ -9,9 +9,8 @@ export function generateJRACalendarUrl(year: number, month: number): string {
   const monthNames = ['jan', 'feb', 'mar', 'apr', 'may', 'jun',
                      'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
   
-  if (month < 1 || month > 12) {
-    throw new Error(`Invalid month: ${month}. Must be between 1 and 12.`)
-  }
+  if (month < 1 || month > 12) throw new Error(`Invalid month: ${month}. Must be between 1 and 12.`)
+  
   
   return `https://www.jra.go.jp/keiba/calendar${year}/${monthNames[month - 1]}.html`
 }
