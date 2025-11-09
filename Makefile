@@ -83,11 +83,28 @@ scrape-jra-calendar-with-results:
 fetch-jrdb-daily-data:
 	@if [ -z "$(YEAR)" ] || [ -z "$(MONTH)" ] || [ -z "$(DAY)" ] || [ -z "$(DATATYPE)" ]; then \
 		echo "Usage: make fetch-jrdb-daily-data YEAR=2025 MONTH=11 DAY=2 DATATYPE=BAC"; \
-		echo "Available JRDB data types: BAC, BAB, ZED, ZEC, HJC, HJB, SRB, SRA, UKC, JOA, TYB, SED, SEC, KZA, KSA, CZA, CSA, OZ, OW, OU, OT, OV"; \
+		echo "Available JRDB data types: BAC, BAB, ZED, ZEC, HJC, HJB, SRB, SRA, UKC, JOA, TYB, SED, SEC, KZA, KSA, CZA, CSA, OZ, OW, OU, OT, OV, ALL"; \
 		exit 1; \
 	fi
 	@curl -X GET \
 		"http://127.0.0.1:5101/umayomi-fbb2b/asia-northeast1/fetchJRDBDailyData?year=$(YEAR)&month=$(MONTH)&day=$(DAY)&dataType=$(DATATYPE)" \
+		--max-time 600 \
+		--connect-timeout 10 \
+		--retry 3 \
+		--retry-delay 1 \
+		--show-error \
+		--fail-with-body \
+		|| (echo "Error: エミュレーターが起動していることを確認してください (make dev)" && exit 1)
+
+# JRDB年度パックデータ取得（エミュレーター環境用）
+fetch-jrdb-annual-data:
+	@if [ -z "$(YEAR)" ] || [ -z "$(DATATYPE)" ]; then \
+		echo "Usage: make fetch-jrdb-annual-data YEAR=2024 DATATYPE=BAC"; \
+		echo "Available JRDB data types with annual pack: KYI, KYH, KYG, BAC, BAB, HJC, SED, SEC, UKC, TYB, ALL"; \
+		exit 1; \
+	fi
+	@curl -X GET \
+		"http://127.0.0.1:5101/umayomi-fbb2b/asia-northeast1/fetchJRDBAnnualData?year=$(YEAR)&dataType=$(DATATYPE)" \
 		--max-time 600 \
 		--connect-timeout 10 \
 		--retry 3 \

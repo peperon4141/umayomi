@@ -20,7 +20,7 @@ function getLogger() {
 /**
  * メンバーページのHTMLを取得
  */
-async function fetchMemberIndexHtml(dataType: JRDBDataType): Promise<string> {
+export async function fetchMemberIndexHtml(dataType: JRDBDataType): Promise<string> {
   const info = getJRDBDataTypeInfo(dataType)
   const url = `${info.dataFileBaseUrl}/index.html`
   getLogger().info('Fetching member index page', { dataType, url })

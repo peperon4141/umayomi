@@ -1,6 +1,7 @@
 import { logger } from 'firebase-functions'
-import { JRDBDataType } from './entities/jrdb'
+import { JRDBDataType, getAllDataTypes, getAnnualPackSupportedDataTypes } from './entities/jrdb'
 import { fetchDailyData } from './fetchDailyData'
+import { fetchAnnualData } from './fetchAnnualData'
 
 /**
  * Request型（Firebase FunctionsのRequest型の簡易版）
@@ -127,6 +128,116 @@ export async function handleFetchJRDBDailyData(request: Request, response: Respo
     const errorStack = error instanceof Error ? error.stack : undefined
 
     logger.error('Fetch JRDB daily data failed', {
+      errorMessage,
+      errorStack,
+      executionTimeMs
+    })
+
+    response.status(500).send({
+      success: false,
+      error: errorMessage,
+      executionTimeMs
+    })
+  }
+}
+
+/**
+ * JRDBから年度単位で指定されたデータタイプの年度パックを取得する処理
+ * 年度パックをサポートしているデータタイプのみ取得
+ */
+export async function handleFetchJRDBAnnualData(request: Request, response: Response): Promise<void> {
+  const startTime = Date.now()
+  logger.info('Fetch JRDB annual data function called')
+
+  try {
+    // リクエストパラメータから年度とデータタイプを取得（queryパラメータのみ、必須）
+    if (!request.query?.year || !request.query?.dataType) {
+      const errorMessage = 'year, dataType parameters are required'
+      logger.error(errorMessage)
+      response.status(400).send({ success: false, error: errorMessage })
+      return
+    }
+
+    const year = parseInt(String(request.query.year))
+    const dataTypeStr = String(request.query.dataType).toUpperCase()
+
+    // データタイプの配列を決定
+    let dataTypes: JRDBDataType[]
+    if (dataTypeStr === 'ALL') {
+      // All指定の場合は、年度パックをサポートしているすべてのデータタイプを取得
+      dataTypes = getAnnualPackSupportedDataTypes(getAllDataTypes())
+      logger.info('Fetching JRDB annual pack data for all supported data types', {
+        year,
+        totalDataTypes: dataTypes.length
+      })
+    } else {
+      // 単一のデータタイプを指定
+      const dataType = Object.values(JRDBDataType).find(dt => dt.toString() === dataTypeStr) as JRDBDataType | undefined
+      
+      if (!dataType) {
+        const supportedDataTypes = getAnnualPackSupportedDataTypes(getAllDataTypes())
+        const errorMessage = `Invalid dataType: ${dataTypeStr}. Valid types: ALL, ${supportedDataTypes.map((dt: JRDBDataType) => dt.toString()).join(', ')}`
+        logger.error(errorMessage)
+        response.status(400).send({ success: false, error: errorMessage })
+        return
+      }
+
+      // 年度パックをサポートしているかチェック
+      const supportedDataTypes = getAnnualPackSupportedDataTypes([dataType])
+      if (supportedDataTypes.length === 0) {
+        const allSupported = getAnnualPackSupportedDataTypes(getAllDataTypes())
+        const errorMessage = `データタイプ ${dataTypeStr} は年度パックをサポートしていません。サポートされているデータタイプ: ${allSupported.map((dt: JRDBDataType) => dt.toString()).join(', ')}`
+        logger.error(errorMessage)
+        response.status(400).send({ success: false, error: errorMessage })
+        return
+      }
+
+      dataTypes = [dataType]
+      logger.info('Fetching JRDB annual pack data for year and dataType', {
+        year,
+        dataType: dataTypeStr
+      })
+    }
+
+    // 指定されたデータタイプ（複数可）の年度パックを取得
+    const results = await fetchAnnualData(year, dataTypes)
+
+    const executionTimeMs = Date.now() - startTime
+    const successCount = results.filter(r => r.success).length
+    const failureCount = results.filter(r => !r.success).length
+
+    // すべて成功した場合
+    if (failureCount === 0) {
+      response.send({
+        success: true,
+        message: `${dataTypeStr === 'ALL' ? 'すべての' : dataTypeStr}年度パックデータの取得が完了しました（年度: ${year}）`,
+        year,
+        totalDataTypes: dataTypes.length,
+        successCount,
+        failureCount,
+        results,
+        executionTimeMs
+      })
+    } else {
+      // 一部またはすべてが失敗した場合
+      response.status(500).send({
+        success: false,
+        message: `${successCount}件成功、${failureCount}件失敗しました`,
+        year,
+        totalDataTypes: dataTypes.length,
+        successCount,
+        failureCount,
+        results,
+        executionTimeMs
+      })
+    }
+    
+  } catch (error) {
+    const executionTimeMs = Date.now() - startTime
+    const errorMessage = error instanceof Error ? error.message : String(error)
+    const errorStack = error instanceof Error ? error.stack : undefined
+
+    logger.error('Fetch JRDB annual data failed', {
       errorMessage,
       errorStack,
       executionTimeMs

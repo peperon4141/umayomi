@@ -7,7 +7,7 @@ import { config } from 'dotenv'
 import {
   handleScrapeJRACalendarWithRaceResults
 } from './jra_scraper/handlers'
-import { handleFetchJRDBDailyData } from './jrdb_scraper/handlers'
+import { handleFetchJRDBDailyData, handleFetchJRDBAnnualData } from './jrdb_scraper/handlers'
 
 // 開発環境の場合、.envファイルを読み込む
 const isDevelopment = process.env.NODE_ENV === 'development' || 
@@ -109,5 +109,22 @@ export const scrapeJRACalendarWithRaceResults = onRequest(
 export const fetchJRDBDailyData = onRequest(
   { timeoutSeconds: 600, memory: '2GiB', region: 'asia-northeast1', cors: true },
   handleFetchJRDBDailyData
+)
+
+/**
+ * JRDBから年度単位で指定されたデータタイプの年度パックを取得するCloud Function
+ * 年度パックをサポートしているデータタイプのみ取得可能
+ * 
+ * 必須パラメータ（query）:
+ * - year: 年度（例: 2024）
+ * - dataType: JRDBデータタイプ（例: BAC, HJC, TYB, UKC, KYI, KYH, KYG, SED, SEC）または ALL（年度パックをサポートしているすべてのデータタイプを取得）
+ * 
+ * 例: 
+ * - 単一データタイプ: https://.../fetchJRDBAnnualData?year=2024&dataType=TYB
+ * - すべてのデータタイプ: https://.../fetchJRDBAnnualData?year=2024&dataType=ALL
+ */
+export const fetchJRDBAnnualData = onRequest(
+  { timeoutSeconds: 600, memory: '2GiB', region: 'asia-northeast1', cors: true },
+  handleFetchJRDBAnnualData
 )
 

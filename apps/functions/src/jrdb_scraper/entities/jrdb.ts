@@ -336,6 +336,8 @@ export function generateAnnualPackUrl(dataType: JRDBDataType, year: number): str
   const info = JRDB_DATA_TYPE_INFO[dataType]
   if (!info.hasAnnualPack) throw new Error(`データタイプ ${dataType} には年度パックが提供されていません`)
   const fileName = `${dataType}_${year}.lzh`
+  // dataFileBaseUrlは既にディレクトリを含んでいる（例: https://jrdb.com/member/data/Bac）
+  // ファイル名を直接追加（例: https://jrdb.com/member/data/Bac/BAC_2024.lzh）
   return `${info.dataFileBaseUrl}/${fileName}`
 }
 
@@ -353,4 +355,14 @@ export async function checkAnnualPackAvailability(dataType: JRDBDataType): Promi
 
 export function getAllDataTypes(): JRDBDataType[] {
   return Object.values(JRDBDataType)
+}
+
+/**
+ * 年度パックをサポートしているデータタイプのみをフィルタリング
+ */
+export function getAnnualPackSupportedDataTypes(dataTypes: JRDBDataType[]): JRDBDataType[] {
+  return dataTypes.filter(dataType => {
+    const info = JRDB_DATA_TYPE_INFO[dataType]
+    return info.hasAnnualPack
+  })
 }
