@@ -57,50 +57,69 @@ export async function handleFetchJRDBDailyData(request: Request, response: Respo
     const day = parseInt(String(request.query.day))
     const dataTypeStr = String(request.query.dataType).toUpperCase()
 
-    // 文字列をJRDBDataType enumに変換
-    const dataType = Object.values(JRDBDataType).find(dt => dt.toString() === dataTypeStr) as JRDBDataType | undefined
-    
-    if (!dataType) {
-      const errorMessage = `Invalid dataType: ${dataTypeStr}. Valid types: ${Object.values(JRDBDataType).join(', ')}`
-      logger.error(errorMessage)
-      response.status(400).send({ success: false, error: errorMessage })
-      return
+    // データタイプの配列を決定
+    let dataTypes: JRDBDataType[]
+    if (dataTypeStr === 'ALL') {
+      // All指定の場合は、すべてのサポートされているデータタイプを取得
+      dataTypes = Object.values(JRDBDataType)
+      logger.info('Fetching JRDB data for all supported data types', {
+        year,
+        month,
+        day,
+        totalDataTypes: dataTypes.length
+      })
+    } else {
+      // 単一のデータタイプを指定
+      const dataType = Object.values(JRDBDataType).find(dt => dt.toString() === dataTypeStr) as JRDBDataType | undefined
+      
+      if (!dataType) {
+        const errorMessage = `Invalid dataType: ${dataTypeStr}. Valid types: ALL, ${Object.values(JRDBDataType).join(', ')}`
+        logger.error(errorMessage)
+        response.status(400).send({ success: false, error: errorMessage })
+        return
+      }
+
+      dataTypes = [dataType]
+      logger.info('Fetching JRDB data for date and dataType', {
+        year,
+        month,
+        day,
+        dataType: dataTypeStr
+      })
     }
 
-    logger.info('Fetching JRDB data for date and dataType', {
-      year,
-      month,
-      day,
-      dataType: dataTypeStr
-    })
-
-    // 指定されたデータタイプを取得（配列として渡す）
-    const results = await fetchDailyData(year, month, day, [dataType])
-    const result = results[0]
+    // 指定されたデータタイプ（複数可）を取得
+    const results = await fetchDailyData(year, month, day, dataTypes)
 
     const executionTimeMs = Date.now() - startTime
+    const successCount = results.filter(r => r.success).length
+    const failureCount = results.filter(r => !r.success).length
 
-    if (result.success) 
+    // すべて成功した場合
+    if (failureCount === 0) {
       response.send({
         success: true,
-        message: `${dataTypeStr}データの取得が完了しました（日付: ${result.date}）`,
-        date: result.date,
-        dataType: result.dataType,
-        recordCount: result.recordCount,
-        lzhStoragePath: result.lzhStoragePath,
-        npzStoragePath: result.npzStoragePath,
-        jsonStoragePath: result.jsonStoragePath,
-        fileName: result.fileName,
+        message: `${dataTypeStr === 'ALL' ? 'すべての' : dataTypeStr}データの取得が完了しました（日付: ${results[0]?.date || ''}）`,
+        date: results[0]?.date || '',
+        totalDataTypes: dataTypes.length,
+        successCount,
+        failureCount,
+        results,
         executionTimeMs
       })
-     else 
+    } else {
+      // 一部またはすべてが失敗した場合
       response.status(500).send({
         success: false,
-        error: result.error,
-        date: result.date,
-        dataType: result.dataType,
+        message: `${successCount}件成功、${failureCount}件失敗しました`,
+        date: results[0]?.date || '',
+        totalDataTypes: dataTypes.length,
+        successCount,
+        failureCount,
+        results,
         executionTimeMs
       })
+    }
     
   } catch (error) {
     const executionTimeMs = Date.now() - startTime

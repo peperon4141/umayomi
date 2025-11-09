@@ -100,9 +100,11 @@ export const scrapeJRACalendarWithRaceResults = onRequest(
  * - year: 年（例: 2025）
  * - month: 月（例: 11）
  * - day: 日（例: 2）
- * - dataType: JRDBデータタイプ（例: BAC, HJC, TYB, UKC, OZ, OW, OU, OT, OV, SRB, SRA, JOA, TYB, UKC, ZED, ZEC, SED, SEC, KZA, KSA, CZA, CSA）
+ * - dataType: JRDBデータタイプ（例: BAC, HJC, TYB, UKC, OZ, OW, OU, OT, OV, JOA, ZED, ZEC, SED, SEC, KZA, KSA, CZA, CSA）または ALL（すべてのデータタイプを取得）
  * 
- * 例: https://.../fetchJRDBDailyData?year=2025&month=11&day=2&dataType=BAC
+ * 例: 
+ * - 単一データタイプ: https://.../fetchJRDBDailyData?year=2025&month=11&day=2&dataType=BAC
+ * - すべてのデータタイプ: https://.../fetchJRDBDailyData?year=2025&month=11&day=2&dataType=ALL
  */
 export const fetchJRDBDailyData = onRequest(
   { timeoutSeconds: 600, memory: '2GiB', region: 'asia-northeast1', cors: true },
