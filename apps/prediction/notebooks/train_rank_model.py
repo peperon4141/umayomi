@@ -33,7 +33,17 @@ import numpy as np
 import pandas as pd
 import lightgbm as lgb
 import matplotlib.pyplot as plt
+import matplotlib
 import seaborn as sns
+
+# 日本語フォント設定（macOS用）
+try:
+    matplotlib.rcParams['font.family'] = 'Hiragino Sans'
+except:
+    try:
+        matplotlib.rcParams['font.family'] = 'Arial Unicode MS'
+    except:
+        pass  # フォント設定に失敗した場合はデフォルトを使用
 
 from src.data_processer import DataProcessor
 from src.rank_predictor import RankPredictor
