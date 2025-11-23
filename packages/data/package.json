@@ -1,0 +1,10 @@
+{
+  "name": "@umayomi/data",
+  "version": "1.0.0",
+  "description": "JRDB data schema definitions",
+  "private": true,
+  "files": [
+    "schemas/**/*.json"
+  ]
+}
+

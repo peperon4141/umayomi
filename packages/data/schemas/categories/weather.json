@@ -1,0 +1,6 @@
+{
+  "name": "WEATHER",
+  "type": "list",
+  "description": "天候コードのリスト",
+  "categories": ["晴","曇","雨","小雨","小雪","雪"]
+}

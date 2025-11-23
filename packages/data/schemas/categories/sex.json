@@ -1,0 +1,6 @@
+{
+  "name": "SEX",
+  "type": "list",
+  "description": "性別コードのリスト",
+  "categories": ["牡","牝","セ"]
+}

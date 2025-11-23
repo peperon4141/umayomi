@@ -1,0 +1,22 @@
+{
+  "include": [
+    "src"
+  ],
+  "exclude": [
+    "**/__pycache__",
+    "**/node_modules",
+    ".venv"
+  ],
+  "reportMissingImports": false,
+  "reportMissingTypeStubs": false,
+  "reportOptionalOperand": false,
+  "reportArgumentType": false,
+  "reportAttributeAccessIssue": false,
+  "reportGeneralTypeIssues": false,
+  "reportCallIssue": false,
+  "reportIncompatibleMethodOverride": false,
+  "reportIncompatibleVariableOverride": false,
+  "pythonVersion": "3.11",
+  "typeCheckingMode": "off"
+}
+

@@ -112,7 +112,7 @@ async function fetchSingleDataType(
 
     // 各レコードを個別のドキュメントとしてサブコレクションに保存
     const recordsCollection = dailyDocRef.collection(actualDataType.toString()).doc('metadata').collection('records')
-    const batch = db.batch()
+    let batch = db.batch()
     let batchCount = 0
     const maxBatchSize = 500
 
@@ -128,6 +128,7 @@ async function fetchSingleDataType(
 
       if (batchCount >= maxBatchSize) {
         await batch.commit()
+        batch = db.batch() // 新しいbatchを作成
         batchCount = 0
       }
     }

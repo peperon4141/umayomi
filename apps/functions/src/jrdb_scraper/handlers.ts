@@ -97,7 +97,7 @@ export async function handleFetchJRDBDailyData(request: Request, response: Respo
     const failureCount = results.filter(r => !r.success).length
 
     // すべて成功した場合
-    if (failureCount === 0) {
+    if (failureCount === 0) 
       response.send({
         success: true,
         message: `${dataTypeStr === 'ALL' ? 'すべての' : dataTypeStr}データの取得が完了しました（日付: ${results[0]?.date || ''}）`,
@@ -108,7 +108,7 @@ export async function handleFetchJRDBDailyData(request: Request, response: Respo
         results,
         executionTimeMs
       })
-    } else {
+     else 
       // 一部またはすべてが失敗した場合
       response.status(500).send({
         success: false,
@@ -120,7 +120,7 @@ export async function handleFetchJRDBDailyData(request: Request, response: Respo
         results,
         executionTimeMs
       })
-    }
+    
     
   } catch (error) {
     const executionTimeMs = Date.now() - startTime
@@ -207,7 +207,7 @@ export async function handleFetchJRDBAnnualData(request: Request, response: Resp
     const failureCount = results.filter(r => !r.success).length
 
     // すべて成功した場合
-    if (failureCount === 0) {
+    if (failureCount === 0) 
       response.send({
         success: true,
         message: `${dataTypeStr === 'ALL' ? 'すべての' : dataTypeStr}年度パックデータの取得が完了しました（年度: ${year}）`,
@@ -218,7 +218,7 @@ export async function handleFetchJRDBAnnualData(request: Request, response: Resp
         results,
         executionTimeMs
       })
-    } else {
+     else 
       // 一部またはすべてが失敗した場合
       response.status(500).send({
         success: false,
@@ -230,7 +230,7 @@ export async function handleFetchJRDBAnnualData(request: Request, response: Resp
         results,
         executionTimeMs
       })
-    }
+    
     
   } catch (error) {
     const executionTimeMs = Date.now() - startTime

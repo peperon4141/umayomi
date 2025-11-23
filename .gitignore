@@ -163,3 +163,23 @@ coverage/
 apps/firebase/functions/lib/
 
 playwright-browsers/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+ENV/
+env/
+.pytest_cache/
+.coverage
+htmlcov/
+*.egg-info/
+dist/
+build/
+
+# Prediction data files
+apps/prediction/notebooks/data/

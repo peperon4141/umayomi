@@ -5,7 +5,7 @@ import type { JRDBDataType } from '../../entities/jrdb'
 // loggerは条件付きで使用（スクリプト実行時は未定義の可能性がある）
 function getLogger() {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
+     
     const { logger } = require('firebase-functions')
     return logger
   } catch {

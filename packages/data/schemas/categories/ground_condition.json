@@ -1,0 +1,6 @@
+{
+  "name": "GROUND_CONDITION",
+  "type": "list",
+  "description": "馬場状態のリスト",
+  "categories": ["良","稍","重","不","重不"]
+}

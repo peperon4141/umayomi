@@ -27,6 +27,7 @@ export async function convertToJson(
 
 /**
  * LZHファイルからデータを抽出・パースする共通処理
+ * 年度パック（複数ファイルを含む）にも対応
  */
 async function extractAndParseLzhData(
   lzhBuffer: Buffer,
@@ -35,21 +36,26 @@ async function extractAndParseLzhData(
   const extractedFiles = await extractLzhFile(lzhBuffer)
   if (extractedFiles.length === 0) throw new Error('展開されたファイルが見つかりません')
   
-  const { buffer: extractedBuffer, fileName: extractedFileName } = extractedFiles[0]
-  
+  // データタイプを決定（最初のファイルから推測、または引数で指定）
   let actualDataType: JRDBDataType | string
   if (dataType !== null) 
     actualDataType = dataType
    else {
-    const extractedDataType = extractDataTypeFromFileName(extractedFileName)
-    if (!extractedDataType) throw new Error(`データ種別の推測に失敗しました。ファイル名: ${extractedFileName}`)
+    const extractedDataType = extractDataTypeFromFileName(extractedFiles[0].fileName)
+    if (!extractedDataType) throw new Error(`データ種別の推測に失敗しました。ファイル名: ${extractedFiles[0].fileName}`)
     actualDataType = extractedDataType
   }
   
-  const records = parseJRDBDataFromBuffer(extractedBuffer, actualDataType)
-  if (records.length === 0) throw new Error('パースされたレコードが0件です')
+  // すべてのファイルをパースしてレコードを結合
+  const allRecords: Record<string, unknown>[] = []
+  for (const { buffer: extractedBuffer } of extractedFiles) {
+    const fileRecords = parseJRDBDataFromBuffer(extractedBuffer, actualDataType)
+    allRecords.push(...fileRecords)
+  }
   
-  return { actualDataType, records }
+  if (allRecords.length === 0) throw new Error('パースされたレコードが0件です')
+  
+  return { actualDataType, records: allRecords }
 }
 
 /**

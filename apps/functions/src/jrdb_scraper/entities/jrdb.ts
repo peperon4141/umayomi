@@ -335,6 +335,8 @@ export function getSpecificationUrl(dataType: JRDBDataType): string {
 export function generateAnnualPackUrl(dataType: JRDBDataType, year: number): string {
   const info = JRDB_DATA_TYPE_INFO[dataType]
   if (!info.hasAnnualPack) throw new Error(`データタイプ ${dataType} には年度パックが提供されていません`)
+  // 年度パックのファイル名形式: {DATA_TYPE}_{YEAR}.lzh（アンダースコアあり）
+  // 例: BAC_2024.lzh, BAB_2024.lzh, KYI_2024.lzh
   const fileName = `${dataType}_${year}.lzh`
   // dataFileBaseUrlは既にディレクトリを含んでいる（例: https://jrdb.com/member/data/Bac）
   // ファイル名を直接追加（例: https://jrdb.com/member/data/Bac/BAC_2024.lzh）

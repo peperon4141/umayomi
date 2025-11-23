@@ -34,13 +34,18 @@ async function fetchSingleAnnualDataType(
 
   try {
     const info = getJRDBDataTypeInfo(dataType)
-    if (!info.hasAnnualPack) {
-      throw new Error(`データタイプ ${dataType} には年度パックが提供されていません`)
-    }
+    if (!info.hasAnnualPack) throw new Error(`データタイプ ${dataType} には年度パックが提供されていません`)
 
     const actualDataType = dataType.toString()
     const sourceUrl = generateAnnualPackUrl(dataType, year)
+    logger.info('年度パックURLを生成しました', { dataType: actualDataType, year, sourceUrl })
     const lzhBuffer = await downloadJRDBFile(sourceUrl)
+    logger.info('年度パックLZHファイルをダウンロードしました', { 
+      dataType: actualDataType, 
+      year, 
+      url: sourceUrl,
+      fileSize: lzhBuffer.length 
+    })
     const fileName = `${actualDataType}_${year}`
     const npzFilePath = path.join(tempDir, `${fileName}.npz`)
     const { records } = await convertLzhToNpz(lzhBuffer, actualDataType, year, npzFilePath)
@@ -112,7 +117,7 @@ async function fetchSingleAnnualDataType(
 
     // 各レコードを個別のドキュメントとしてサブコレクションに保存
     const recordsCollection = annualDocRef.collection(actualDataType.toString()).doc('metadata').collection('records')
-    const batch = db.batch()
+    let batch = db.batch()
     let batchCount = 0
     const maxBatchSize = 500
 
@@ -128,6 +133,7 @@ async function fetchSingleAnnualDataType(
 
       if (batchCount >= maxBatchSize) {
         await batch.commit()
+        batch = db.batch() // 新しいbatchを作成
         batchCount = 0
       }
     }
@@ -229,7 +235,7 @@ export async function fetchAnnualData(
     error?: string
   }> = []
 
-  for (const dataType of supportedDataTypes) {
+  for (const dataType of supportedDataTypes) 
     try {
       const result = await fetchSingleAnnualDataType(year, dataType)
       results.push(result)
@@ -244,7 +250,7 @@ export async function fetchAnnualData(
         error: errorMessage
       })
     }
-  }
+  
 
   logger.info('年度パックデータ取得完了', { 
     year, 
