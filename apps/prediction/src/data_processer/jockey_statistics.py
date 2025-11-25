@@ -1,9 +1,7 @@
 """騎手の過去成績統計を計算するクラス"""
 
-import multiprocessing
 import numpy as np
 import pandas as pd
-from joblib import Parallel, delayed
 from tqdm import tqdm
 
 
@@ -139,10 +137,9 @@ class JockeyStatistics:
                 jockey_stats, on=key_cols, how="left", suffixes=("", "_jockey_stats"), sort=False
             )
         else:
-            target_df_merged = target_df_sorted.copy()
-            for col in jockey_stats.columns:
-                if col not in key_cols:
-                    target_df_merged[col] = jockey_stats[col].values
+            # フラグメント化を回避するため、pd.concatを使用
+            jockey_stats_subset = jockey_stats[[col for col in jockey_stats.columns if col not in key_cols]].copy()
+            target_df_merged = pd.concat([target_df_sorted, jockey_stats_subset], axis=1)
         
         assert len(target_df_merged) == len(jockey_recent_races), "行数が一致しません"
         keys_match_recent = (target_df_merged[key_cols].values == jockey_recent_races[key_cols].values).all()
@@ -152,13 +149,16 @@ class JockeyStatistics:
                 jockey_recent_races, on=key_cols, how="left", suffixes=("", "_jockey_recent"), sort=False
             )
         else:
-            for col in jockey_recent_races.columns:
-                if col not in key_cols:
-                    target_df_merged[col] = jockey_recent_races[col].values
+            # フラグメント化を回避するため、pd.concatを使用
+            jockey_recent_subset = jockey_recent_races[[col for col in jockey_recent_races.columns if col not in key_cols]].copy()
+            target_df_merged = pd.concat([target_df_merged, jockey_recent_subset], axis=1)
         
         target_index_df = pd.DataFrame({'_original_index': target_original_index})
         target_df = target_index_df.merge(target_df_merged, on='_original_index', how='left').drop(columns=['_original_index'])
         target_df.index = target_original_index
+        
+        # 使用済みのDataFrameを削除
+        del target_df_sorted, jockey_stats, jockey_recent_races, target_df_merged, target_index_df
         
         return target_df
 
@@ -183,29 +183,25 @@ class JockeyStatistics:
         grouped_stats = stats_sorted.groupby(group_col, sort=False)
         target_groups = set(target_sorted[group_col].unique())
         grouped_targets = target_sorted.groupby(group_col, sort=False)
-        group_data_list = [
-            (group_value, grouped_stats.get_group(group_value), grouped_targets.get_group(group_value)[[group_col, time_col, '_original_index']])
-            for group_value in target_groups
-            if group_value in grouped_stats.groups and group_value in grouped_targets.groups
-        ]
+        valid_groups = [g for g in target_groups if g in grouped_stats.groups and g in grouped_targets.groups]
         
-        if len(group_data_list) == 0:
+        if len(valid_groups) == 0:
             return pd.DataFrame(columns=[group_col, time_col, '_original_index',
                                         f"{prefix}_cumsum_1st", f"{prefix}_cumsum_3rd",
                                         f"{prefix}_cumsum_rank", f"{prefix}_cumcount"])
         
-        n_jobs = max(1, multiprocessing.cpu_count() - 1)
-        batch_size = max(50, min(500, len(group_data_list) // n_jobs))
-        
-        with tqdm(total=len(group_data_list), desc=f"{prefix}グループ処理", leave=True, unit="groups") as pbar:
-            results = Parallel(n_jobs=n_jobs, batch_size=batch_size, verbose=0)(
-                delayed(_process_group_time_series_stats)(
+        # シーケンシャル処理でメモリ使用量を削減
+        results = []
+        with tqdm(total=len(valid_groups), desc=f"{prefix}グループ処理", leave=True, unit="groups") as pbar:
+            for group_value in valid_groups:
+                group_stats = grouped_stats.get_group(group_value)
+                group_targets = grouped_targets.get_group(group_value)[[group_col, time_col, '_original_index']]
+                result_df = _process_group_time_series_stats(
                     group_value, group_stats, group_targets, group_col, time_col, prefix
-                ) for group_value, group_stats, group_targets in group_data_list
-            )
-            for result_df in results:
+                )
                 if len(result_df) > 0:
-                    pbar.update(1)
+                    results.append(result_df)
+                pbar.update(1)
         
         merged = pd.concat([df for df in results if len(df) > 0], ignore_index=True) if results else pd.DataFrame(
             columns=[group_col, time_col, '_original_index',
@@ -226,6 +222,9 @@ class JockeyStatistics:
         result = target_index_df.merge(merged, on='_original_index', how='left').drop(columns=['_original_index'])
         result.index = target_original_index
         
+        # 使用済みのDataFrameを削除
+        del target_sorted, stats_sorted, grouped_stats, grouped_targets, merged, target_index_df
+        
         return result[[group_col, time_col, f"{prefix_jp}勝率", f"{prefix_jp}連対率", f"{prefix_jp}平均着順", f"{prefix_jp}出走回数"]]
 
     @staticmethod
@@ -243,13 +242,9 @@ class JockeyStatistics:
         grouped_stats = stats_df_subset.groupby(group_col, sort=False)
         target_groups = set(target_df_subset[group_col].unique())
         grouped_targets = target_df_subset.groupby(group_col, sort=False)
-        group_data_list = [
-            (group_value, grouped_stats.get_group(group_value), grouped_targets.get_group(group_value)[[group_col, time_col, '_original_index']])
-            for group_value in target_groups
-            if group_value in grouped_stats.groups and group_value in grouped_targets.groups
-        ]
+        valid_groups = [g for g in target_groups if g in grouped_stats.groups and g in grouped_targets.groups]
         
-        if len(group_data_list) == 0:
+        if len(valid_groups) == 0:
             prefix_jp = {"horse": "馬", "jockey": "騎手", "trainer": "調教師"}.get(prefix)
             if not prefix_jp:
                 raise ValueError(f"未知のprefix: {prefix}")
@@ -265,18 +260,18 @@ class JockeyStatistics:
             ]
             return pd.DataFrame(index=target_original_index, columns=result_cols)
         
-        n_jobs = max(1, multiprocessing.cpu_count() - 1)
-        batch_size = max(50, min(500, len(group_data_list) // n_jobs))
-        
-        with tqdm(total=len(group_data_list), desc=f"{prefix}直近レース抽出", leave=True, unit="groups") as pbar:
-            results = Parallel(n_jobs=n_jobs, batch_size=batch_size, verbose=0)(
-                delayed(_process_group_recent_races)(
+        # シーケンシャル処理でメモリ使用量を削減
+        results = []
+        with tqdm(total=len(valid_groups), desc=f"{prefix}直近レース抽出", leave=True, unit="groups") as pbar:
+            for group_value in valid_groups:
+                group_stats = grouped_stats.get_group(group_value)
+                group_targets = grouped_targets.get_group(group_value)[[group_col, time_col, '_original_index']]
+                result_df = _process_group_recent_races(
                     group_value, group_stats, group_targets, group_col, time_col, num_races, prefix
-                ) for group_value, group_stats, group_targets in group_data_list
-            )
-            for result_df in results:
+                )
                 if len(result_df) > 0:
-                    pbar.update(1)
+                    results.append(result_df)
+                pbar.update(1)
         
         result_df = pd.concat([df for df in results if len(df) > 0], ignore_index=True) if results else pd.DataFrame()
         
@@ -284,6 +279,7 @@ class JockeyStatistics:
             target_index_df = pd.DataFrame({'_original_index': target_original_index})
             result_df = target_index_df.merge(result_df, on='_original_index', how='left').drop(columns=['_original_index'])
             result_df.index = target_original_index
+            del target_index_df
         else:
             prefix_jp = {"horse": "馬", "jockey": "騎手", "trainer": "調教師"}.get(prefix)
             if not prefix_jp:
@@ -299,5 +295,8 @@ class JockeyStatistics:
                 for col in ['rank', 'time', 'distance', 'course_type', 'ground_condition', 'num_horses', 'race_num']
             ]
             result_df = pd.DataFrame(index=target_original_index, columns=result_cols)
+        
+        # 使用済みのDataFrameを削除
+        del stats_df_subset, target_df_subset, grouped_stats, grouped_targets
         
         return result_df

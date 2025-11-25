@@ -27,3 +27,4 @@ print(f'レース数: {df.index.nunique()}')
 
 
 
+

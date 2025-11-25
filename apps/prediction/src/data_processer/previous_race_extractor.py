@@ -4,7 +4,6 @@ from typing import Optional
 
 import numpy as np
 import pandas as pd
-from joblib import Parallel, delayed
 
 from .feature_converter import FeatureConverter
 
@@ -46,11 +45,7 @@ def extract(df: pd.DataFrame, sed_df: pd.DataFrame, bac_df: Optional[pd.DataFram
             "race_key", ascending=True
         )
 
-        # 各馬の前走データを抽出（並列化）
-        import multiprocessing
-
-        n_jobs = max(1, multiprocessing.cpu_count() - 1)
-
+        # 各馬の前走データを抽出（シーケンシャル処理）
         # 各馬のデータを準備
         horse_ids = [h for h in df["血統登録番号"].unique() if not pd.isna(h)]
         horse_data_list = []
@@ -70,17 +65,15 @@ def extract(df: pd.DataFrame, sed_df: pd.DataFrame, bac_df: Optional[pd.DataFram
                 (horse_id, horse_main_indices, horse_main_race_keys, horse_sed)
             )
 
-        # 並列処理を実行
+        # シーケンシャル処理でメモリ使用量を削減
         if len(horse_data_list) > 0:
-            print(f"前走データ抽出中（並列処理: {n_jobs}コア、{len(horse_data_list)}頭）...")
-            # バッチサイズを調整してメモリ使用量を削減
-            batch_size = max(100, len(horse_data_list) // (n_jobs * 4))
-            all_results = Parallel(n_jobs=n_jobs, batch_size=batch_size, verbose=1)(
-                delayed(_process_horse_previous_races)(
+            print(f"前走データ抽出中（シーケンシャル処理、{len(horse_data_list)}頭）...")
+            all_results = []
+            for horse_id, horse_main_indices, horse_main_race_keys, horse_sed in horse_data_list:
+                result = _process_horse_previous_races(
                     horse_id, horse_main_indices, horse_main_race_keys, horse_sed
                 )
-                for horse_id, horse_main_indices, horse_main_race_keys, horse_sed in horse_data_list
-            )
+                all_results.append(result)
 
             # 結果を結合してDataFrameに反映（一括更新で高速化）
             prev_cols = [

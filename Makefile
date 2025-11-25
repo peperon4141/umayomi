@@ -114,4 +114,4 @@ fetch-jrdb-annual-data:
 		|| (echo "Error: エミュレーターが起動していることを確認してください (make dev)" && exit 1)
 
 predict:
-	@-cd apps/prediction && .venv/bin/python notebooks/train_rank_model.py
+	@-cd apps/prediction && .venv/bin/python notebooks/train_rank_model_v1.py

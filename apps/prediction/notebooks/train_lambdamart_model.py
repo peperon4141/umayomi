@@ -1,7 +1,9 @@
 # %%
-# JRDBデータを使用したランキング学習モデル
+# LambdaMARTを使用したランキング学習モデル
 # 
-# 年度パックNPZファイルからデータを読み込み、LambdaRankモデルを学習します。
+# 年度パックNPZファイルからデータを読み込み、LambdaMARTモデルを学習します。
+#
+# LambdaMARTはLambdaRankの改良版で、勾配ブースティングを使用したランキング学習アルゴリズムです。
 
 # %%
 # ## インポート
@@ -20,7 +22,7 @@ print("=" * 80)
 # 既にインポート済みのモジュールを明示的にリロード（初回実行時）
 submodules_to_reload = [
     'src.data_processer',
-    'src.rank_predictor',
+    'src.lambdamart_predictor',
     'src.features',
     'src.evaluator',
 ]
@@ -46,7 +48,7 @@ except:
         pass  # フォント設定に失敗した場合はデフォルトを使用
 
 from src.data_processer import DataProcessor
-from src.rank_predictor import RankPredictor
+from src.lambdamart_predictor import LambdaMARTPredictor
 from src.features import Features
 
 pd.set_option('display.max_columns', None)
@@ -71,7 +73,7 @@ YEARS = [2024]
 
 # モデル保存パス（日時ベース）
 model_timestamp = datetime.now().strftime('%Y%m%d%H%M')
-MODEL_PATH = Path(__file__).parent.parent / 'models' / f'rank_model_{model_timestamp}_v1.txt'
+MODEL_PATH = Path(__file__).parent.parent / 'models' / f'lambdamart_model_{model_timestamp}_v1.txt'
 MODEL_PATH.parent.mkdir(parents=True, exist_ok=True)
 
 print(f"BASE_PATH: {BASE_PATH.absolute()}")
@@ -127,13 +129,13 @@ except Exception as e:
 
 # %%
 # ## モデル学習
-# RankPredictorのインスタンスを作成
-rank_predictor = RankPredictor(train_df, val_df)
+# LambdaMARTPredictorのインスタンスを作成
+lambdamart_predictor = LambdaMARTPredictor(train_df, val_df)
 
 print("モデル学習を開始します...")
 print("（Optunaによるハイパーパラメータチューニングが実行されます）")
 
-model = rank_predictor.train()
+model = lambdamart_predictor.train()
 print("\nモデル学習完了")
 
 # %%
@@ -144,7 +146,7 @@ print(f"モデルを保存しました: {MODEL_PATH}")
 # %%
 # ## 予測と評価
 print("検証データで予測を実行します...")
-val_predictions_raw = RankPredictor.predict(model, val_df, rank_predictor.features)
+val_predictions_raw = LambdaMARTPredictor.predict(model, val_df, lambdamart_predictor.features)
 
 # original_df（full_data_df、日本語キー）から評価用データを取得
 original_eval = original_df.copy()
@@ -159,8 +161,10 @@ missing_cols = [col for col in required_cols_jp if col not in original_eval.colu
 if missing_cols:
     raise ValueError(f"original_dfに必須列が含まれていません: {missing_cols}")
 
-# original_evalは既にfull_info_schema.jsonの全カラム（日本語キー）を含んでいる
-# 手動でeval_colsを選択する必要はない（data_processerの設計通り）
+# 評価用カラムを取得（日本語キーのまま）
+eval_cols = required_cols_jp + (["タイム"] if "タイム" in original_eval.columns else [])
+original_eval = original_eval[eval_cols].copy()
+
 # 予測結果と結合（日本語キーのまま）
 val_predictions = val_predictions_raw.merge(original_eval, on="race_key", how="left")
 
@@ -175,21 +179,17 @@ print(f"予測完了: {len(val_predictions)}件")
 print(f"\n予測結果のサンプル:")
 print(val_predictions.head(10))
 
-# オッズデータの有無を確認
-has_odds = "確定単勝オッズ" in val_predictions.columns and val_predictions["確定単勝オッズ"].notna().any()
-odds_col = "確定単勝オッズ" if has_odds else None
-
 print("\n" + "=" * 60)
-print(f"モデル評価（{'オッズあり' if has_odds else 'オッズなし'}）:")
+print("モデル評価（オッズなし）:")
 print("=" * 60)
 from src.evaluator import evaluate_model, print_evaluation_results
-evaluation_result = evaluate_model(val_predictions, odds_col=odds_col)
+evaluation_result = evaluate_model(val_predictions)
 print_evaluation_results(evaluation_result)
 
 # %%
 # ## 特徴量重要度
 importance = model.feature_importance(importance_type='gain')
-feature_names = [f for f in rank_predictor.features.encoded_feature_names if f in val_df.columns]
+feature_names = [f for f in lambdamart_predictor.features.encoded_feature_names if f in val_df.columns]
 
 importance_df = pd.DataFrame({
     'feature': feature_names[:len(importance)],
@@ -206,3 +206,4 @@ plt.title('特徴量重要度（上位20）')
 plt.xlabel('重要度')
 plt.tight_layout()
 plt.show()
+

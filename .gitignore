@@ -183,3 +183,6 @@ build/
 
 # Prediction data files
 apps/prediction/notebooks/data/
+
+# Prediction model files
+apps/prediction/models/*.txt

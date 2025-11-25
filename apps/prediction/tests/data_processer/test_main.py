@@ -48,6 +48,12 @@ class TestDataProcessor:
         assert isinstance(eval_df, pd.DataFrame)
         assert 'rank' in train_df.columns
         assert 'rank' in test_df.columns
+        # eval_dfには評価用カラム（日本語キー）が含まれることを確認
+        assert '着順' in eval_df.columns or 'rank' in eval_df.columns
+        assert '馬番' in eval_df.columns
+        # SEDデータに「確定単勝オッズ」が含まれている場合、eval_dfにも含まれることを確認
+        if '確定単勝オッズ' in simple_data_dict['SED'].columns:
+            assert '確定単勝オッズ' in eval_df.columns
         mock_load.assert_called_once_with(['KYI', 'BAC', 'SED'], 2024)
 
     @patch('src.data_processer.main.NpzLoader.load')

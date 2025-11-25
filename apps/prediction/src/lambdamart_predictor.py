@@ -12,6 +12,7 @@ import optuna.integration.lightgbm as optunaLgb
 import pandas as pd
 
 from .base_predictor import BasePredictor
+from .features import Features
 
 
 class LambdaMARTPredictor(BasePredictor):
@@ -186,7 +187,7 @@ class LambdaMARTPredictor(BasePredictor):
             features: Featuresインスタンス
 
         Returns:
-            予測結果が追加されたDataFrame
+            race_keyとpredict列のみを含むDataFrame
         """
         # race_keyがインデックスとカラムの両方に存在する場合の処理
         race_df_processed = race_df.copy()
@@ -210,19 +211,14 @@ class LambdaMARTPredictor(BasePredictor):
                 f"特徴量が見つかりません。利用可能な列: {race_df_processed.columns.tolist()[:10]}"
             )
 
-        predictions = model.predict(
-            race_df_processed[available_features], num_iteration=model.best_iteration
-        )
+        features_for_lgb = [f for f in available_features if race_df_processed[f].dtype != "object"]
 
-        result_df = race_df_processed.copy()
-        result_df.insert(0, "predict", np.round(predictions, 2))
+        if not features_for_lgb:
+            raise ValueError(f"特徴量が見つかりません。利用可能な列: {race_df_processed.columns.tolist()[:10]}")
 
-        # 根本解決: race_keyと馬番の型を統一（odds_dfとのマージを確実にするため）
-        if "race_key" in result_df.columns:
-            result_df["race_key"] = result_df["race_key"].astype(str)
-        if "馬番" in result_df.columns:
-            result_df["馬番"] = pd.to_numeric(result_df["馬番"], errors="coerce")
-
-        return result_df
-
-    @staticmethod
+        predictions = model.predict(race_df_processed[features_for_lgb], num_iteration=model.best_iteration)
+        
+        return pd.DataFrame({
+            "race_key": race_df_processed["race_key"].values,
+            "predict": np.round(predictions, 2)
+        })

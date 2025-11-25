@@ -1,9 +1,7 @@
 """馬の過去成績統計を計算するクラス"""
 
-import multiprocessing
 import numpy as np
 import pandas as pd
-from joblib import Parallel, delayed
 from tqdm import tqdm
 
 
@@ -76,14 +74,16 @@ class HorseStatistics:
                 horse_stats, on=key_cols, how="left", suffixes=("", "_horse_stats"), sort=False
             )
         else:
-            target_df_merged = target_df_sorted.copy()
-            for col in horse_stats.columns:
-                if col not in key_cols:
-                    target_df_merged[col] = horse_stats[col].values
+            # フラグメント化を回避するため、pd.concatを使用
+            horse_stats_subset = horse_stats[[col for col in horse_stats.columns if col not in key_cols]].copy()
+            target_df_merged = pd.concat([target_df_sorted, horse_stats_subset], axis=1)
 
         target_index_df = pd.DataFrame({'_original_index': target_original_index})
         target_df = target_index_df.merge(target_df_merged, on='_original_index', how='left').drop(columns=['_original_index'])
         target_df.index = target_original_index
+
+        # 使用済みのDataFrameを削除
+        del target_df_sorted, horse_stats, target_df_merged, target_index_df
 
         return target_df
 
@@ -106,29 +106,24 @@ class HorseStatistics:
         
         grouped_stats = stats_sorted.groupby(group_col, sort=False)
         target_groups = set(target_sorted[group_col].unique())
-        group_data_list = [
-            (group_value, grouped_stats.get_group(group_value))
-            for group_value in target_groups
-            if group_value in grouped_stats.groups
-        ]
+        valid_groups = [g for g in target_groups if g in grouped_stats.groups]
         
-        if len(group_data_list) == 0:
+        if len(valid_groups) == 0:
             return pd.DataFrame(columns=[group_col, time_col, '_original_index',
                                         f"{prefix}_cumsum_1st", f"{prefix}_cumsum_3rd",
                                         f"{prefix}_cumsum_rank", f"{prefix}_cumcount"])
         
-        n_jobs = max(1, multiprocessing.cpu_count() - 1)
-        batch_size = max(100, len(group_data_list) // (n_jobs * 4))
-        
-        with tqdm(total=len(group_data_list), desc=f"{prefix}グループ処理", leave=True, unit="groups") as pbar:
-            results = Parallel(n_jobs=n_jobs, batch_size=batch_size, verbose=0)(
-                delayed(_process_group_time_series_stats)(
+        # シーケンシャル処理でメモリ使用量を削減
+        results = []
+        with tqdm(total=len(valid_groups), desc=f"{prefix}グループ処理", leave=True, unit="groups") as pbar:
+            for group_value in valid_groups:
+                group_stats = grouped_stats.get_group(group_value)
+                result_df = _process_group_time_series_stats(
                     group_value, group_stats, target_sorted, group_col, time_col, prefix
-                ) for group_value, group_stats in group_data_list
-            )
-            for result_df in results:
+                )
                 if len(result_df) > 0:
-                    pbar.update(1)
+                    results.append(result_df)
+                pbar.update(1)
         
         merged = pd.concat([df for df in results if len(df) > 0], ignore_index=True) if results else pd.DataFrame(
             columns=[group_col, time_col, '_original_index',
@@ -148,5 +143,8 @@ class HorseStatistics:
         target_index_df = pd.DataFrame({'_original_index': target_original_index})
         result = target_index_df.merge(merged, on='_original_index', how='left').drop(columns=['_original_index'])
         result.index = target_original_index
+        
+        # 使用済みのDataFrameを削除
+        del target_sorted, stats_sorted, grouped_stats, merged, target_index_df
         
         return result[[group_col, time_col, f"{prefix_jp}勝率", f"{prefix_jp}連対率", f"{prefix_jp}平均着順", f"{prefix_jp}出走回数"]]

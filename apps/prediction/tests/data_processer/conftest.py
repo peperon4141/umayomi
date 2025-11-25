@@ -49,6 +49,7 @@ def create_simple_sed_data(n_records: int = 3) -> pd.DataFrame:
         "馬場状態": [1] * n_records,
         "頭数": [n_records] * n_records,
         "年月日": [20240101] * n_records,
+        "確定単勝オッズ": [f"{2.5 + i * 0.5:.1f}" for i in range(n_records)],  # 評価用に追加
     })
 
 

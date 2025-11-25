@@ -1,9 +1,7 @@
 """調教師の過去成績統計を計算するクラス"""
 
-import multiprocessing
 import numpy as np
 import pandas as pd
-from joblib import Parallel, delayed
 from tqdm import tqdm
 
 
@@ -50,12 +48,73 @@ def _process_group_time_series_stats(
     return pd.DataFrame(result_data)
 
 
+def _process_group_recent_races(
+    group_value, group_stats, group_targets, group_col, time_col, num_races, prefix
+):
+    """グループごとの直近レースを抽出（並列化用）"""
+    group_stats = group_stats.sort_values(by=time_col).reset_index(drop=True)
+    
+    prefix_jp = {"horse": "馬", "jockey": "騎手", "trainer": "調教師"}.get(prefix)
+    if not prefix_jp:
+        raise ValueError(f"未知のprefix: {prefix}")
+    
+    field_mapping = {
+        'rank': '着順', 'time': 'タイム', 'distance': '距離',
+        'course_type': '芝ダ障害コード', 'ground_condition': '馬場状態',
+        'num_horses': '頭数', 'race_num': 'R'
+    }
+    
+    if len(group_stats) == 0 or len(group_targets) == 0:
+        result_cols = [group_col, time_col, '_original_index'] + [
+            f"{prefix_jp}直近{i}{field_mapping[col]}"
+            for i in range(1, num_races + 1)
+            for col in ['rank', 'time', 'distance', 'course_type', 'ground_condition', 'num_horses', 'race_num']
+        ]
+        return pd.DataFrame(columns=result_cols)
+    
+    group_stats_times = group_stats[time_col].values
+    group_targets_times = group_targets[time_col].values
+    group_targets_indices = group_targets['_original_index'].values
+    n_targets = len(group_targets)
+    
+    result_data = {
+        group_col: np.full(n_targets, group_value),
+        time_col: group_targets_times,
+        '_original_index': group_targets_indices,
+    }
+    
+    for i in range(1, num_races + 1):
+        for en_col, jp_col in field_mapping.items():
+            result_data[f"{prefix_jp}直近{i}{jp_col}"] = np.full(n_targets, np.nan, dtype=float)
+    
+    stats_cols = ["着順", "タイム", "距離", "芝ダ障害コード", "馬場状態", "頭数", "R"]
+    available_cols = [col for col in stats_cols if col in group_stats.columns]
+    stats_arrays = {col: group_stats[col].values for col in available_cols}
+    
+    search_indices = np.searchsorted(group_stats_times, group_targets_times, side='left')
+    
+    for target_idx in range(n_targets):
+        past_count = search_indices[target_idx]
+        if past_count > 0:
+            start_idx = max(0, past_count - num_races)
+            recent_indices = np.arange(start_idx, past_count)
+            for i in range(1, num_races + 1):
+                race_idx_in_recent = len(recent_indices) - i
+                if race_idx_in_recent >= 0:
+                    race_idx = recent_indices[race_idx_in_recent]
+                    for en_col, jp_col in field_mapping.items():
+                        if jp_col in stats_arrays:
+                            result_data[f"{prefix_jp}直近{i}{jp_col}"][target_idx] = stats_arrays[jp_col][race_idx]
+    
+    return pd.DataFrame(result_data)
+
+
 class TrainerStatistics:
     """調教師の過去成績統計を計算するクラス"""
 
     @staticmethod
     def calculate(stats_df: pd.DataFrame, target_df: pd.DataFrame) -> pd.DataFrame:
-        """調教師の過去成績統計特徴量を追加。各レースのstart_datetimeより前のデータのみを使用（未来情報を除外）。"""
+        """調教師の過去成績統計特徴量と直近3レース詳細を追加。各レースのstart_datetimeより前のデータのみを使用（未来情報を除外）。"""
         if "調教師コード" not in target_df.columns:
             return target_df
 
@@ -65,6 +124,9 @@ class TrainerStatistics:
 
         trainer_stats = TrainerStatistics._calculate_time_series_stats(
             stats_df, target_df_sorted, "調教師コード", "start_datetime", "trainer"
+        )
+        trainer_recent_races = TrainerStatistics._extract_recent_races(
+            stats_df, target_df_sorted, "調教師コード", "start_datetime", num_races=3, prefix="trainer"
         )
 
         key_cols = ["調教師コード", "start_datetime"]
@@ -76,14 +138,28 @@ class TrainerStatistics:
                 trainer_stats, on=key_cols, how="left", suffixes=("", "_trainer_stats"), sort=False
             )
         else:
-            target_df_merged = target_df_sorted.copy()
-            for col in trainer_stats.columns:
-                if col not in key_cols:
-                    target_df_merged[col] = trainer_stats[col].values
+            # フラグメント化を回避するため、pd.concatを使用
+            trainer_stats_subset = trainer_stats[[col for col in trainer_stats.columns if col not in key_cols]].copy()
+            target_df_merged = pd.concat([target_df_sorted, trainer_stats_subset], axis=1)
+
+        assert len(target_df_merged) == len(trainer_recent_races), "行数が一致しません"
+        keys_match_recent = (target_df_merged[key_cols].values == trainer_recent_races[key_cols].values).all()
+        
+        if not keys_match_recent:
+            target_df_merged = target_df_merged.merge(
+                trainer_recent_races, on=key_cols, how="left", suffixes=("", "_trainer_recent"), sort=False
+            )
+        else:
+            # フラグメント化を回避するため、pd.concatを使用
+            trainer_recent_subset = trainer_recent_races[[col for col in trainer_recent_races.columns if col not in key_cols]].copy()
+            target_df_merged = pd.concat([target_df_merged, trainer_recent_subset], axis=1)
 
         target_index_df = pd.DataFrame({'_original_index': target_original_index})
         target_df = target_index_df.merge(target_df_merged, on='_original_index', how='left').drop(columns=['_original_index'])
         target_df.index = target_original_index
+
+        # 使用済みのDataFrameを削除
+        del target_df_sorted, trainer_stats, trainer_recent_races, target_df_merged, target_index_df
 
         return target_df
 
@@ -106,29 +182,24 @@ class TrainerStatistics:
         
         grouped_stats = stats_sorted.groupby(group_col, sort=False)
         target_groups = set(target_sorted[group_col].unique())
-        group_data_list = [
-            (group_value, grouped_stats.get_group(group_value))
-            for group_value in target_groups
-            if group_value in grouped_stats.groups
-        ]
+        valid_groups = [g for g in target_groups if g in grouped_stats.groups]
         
-        if len(group_data_list) == 0:
+        if len(valid_groups) == 0:
             return pd.DataFrame(columns=[group_col, time_col, '_original_index',
                                         f"{prefix}_cumsum_1st", f"{prefix}_cumsum_3rd",
                                         f"{prefix}_cumsum_rank", f"{prefix}_cumcount"])
         
-        n_jobs = max(1, multiprocessing.cpu_count() - 1)
-        batch_size = max(100, len(group_data_list) // (n_jobs * 4))
-        
-        with tqdm(total=len(group_data_list), desc=f"{prefix}グループ処理", leave=True, unit="groups") as pbar:
-            results = Parallel(n_jobs=n_jobs, batch_size=batch_size, verbose=0)(
-                delayed(_process_group_time_series_stats)(
+        # シーケンシャル処理でメモリ使用量を削減
+        results = []
+        with tqdm(total=len(valid_groups), desc=f"{prefix}グループ処理", leave=True, unit="groups") as pbar:
+            for group_value in valid_groups:
+                group_stats = grouped_stats.get_group(group_value)
+                result_df = _process_group_time_series_stats(
                     group_value, group_stats, target_sorted, group_col, time_col, prefix
-                ) for group_value, group_stats in group_data_list
-            )
-            for result_df in results:
+                )
                 if len(result_df) > 0:
-                    pbar.update(1)
+                    results.append(result_df)
+                pbar.update(1)
         
         merged = pd.concat([df for df in results if len(df) > 0], ignore_index=True) if results else pd.DataFrame(
             columns=[group_col, time_col, '_original_index',
@@ -149,4 +220,81 @@ class TrainerStatistics:
         result = target_index_df.merge(merged, on='_original_index', how='left').drop(columns=['_original_index'])
         result.index = target_original_index
         
+        # 使用済みのDataFrameを削除
+        del target_sorted, stats_sorted, grouped_stats, merged, target_index_df
+        
         return result[[group_col, time_col, f"{prefix_jp}勝率", f"{prefix_jp}連対率", f"{prefix_jp}平均着順", f"{prefix_jp}出走回数"]]
+
+    @staticmethod
+    def _extract_recent_races(
+        stats_df: pd.DataFrame, target_df: pd.DataFrame, group_col: str, time_col: str, num_races: int = 3, prefix: str = "trainer"
+    ) -> pd.DataFrame:
+        """各レースのstart_datetimeより前のデータから直近Nレースの詳細情報を抽出（未来情報を完全に除外）。"""
+        target_original_index = target_df.index.copy()
+        stats_cols = ["着順", "タイム", "距離", "芝ダ障害コード", "馬場状態", "頭数", "R"]
+        available_cols = [col for col in stats_cols if col in stats_df.columns]
+        stats_df_subset = stats_df[[group_col, time_col] + available_cols]
+        target_df_subset = target_df[[group_col, time_col]]
+        target_df_subset['_original_index'] = target_df.index.values
+        
+        grouped_stats = stats_df_subset.groupby(group_col, sort=False)
+        target_groups = set(target_df_subset[group_col].unique())
+        grouped_targets = target_df_subset.groupby(group_col, sort=False)
+        valid_groups = [g for g in target_groups if g in grouped_stats.groups and g in grouped_targets.groups]
+        
+        if len(valid_groups) == 0:
+            prefix_jp = {"horse": "馬", "jockey": "騎手", "trainer": "調教師"}.get(prefix)
+            if not prefix_jp:
+                raise ValueError(f"未知のprefix: {prefix}")
+            field_mapping = {
+                'rank': '着順', 'time': 'タイム', 'distance': '距離',
+                'course_type': '芝ダ障害コード', 'ground_condition': '馬場状態',
+                'num_horses': '頭数', 'race_num': 'R'
+            }
+            result_cols = [group_col, time_col, '_original_index'] + [
+                f"{prefix_jp}直近{i}{field_mapping[col]}"
+                for i in range(1, num_races + 1)
+                for col in ['rank', 'time', 'distance', 'course_type', 'ground_condition', 'num_horses', 'race_num']
+            ]
+            return pd.DataFrame(index=target_original_index, columns=result_cols)
+        
+        # シーケンシャル処理でメモリ使用量を削減
+        results = []
+        with tqdm(total=len(valid_groups), desc=f"{prefix}直近レース抽出", leave=True, unit="groups") as pbar:
+            for group_value in valid_groups:
+                group_stats = grouped_stats.get_group(group_value)
+                group_targets = grouped_targets.get_group(group_value)[[group_col, time_col, '_original_index']]
+                result_df = _process_group_recent_races(
+                    group_value, group_stats, group_targets, group_col, time_col, num_races, prefix
+                )
+                if len(result_df) > 0:
+                    results.append(result_df)
+                pbar.update(1)
+        
+        result_df = pd.concat([df for df in results if len(df) > 0], ignore_index=True) if results else pd.DataFrame()
+        
+        if len(result_df) > 0 and '_original_index' in result_df.columns:
+            target_index_df = pd.DataFrame({'_original_index': target_original_index})
+            result_df = target_index_df.merge(result_df, on='_original_index', how='left').drop(columns=['_original_index'])
+            result_df.index = target_original_index
+            del target_index_df
+        else:
+            prefix_jp = {"horse": "馬", "jockey": "騎手", "trainer": "調教師"}.get(prefix)
+            if not prefix_jp:
+                raise ValueError(f"未知のprefix: {prefix}")
+            field_mapping = {
+                'rank': '着順', 'time': 'タイム', 'distance': '距離',
+                'course_type': '芝ダ障害コード', 'ground_condition': '馬場状態',
+                'num_horses': '頭数', 'race_num': 'R'
+            }
+            result_cols = [group_col, time_col] + [
+                f"{prefix_jp}直近{i}{field_mapping[col]}"
+                for i in range(1, num_races + 1)
+                for col in ['rank', 'time', 'distance', 'course_type', 'ground_condition', 'num_horses', 'race_num']
+            ]
+            result_df = pd.DataFrame(index=target_original_index, columns=result_cols)
+        
+        # 使用済みのDataFrameを削除
+        del stats_df_subset, target_df_subset, grouped_stats, grouped_targets
+        
+        return result_df

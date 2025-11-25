@@ -1,7 +1,8 @@
 # %%
-# JRDBデータを使用したランキング学習モデル
+# JRDBデータを使用したランキング学習モデル（特徴量強化版）
 # 
 # 年度パックNPZファイルからデータを読み込み、LambdaRankモデルを学習します。
+# レース内相対特徴量とインタラクション特徴量を追加して的中精度を向上させます。
 
 # %%
 # ## インポート
@@ -23,6 +24,7 @@ submodules_to_reload = [
     'src.rank_predictor',
     'src.features',
     'src.evaluator',
+    'src.feature_enhancers',
 ]
 
 for module_name in submodules_to_reload:
@@ -48,6 +50,7 @@ except:
 from src.data_processer import DataProcessor
 from src.rank_predictor import RankPredictor
 from src.features import Features
+from src.feature_enhancers import enhance_features
 
 pd.set_option('display.max_columns', None)
 pd.set_option('display.max_rows', 100)
@@ -126,12 +129,52 @@ except Exception as e:
     raise
 
 # %%
+# ## 特徴量強化（レース内相対特徴量とインタラクション特徴量を追加）
+print("\n" + "=" * 80)
+print("特徴量強化を開始します...")
+print("=" * 80)
+
+# レースキーの取得方法を確認
+race_key_col = "race_key"
+if df.index.name == race_key_col:
+    # インデックスがrace_keyの場合、一時的にリセット
+    df_for_enhance = df.reset_index()
+    val_df_for_enhance = val_df.reset_index()
+    use_index = True
+else:
+    df_for_enhance = df.copy()
+    val_df_for_enhance = val_df.copy()
+    use_index = False
+
+# 特徴量強化を実行
+df_enhanced = enhance_features(df_for_enhance, race_key_col)
+val_df_enhanced = enhance_features(val_df_for_enhance, race_key_col)
+
+# インデックスを復元（必要に応じて）
+if use_index:
+    df_enhanced = df_enhanced.set_index(race_key_col)
+    val_df_enhanced = val_df_enhanced.set_index(race_key_col)
+    # 元のインデックス順序を保持
+    if len(df_enhanced) == len(df):
+        df_enhanced = df_enhanced.reindex(df.index)
+    if len(val_df_enhanced) == len(val_df):
+        val_df_enhanced = val_df_enhanced.reindex(val_df.index)
+
+# 更新されたDataFrameを使用
+df = df_enhanced
+val_df = val_df_enhanced
+
+print(f"\n特徴量強化後のデータ形状: 学習={df.shape}, テスト={val_df.shape}")
+
+# %%
 # ## モデル学習
 # RankPredictorのインスタンスを作成
-rank_predictor = RankPredictor(train_df, val_df)
+rank_predictor = RankPredictor(df, val_df)
 
+print("\n" + "=" * 80)
 print("モデル学習を開始します...")
 print("（Optunaによるハイパーパラメータチューニングが実行されます）")
+print("=" * 80)
 
 model = rank_predictor.train()
 print("\nモデル学習完了")
@@ -143,8 +186,63 @@ print(f"モデルを保存しました: {MODEL_PATH}")
 
 # %%
 # ## 予測と評価
+print("\n" + "=" * 80)
 print("検証データで予測を実行します...")
+print("=" * 80)
 val_predictions_raw = RankPredictor.predict(model, val_df, rank_predictor.features)
+
+# 馬番を取得してval_predictions_rawに追加（マージキー用）
+# val_dfにhorse_number（英語キー）が含まれている場合はそれを使用
+# 含まれていない場合はoriginal_dfから馬番（日本語キー）を取得
+val_df_for_merge = val_df.copy()
+if val_df_for_merge.index.name == "race_key":
+    val_df_for_merge = val_df_for_merge.reset_index()
+elif "race_key" not in val_df_for_merge.columns:
+    raise ValueError("val_dfにrace_key列が含まれていません")
+
+# val_predictions_rawとval_df_for_mergeの行数が一致することを確認
+if len(val_predictions_raw) != len(val_df_for_merge):
+    raise ValueError(f"予測結果の行数({len(val_predictions_raw)})とval_dfの行数({len(val_df_for_merge)})が一致しません")
+
+# val_dfにhorse_number（英語キー）が含まれているか確認
+if "horse_number" in val_df_for_merge.columns:
+    # val_dfにhorse_numberが含まれている場合はそれを使用
+    val_predictions_raw["馬番"] = val_df_for_merge["horse_number"].values
+else:
+    # val_dfにhorse_numberが含まれていない場合はoriginal_dfから取得
+    original_df_for_merge = original_df.copy()
+    if original_df_for_merge.index.name == "race_key":
+        original_df_for_merge = original_df_for_merge.reset_index()
+    elif "race_key" not in original_df_for_merge.columns:
+        raise ValueError("original_dfにrace_key列が含まれていません")
+    
+    if "馬番" not in original_df_for_merge.columns:
+        raise ValueError("original_dfに馬番列が含まれていません")
+    
+    # race_keyでマージして馬番を取得
+    # val_dfと同じ順序で予測結果が返されるため、race_keyでマージ
+    val_df_race_keys = pd.DataFrame({
+        "race_key": val_df_for_merge["race_key"].values,
+        "_order": range(len(val_df_for_merge))
+    })
+    # original_dfからrace_keyと馬番の対応関係を取得
+    # 同じrace_keyに複数の馬がいる場合を考慮して、行の順序で対応
+    original_df_subset = original_df_for_merge[["race_key", "馬番"]].copy()
+    original_df_subset["_order"] = range(len(original_df_subset))
+    
+    # race_keyでマージ（同じrace_keyに複数の馬がいる場合、行の順序で対応）
+    merged = val_df_race_keys.merge(original_df_subset, on=["race_key", "_order"], how="left")
+    
+    # マージに失敗した場合はrace_keyのみでマージ（順序が一致している場合）
+    if merged["馬番"].isna().any():
+        # race_keyのみでマージ（最初の馬を取得）
+        merged = val_df_race_keys.merge(
+            original_df_subset[["race_key", "馬番"]].drop_duplicates(subset="race_key", keep="first"),
+            on="race_key",
+            how="left"
+        )
+    
+    val_predictions_raw["馬番"] = merged["馬番"].values
 
 # original_df（full_data_df、日本語キー）から評価用データを取得
 original_eval = original_df.copy()
@@ -161,8 +259,8 @@ if missing_cols:
 
 # original_evalは既にfull_info_schema.jsonの全カラム（日本語キー）を含んでいる
 # 手動でeval_colsを選択する必要はない（data_processerの設計通り）
-# 予測結果と結合（日本語キーのまま）
-val_predictions = val_predictions_raw.merge(original_eval, on="race_key", how="left")
+# 予測結果と結合（race_keyと馬番の両方でマージしてデカルト積を防ぐ）
+val_predictions = val_predictions_raw.merge(original_eval, on=["race_key", "馬番"], how="left")
 
 # 評価用にrank列を追加（着順から）
 if "着順" in val_predictions.columns and "rank" not in val_predictions.columns:
@@ -191,18 +289,48 @@ print_evaluation_results(evaluation_result)
 importance = model.feature_importance(importance_type='gain')
 feature_names = [f for f in rank_predictor.features.encoded_feature_names if f in val_df.columns]
 
+# 新しく追加された特徴量も含めて重要度を計算
+all_feature_names = list(val_df.columns)
+# rank列とrace_key列を除外
+all_feature_names = [f for f in all_feature_names if f not in ['rank', 'race_key']]
+
+# 重要度と特徴量名を対応付け
+importance_dict = {}
+for i, feat_name in enumerate(feature_names[:len(importance)]):
+    if feat_name in importance_dict:
+        # 重複がある場合は最大値を取る
+        importance_dict[feat_name] = max(importance_dict[feat_name], importance[i])
+    else:
+        importance_dict[feat_name] = importance[i]
+
+# 新しく追加された特徴量の重要度を取得（モデルに含まれている場合）
+model_feature_names = model.feature_name()
+for i, feat_name in enumerate(model_feature_names):
+    if feat_name not in importance_dict:
+        # 新しく追加された特徴量
+        if i < len(importance):
+            importance_dict[feat_name] = importance[i]
+
 importance_df = pd.DataFrame({
-    'feature': feature_names[:len(importance)],
-    'importance': importance
+    'feature': list(importance_dict.keys()),
+    'importance': list(importance_dict.values())
 }).sort_values('importance', ascending=False)
 
-print("特徴量重要度（上位20）:")
-print(importance_df.head(20))
+print("\n特徴量重要度（上位30）:")
+print(importance_df.head(30))
+
+# 新しく追加された特徴量の重要度を確認
+new_features = [f for f in importance_df['feature'] if '_rank' in f or '_x_' in f]
+if new_features:
+    print(f"\n新しく追加された特徴量（上位10）:")
+    new_features_df = importance_df[importance_df['feature'].isin(new_features)].head(10)
+    print(new_features_df)
 
 # 可視化
-plt.figure(figsize=(10, 8))
-sns.barplot(data=importance_df.head(20), y='feature', x='importance')
-plt.title('特徴量重要度（上位20）')
+plt.figure(figsize=(12, 10))
+sns.barplot(data=importance_df.head(30), y='feature', x='importance')
+plt.title('特徴量重要度（上位30）')
 plt.xlabel('重要度')
 plt.tight_layout()
 plt.show()
+

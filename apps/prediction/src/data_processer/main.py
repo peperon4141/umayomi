@@ -46,17 +46,12 @@ class DataProcessor:
         raw_df = self._jrdb_combiner.combine(data_dict)
         print(f"データ結合完了: {len(raw_df):,}件")
 
-        # ステップ2: 特徴量追加
+        # ステップ2: 特徴量追加（並列処理）
         sed_df = data_dict.get("SED")
         bac_df = data_dict.get("BAC")
         if sed_df is not None:
-            print("前走データ抽出中...")
-            featured_df = self._feature_extractor.extract_previous_races(raw_df, sed_df, bac_df)
-            print("前走データ抽出完了")
-            
-            print("統計特徴量計算中...")
-            featured_df = self._feature_extractor.extract_statistics(featured_df, sed_df, bac_df)
-            print("統計特徴量計算完了")
+            featured_df = self._feature_extractor.extract_all_parallel(raw_df, sed_df, bac_df)
+            del raw_df  # 使用済みのため削除
         else:
             featured_df = raw_df
 
@@ -66,6 +61,10 @@ class DataProcessor:
         print("データ最適化中...")
         converted_df = self._key_converter.optimize(converted_df)
         print("データ変換完了")
+        
+        # split_date未指定時はfeatured_dfを削除（eval_df作成時に必要なので、指定時は保持）
+        if split_date is None:
+            del featured_df
 
         # インデックス設定
         if "race_key" in converted_df.columns:

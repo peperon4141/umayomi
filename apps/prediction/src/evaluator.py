@@ -9,28 +9,22 @@ import pandas as pd
 
 
 def calculate_ndcg(y_true: np.ndarray, y_pred: np.ndarray, k: int = 3) -> float:
-    """NDCGを計算"""
+    """NDCGを計算（ベクトル化）"""
 
     def dcg(scores: np.ndarray, k: int) -> float:
         scores = np.asarray(scores)[:k]
         return np.sum(scores / np.log2(np.arange(2, len(scores) + 2)))
 
-    # 実際の着順からスコアを生成（1着=3, 2着=2, 3着=1, その他=0）
-    def convert_rank_to_score(rank: int) -> int:
-        if rank == 1:
-            return 3
-        if rank == 2:
-            return 2
-        if rank == 3:
-            return 1
-        return 0
+    # ベクトル化：着順からスコアを生成（1着=3, 2着=2, 3着=1, その他=0）
+    y_true_int = y_true.astype(int)
+    scores = np.where(y_true_int == 1, 3, np.where(y_true_int == 2, 2, np.where(y_true_int == 3, 1, 0)))
 
     # 予測順位でソート
     sorted_indices = np.argsort(-y_pred)
-    sorted_scores = np.array([convert_rank_to_score(int(y_true[i])) for i in sorted_indices])
+    sorted_scores = scores[sorted_indices]
 
     # 理想的な順位（実際の着順順）
-    ideal_scores = np.array(sorted([convert_rank_to_score(int(r)) for r in y_true], reverse=True))
+    ideal_scores = np.sort(scores)[::-1]
 
     dcg_score = dcg(sorted_scores, k)
     idcg_score = dcg(ideal_scores, k)
@@ -76,11 +70,16 @@ def evaluate_model(
         else:
             raise ValueError(f"{rank_col}列または着順列が見つかりません")
     
-    # rank列を数値型に変換（object型の場合があるため）
+    # 事前に型変換（一度だけ）
     predictions_df[rank_col] = pd.to_numeric(predictions_df[rank_col], errors="coerce")
+    if horse_num_col in predictions_df.columns:
+        predictions_df[horse_num_col] = pd.to_numeric(predictions_df[horse_num_col], errors="coerce")
     
     # rankが欠損している行を除外
     df = predictions_df[predictions_df[rank_col].notna()].copy()
+    
+    # 全体を一度だけソート（race_keyとpredict_colで）
+    df = df.sort_values([race_key_col, predict_col], ascending=[True, False])
 
     if len(df) == 0:
         raise ValueError("評価可能なデータがありません（rankがすべて欠損）")
@@ -90,84 +89,133 @@ def evaluate_model(
 
     results = {}
 
-    # 1. NDCG@1, @2, @3（groupbyで最適化）
-    ndcg_scores = {"ndcg@1": [], "ndcg@2": [], "ndcg@3": []}
-
     # race_key_colを数値型に変換（必要に応じて）
     if df[race_key_col].dtype == 'object':
         df[race_key_col] = df[race_key_col].astype(str)
 
-    grouped = df.groupby(race_key_col)
+    # 事前にNumPy配列を取得（高速化のため）
+    rank_values_all = df[rank_col].values
+    predict_values_all = df[predict_col].values
+    if horse_num_col in df.columns:
+        horse_num_values_all = df[horse_num_col].values
+    else:
+        horse_num_values_all = None
+    if odds_col and odds_col in df.columns:
+        odds_values_all = df[odds_col].values
+    else:
+        odds_values_all = None
+
+    # groupbyを1回だけ実行して全ての評価指標を計算（sort=Falseで高速化）
+    grouped = df.groupby(race_key_col, sort=False)
+    
+    # 初期化
+    ndcg_scores = {"ndcg@1": [], "ndcg@2": [], "ndcg@3": []}
+    correct_1st = 0
+    total_races = 0
+    races_with_rank_1 = 0
+    races_without_horse_num = 0
+    correct_top3 = 0
+    total_races_top3 = 0
+    rank_errors_list = []
+    total_investment = 0
+    total_return = 0
+    valid_races = 0
+
     for race_key, race_data in grouped:
         if len(race_data) < 2:  # 1頭だけのレースはスキップ
             continue
 
-        y_true = race_data[rank_col].values
-        y_pred = race_data[predict_col].values
+        # インデックスを使ってNumPy配列から直接取得（DataFrame操作を避ける）
+        # race_dataの最初のインデックスがdf内のどこにあるかを取得
+        first_idx = race_data.index[0]
+        start_pos = df.index.get_loc(first_idx)
+        if isinstance(start_pos, slice):
+            start_idx = start_pos.start
+        elif isinstance(start_pos, np.ndarray):
+            start_idx = start_pos[0]
+        else:
+            start_idx = int(start_pos)
+        end_idx = start_idx + len(race_data)
 
+        # NumPy配列から直接取得
+        y_true = rank_values_all[start_idx:end_idx]
+        y_pred = predict_values_all[start_idx:end_idx]
+        rank_values = y_true
+
+        # 1. NDCG@1, @2, @3
         for k in [1, 2, 3]:
             ndcg = calculate_ndcg(y_true, y_pred, k)
             ndcg_scores[f"ndcg@{k}"].append(ndcg)
 
+        # 2. 1着的中率（NumPy配列で直接処理）
+        if horse_num_values_all is not None:
+            race_horse_nums = horse_num_values_all[start_idx:end_idx]
+            actual_1st_mask = (rank_values == 1.0) | (rank_values == 1)
+            if actual_1st_mask.any():
+                races_with_rank_1 += 1
+                total_races += 1
+                predicted_1st_horse_num = race_horse_nums[0]
+                actual_1st_horse_num = race_horse_nums[actual_1st_mask][0]
+                if pd.notna(predicted_1st_horse_num) and pd.notna(actual_1st_horse_num):
+                    if predicted_1st_horse_num == actual_1st_horse_num:
+                        correct_1st += 1
+        else:
+            races_without_horse_num += 1
+
+        # 3. 3着以内的中率（NumPy配列で直接処理）
+        if horse_num_values_all is not None:
+            race_horse_nums = horse_num_values_all[start_idx:end_idx]
+            actual_top3_mask = (rank_values >= 1) & (rank_values <= 3)
+            if actual_top3_mask.any():
+                total_races_top3 += 1
+                # 予測上位3頭（既にソート済みなので最初の3つ）
+                predicted_top3_horse_nums = race_horse_nums[:3]
+                predicted_top3_valid = predicted_top3_horse_nums[~np.isnan(predicted_top3_horse_nums)].astype(int)
+                # 実際の3着以内
+                actual_top3_horse_nums = race_horse_nums[actual_top3_mask]
+                actual_top3_valid = actual_top3_horse_nums[~np.isnan(actual_top3_horse_nums)].astype(int)
+                if len(predicted_top3_valid) > 0 and len(actual_top3_valid) > 0:
+                    if np.intersect1d(predicted_top3_valid, actual_top3_valid).size > 0:
+                        correct_top3 += 1
+
+        # 4. 平均順位誤差
+        valid_mask = ~np.isnan(rank_values)
+        if valid_mask.any():
+            predicted_ranks = np.arange(1, len(rank_values) + 1)
+            actual_ranks = rank_values[valid_mask]
+            predicted_ranks_valid = predicted_ranks[valid_mask]
+            
+            max_rank = len(rank_values)
+            valid_filter = (actual_ranks >= 1) & (actual_ranks <= max_rank * 2)
+            if valid_filter.any():
+                errors = np.abs(predicted_ranks_valid[valid_filter] - actual_ranks[valid_filter])
+                rank_errors_list.append(errors)
+
+        # 5. 単勝回収率（NumPy配列で直接処理）
+        if odds_values_all is not None:
+            race_odds = odds_values_all[start_idx:end_idx]
+            race_rank_first = rank_values[0]
+            
+            if pd.notna(race_odds[0]) and pd.notna(race_rank_first):
+                odds = float(race_odds[0])
+                if int(race_rank_first) == 1:
+                    total_return += odds * 100
+                total_investment += 100
+                valid_races += 1
+
+    # rank_errorsを一度に結合
+    if rank_errors_list:
+        rank_errors = np.concatenate(rank_errors_list)
+    else:
+        rank_errors = np.array([])
+
+    # 結果を集計
     for k in [1, 2, 3]:
         scores = ndcg_scores[f"ndcg@{k}"]
         if scores:
             results[f"ndcg@{k}"] = np.mean(scores)
         else:
             results[f"ndcg@{k}"] = 0.0
-
-    # 2. 1着的中率（groupbyで最適化）
-    correct_1st = 0
-    total_races = 0
-    
-    # デバッグ: 評価前の状態確認
-    races_with_rank_1 = 0
-    races_without_horse_num = 0
-
-    grouped = df.groupby(race_key_col)
-    for race_key, race_data in grouped:
-        race_data_sorted = race_data.sort_values(predict_col, ascending=False)
-
-        if horse_num_col not in race_data_sorted.columns:
-            races_without_horse_num += 1
-            continue
-
-        # rank列を数値型に変換してから比較（浮動小数点数の問題を回避）
-        if rank_col not in race_data_sorted.columns:
-            continue  # rank列が存在しない場合はスキップ
-        
-        rank_values = pd.to_numeric(race_data_sorted[rank_col], errors='coerce')
-        # 整数1と浮動小数点1.0の両方に対応
-        actual_1st_mask = (rank_values == 1.0) | (rank_values == 1)
-
-        if actual_1st_mask.any():
-            races_with_rank_1 += 1
-            total_races += 1
-            predicted_1st_horse_num = race_data_sorted.iloc[0][horse_num_col]
-            actual_1st_horse_num = race_data_sorted[actual_1st_mask].iloc[0][horse_num_col]
-
-            if pd.notna(predicted_1st_horse_num) and pd.notna(actual_1st_horse_num):
-                # 馬番も数値型に変換して比較
-                predicted_1st_horse_num = pd.to_numeric(predicted_1st_horse_num, errors='coerce')
-                actual_1st_horse_num = pd.to_numeric(actual_1st_horse_num, errors='coerce')
-                if pd.notna(predicted_1st_horse_num) and pd.notna(actual_1st_horse_num):
-                    if predicted_1st_horse_num == actual_1st_horse_num:
-                        correct_1st += 1
-    
-    # デバッグ出力（最初の数レースのみ）
-    if total_races == 0 and len(grouped) > 0:
-        import logging
-        logger = logging.getLogger(__name__)
-        logger.warning(f"[DEBUG] 1着的中率評価: 総レース数={len(grouped)}, rank==1のレース数={races_with_rank_1}, 馬番列なしレース数={races_without_horse_num}")
-        # 最初のレースのサンプルを確認
-        sample_race_key = list(grouped.groups.keys())[0]
-        sample_race_data = grouped.get_group(sample_race_key)
-        if rank_col in sample_race_data.columns:
-            rank_values = pd.to_numeric(sample_race_data[rank_col], errors='coerce')
-            logger.warning(f"[DEBUG] サンプルレース({sample_race_key})のrank値: {rank_values.dropna().tolist()[:10]}")
-            logger.warning(f"[DEBUG] rank==1.0の行数: {len(sample_race_data[rank_values == 1.0])}")
-            if horse_num_col in sample_race_data.columns:
-                logger.warning(f"[DEBUG] 馬番列の有効値数: {sample_race_data[horse_num_col].notna().sum()}")
 
     if total_races > 0:
         results["accuracy_1st"] = correct_1st / total_races * 100
@@ -178,29 +226,19 @@ def evaluate_model(
         results["correct_1st"] = 0
         results["total_races"] = 0
 
-    # 3. 3着以内的中率（groupbyで最適化）
-    correct_top3 = 0
-    total_races_top3 = 0
-
-    for race_key, race_data in grouped:
-        race_data_sorted = race_data.sort_values(predict_col, ascending=False)
-
-        if horse_num_col not in race_data_sorted.columns:
-            continue
-
-        # rank列を数値型に変換してから比較（浮動小数点数の問題を回避）
-        rank_values = pd.to_numeric(race_data_sorted[rank_col], errors='coerce')
-        # 整数と浮動小数点の両方に対応
-        actual_top3_mask = rank_values.isin([1.0, 2.0, 3.0, 1, 2, 3])
-
-        if actual_top3_mask.any():
-            total_races_top3 += 1
-            # 馬番も数値型に変換
-            predicted_top3_horse_nums = set(pd.to_numeric(race_data_sorted.head(3)[horse_num_col], errors='coerce').dropna().astype(int).tolist())
-            actual_top3_horse_nums = set(pd.to_numeric(race_data_sorted[actual_top3_mask][horse_num_col], errors='coerce').dropna().astype(int).tolist())
-
-            if len(predicted_top3_horse_nums & actual_top3_horse_nums) > 0:
-                correct_top3 += 1
+    # デバッグ出力（最初の数レースのみ）
+    if total_races == 0 and len(grouped) > 0:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.warning(f"[DEBUG] 1着的中率評価: 総レース数={len(grouped)}, rank==1のレース数={races_with_rank_1}, 馬番列なしレース数={races_without_horse_num}")
+        sample_race_key = list(grouped.groups.keys())[0]
+        sample_race_data = grouped.get_group(sample_race_key)
+        if rank_col in sample_race_data.columns:
+            rank_values = pd.to_numeric(sample_race_data[rank_col], errors='coerce')
+            logger.warning(f"[DEBUG] サンプルレース({sample_race_key})のrank値: {rank_values.dropna().tolist()[:10]}")
+            logger.warning(f"[DEBUG] rank==1.0の行数: {len(sample_race_data[rank_values == 1.0])}")
+            if horse_num_col in sample_race_data.columns:
+                logger.warning(f"[DEBUG] 馬番列の有効値数: {sample_race_data[horse_num_col].notna().sum()}")
 
     if total_races_top3 > 0:
         results["accuracy_top3"] = correct_top3 / total_races_top3 * 100
@@ -209,53 +247,12 @@ def evaluate_model(
         results["accuracy_top3"] = 0.0
         results["correct_top3"] = 0
 
-    # 4. 平均順位誤差（ベクトル化）
-    rank_errors = []
-    
-    # レースごとにグループ化して処理
-    grouped = df.groupby(race_key_col)
-    for race_key, race_data in grouped:
-        race_data_sorted = race_data.sort_values(predict_col, ascending=False)
-        valid_mask = race_data_sorted[rank_col].notna()
-        if valid_mask.any():
-            predicted_ranks = np.arange(1, len(race_data_sorted) + 1)
-            actual_ranks = pd.to_numeric(race_data_sorted[rank_col], errors='coerce').values
-            errors = np.abs(predicted_ranks[valid_mask.values] - actual_ranks[valid_mask.values])
-            rank_errors.extend(errors.tolist())
-
-    if rank_errors:
+    if len(rank_errors) > 0:
         results["mean_rank_error"] = np.mean(rank_errors)
     else:
         results["mean_rank_error"] = 0.0
 
-    # 5. 単勝回収率（オッズデータがある場合、groupbyで最適化）
     if odds_col and odds_col in df.columns:
-        total_investment = 0
-        total_return = 0
-        valid_races = 0
-
-        for race_key, race_data in grouped:
-            race_data_sorted = race_data.sort_values(predict_col, ascending=False)
-
-            predicted_1st = race_data_sorted.iloc[0]
-
-            # 必須カラムを明示的にチェック（fallback禁止）
-            if odds_col not in predicted_1st.index:
-                continue
-            if pd.notna(predicted_1st[odds_col]):
-                odds = float(predicted_1st[odds_col])
-                if rank_col not in predicted_1st.index:
-                    continue
-                actual_rank = predicted_1st[rank_col]
-
-                if pd.notna(actual_rank) and int(actual_rank) == 1:
-                    total_return += odds * 100
-                else:
-                    total_return += 0
-
-                total_investment += 100
-                valid_races += 1
-
         if valid_races > 0 and total_investment > 0:
             results["recovery_rate"] = (total_return / total_investment) * 100
             results["total_investment"] = total_investment

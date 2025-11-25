@@ -25,6 +25,7 @@ def calculate(df: pd.DataFrame, sed_df: pd.DataFrame, bac_df: Optional[pd.DataFr
     stats_df = sed_df_with_key[
         ["race_key", "馬番", "血統登録番号", "騎手コード", "調教師コード", "着順", "タイム", "距離", "芝ダ障害コード", "馬場状態", "頭数", "R"]
     ].copy()
+    del sed_df_with_key  # 使用済みのため削除
     stats_df["rank_1st"] = (stats_df["着順"] == 1).astype(int)
     stats_df["rank_3rd"] = (stats_df["着順"].isin([1, 2, 3])).astype(int)
 
@@ -48,6 +49,7 @@ def calculate(df: pd.DataFrame, sed_df: pd.DataFrame, bac_df: Optional[pd.DataFr
     sys.stdout.flush()
     df = TrainerStatistics.calculate(stats_df, df)
 
+    del stats_df  # 使用済みのため削除
     return df
 
 
