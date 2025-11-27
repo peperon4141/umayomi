@@ -1,6 +1,6 @@
 {
   "description": "学習用データのスキーマ定義（特徴量のみ定義、ターゲット変数は別途定義）",
-  "num_columns": 145,
+  "num_columns": 141,
   "target_variable": {
     "name": "rank",
     "type": "numeric",

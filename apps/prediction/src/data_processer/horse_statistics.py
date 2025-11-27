@@ -94,7 +94,12 @@ class HorseStatistics:
         """各レースのstart_datetimeより前のデータのみを使って統計量を計算（未来情報を完全に除外）。"""
         target_original_index = target_df['_original_index'].values if '_original_index' in target_df.columns else target_df.index.copy()
         stats_sorted = stats_df.sort_values(by=[group_col, time_col]).reset_index(drop=True)
-        target_sorted = target_df[[group_col, time_col, '_original_index']]
+        # 新しいDataFrameを直接作成（コピーを避ける）
+        target_sorted = pd.DataFrame({
+            group_col: target_df[group_col].values,
+            time_col: target_df[time_col].values,
+            '_original_index': target_df['_original_index'].values if '_original_index' in target_df.columns else target_df.index.values
+        })
         
         stats_sorted[f"{prefix}_cumsum_1st"] = stats_sorted.groupby(group_col)["rank_1st"].cumsum()
         stats_sorted[f"{prefix}_cumsum_3rd"] = stats_sorted.groupby(group_col)["rank_3rd"].cumsum()

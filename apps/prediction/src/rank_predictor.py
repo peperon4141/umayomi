@@ -206,7 +206,7 @@ class RankPredictor(BasePredictor):
         
         return pd.DataFrame({
             "race_key": race_df_processed["race_key"].values,
-            "predict": np.round(predictions, 2)
+            "predicted_score": np.round(predictions, 2)
         })
 
     def get_result(self, model: lgb.Booster, race_df: pd.DataFrame, rank_in: int = 1) -> tuple:
@@ -226,11 +226,11 @@ class RankPredictor(BasePredictor):
         predictions = model.predict(race_df[available_features], num_iteration=model.best_iteration)
 
         result_df = race_df.copy()
-        result_df.insert(0, "predict", np.round(predictions, 2))
-        sorted_race_df = result_df.sort_values("predict", ascending=False)
+        result_df.insert(0, "predicted_score", np.round(predictions, 2))
+        sorted_race_df = result_df.sort_values("predicted_score", ascending=False)
 
-        # predictの値が大きい順に、predict_rank列を追加
-        sorted_race_df.insert(1, "predict_rank", range(1, len(sorted_race_df) + 1))
+        # predicted_scoreの値が大きい順に、predicted_rank列を追加
+        sorted_race_df.insert(1, "predicted_rank", range(1, len(sorted_race_df) + 1))
 
         bet = True
         success = False

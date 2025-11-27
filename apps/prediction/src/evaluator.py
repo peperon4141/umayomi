@@ -39,9 +39,10 @@ def evaluate_model(
     predictions_df: pd.DataFrame,
     race_key_col: str = "race_key",
     rank_col: str = "rank",
-    predict_col: str = "predict",
+    predict_col: str = "predicted_score",
     horse_num_col: str = "馬番",
     odds_col: Optional[str] = None,
+    win5_flag_col: Optional[str] = "WIN5フラグ",
 ) -> Dict[str, float]:
     """
     モデル評価を実行
@@ -108,6 +109,13 @@ def evaluate_model(
     # groupbyを1回だけ実行して全ての評価指標を計算（sort=Falseで高速化）
     grouped = df.groupby(race_key_col, sort=False)
     
+    # WIN5フラグの有無を確認
+    has_win5_flag = win5_flag_col and win5_flag_col in df.columns
+    if has_win5_flag:
+        win5_flag_count = df[win5_flag_col].notna().sum()
+        win5_flag_valid = df[win5_flag_col].apply(lambda x: pd.notna(x) and str(x).strip() != "" and str(x).strip().isdigit() and 1 <= int(str(x).strip()) <= 5).sum()
+        print(f"[DEBUG] WIN5フラグ列が存在します: 総数={win5_flag_count}, 有効値(1-5)={win5_flag_valid}")
+    
     # 初期化
     ndcg_scores = {"ndcg@1": [], "ndcg@2": [], "ndcg@3": []}
     correct_1st = 0
@@ -120,6 +128,9 @@ def evaluate_model(
     total_investment = 0
     total_return = 0
     valid_races = 0
+    
+    # WIN5評価用
+    win5_dates = {}  # 日付 -> {race_keys: [], correct_count: 0}
 
     for race_key, race_data in grouped:
         if len(race_data) < 2:  # 1頭だけのレースはスキップ
@@ -185,8 +196,9 @@ def evaluate_model(
             actual_ranks = rank_values[valid_mask]
             predicted_ranks_valid = predicted_ranks[valid_mask]
             
+            # 異常値を除外（1以上、頭数以内の着順のみ）
             max_rank = len(rank_values)
-            valid_filter = (actual_ranks >= 1) & (actual_ranks <= max_rank * 2)
+            valid_filter = (actual_ranks >= 1) & (actual_ranks <= max_rank)
             if valid_filter.any():
                 errors = np.abs(predicted_ranks_valid[valid_filter] - actual_ranks[valid_filter])
                 rank_errors_list.append(errors)
@@ -202,6 +214,38 @@ def evaluate_model(
                     total_return += odds * 100
                 total_investment += 100
                 valid_races += 1
+        
+        # 6. WIN5評価用データ収集
+        if has_win5_flag:
+            win5_flag_value = race_data.iloc[0][win5_flag_col] if win5_flag_col in race_data.columns else None
+            # 空文字列やNaNを除外
+            if pd.notna(win5_flag_value) and str(win5_flag_value).strip() != "":
+                try:
+                    win5_flag_int = int(win5_flag_value)
+                    if 1 <= win5_flag_int <= 5:
+                        # race_keyから日付を抽出（YYYYMMDD形式を想定）
+                        race_key_str = str(race_key)
+                        if len(race_key_str) >= 8:
+                            date_str = race_key_str[:8]  # YYYYMMDD
+                            if date_str not in win5_dates:
+                                win5_dates[date_str] = {"races": []}  # races: [(win5_flag, is_correct), ...]
+                            
+                            # 1着的中かどうかを記録
+                            is_correct = False
+                            if horse_num_values_all is not None:
+                                race_horse_nums = horse_num_values_all[start_idx:end_idx]
+                                actual_1st_mask = (rank_values == 1.0) | (rank_values == 1)
+                                if actual_1st_mask.any():
+                                    predicted_1st_horse_num = race_horse_nums[0]
+                                    actual_1st_horse_num = race_horse_nums[actual_1st_mask][0]
+                                    if pd.notna(predicted_1st_horse_num) and pd.notna(actual_1st_horse_num):
+                                        if predicted_1st_horse_num == actual_1st_horse_num:
+                                            is_correct = True
+                            
+                            win5_dates[date_str]["races"].append((win5_flag_int, is_correct))
+                except (ValueError, TypeError):
+                    # 変換できない値はスキップ
+                    pass
 
     # rank_errorsを一度に結合
     if rank_errors_list:
@@ -268,36 +312,88 @@ def evaluate_model(
         results["total_investment"] = None
         results["total_return"] = None
         results["valid_races"] = None
+    
+    # WIN5評価
+    if has_win5_flag:
+        print(f"[DEBUG] WIN5評価: win5_datesの日数={len(win5_dates)}")
+        if win5_dates:
+            win5_total_days = 0
+            win5_success_days = 0
+            for date_str, date_data in win5_dates.items():
+                races = date_data["races"]
+                # WIN5フラグが1～5の5レースすべてが存在するか確認
+                win5_flags = [r[0] for r in races]
+                if set(win5_flags) == {1, 2, 3, 4, 5}:
+                    win5_total_days += 1
+                    # 5レースすべてが的中した場合
+                    correct_races = [r[1] for r in races]
+                    if len(correct_races) == 5 and all(correct_races):
+                        win5_success_days += 1
+            
+            print(f"[DEBUG] WIN5評価: 完全な5レース揃った日数={win5_total_days}, 的中日数={win5_success_days}")
+            if win5_total_days > 0:
+                results["win5_accuracy"] = (win5_success_days / win5_total_days) * 100
+                results["win5_success_days"] = win5_success_days
+                results["win5_total_days"] = win5_total_days
+            else:
+                results["win5_accuracy"] = 0.0
+                results["win5_success_days"] = 0
+                results["win5_total_days"] = 0
+        else:
+            print(f"[DEBUG] WIN5評価: win5_datesが空です")
+            results["win5_accuracy"] = 0.0
+            results["win5_success_days"] = 0
+            results["win5_total_days"] = 0
+    else:
+        print(f"[DEBUG] WIN5評価: WIN5フラグ列が存在しません")
+        results["win5_accuracy"] = None
+        results["win5_success_days"] = None
+        results["win5_total_days"] = None
 
     return results
 
 
 def print_evaluation_results(results: Dict[str, float]) -> None:
-    """評価結果を整形して表示"""
-    print("\n" + "=" * 60)
+    """評価結果を整形して日本語で表示"""
+    print("\n" + "=" * 80)
     print("モデル評価結果")
-    print("=" * 60)
+    print("=" * 80)
 
     # NDCG
-    print("\nNDCG（Normalized Discounted Cumulative Gain）:")
+    print("\n【NDCG（正規化累積利得）】")
     for k in [1, 2, 3]:
         ndcg = results.get(f"ndcg@{k}", 0.0)
         print(f"  NDCG@{k}: {ndcg:.4f}")
 
-    # 1着的中率
+    # 的中率
+    print("\n【的中率】")
     accuracy_1st = results.get("accuracy_1st", 0.0)
     correct_1st = results.get("correct_1st", 0)
     total_races = results.get("total_races", 0)
-    print(f"\n1着的中率: {accuracy_1st:.2f}% ({correct_1st}/{total_races}レース)")
+    print(f"  1着的中率: {accuracy_1st:.2f}% ({correct_1st:,}/{total_races:,}レース)")
 
-    # 3着以内的中率
     accuracy_top3 = results.get("accuracy_top3", 0.0)
     correct_top3 = results.get("correct_top3", 0)
-    print(f"3着以内的中率: {accuracy_top3:.2f}% ({correct_top3}/{total_races}レース)")
+    print(f"  3着内的中率: {accuracy_top3:.2f}% ({correct_top3:,}/{total_races:,}レース)")
 
     # 平均順位誤差
     mean_error = results.get("mean_rank_error", 0.0)
-    print(f"\n平均順位誤差: {mean_error:.2f}位")
+    print(f"\n【順位誤差】")
+    print(f"  平均順位誤差: {mean_error:.2f}位")
+
+    # WIN5的中率
+    win5_accuracy = results.get("win5_accuracy")
+    if win5_accuracy is not None:
+        win5_success_days = results.get("win5_success_days", 0)
+        win5_total_days = results.get("win5_total_days", 0)
+        print(f"\n【WIN5評価】")
+        if win5_total_days > 0:
+            print(f"  WIN5的中率: {win5_accuracy:.2f}% ({win5_success_days}/{win5_total_days}日)")
+            print(f"  WIN5的中日数: {win5_success_days}日")
+            print(f"  WIN5評価対象日数: {win5_total_days}日")
+        else:
+            print(f"  WIN5的中率: 0.00% (0/0日)")
+            print(f"  ※WIN5フラグ1～5が揃った日が存在しません")
 
     # 単勝回収率
     recovery_rate = results.get("recovery_rate")
@@ -305,7 +401,14 @@ def print_evaluation_results(results: Dict[str, float]) -> None:
         total_investment = results.get("total_investment", 0)
         total_return = results.get("total_return", 0)
         valid_races = results.get("valid_races", 0)
-        print(f"\n単勝回収率: {recovery_rate:.2f}%")
-        print(f"  総投資額: {total_investment:,}円 ({valid_races}レース)")
+        profit = total_return - total_investment
+        profit_rate = (profit / total_investment * 100) if total_investment > 0 else 0.0
+        
+        print(f"\n【回収率】")
+        print(f"  単勝回収率: {recovery_rate:.2f}%")
+        print(f"  総投資額: {total_investment:,}円 ({valid_races:,}レース × 100円)")
         print(f"  総払戻額: {total_return:,.0f}円")
-        print(f"  収益: {total_return - total_investment:,.0f}円")
+        print(f"  損益: {profit:+,.0f}円 ({profit_rate:+.2f}%)")
+    else:
+        print(f"\n【回収率】")
+        print(f"  ※オッズデータが存在しないため、回収率は計算されていません")

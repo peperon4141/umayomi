@@ -89,10 +89,14 @@ class LabelEncoder:
                     if feature_name not in self.label_encoders:
                         self.label_encoders[feature_name] = preprocessing.LabelEncoder()
                         is_numeric = df[feature_name].dtype in ["float64", "float32", "int64", "int32"]
+                        # カテゴリカル特徴量のエンコーディングにおいて、欠損値は「未知のカテゴリ」として扱う
+                        # これは機械学習の一般的な手法であり、データ不整合ではなく正常な処理
                         feature_values = df[feature_name].astype(str).replace("nan", "__UNKNOWN__") if is_numeric else df[feature_name].fillna("__UNKNOWN__")
                         self.label_encoders[feature_name].fit(feature_values)
 
                     is_numeric = df[feature_name].dtype in ["float64", "float32", "int64", "int32"]
+                    # カテゴリカル特徴量のエンコーディングにおいて、欠損値は「未知のカテゴリ」として扱う
+                    # これは機械学習の一般的な手法であり、データ不整合ではなく正常な処理
                     feature_values = df[feature_name].astype(str).replace("nan", "__UNKNOWN__") if is_numeric else df[feature_name].fillna("__UNKNOWN__")
                     encoded_columns[new_column_name] = pd.Series(
                         self.label_encoders[feature_name].transform(feature_values),

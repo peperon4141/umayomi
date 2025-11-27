@@ -35,6 +35,8 @@ class JrdbCombiner:
             raise ValueError(f"BACデータが必要です。現在のデータタイプ: {', '.join(data_dict.keys())}")
 
         schema = self._load_schema()
+        # スキーマファイルにbaseDataTypeが定義されていない場合のデフォルト値
+        # KYIは常に存在し、他のデータタイプの結合基準となるため、デフォルト値として適切
         base_type = schema.get("baseDataType", "KYI")
         combined_df = data_dict[base_type].copy()
 

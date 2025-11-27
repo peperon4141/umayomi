@@ -120,7 +120,32 @@ try:
     
     df = train_df
     val_df = test_df
-    original_df = eval_df  # eval_dfが評価用データ（日本語キー）
+    original_df = eval_df  # eval_dfが評価用データ（日本語キー、evaluation_schema.jsonに基づいて選択済み）
+    
+    # キャッシュデータの整合性確認（evaluation_schema.jsonに基づく必須カラムの存在確認）
+    print("\n評価用データの整合性確認中...")
+    # インデックスがrace_keyの場合は一時的にリセットして確認
+    original_df_for_check = original_df.reset_index() if original_df.index.name == "race_key" else original_df.copy()
+    required_eval_cols = ["race_key", "馬番", "着順"]
+    missing_cols = [col for col in required_eval_cols if col not in original_df_for_check.columns]
+    if missing_cols:
+        print(f"警告: 評価用データに必須カラムが不足しています: {missing_cols}")
+        print("evaluation_schema.jsonに基づいて再選択します...")
+        from src.data_processer.column_selector import ColumnSelector
+        column_selector = ColumnSelector(base_path=base_project_path.parent.parent)
+        # featured_dfを再読み込みする必要があるが、キャッシュから読み込んだeval_dfが不整合な場合は
+        # データ処理を再実行する必要がある（キャッシュを無効化）
+        # ここでは、eval_dfをそのまま使用し、不足しているカラムがあればエラーを投げる
+        raise ValueError(f"キャッシュから読み込んだeval_dfがevaluation_schema.jsonに準拠していません。必須カラムが不足: {missing_cols}。キャッシュを削除して再処理してください。")
+    else:
+        print(f"評価用データの整合性確認完了（必須カラムが存在します: {required_eval_cols}）")
+        # オプションカラムの存在確認（情報表示のみ）
+        optional_eval_cols = ["WIN5フラグ", "確定単勝オッズ"]
+        existing_optional_cols = [col for col in optional_eval_cols if col in original_df_for_check.columns]
+        if existing_optional_cols:
+            print(f"オプションカラムが存在します: {existing_optional_cols}")
+        else:
+            print("オプションカラムは存在しません（WIN5フラグ、確定単勝オッズ）")
         
 except Exception as e:
     print(f"エラーが発生しました: {e}")
@@ -244,23 +269,36 @@ else:
     
     val_predictions_raw["馬番"] = merged["馬番"].values
 
-# original_df（full_data_df、日本語キー）から評価用データを取得
+# original_df（eval_df、日本語キー、evaluation_schema.jsonに基づいて選択済み）を使用
+# 注: キャッシュから読み込んだeval_dfは既にevaluation_schema.jsonに基づいて選択されているため、
+#     再度select_evaluation()を呼び出す必要はない（仕様書に沿った実装）
 original_eval = original_df.copy()
-if original_df.index.name == "race_key":
+
+# インデックスがrace_keyの場合はリセット
+if original_eval.index.name == "race_key":
     original_eval = original_eval.reset_index()
 elif "race_key" not in original_eval.columns:
-    raise ValueError("original_dfにrace_key列が含まれていません")
+    raise ValueError("original_evalにrace_key列が含まれていません")
 
-# 日本語キーで必須列を確認
-required_cols_jp = ["race_key", "着順", "馬番"]
-missing_cols = [col for col in required_cols_jp if col not in original_eval.columns]
+# キャッシュデータの整合性確認（evaluation_schema.jsonに基づく必須カラムの存在確認）
+required_eval_cols = ["race_key", "馬番", "着順"]
+missing_cols = [col for col in required_eval_cols if col not in original_eval.columns]
 if missing_cols:
-    raise ValueError(f"original_dfに必須列が含まれていません: {missing_cols}")
+    raise ValueError(f"キャッシュから読み込んだeval_dfがevaluation_schema.jsonに準拠していません。必須カラムが不足: {missing_cols}。キャッシュを削除して再処理してください。")
 
-# original_evalは既にfull_info_schema.jsonの全カラム（日本語キー）を含んでいる
-# 手動でeval_colsを選択する必要はない（data_processerの設計通り）
-# 予測結果と結合（race_keyと馬番の両方でマージしてデカルト積を防ぐ）
-val_predictions = val_predictions_raw.merge(original_eval, on=["race_key", "馬番"], how="left")
+print(f"評価用データのカラム数: {len(original_eval.columns)}")
+print(f"評価用データのカラム: {list(original_eval.columns)[:10]}...")  # 最初の10カラムを表示
+
+# 予測結果をベースに、評価に必要な最小限の情報だけを追加
+val_predictions = val_predictions_raw.copy()
+
+# 評価に必要な情報を追加（race_keyと馬番でマージ）
+eval_data = original_eval.copy()
+val_predictions = val_predictions.merge(eval_data, on=["race_key", "馬番"], how="left")
+
+# 予測順位を追加（レースごとにpredicted_scoreでソートして順位を付与）
+val_predictions = val_predictions.sort_values(["race_key", "predicted_score"], ascending=[True, False])
+val_predictions["predicted_rank"] = val_predictions.groupby("race_key").cumcount() + 1
 
 # 評価用にrank列を追加（着順から）
 if "着順" in val_predictions.columns and "rank" not in val_predictions.columns:

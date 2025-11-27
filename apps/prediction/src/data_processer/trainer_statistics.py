@@ -69,6 +69,9 @@ def _process_group_recent_races(
             f"{prefix_jp}直近{i}{field_mapping[col]}"
             for i in range(1, num_races + 1)
             for col in ['rank', 'time', 'distance', 'course_type', 'ground_condition', 'num_horses', 'race_num']
+        ] + [
+            f"{prefix_jp}直近{i}race_key"  # 日程情報（リーク検証用）
+            for i in range(1, num_races + 1)
         ]
         return pd.DataFrame(columns=result_cols)
     
@@ -86,10 +89,17 @@ def _process_group_recent_races(
     for i in range(1, num_races + 1):
         for en_col, jp_col in field_mapping.items():
             result_data[f"{prefix_jp}直近{i}{jp_col}"] = np.full(n_targets, np.nan, dtype=float)
+        # 日程情報（リーク検証用）
+        result_data[f"{prefix_jp}直近{i}race_key"] = np.full(n_targets, None, dtype=object)
     
     stats_cols = ["着順", "タイム", "距離", "芝ダ障害コード", "馬場状態", "頭数", "R"]
     available_cols = [col for col in stats_cols if col in group_stats.columns]
     stats_arrays = {col: group_stats[col].values for col in available_cols}
+    
+    # race_keyも取得（日程情報用）
+    race_key_array = None
+    if "race_key" in group_stats.columns:
+        race_key_array = group_stats["race_key"].values
     
     search_indices = np.searchsorted(group_stats_times, group_targets_times, side='left')
     
@@ -105,6 +115,9 @@ def _process_group_recent_races(
                     for en_col, jp_col in field_mapping.items():
                         if jp_col in stats_arrays:
                             result_data[f"{prefix_jp}直近{i}{jp_col}"][target_idx] = stats_arrays[jp_col][race_idx]
+                    # 日程情報（リーク検証用）
+                    if race_key_array is not None:
+                        result_data[f"{prefix_jp}直近{i}race_key"][target_idx] = race_key_array[race_idx]
     
     return pd.DataFrame(result_data)
 
@@ -170,7 +183,12 @@ class TrainerStatistics:
         """各レースのstart_datetimeより前のデータのみを使って統計量を計算（未来情報を完全に除外）。"""
         target_original_index = target_df['_original_index'].values if '_original_index' in target_df.columns else target_df.index.copy()
         stats_sorted = stats_df.sort_values(by=[group_col, time_col]).reset_index(drop=True)
-        target_sorted = target_df[[group_col, time_col, '_original_index']]
+        # 新しいDataFrameを直接作成（コピーを避ける）
+        target_sorted = pd.DataFrame({
+            group_col: target_df[group_col].values,
+            time_col: target_df[time_col].values,
+            '_original_index': target_df['_original_index'].values if '_original_index' in target_df.columns else target_df.index.values
+        })
         
         stats_sorted[f"{prefix}_cumsum_1st"] = stats_sorted.groupby(group_col)["rank_1st"].cumsum()
         stats_sorted[f"{prefix}_cumsum_3rd"] = stats_sorted.groupby(group_col)["rank_3rd"].cumsum()
@@ -233,9 +251,15 @@ class TrainerStatistics:
         target_original_index = target_df.index.copy()
         stats_cols = ["着順", "タイム", "距離", "芝ダ障害コード", "馬場状態", "頭数", "R"]
         available_cols = [col for col in stats_cols if col in stats_df.columns]
-        stats_df_subset = stats_df[[group_col, time_col] + available_cols]
-        target_df_subset = target_df[[group_col, time_col]]
-        target_df_subset['_original_index'] = target_df.index.values
+        # 新しいDataFrameを直接作成（コピーを避ける）
+        stats_df_subset = pd.DataFrame({
+            col: stats_df[col].values for col in [group_col, time_col] + available_cols
+        })
+        target_df_subset = pd.DataFrame({
+            group_col: target_df[group_col].values,
+            time_col: target_df[time_col].values,
+            '_original_index': target_df.index.values
+        })
         
         grouped_stats = stats_df_subset.groupby(group_col, sort=False)
         target_groups = set(target_df_subset[group_col].unique())

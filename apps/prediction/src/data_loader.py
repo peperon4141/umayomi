@@ -25,7 +25,28 @@ def load_jrdb_npz_to_dataframe(file_path: Union[str, Path]) -> pd.DataFrame:
     lengths = [len(arr) for arr in data.values()]
     if len(set(lengths)) > 1: raise ValueError(f"フィールド間でレコード数が一致しません: {lengths}")
 
-    return pd.DataFrame(data)
+    df = pd.DataFrame(data)
+    
+    # INTEGER_ZERO_BLANK型のフィールド（空文字列をNaNに変換）
+    # WIN5フラグなど、数値型のフィールドで空文字列の場合はNaNに変換
+    # 数値に変換可能なフィールドを特定（空文字列が含まれている場合）
+    for col in df.columns:
+        # 空文字列が含まれている列を確認
+        if df[col].dtype == 'object':
+            # 空文字列をNaNに変換してから数値変換を試行
+            # まず空文字列をNaNに変換
+            col_series = df[col].copy()
+            col_series = col_series.replace('', np.nan)
+            # 数値に変換可能な場合は数値型に変換、できない場合は文字列のまま
+            numeric_series = pd.to_numeric(col_series, errors='coerce')
+            # 数値に変換できた行が存在する場合、その列は数値型として扱う
+            if numeric_series.notna().any():
+                df[col] = numeric_series
+            else:
+                # すべてNaNの場合でも、数値型として扱う（空文字列をNaNに変換済み）
+                df[col] = numeric_series
+    
+    return df
 
 def load_multiple_npz_files(
     file_paths: List[Union[str, Path]], data_type: Optional[str] = None

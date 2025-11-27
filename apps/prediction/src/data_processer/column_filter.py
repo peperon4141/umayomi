@@ -21,6 +21,7 @@ class ColumnFilter:
         self.schemas_dir = self.base_path / "packages" / "data" / "schemas" / "jrdb_processed"
         self._full_info_schema: Optional[dict] = None
         self._training_columns: Optional[Set[str]] = None
+        self._evaluation_schema: Optional[dict] = None
 
     def load_full_info_schema(self) -> dict:
         """full_info_schema.jsonを読み込む"""
@@ -102,28 +103,78 @@ class ColumnFilter:
                 all_cols.append(jp_name)
         return all_cols
 
-    def get_evaluation_columns(self, df: pd.DataFrame) -> List[str]:
+    def load_evaluation_schema(self) -> dict:
+        """evaluation_schema.jsonを読み込む"""
+        if self._evaluation_schema is None:
+            schema_file = self.schemas_dir / "evaluation_schema.json"
+            if not schema_file.exists():
+                raise FileNotFoundError(f"評価用スキーマファイルが見つかりません: {schema_file}")
+            with open(schema_file, "r", encoding="utf-8") as f:
+                self._evaluation_schema = json.load(f)
+        return self._evaluation_schema
+
+    def get_evaluation_columns(self, df: pd.DataFrame, include_optional: bool = True) -> List[str]:
         """
-        評価用カラムを取得（full_info_schema.jsonの全カラムから、use_for_training=falseのカラム + rank, time）。
-        df: 結合済みDataFrame（英語キーに変換済み）
+        評価用カラムを取得（evaluation_schema.jsonに基づく）。
+        
+        Args:
+            df: 結合済みDataFrame（日本語キー）
+            include_optional: オプションカラムを含めるか（デフォルト: True）
+            
+        Returns:
+            評価用カラムのリスト（日本語キー）
         """
-        schema = self.load_full_info_schema()
-        training_columns = self.get_training_columns()
+        schema = self.load_evaluation_schema()
         evaluation_cols = []
         
-        # full_info_schema.jsonから評価用カラムを取得
-        for col in schema.get("columns", []):
-            feature_name = col.get("feature_name")
-            if feature_name and feature_name in df.columns:
-                # use_for_training=falseのカラム、またはrank/timeは評価用
-                if not col.get("use_for_training", False) or feature_name in ["rank", "time"]:
-                    evaluation_cols.append(feature_name)
-        
-        # rankとtimeは必ず含める
-        if "rank" in df.columns and "rank" not in evaluation_cols:
-            evaluation_cols.append("rank")
-        if "time" in df.columns and "time" not in evaluation_cols:
-            evaluation_cols.append("time")
+        # スキーマから評価用カラムを取得
+        for col_def in schema.get("columns", []):
+            col_name = col_def.get("name")
+            if col_name and col_name in df.columns:
+                required = col_def.get("required", False)
+                category = col_def.get("category", "optional")
+                
+                # 必須カラムは常に含める
+                if required or category == "merge_key":
+                    evaluation_cols.append(col_name)
+                # オプションカラムはinclude_optionalがTrueの場合のみ含める
+                elif include_optional and category == "optional":
+                    evaluation_cols.append(col_name)
         
         return evaluation_cols
+
+    def get_evaluation_columns_by_metrics(self, df: pd.DataFrame, metrics: List[str]) -> List[str]:
+        """
+        指定された評価指標に必要なカラムを取得。
+        
+        Args:
+            df: 結合済みDataFrame（日本語キー）
+            metrics: 評価指標のリスト（例: ["ndcg", "hit_rate", "return_rate_single", "win5_accuracy"]）
+            
+        Returns:
+            評価指標に必要なカラムのリスト（日本語キー）
+        """
+        schema = self.load_evaluation_schema()
+        required_cols = set()
+        
+        # マージキーは常に含める
+        merge_keys = schema.get("merge_keys", {}).get("keys", [])
+        required_cols.update(merge_keys)
+        
+        # 各評価指標に必要なカラムを取得
+        evaluation_metrics = schema.get("evaluation_metrics", {})
+        for metric in metrics:
+            if metric in evaluation_metrics:
+                metric_cols = evaluation_metrics[metric].get("required_columns", [])
+                required_cols.update(metric_cols)
+        
+        # 必須カラムも含める
+        for col_def in schema.get("columns", []):
+            if col_def.get("required", False):
+                col_name = col_def.get("name")
+                if col_name and col_name in df.columns:
+                    required_cols.add(col_name)
+        
+        # DataFrameに存在するカラムのみを返す
+        return [col for col in required_cols if col in df.columns]
 

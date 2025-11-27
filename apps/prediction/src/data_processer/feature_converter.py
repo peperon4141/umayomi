@@ -17,7 +17,15 @@ class FeatureConverter:
 
     @staticmethod
     def safe_int(value, default: int = 0) -> int:
-        """安全に数値に変換するヘルパー関数"""
+        """
+        安全に数値に変換するヘルパー関数
+        
+        注意: デフォルト値0を使用する理由
+        - この関数はデータ変換時の安全な処理を目的としており、
+          不正な値や変換不可能な値が存在する場合でも処理を続行する必要がある
+        - デフォルト値0は「変換不可能な値」を表すマーカーとして使用される
+        - データ不整合の可能性がある場合は、呼び出し側で事前に検証することを推奨
+        """
         if value is None:
             return default
         if isinstance(value, (int, float)):

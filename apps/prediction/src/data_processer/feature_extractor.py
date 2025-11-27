@@ -5,7 +5,7 @@ from typing import Dict, Optional
 
 import pandas as pd
 
-from . import previous_race_extractor, statistical_feature_calculator
+from . import previous_race_extractor
 from .feature_converter import FeatureConverter
 from .horse_statistics import HorseStatistics
 from .jockey_statistics import JockeyStatistics
@@ -21,11 +21,6 @@ class FeatureExtractor:
         """前走データを抽出。df: 結合済みDataFrame、sed_df: SEDデータ、bac_df: BACデータ（オプション）。前走データが追加されたDataFrameを返す"""
         return previous_race_extractor.extract(df, sed_df, bac_df)
 
-    def extract_statistics(
-        self, df: pd.DataFrame, sed_df: pd.DataFrame, bac_df: Optional[pd.DataFrame] = None
-    ) -> pd.DataFrame:
-        """統計特徴量を計算。df: 結合済みDataFrame、sed_df: SEDデータ、bac_df: BACデータ（オプション）。統計特徴量が追加されたDataFrameを返す"""
-        return statistical_feature_calculator.calculate(df, sed_df, bac_df)
 
     def extract_all_parallel(
         self, df: pd.DataFrame, sed_df: pd.DataFrame, bac_df: Optional[pd.DataFrame] = None
@@ -73,33 +68,75 @@ class FeatureExtractor:
         featured_df = results["previous_races"]
         original_index = featured_df.index
 
+        # デバッグ: 各結果のカラム数を確認
+        print(f"previous_racesカラム数: {len(featured_df.columns)}")
+        print(f"horse_statsカラム数: {len(results['horse_stats'].columns)}")
+        print(f"jockey_statsカラム数: {len(results['jockey_stats'].columns)}")
+        print(f"trainer_statsカラム数: {len(results['trainer_stats'].columns)}")
+        print(f"df_with_datetimeカラム数: {len(df_with_datetime.columns)}")
+
         # 結合するDataFrameのリスト
         dfs_to_concat = [featured_df]
 
-        # 馬統計を結合（追加されたカラムのみ）
-        horse_new_cols = [col for col in results["horse_stats"].columns if col not in df_with_datetime.columns]
+        # 既に含まれているカラムを追跡（previous_racesに含まれる全カラム）
+        existing_cols = set(featured_df.columns)
+
+        # 馬統計を結合（追加されたカラムのみ、previous_racesに既に含まれているカラムは除外）
+        horse_new_cols = [
+            col for col in results["horse_stats"].columns 
+            if col not in df_with_datetime.columns and col not in existing_cols
+        ]
+        # デバッグ: 重複チェック
+        horse_duplicated = [col for col in results["horse_stats"].columns if col in existing_cols and col not in df_with_datetime.columns]
+        if horse_duplicated:
+            print(f"警告: 馬統計で重複カラム検出（previous_racesに既に存在）: {horse_duplicated[:10]}")
         if horse_new_cols:
             horse_stats_subset = results["horse_stats"][horse_new_cols].copy()
             horse_stats_subset.index = original_index
             dfs_to_concat.append(horse_stats_subset)
+            existing_cols.update(horse_new_cols)
 
-        # 騎手統計を結合（追加されたカラムのみ）
-        jockey_new_cols = [col for col in results["jockey_stats"].columns if col not in df_with_datetime.columns]
+        # 騎手統計を結合（追加されたカラムのみ、previous_racesに既に含まれているカラムは除外）
+        jockey_new_cols = [
+            col for col in results["jockey_stats"].columns 
+            if col not in df_with_datetime.columns and col not in existing_cols
+        ]
+        # デバッグ: 重複チェック
+        jockey_duplicated = [col for col in results["jockey_stats"].columns if col in existing_cols and col not in df_with_datetime.columns]
+        if jockey_duplicated:
+            print(f"警告: 騎手統計で重複カラム検出（previous_racesに既に存在）: {jockey_duplicated[:10]}")
         if jockey_new_cols:
             jockey_stats_subset = results["jockey_stats"][jockey_new_cols].copy()
             jockey_stats_subset.index = original_index
             dfs_to_concat.append(jockey_stats_subset)
+            existing_cols.update(jockey_new_cols)
 
-        # 調教師統計を結合（追加されたカラムのみ）
-        trainer_new_cols = [col for col in results["trainer_stats"].columns if col not in df_with_datetime.columns]
+        # 調教師統計を結合（追加されたカラムのみ、previous_racesに既に含まれているカラムは除外）
+        trainer_new_cols = [
+            col for col in results["trainer_stats"].columns 
+            if col not in df_with_datetime.columns and col not in existing_cols
+        ]
+        # デバッグ: 重複チェック
+        trainer_duplicated = [col for col in results["trainer_stats"].columns if col in existing_cols and col not in df_with_datetime.columns]
+        if trainer_duplicated:
+            print(f"警告: 調教師統計で重複カラム検出（previous_racesに既に存在）: {trainer_duplicated[:10]}")
         if trainer_new_cols:
             trainer_stats_subset = results["trainer_stats"][trainer_new_cols].copy()
             trainer_stats_subset.index = original_index
             dfs_to_concat.append(trainer_stats_subset)
+            existing_cols.update(trainer_new_cols)
 
         # 一度に結合（フラグメント化を回避）
         if len(dfs_to_concat) > 1:
             featured_df = pd.concat(dfs_to_concat, axis=1)
+            
+            # 重複カラムの検証（データ整合性チェック）
+            duplicated_cols = featured_df.columns[featured_df.columns.duplicated()].unique()
+            if len(duplicated_cols) > 0:
+                raise ValueError(
+                    f"重複カラムが検出されました。データ整合性を保つため、重複を解消してください。"
+                    f"重複カラム: {list(duplicated_cols)[:20]}..." if len(duplicated_cols) > 20 else f"重複カラム: {list(duplicated_cols)}"
+                )
 
         print("特徴量抽出完了")
         return featured_df

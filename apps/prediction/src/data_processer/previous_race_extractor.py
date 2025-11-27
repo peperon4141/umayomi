@@ -1,9 +1,12 @@
 """前走データ抽出クラス。SEDデータから各馬の前走データを抽出。"""
 
+import os
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Optional
 
 import numpy as np
 import pandas as pd
+from tqdm import tqdm
 
 from .feature_converter import FeatureConverter
 
@@ -24,10 +27,15 @@ def extract(df: pd.DataFrame, sed_df: pd.DataFrame, bac_df: Optional[pd.DataFram
             f"prev_{i}_distance",
             f"prev_{i}_course_type",
             f"prev_{i}_ground_condition",
+            f"prev_{i}_race_key",  # 日程情報（リーク検証用）
         ]
         for col in prev_cols:
             if col not in df.columns:
-                df[col] = np.nan
+                # race_keyは文字列型で初期化
+                if "race_key" in col:
+                    df[col] = None  # Noneを使用してobject型にする
+                else:
+                    df[col] = np.nan
 
     # 血統登録番号と年月日で前走を検索
     # SEDデータにrace_keyと年月日を追加（BACデータの年月日基準）
@@ -65,28 +73,45 @@ def extract(df: pd.DataFrame, sed_df: pd.DataFrame, bac_df: Optional[pd.DataFram
                 (horse_id, horse_main_indices, horse_main_race_keys, horse_sed)
             )
 
-        # シーケンシャル処理でメモリ使用量を削減
+        # 並列処理で高速化（各馬の処理は独立しているため並列化可能）
         if len(horse_data_list) > 0:
-            print(f"前走データ抽出中（シーケンシャル処理、{len(horse_data_list)}頭）...")
+            # 環境変数DATA_PROCESSER_MAX_WORKERSが設定されていない場合のデフォルト値
+            # デフォルト値4は、CPUコア数に応じて調整可能なオプショナルな設定値
+            # パフォーマンスチューニングのため、環境変数で上書き可能
+            max_workers = int(os.environ.get("DATA_PROCESSER_MAX_WORKERS", "4"))
+            print(f"前走データ抽出中（並列処理、{len(horse_data_list)}頭、ワーカー数: {max_workers}）...")
             all_results = []
-            for horse_id, horse_main_indices, horse_main_race_keys, horse_sed in horse_data_list:
-                result = _process_horse_previous_races(
-                    horse_id, horse_main_indices, horse_main_race_keys, horse_sed
-                )
-                all_results.append(result)
+            
+            with ThreadPoolExecutor(max_workers=max_workers) as executor:
+                futures = {
+                    executor.submit(_process_horse_previous_races, horse_id, horse_main_indices, horse_main_race_keys, horse_sed): horse_id
+                    for horse_id, horse_main_indices, horse_main_race_keys, horse_sed in horse_data_list
+                }
+                
+                # 進捗バーを表示
+                with tqdm(total=len(futures), desc="前走データ抽出", leave=True, unit="頭") as pbar:
+                    for future in as_completed(futures):
+                        try:
+                            result = future.result()
+                            all_results.append(result)
+                            pbar.update(1)
+                        except Exception as e:
+                            horse_id = futures[future]
+                            print(f"馬ID {horse_id} の処理でエラー: {e}")
+                            raise
 
             # 結果を結合してDataFrameに反映（一括更新で高速化）
             prev_cols = [
                 "prev_1_rank", "prev_1_time", "prev_1_distance", "prev_1_num_horses",
-                "prev_1_course_type", "prev_1_ground_condition",
+                "prev_1_course_type", "prev_1_ground_condition", "prev_1_race_key",
                 "prev_2_rank", "prev_2_time", "prev_2_distance", "prev_2_num_horses",
-                "prev_2_course_type", "prev_2_ground_condition",
+                "prev_2_course_type", "prev_2_ground_condition", "prev_2_race_key",
                 "prev_3_rank", "prev_3_time", "prev_3_distance", "prev_3_num_horses",
-                "prev_3_course_type", "prev_3_ground_condition",
+                "prev_3_course_type", "prev_3_ground_condition", "prev_3_race_key",
                 "prev_4_rank", "prev_4_time", "prev_4_distance", "prev_4_num_horses",
-                "prev_4_course_type", "prev_4_ground_condition",
+                "prev_4_course_type", "prev_4_ground_condition", "prev_4_race_key",
                 "prev_5_rank", "prev_5_time", "prev_5_distance", "prev_5_num_horses",
-                "prev_5_course_type", "prev_5_ground_condition",
+                "prev_5_course_type", "prev_5_ground_condition", "prev_5_race_key",
             ]
             
             # 結果を辞書にまとめる（インデックス → カラム → 値）
@@ -101,7 +126,11 @@ def extract(df: pd.DataFrame, sed_df: pd.DataFrame, bac_df: Optional[pd.DataFram
             # 一括更新（df.atより大幅に高速）
             for col in prev_cols:
                 if update_dict[col]:
-                    df.loc[list(update_dict[col].keys()), col] = pd.Series(update_dict[col])
+                    # race_keyカラムは文字列型として扱う
+                    if "race_key" in col:
+                        df.loc[list(update_dict[col].keys()), col] = pd.Series(update_dict[col], dtype=object)
+                    else:
+                        df.loc[list(update_dict[col].keys()), col] = pd.Series(update_dict[col])
 
     return df
 
@@ -146,6 +175,7 @@ def _process_horse_previous_races(
             result_dict[f"prev_{i + 1}_num_horses"] = prev_row.get("頭数", np.nan)
             result_dict[f"prev_{i + 1}_course_type"] = prev_row.get("芝ダ障害コード", np.nan)
             result_dict[f"prev_{i + 1}_ground_condition"] = prev_row.get("馬場状態", np.nan)
+            result_dict[f"prev_{i + 1}_race_key"] = prev_row.get("race_key", np.nan)  # 日程情報（リーク検証用）
 
         results.append(result_dict)
 
