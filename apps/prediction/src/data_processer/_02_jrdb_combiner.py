@@ -1,12 +1,13 @@
 """データ結合処理"""
 
 import json
+import logging
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Dict
 
 import pandas as pd
 
-from ._03_01_feature_converter import FeatureConverter
+logger = logging.getLogger(__name__)
 
 
 class JrdbCombiner:
@@ -40,7 +41,10 @@ class JrdbCombiner:
         base_type = schema.get("baseDataType", "KYI")
         combined_df = data_dict[base_type].copy()
 
-        bac_df = FeatureConverter.add_race_key_to_df(data_dict["BAC"].copy(), use_bac_date=False)
+        # BACデータからrace_keyを取得（事前定義済みのキーを使用）
+        bac_df = data_dict["BAC"].copy()
+        if "race_key" not in bac_df.columns:
+            raise ValueError("BACデータにrace_keyが含まれていません。LZH→Parquet変換時にrace_keyが生成されている必要があります。")
         race_key_cols = ["場コード", "回", "日", "R", "race_key"]
         combined_df = combined_df.merge(
             bac_df[race_key_cols].drop_duplicates(),
@@ -59,9 +63,20 @@ class JrdbCombiner:
             join_config = join_keys[data_type]
 
             if "race_key" in join_config["keys"]:
-                df = FeatureConverter.add_race_key_to_df(
-                    df, bac_df=data_dict["BAC"], use_bac_date=join_config.get("use_bac_date", False)
-                )
+                # race_keyが事前定義済みであることを確認（LZH→Parquet変換時に生成されている必要がある）
+                # ただし、TYBとKYIの場合は年月日カラムがないため、BACデータとマージする際にrace_keyを取得する
+                if "race_key" not in df.columns:
+                    if data_type in ["TYB", "KYI"]:
+                        # TYBとKYIの場合は、BACデータとマージする際にrace_keyを取得する
+                        # ここではrace_keyを追加せず、後でBACデータとマージする際に取得する
+                        logger.debug(f"{data_type}データにはrace_keyがありません。BACデータとマージする際に取得します。")
+                    else:
+                        raise ValueError(
+                            f"{data_type}データにrace_keyが含まれていません。"
+                            f"LZH→Parquet変換時にrace_keyが生成されている必要があります。"
+                        )
+                else:
+                    logger.debug(f"{data_type}データには既にrace_keyが存在します。事前定義済みのキーを使用します。")
 
             if data_type == "SED":
                 if "着順" in df.columns:
@@ -70,6 +85,14 @@ class JrdbCombiner:
 
             config_keys = join_config["keys"]
             actual_keys = [k for k in config_keys if k in combined_df.columns and k in df.columns]
+            
+            # TYBとKYIの場合は、race_keyが含まれていない場合でも、場コード、回、日、Rでマージできる
+            # マージ後、race_keyがcombined_dfに含まれている場合は、dfにもrace_keyが追加される
+            if data_type in ["TYB", "KYI"] and "race_key" not in df.columns:
+                # race_key以外のキーでマージ
+                keys_without_race_key = [k for k in config_keys if k != "race_key"]
+                actual_keys = [k for k in keys_without_race_key if k in combined_df.columns and k in df.columns]
+            
             if not actual_keys:
                 continue
 

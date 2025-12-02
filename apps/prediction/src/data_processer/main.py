@@ -142,8 +142,32 @@ class DataProcessor:
         # 空のDataFrameを除外してから結合（FutureWarningを回避）
         all_sed_dfs_filtered = [df for df in all_sed_dfs if len(df) > 0]
         all_bac_dfs_filtered = [df for df in all_bac_dfs if len(df) > 0]
-        all_sed_df = pd.concat(all_sed_dfs_filtered, ignore_index=True) if all_sed_dfs_filtered else None
-        all_bac_df = pd.concat(all_bac_dfs_filtered, ignore_index=True) if all_bac_dfs_filtered else None
+        
+        # メモリ効率化: 段階的に結合
+        if all_sed_dfs_filtered:
+            all_sed_df = all_sed_dfs_filtered[0].copy()
+            for df in all_sed_dfs_filtered[1:]:
+                all_sed_df = pd.concat([all_sed_df, df.copy()], ignore_index=True)
+                del df
+                import gc
+                gc.collect()
+        else:
+            all_sed_df = None
+            
+        if all_bac_dfs_filtered:
+            all_bac_df = all_bac_dfs_filtered[0].copy()
+            for df in all_bac_dfs_filtered[1:]:
+                all_bac_df = pd.concat([all_bac_df, df.copy()], ignore_index=True)
+                del df
+                import gc
+                gc.collect()
+        else:
+            all_bac_df = None
+        
+        # リストを削除
+        del all_sed_dfs, all_bac_dfs, all_sed_dfs_filtered, all_bac_dfs_filtered
+        import gc
+        gc.collect()
         
         if all_bac_df is None:
             raise ValueError("BACデータは必須です。全年度のBACデータが存在しません。")
@@ -178,6 +202,7 @@ class DataProcessor:
         print(f"[_03_] {year}年の特徴量追加中（全年度のSED/BACデータを使用）...")
         if all_sed_df is not None:
             featured_df = self._feature_extractor.extract_all_parallel(raw_df, all_sed_df, all_bac_df)
+            # メモリ解放
             del raw_df
         else:
             featured_df = raw_df
@@ -187,6 +212,19 @@ class DataProcessor:
         gc.collect()
         
         print(f"[_03_] {year}年の特徴量抽出完了: {len(featured_df):,}件")
+        
+        # メモリ効率化: データ型を最適化（早い段階で実行）
+        try:
+            # 数値カラムの型を最適化
+            for col in featured_df.select_dtypes(include=['int64']).columns:
+                if featured_df[col].min() >= 0 and featured_df[col].max() <= 2147483647:
+                    featured_df[col] = featured_df[col].astype('int32')
+            for col in featured_df.select_dtypes(include=['float64']).columns:
+                featured_df[col] = pd.to_numeric(featured_df[col], downcast='float')
+            gc.collect()
+        except Exception as e:
+            print(f"警告: データ型最適化でエラーが発生しました（処理は続行）: {e}")
+        
         return featured_df
 
     def _convert_and_prepare_data(
@@ -284,6 +322,9 @@ class DataProcessor:
         for year in years:
             featured_df = self._process_single_year_features(year, data_types, all_sed_df, all_bac_df)
             featured_dfs.append(featured_df)
+            # 各年度処理後にメモリを解放
+            import gc
+            gc.collect()
         
         # 全年度のSED/BACデータを削除（使用済み）
         del all_sed_df, all_bac_df

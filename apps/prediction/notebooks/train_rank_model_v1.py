@@ -96,8 +96,24 @@ train_test_split_date = "2024-06-01"  # 2024年のデータを6月1日で分割�
 
 # メモリ使用量を削減するため、並列処理のワーカー数を制限
 import os
+import gc
 os.environ["DATA_PROCESSER_MAX_WORKERS"] = "1"  # 並列処理を無効化してメモリ使用量を削減
 os.environ["FEATURE_EXTRACTOR_MAX_WORKERS"] = "1"  # 特徴量抽出の並列処理も無効化
+
+# メモリ使用量を監視
+def print_memory_usage(stage: str):
+    """メモリ使用量を表示"""
+    try:
+        import psutil
+        import os as os_module
+        process = psutil.Process(os_module.getpid())
+        mem_info = process.memory_info()
+        mem_mb = mem_info.rss / 1024 / 1024
+        print(f"[メモリ使用量] {stage}: {mem_mb:.1f} MB")
+    except ImportError:
+        pass  # psutilがインストールされていない場合はスキップ
+
+print_memory_usage("処理開始前")
 
 try:
     # 複数年度のデータを処理（DataProcessorを使用）
@@ -107,9 +123,11 @@ try:
         split_date=train_test_split_date
     )
     
+    print_memory_usage("データ処理完了後")
+    
     # 変換済みデータは不要なので削除（既にtrain_df, test_dfに分割済み）
-    import gc
     gc.collect()
+    print_memory_usage("ガベージコレクション後")
     
     print(f"\n前処理完了: 学習={len(train_data):,}件, テスト={len(test_data):,}件")
     print(f"レース数: 学習={train_data.index.nunique() if train_data.index.name == 'race_key' else len(train_data)}, テスト={test_data.index.nunique() if test_data.index.name == 'race_key' else len(test_data)}")
@@ -128,9 +146,15 @@ try:
     if train_data_rank_count == 0 or test_data_rank_count == 0:
         raise ValueError(f"rank列が不足しています。学習={train_data_rank_count:,}件, 検証={test_data_rank_count:,}件")
     
-    train_data_for_enhancement = train_data
-    test_data_for_enhancement = test_data
-    evaluation_data_with_japanese_keys = evaluation_data  # 評価用データ（日本語キー、evaluation_schema.jsonに基づいて選択済み）
+    # メモリ効率化: 不要な参照を削除
+    train_data_for_enhancement = train_data.copy() if hasattr(train_data, 'copy') else train_data
+    test_data_for_enhancement = test_data.copy() if hasattr(test_data, 'copy') else test_data
+    evaluation_data_with_japanese_keys = evaluation_data.copy() if hasattr(evaluation_data, 'copy') else evaluation_data
+    
+    # 元の参照を削除してメモリを解放
+    del train_data, test_data, evaluation_data
+    gc.collect()
+    print_memory_usage("データコピー後")
     
     # キャッシュデータの整合性確認（evaluation_schema.jsonに基づく必須カラムの存在確認）
     print("\n評価用データの整合性確認中...")

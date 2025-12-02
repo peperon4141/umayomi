@@ -14,6 +14,15 @@ class TestPreviousRaceExtractor:
     @pytest.fixture
     def sample_data(self):
         """サンプルデータを作成（前走データ抽出用）"""
+        # race_keyを事前定義（LZH→Parquet変換時に生成される想定）
+        def _generate_race_key(year: int, month: int, day: int, place_code: int, kaisai_round: int, kaisai_day: str, race_number: int) -> str:
+            date_str = f"{year:04d}{month:02d}{day:02d}"
+            place_code_str = f"{place_code:02d}"
+            round_str = f"{kaisai_round:02d}"
+            day_str = str(kaisai_day).lower()
+            race_str = f"{race_number:02d}"
+            return f"{date_str}_{place_code_str}_{round_str}_{day_str}_{race_str}"
+        
         # 同じ馬が複数レースに出走するデータを作成
         kyi_df = pd.DataFrame({
             "場コード": [1, 1, 1],
@@ -24,6 +33,11 @@ class TestPreviousRaceExtractor:
             "血統登録番号": ["12345678", "12345678", "12345678"],  # 同じ馬
             "騎手コード": ["J001", "J001", "J001"],
             "調教師コード": ["T001", "T001", "T001"],
+            "race_key": [
+                _generate_race_key(2024, 1, 1, 1, 1, "1", 1),
+                _generate_race_key(2024, 1, 2, 1, 1, "1", 2),
+                _generate_race_key(2024, 1, 10, 1, 2, "1", 1),
+            ],  # 事前定義済みのキー
         })
         
         bac_df = pd.DataFrame({
@@ -33,6 +47,11 @@ class TestPreviousRaceExtractor:
             "R": [1, 2, 1],
             "年月日": [20240101, 20240102, 20240110],
             "発走時刻": [1200, 1300, 1200],
+            "race_key": [
+                _generate_race_key(2024, 1, 1, 1, 1, "1", 1),
+                _generate_race_key(2024, 1, 2, 1, 1, "1", 2),
+                _generate_race_key(2024, 1, 10, 1, 2, "1", 1),
+            ],  # 事前定義済みのキー
         })
         
         # 過去レースを含むSEDデータ（時系列順）
@@ -52,21 +71,15 @@ class TestPreviousRaceExtractor:
             "馬場状態": [1, 1, 2],
             "頭数": [10, 12, 10],
             "年月日": [20240101, 20240102, 20240110],
+            "race_key": [
+                _generate_race_key(2024, 1, 1, 1, 1, "1", 1),
+                _generate_race_key(2024, 1, 2, 1, 1, "1", 2),
+                _generate_race_key(2024, 1, 10, 1, 2, "1", 1),
+            ],  # 事前定義済みのキー
         })
         
-        # race_keyを追加
-        from src.data_processer._03_01_feature_converter import FeatureConverter
-        df = kyi_df.copy()
-        df = df.merge(bac_df[["場コード", "回", "日", "R", "年月日"]], on=["場コード", "回", "日", "R"], how="left")
-        df["race_key"] = df.apply(
-            lambda row: FeatureConverter.generate_race_key(
-                2024, 1, int(row["日"]), f"{row['場コード']:02d}", row["回"], row["日"], row["R"]
-            ),
-            axis=1
-        )
-        
         return {
-            "df": df,
+            "df": kyi_df,
             "sed_df": sed_df,
             "bac_df": bac_df,
         }

@@ -59,6 +59,9 @@ class TestDataProcessor:
     @patch('src.data_processer._01_parquet_loader.ParquetLoader.load')
     def test_process_minimal_data(self, mock_load, processor):
         """最小限のデータ（KYI+BACのみ）でのテスト"""
+        # race_keyを事前定義（LZH→Parquet変換時に生成される想定）
+        race_key = "20240101_01_01_1_01"
+        
         minimal_data = {
             "KYI": pd.DataFrame({
                 "場コード": [1],
@@ -69,6 +72,7 @@ class TestDataProcessor:
                 "血統登録番号": ["12345678"],
                 "騎手コード": ["J001"],
                 "調教師コード": ["T001"],
+                "race_key": [race_key],  # 事前定義済みのキー
             }),
             "BAC": pd.DataFrame({
                 "場コード": [1],
@@ -77,6 +81,7 @@ class TestDataProcessor:
                 "R": [1],
                 "年月日": [20240101],
                 "発走時刻": [1200],
+                "race_key": [race_key],  # 事前定義済みのキー
             }),
         }
         mock_load.return_value = minimal_data
@@ -130,8 +135,13 @@ class TestDataProcessor:
         # 2024年のBACデータの年月日を後半に設定
         data_2024["BAC"] = data_2024["BAC"].copy()
         data_2024["BAC"]["年月日"] = 20240701  # 2024年7月1日（split_dateより後）
+        # race_keyも更新（年月日に合わせて）
+        data_2024["BAC"]["race_key"] = "20240701_01_01_1_01"
         data_2024["SED"] = data_2024["SED"].copy()
         data_2024["SED"]["年月日"] = 20240701
+        data_2024["SED"]["race_key"] = "20240701_01_01_1_01"
+        data_2024["KYI"] = data_2024["KYI"].copy()
+        data_2024["KYI"]["race_key"] = "20240701_01_01_1_01"
         
         def load_side_effect(data_types, year):
             if data_types == ["SED", "BAC"]:
