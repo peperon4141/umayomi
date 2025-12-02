@@ -1,0 +1,22 @@
+{
+  "dataType": "SRA",
+  "description": "JRDB成績レースデータ（SRA）",
+  "recordLength": 1018,
+  "encoding": "ShiftJIS",
+  "lineEnding": "CRLF",
+  "fields": [
+    {"name":"場コード","start":1,"length":2,"type":"integer_nine","description":"場コード"},
+    {"name":"年","start":3,"length":2,"type":"integer_nine","description":"年"},
+    {"name":"回","start":5,"length":1,"type":"integer_nine","description":"回"},
+    {"name":"日","start":6,"length":1,"type":"string_hex","description":"16進数(数字 or 小文字アルファベット)"},
+    {"name":"R","start":7,"length":2,"type":"integer_nine","description":"Ｒ"},
+    {"name":"ハロンタイム","start":999,"length":18,"type":"integer_nine","description":"9 3*18=54BYTE"},
+    {"name":"1コーナー","start":63,"length":64,"type":"string","description":"１コーナー"},
+    {"name":"2コーナー","start":127,"length":64,"type":"string","description":"２コーナー"},
+    {"name":"3コーナー","start":191,"length":64,"type":"string","description":"３コーナー"},
+    {"name":"4コーナー","start":255,"length":64,"type":"string","description":"４コーナー"},
+    {"name":"予備1","start":319,"length":80,"type":"string","description":"スペース"},
+    {"name":"予備2","start":399,"length":8,"type":"string","description":"スペース"},
+    {"name":"改行","start":407,"length":2,"type":"string","description":"ＣＲ・ＬＦ"}
+  ]
+}

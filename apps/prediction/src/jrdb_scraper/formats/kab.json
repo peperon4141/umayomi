@@ -1,0 +1,22 @@
+{
+  "dataType": "KAB",
+  "description": "JRDB開催データ（KAB）",
+  "recordLength": 70,
+  "encoding": "ShiftJIS",
+  "lineEnding": "CRLF",
+  "fields": [
+    {"name":"場コード","start":1,"length":2,"type":"integer_nine","description":"場コード"},
+    {"name":"年","start":3,"length":2,"type":"integer_nine","description":"年"},
+    {"name":"回","start":5,"length":1,"type":"integer_nine","description":"回"},
+    {"name":"日","start":6,"length":1,"type":"string_hex","description":"16進数(数字 or 小文字アルファベット)"},
+    {"name":"R","start":7,"length":2,"type":"integer_nine","description":"Ｒ"},
+    {"name":"年月日","start":9,"length":8,"type":"integer_nine","description":"YYYYMMDD"},
+    {"name":"開催名","start":17,"length":10,"type":"string","description":"開催名"},
+    {"name":"予備1","start":27,"length":3,"type":"string","description":"予備"},
+    {"name":"予備2","start":30,"length":20,"type":"string","description":"予備"},
+    {"name":"数値1","start":50,"length":10,"type":"string","description":"数値フィールド"},
+    {"name":"数値2","start":60,"length":8,"type":"string","description":"数値フィールド"},
+    {"name":"改行","start":68,"length":2,"type":"string","description":"ＣＲ・ＬＦ"}
+  ]
+}
+

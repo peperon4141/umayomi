@@ -1,0 +1,36 @@
+{
+  "dataType": "KTA",
+  "description": "JRDB登録馬データ（KTA）",
+  "recordLength": 386,
+  "encoding": "ShiftJIS",
+  "lineEnding": "CRLF",
+  "fields": [
+    {"name":"場コード","start":1,"length":2,"type":"integer_nine","description":"場コード"},
+    {"name":"年","start":3,"length":2,"type":"integer_nine","description":"年"},
+    {"name":"回","start":5,"length":1,"type":"integer_nine","description":"回"},
+    {"name":"日","start":6,"length":1,"type":"string_hex","description":"16進数(数字 or 小文字アルファベット)"},
+    {"name":"R","start":7,"length":2,"type":"integer_nine","description":"Ｒ"},
+    {"name":"馬番","start":9,"length":2,"type":"integer_nine","description":"馬番"},
+    {"name":"馬名","start":11,"length":20,"type":"string","description":"馬名"},
+    {"name":"生年","start":31,"length":4,"type":"integer_nine","description":"生年"},
+    {"name":"予備1","start":35,"length":40,"type":"string","description":"予備"},
+    {"name":"血統登録番号","start":75,"length":8,"type":"integer_nine","description":"血統登録番号"},
+    {"name":"馬名2","start":83,"length":20,"type":"string","description":"馬名（重複）"},
+    {"name":"予備2","start":103,"length":20,"type":"string","description":"予備"},
+    {"name":"数値1","start":123,"length":3,"type":"integer_zero_blank","description":"数値フィールド"},
+    {"name":"騎手名","start":126,"length":10,"type":"string","description":"騎手名"},
+    {"name":"負担重量","start":136,"length":3,"type":"integer_nine","description":"負担重量"},
+    {"name":"調教師名","start":139,"length":10,"type":"string","description":"調教師名"},
+    {"name":"調教師所属","start":149,"length":4,"type":"string","description":"調教師所属"},
+    {"name":"数値2","start":153,"length":5,"type":"string","description":"数値フィールド"},
+    {"name":"数値3","start":158,"length":3,"type":"integer_nine","description":"数値フィールド"},
+    {"name":"数値4","start":161,"length":3,"type":"integer_nine","description":"数値フィールド"},
+    {"name":"数値5","start":164,"length":2,"type":"integer_nine","description":"数値フィールド"},
+    {"name":"日付1","start":166,"length":8,"type":"integer_nine","description":"日付"},
+    {"name":"日付2","start":174,"length":8,"type":"integer_nine","description":"日付"},
+    {"name":"日付3","start":182,"length":8,"type":"integer_nine","description":"日付"},
+    {"name":"予備3","start":190,"length":194,"type":"string","description":"予備"},
+    {"name":"改行","start":384,"length":2,"type":"string","description":"ＣＲ・ＬＦ"}
+  ]
+}
+

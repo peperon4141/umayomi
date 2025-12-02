@@ -1,0 +1,31 @@
+{
+  "dataType": "UKC",
+  "description": "JRDB馬基本データ（UKC）",
+  "recordLength": 292,
+  "encoding": "ShiftJIS",
+  "lineEnding": "CRLF",
+  "fields": [
+    {"name":"血統登録番号","start":1,"length":8,"type":"string","description":"血統登録番号"},
+    {"name":"馬名","start":9,"length":36,"type":"string","description":"全角１８文字"},
+    {"name":"性別コード","start":45,"length":1,"type":"integer_nine","description":"1:牡,2:牝,3,セン"},
+    {"name":"毛色コード","start":46,"length":2,"type":"integer_nine","description":"コード表参照"},
+    {"name":"馬記号コード","start":48,"length":2,"type":"integer_nine","description":"コード表参照"},
+    {"name":"父馬名","start":50,"length":36,"type":"string","description":"全角１８文字"},
+    {"name":"母馬名","start":86,"length":36,"type":"string","description":"全角１８文字"},
+    {"name":"母父馬名","start":122,"length":36,"type":"string","description":"全角１８文字"},
+    {"name":"生年月日","start":158,"length":8,"type":"integer_nine","description":"YYYYMMDD"},
+    {"name":"父馬生年","start":166,"length":4,"type":"integer_nine","description":"YYYY 血統キー用"},
+    {"name":"母馬生年","start":170,"length":4,"type":"integer_nine","description":"YYYY 血統キー用"},
+    {"name":"母父馬生年","start":174,"length":4,"type":"integer_nine","description":"YYYY 血統キー用"},
+    {"name":"馬主名","start":178,"length":40,"type":"string","description":"全角２０文字"},
+    {"name":"馬主会コード","start":218,"length":2,"type":"integer_nine","description":"競馬場毎にある。場コードと同じ"},
+    {"name":"生産者名","start":220,"length":40,"type":"string","description":"全角２０文字"},
+    {"name":"産地名","start":260,"length":8,"type":"string","description":"全角４文字"},
+    {"name":"登録抹消フラグ","start":268,"length":1,"type":"integer_nine","description":"0:現役,1:抹消"},
+    {"name":"データ年月日","start":269,"length":8,"type":"integer_nine","description":"YYYYMMDD"},
+    {"name":"父系統コード","start":277,"length":4,"type":"integer_nine","description":"父系統コード"},
+    {"name":"母父系統コード","start":281,"length":4,"type":"integer_nine","description":"母父系統コード"},
+    {"name":"予備","start":285,"length":6,"type":"string","description":"スペース"},
+    {"name":"改行","start":291,"length":2,"type":"string","description":"ＣＲ・ＬＦ"}
+  ]
+}

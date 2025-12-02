@@ -1,0 +1,18 @@
+{
+  "dataType": "OU",
+  "description": "JRDB基準オッズデータ（OU）- 馬単",
+  "recordLength": 1856,
+  "encoding": "ShiftJIS",
+  "lineEnding": "CRLF",
+  "fields": [
+    {"name":"場コード","start":1,"length":2,"type":"integer_nine","description":"場コード"},
+    {"name":"年","start":3,"length":2,"type":"integer_nine","description":"年"},
+    {"name":"回","start":5,"length":1,"type":"integer_nine","description":"回"},
+    {"name":"日","start":6,"length":1,"type":"string_hex","description":"16進数(数字 or 小文字アルファベット)"},
+    {"name":"R","start":7,"length":2,"type":"integer_nine","description":"Ｒ"},
+    {"name":"登録頭数","start":9,"length":2,"type":"integer_zero_blank","description":"登録頭数"},
+    {"name":"馬単オッズ306","start":11,"length":6,"type":"string","description":"馬単オッズ 306"},
+    {"name":"予備","start":1847,"length":8,"type":"string","description":"スペース"},
+    {"name":"改行","start":1855,"length":2,"type":"string","description":"ＣＲ・ＬＦ"}
+  ]
+}

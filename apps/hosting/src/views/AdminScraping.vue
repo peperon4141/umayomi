@@ -315,18 +315,13 @@ const executeTask = async () => {
       ...(taskType === ScrapingTaskType.RACE_RESULT && { day: day.value! })
     }
 
-    console.log('タスク実行:', { taskType, params })
-    
     const result = await callScrapingFunction(taskType, params)
     
     if (result.success) {
-      console.log('タスク実行成功:', result)
       await refreshData()
-    } else {
-      console.error('タスク実行失敗:', result.error)
     }
   } catch (error) {
-    console.error('タスク実行エラー:', error)
+    // エラーはuseCloudFunctionsで処理されるため、ここでは処理しない
   } finally {
     isExecuting.value = false
   }

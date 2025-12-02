@@ -201,10 +201,19 @@ describe('handleFetchJRDBDailyData', () => {
         success: true,
         message: 'BACデータの取得が完了しました（日付: 2025-11-02）',
         date: '2025-11-02',
-        dataType: 'BAC',
-        recordCount: 24,
-        lzhStoragePath: 'jrdb/lzh/BAC251102.lzh',
-        fileName: 'BAC251102',
+        totalDataTypes: 1,
+        successCount: 1,
+        failureCount: 0,
+        results: expect.arrayContaining([
+          expect.objectContaining({
+            date: '2025-11-02',
+            dataType: 'BAC',
+            success: true,
+            recordCount: 24,
+            lzhStoragePath: 'jrdb/lzh/BAC251102.lzh',
+            fileName: 'BAC251102'
+          })
+        ]),
         executionTimeMs: expect.any(Number)
       })
     )

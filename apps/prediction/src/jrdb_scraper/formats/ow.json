@@ -1,0 +1,18 @@
+{
+  "dataType": "OW",
+  "description": "JRDB基準オッズデータ（OW）- ワイド",
+  "recordLength": 780,
+  "encoding": "ShiftJIS",
+  "lineEnding": "CRLF",
+  "fields": [
+    {"name":"場コード","start":1,"length":2,"type":"integer_nine","description":"場コード"},
+    {"name":"年","start":3,"length":2,"type":"integer_nine","description":"年"},
+    {"name":"回","start":5,"length":1,"type":"integer_nine","description":"回"},
+    {"name":"日","start":6,"length":1,"type":"string_hex","description":"16進数(数字 or 小文字アルファベット)"},
+    {"name":"R","start":7,"length":2,"type":"integer_nine","description":"Ｒ"},
+    {"name":"登録頭数","start":9,"length":2,"type":"integer_zero_blank","description":"登録頭数"},
+    {"name":"ワイドオッズ153","start":11,"length":5,"type":"string","description":"オッズ範囲の下側を出力"},
+    {"name":"予備","start":776,"length":3,"type":"string","description":"ＣＲ・ＬＦ"},
+    {"name":"改行","start":779,"length":2,"type":"string","description":"ＣＲ・ＬＦ"}
+  ]
+}

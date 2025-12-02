@@ -1,0 +1,23 @@
+{
+  "dataType": "KKA",
+  "description": "JRDB拡張競走馬データ（KKA）",
+  "recordLength": 324,
+  "encoding": "ShiftJIS",
+  "lineEnding": "CRLF",
+  "fields": [
+    {"name":"場コード","start":1,"length":2,"type":"integer_nine","description":"場コード"},
+    {"name":"年","start":3,"length":2,"type":"integer_nine","description":"年"},
+    {"name":"回","start":5,"length":1,"type":"integer_nine","description":"回"},
+    {"name":"日","start":6,"length":1,"type":"string_hex","description":"16進数(数字 or 小文字アルファベット)"},
+    {"name":"R","start":7,"length":2,"type":"integer_nine","description":"Ｒ"},
+    {"name":"馬番","start":9,"length":2,"type":"integer_nine","description":"馬番"},
+    {"name":"父馬産駒芝連対率","start":287,"length":3,"type":"integer_zero_blank","description":"※３ 単位％"},
+    {"name":"父馬産駒ダ連対率","start":290,"length":3,"type":"integer_zero_blank","description":"※３ 単位％"},
+    {"name":"父馬産駒連対平均距離","start":293,"length":4,"type":"integer_nine","description":"※３"},
+    {"name":"母父馬産駒芝連対率","start":297,"length":3,"type":"integer_zero_blank","description":"※３ 単位％"},
+    {"name":"母父馬産駒ダ連対率","start":300,"length":3,"type":"integer_zero_blank","description":"※３ 単位％"},
+    {"name":"母父馬産駒連対平均距離","start":303,"length":4,"type":"integer_nine","description":"※３"},
+    {"name":"予備","start":307,"length":16,"type":"string","description":"スペース"},
+    {"name":"改行","start":323,"length":2,"type":"string","description":"ＣＲ・ＬＦ"}
+  ]
+}

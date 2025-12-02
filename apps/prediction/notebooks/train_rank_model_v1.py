@@ -31,9 +31,7 @@ for module_name in submodules_to_reload:
     if module_name in sys.modules:
         importlib.reload(sys.modules[module_name])
 
-import numpy as np
 import pandas as pd
-import lightgbm as lgb
 import matplotlib.pyplot as plt
 import matplotlib
 import seaborn as sns
@@ -49,7 +47,6 @@ except:
 
 from src.data_processer import DataProcessor
 from src.rank_predictor import RankPredictor
-from src.features import Features
 from src.feature_enhancers import enhance_features
 
 pd.set_option('display.max_columns', None)
@@ -73,77 +70,90 @@ DATA_TYPES = [
 YEARS = [2024]
 
 # モデル保存パス（日時ベース）
-model_timestamp = datetime.now().strftime('%Y%m%d%H%M')
-MODEL_PATH = Path(__file__).parent.parent / 'models' / f'rank_model_{model_timestamp}_v1.txt'
+model_save_timestamp = datetime.now().strftime('%Y%m%d%H%M')
+MODEL_PATH = Path(__file__).parent.parent / 'models' / f'rank_model_{model_save_timestamp}_v1.txt'
 MODEL_PATH.parent.mkdir(parents=True, exist_ok=True)
 
-print(f"BASE_PATH: {BASE_PATH.absolute()}")
-if BASE_PATH.exists():
-    npz_files = list(BASE_PATH.glob('*.npz'))
-    print(f"見つかったNPZファイル: {len(npz_files)}件")
-    for f in npz_files[:5]:
-        print(f"  - {f.name}")
+# Parquetファイルは apps/prediction/cache/jrdb/parquet/ に保存されている
+jrdb_parquet_cache_directory = Path(__file__).parent.parent / 'cache' / 'jrdb' / 'parquet'
+print(f"Parquetファイルパス: {jrdb_parquet_cache_directory.absolute()}")
+if jrdb_parquet_cache_directory.exists():
+    jrdb_parquet_files_for_2024 = list(jrdb_parquet_cache_directory.glob('*_2024.parquet'))
+    print(f"見つかった2024年度のParquetファイル: {len(jrdb_parquet_files_for_2024)}件")
+    for parquet_file in jrdb_parquet_files_for_2024[:5]:
+        print(f"  - {parquet_file.name}")
 else:
-    print(f"警告: {BASE_PATH} が存在しません")
+    print(f"警告: {jrdb_parquet_cache_directory} が存在しません")
 
 # %%
 # ## データ読み込みと前処理
-base_project_path = Path(__file__).resolve().parent.parent  # notebooks/ -> apps/prediction/
-data_processor = DataProcessor(base_path=base_project_path.parent.parent)  # apps/prediction/ -> プロジェクトルート
+prediction_app_directory = Path(__file__).resolve().parent.parent  # notebooks/ -> apps/prediction/
+project_root_directory = prediction_app_directory.parent.parent  # apps/prediction/ -> プロジェクトルート
+data_processor = DataProcessor(base_path=project_root_directory)
 
-print("データ読み込みと前処理を開始します...")
-split_date = "2024-06-01"
+print("[_01_] データ読み込みと前処理を開始します...")
+train_test_split_date = "2024-06-01"  # 2024年のデータを6月1日で分割（学習/テスト）
+
+# メモリ使用量を削減するため、並列処理のワーカー数を制限
+import os
+os.environ["DATA_PROCESSER_MAX_WORKERS"] = "1"  # 並列処理を無効化してメモリ使用量を削減
+os.environ["FEATURE_EXTRACTOR_MAX_WORKERS"] = "1"  # 特徴量抽出の並列処理も無効化
 
 try:
-    train_df, test_df, eval_df = data_processor.process(
+    # 複数年度のデータを処理（DataProcessorを使用）
+    train_data, test_data, evaluation_data = data_processor.process_multiple_years(
         data_types=DATA_TYPES,
-        year=YEARS[0],
-        split_date=split_date,
+        years=YEARS,
+        split_date=train_test_split_date
     )
     
-    print(f"\n前処理完了: 学習={len(train_df):,}件, テスト={len(test_df):,}件")
-    print(f"レース数: 学習={train_df.index.nunique() if train_df.index.name == 'race_key' else len(train_df)}, テスト={test_df.index.nunique() if test_df.index.name == 'race_key' else len(test_df)}")
-    print(f"\nデータ形状: 学習={train_df.shape}, テスト={test_df.shape}")
+    # 変換済みデータは不要なので削除（既にtrain_df, test_dfに分割済み）
+    import gc
+    gc.collect()
+    
+    print(f"\n前処理完了: 学習={len(train_data):,}件, テスト={len(test_data):,}件")
+    print(f"レース数: 学習={train_data.index.nunique() if train_data.index.name == 'race_key' else len(train_data)}, テスト={test_data.index.nunique() if test_data.index.name == 'race_key' else len(test_data)}")
+    print(f"\nデータ形状: 学習={train_data.shape}, テスト={test_data.shape}")
     
     # rank列の確認
-    if 'rank' not in train_df.columns:
-        raise ValueError("train_dfにrank列が含まれていません。filter_training_columns()でtarget_variableが含まれるはずです。")
-    if 'rank' not in test_df.columns:
-        raise ValueError("test_dfにrank列が含まれていません。filter_training_columns()でtarget_variableが含まれるはずです。")
+    if 'rank' not in train_data.columns:
+        raise ValueError("train_dataにrank列が含まれていません。filter_training_columns()でtarget_variableが含まれるはずです。")
+    if 'rank' not in test_data.columns:
+        raise ValueError("test_dataにrank列が含まれていません。filter_training_columns()でtarget_variableが含まれるはずです。")
     
-    train_rank_count = train_df['rank'].notna().sum()
-    test_rank_count = test_df['rank'].notna().sum()
-    print(f"rank列の状態: 学習={train_rank_count:,}件, 検証={test_rank_count:,}件")
+    train_data_rank_count = train_data['rank'].notna().sum()
+    test_data_rank_count = test_data['rank'].notna().sum()
+    print(f"rank列の状態: 学習={train_data_rank_count:,}件, 検証={test_data_rank_count:,}件")
     
-    if train_rank_count == 0 or test_rank_count == 0:
-        raise ValueError(f"rank列が不足しています。学習={train_rank_count:,}件, 検証={test_rank_count:,}件")
+    if train_data_rank_count == 0 or test_data_rank_count == 0:
+        raise ValueError(f"rank列が不足しています。学習={train_data_rank_count:,}件, 検証={test_data_rank_count:,}件")
     
-    df = train_df
-    val_df = test_df
-    original_df = eval_df  # eval_dfが評価用データ（日本語キー、evaluation_schema.jsonに基づいて選択済み）
+    train_data_for_enhancement = train_data
+    test_data_for_enhancement = test_data
+    evaluation_data_with_japanese_keys = evaluation_data  # 評価用データ（日本語キー、evaluation_schema.jsonに基づいて選択済み）
     
     # キャッシュデータの整合性確認（evaluation_schema.jsonに基づく必須カラムの存在確認）
     print("\n評価用データの整合性確認中...")
     # インデックスがrace_keyの場合は一時的にリセットして確認
-    original_df_for_check = original_df.reset_index() if original_df.index.name == "race_key" else original_df.copy()
-    required_eval_cols = ["race_key", "馬番", "着順"]
-    missing_cols = [col for col in required_eval_cols if col not in original_df_for_check.columns]
-    if missing_cols:
-        print(f"警告: 評価用データに必須カラムが不足しています: {missing_cols}")
+    evaluation_data_for_column_check = evaluation_data_with_japanese_keys.reset_index() if evaluation_data_with_japanese_keys.index.name == "race_key" else evaluation_data_with_japanese_keys.copy()
+    required_evaluation_columns = ["race_key", "馬番", "着順"]
+    missing_evaluation_columns = [col for col in required_evaluation_columns if col not in evaluation_data_for_column_check.columns]
+    if missing_evaluation_columns:
+        print(f"警告: 評価用データに必須カラムが不足しています: {missing_evaluation_columns}")
         print("evaluation_schema.jsonに基づいて再選択します...")
-        from src.data_processer.column_selector import ColumnSelector
-        column_selector = ColumnSelector(base_path=base_project_path.parent.parent)
+        from src.data_processer._06_column_selector import ColumnSelector
+        column_selector = ColumnSelector(base_path=project_root_directory)
         # featured_dfを再読み込みする必要があるが、キャッシュから読み込んだeval_dfが不整合な場合は
         # データ処理を再実行する必要がある（キャッシュを無効化）
         # ここでは、eval_dfをそのまま使用し、不足しているカラムがあればエラーを投げる
-        raise ValueError(f"キャッシュから読み込んだeval_dfがevaluation_schema.jsonに準拠していません。必須カラムが不足: {missing_cols}。キャッシュを削除して再処理してください。")
+        raise ValueError(f"キャッシュから読み込んだeval_dfがevaluation_schema.jsonに準拠していません。必須カラムが不足: {missing_evaluation_columns}。キャッシュを削除して再処理してください。")
     else:
-        print(f"評価用データの整合性確認完了（必須カラムが存在します: {required_eval_cols}）")
+        print(f"評価用データの整合性確認完了（必須カラムが存在します: {required_evaluation_columns}）")
         # オプションカラムの存在確認（情報表示のみ）
-        optional_eval_cols = ["WIN5フラグ", "確定単勝オッズ"]
-        existing_optional_cols = [col for col in optional_eval_cols if col in original_df_for_check.columns]
-        if existing_optional_cols:
-            print(f"オプションカラムが存在します: {existing_optional_cols}")
+        optional_evaluation_columns = ["WIN5フラグ", "確定単勝オッズ"]
+        existing_optional_evaluation_columns = [col for col in optional_evaluation_columns if col in evaluation_data_for_column_check.columns]
+        if existing_optional_evaluation_columns:
+            print(f"オプションカラムが存在します: {existing_optional_evaluation_columns}")
         else:
             print("オプションカラムは存在しません（WIN5フラグ、確定単勝オッズ）")
         
@@ -160,41 +170,137 @@ print("特徴量強化を開始します...")
 print("=" * 80)
 
 # レースキーの取得方法を確認
-race_key_col = "race_key"
-if df.index.name == race_key_col:
-    # インデックスがrace_keyの場合、一時的にリセット
-    df_for_enhance = df.reset_index()
-    val_df_for_enhance = val_df.reset_index()
-    use_index = True
+race_key_column_name = "race_key"
+
+# race_keyがインデックスまたはカラムとして存在するか確認
+if train_data_for_enhancement.index.name == race_key_column_name:
+    # インデックス名がrace_keyの場合、一時的にリセット
+    train_data_with_reset_index = train_data_for_enhancement.reset_index()
+    test_data_with_reset_index = test_data_for_enhancement.reset_index()
+    should_restore_race_key_index = True
+elif race_key_column_name in train_data_for_enhancement.columns:
+    # race_keyがカラムの場合
+    train_data_with_reset_index = train_data_for_enhancement.copy()
+    test_data_with_reset_index = test_data_for_enhancement.copy()
+    should_restore_race_key_index = False
+elif train_data_for_enhancement.index.name is None and len(train_data_for_enhancement.index) > 0:
+    # インデックス名がNoneでも、インデックスが存在する場合（Parquet読み込み時など）
+    # インデックスをリセットしてカラムに変換（インデックス値がrace_keyの可能性がある）
+    train_data_with_reset_index = train_data_for_enhancement.reset_index()
+    test_data_with_reset_index = test_data_for_enhancement.reset_index()
+    # リセット後のカラム名を確認
+    if race_key_column_name in train_data_with_reset_index.columns:
+        should_restore_race_key_index = True
+    else:
+        # リセット後もrace_keyが存在しない場合、エラー
+        raise ValueError(
+            f"race_key（{race_key_column_name}）がインデックスにもカラムにも存在しません。\n"
+            f"  インデックス名: {train_data_for_enhancement.index.name}\n"
+            f"  インデックス型: {type(train_data_for_enhancement.index)}\n"
+            f"  カラム（最初の10個）: {list(train_data_for_enhancement.columns[:10])}\n"
+            f"  リセット後のカラム: {list(train_data_with_reset_index.columns[:10])}\n"
+            f"  データ形状: {train_data_for_enhancement.shape}"
+        )
 else:
-    df_for_enhance = df.copy()
-    val_df_for_enhance = val_df.copy()
-    use_index = False
+    # race_keyが存在しない場合、エラーを投げる（デバッグ情報付き）
+    raise ValueError(
+        f"race_key（{race_key_column_name}）がインデックスにもカラムにも存在しません。\n"
+        f"  インデックス名: {train_data_for_enhancement.index.name}\n"
+        f"  インデックス型: {type(train_data_for_enhancement.index)}\n"
+        f"  カラム（最初の10個）: {list(train_data_for_enhancement.columns[:10])}\n"
+        f"  データ形状: {train_data_for_enhancement.shape}"
+    )
 
 # 特徴量強化を実行
-df_enhanced = enhance_features(df_for_enhance, race_key_col)
-val_df_enhanced = enhance_features(val_df_for_enhance, race_key_col)
+train_data_after_enhancement = enhance_features(train_data_with_reset_index, race_key_column_name)
+test_data_after_enhancement = enhance_features(test_data_with_reset_index, race_key_column_name)
 
 # インデックスを復元（必要に応じて）
-if use_index:
-    df_enhanced = df_enhanced.set_index(race_key_col)
-    val_df_enhanced = val_df_enhanced.set_index(race_key_col)
+if should_restore_race_key_index:
+    train_data_after_enhancement = train_data_after_enhancement.set_index(race_key_column_name)
+    test_data_after_enhancement = test_data_after_enhancement.set_index(race_key_column_name)
     # 元のインデックス順序を保持
-    if len(df_enhanced) == len(df):
-        df_enhanced = df_enhanced.reindex(df.index)
-    if len(val_df_enhanced) == len(val_df):
-        val_df_enhanced = val_df_enhanced.reindex(val_df.index)
+    if len(train_data_after_enhancement) == len(train_data_for_enhancement):
+        train_data_after_enhancement = train_data_after_enhancement.reindex(train_data_for_enhancement.index)
+    if len(test_data_after_enhancement) == len(test_data_for_enhancement):
+        test_data_after_enhancement = test_data_after_enhancement.reindex(test_data_for_enhancement.index)
 
 # 更新されたDataFrameを使用
-df = df_enhanced
-val_df = val_df_enhanced
+train_data_with_enhanced_features = train_data_after_enhancement
+test_data_with_enhanced_features = test_data_after_enhancement
 
-print(f"\n特徴量強化後のデータ形状: 学習={df.shape}, テスト={val_df.shape}")
+print(f"\n特徴量強化後のデータ形状: 学習={train_data_with_enhanced_features.shape}, テスト={test_data_with_enhanced_features.shape}")
+
+# %%
+# ## リークチェック用データの保存（前走データ含む）
+# 特徴量抽出完了後のfeatured_df（前走データ含む、日本語キー）をキャッシュから読み込んで保存
+# リークチェックには前走データ（prev_*_race_key）が含まれる段階のデータが必要
+print("\n" + "=" * 80)
+print("リークチェック用データを保存中...")
+print("=" * 80)
+
+# CacheManagerからfeatured_dfを読み込み（前走データ含む）
+from src.data_processer._07_cache_manager import CacheManager
+data_cache_manager = CacheManager(project_root / "cache")
+
+# 複数年度の場合は最初の年度のfeatured_dfを読み込む
+feature_extracted_data_with_previous_races = None
+for year in YEARS:
+    feature_extracted_data_with_previous_races = data_cache_manager.load_featured_df(DATA_TYPES, year, train_test_split_date)
+    if feature_extracted_data_with_previous_races is not None:
+        print(f"  {year}年度のfeature_extracted_data_with_previous_racesを読み込み: {len(feature_extracted_data_with_previous_races):,}件")
+        break
+
+if feature_extracted_data_with_previous_races is None:
+    print("警告: feature_extracted_data_with_previous_racesのキャッシュが見つかりません。リークチェック用データを保存できません。")
+    print("      データ処理を実行してから再度試してください。")
+else:
+    # 前走データのカラムを確認
+    previous_race_key_column_names = [f"prev_{i}_race_key" for i in range(1, 6)]
+    existing_previous_race_key_columns = [col for col in previous_race_key_column_names if col in feature_extracted_data_with_previous_races.columns]
+    if existing_previous_race_key_columns:
+        print(f"  前走データカラムを確認: {len(existing_previous_race_key_columns)}個のprev_*_race_keyカラムが見つかりました")
+    else:
+        print("  警告: 前走データのrace_keyカラムが見つかりません")
+    
+    # 時系列分割（train_test_split_dateに基づく）
+    if train_test_split_date:
+        from src.data_processer._05_time_series_splitter import TimeSeriesSplitter
+        # feature_extracted_data_with_previous_racesにstart_datetimeを追加（まだ追加されていない場合）
+        if "start_datetime" not in feature_extracted_data_with_previous_races.columns:
+            from src.data_processer._03_01_feature_converter import FeatureConverter
+            feature_extracted_data_with_previous_races = FeatureConverter.add_start_datetime_to_df(feature_extracted_data_with_previous_races)
+        
+        # race_keyをインデックスに設定（まだ設定されていない場合）
+        if feature_extracted_data_with_previous_races.index.name != "race_key" and "race_key" in feature_extracted_data_with_previous_races.columns:
+            feature_extracted_data_with_previous_races = feature_extracted_data_with_previous_races.set_index("race_key")
+        
+        # 時系列分割
+        time_series_splitter = TimeSeriesSplitter()
+        train_data_with_previous_races, test_data_with_previous_races = time_series_splitter.split(feature_extracted_data_with_previous_races, train_test_split_date)
+        
+        # リークチェック用に保存（apps/prediction/cache/leak_check/）
+        leak_check_cache_directory = project_root / "cache" / "leak_check"
+        leak_check_cache_directory.mkdir(parents=True, exist_ok=True)
+        
+        train_data_cache_file_path = leak_check_cache_directory / f"train_featured_{YEARS[0]}_{train_test_split_date.replace('-', '')}.parquet"
+        test_data_cache_file_path = leak_check_cache_directory / f"test_featured_{YEARS[0]}_{train_test_split_date.replace('-', '')}.parquet"
+        
+        train_data_with_previous_races.to_parquet(train_data_cache_file_path)
+        test_data_with_previous_races.to_parquet(test_data_cache_file_path)
+        
+        print(f"  学習データ（前走データ含む）: {train_data_cache_file_path}")
+        print(f"  テストデータ（前走データ含む）: {test_data_cache_file_path}")
+        print(f"\n✅ リークチェック用データ保存完了: {leak_check_cache_directory.absolute()}")
+        print(f"リークチェックを実行する場合:")
+        print(f"  python {project_root / 'tmp' / 'check_leakage.py'}")
+    else:
+        print("  警告: train_test_split_dateが指定されていないため、時系列分割ができません。")
 
 # %%
 # ## モデル学習
 # RankPredictorのインスタンスを作成
-rank_predictor = RankPredictor(df, val_df)
+rank_predictor = RankPredictor(train_data_with_enhanced_features, test_data_with_enhanced_features)
 
 print("\n" + "=" * 80)
 print("モデル学習を開始します...")
@@ -214,159 +320,159 @@ print(f"モデルを保存しました: {MODEL_PATH}")
 print("\n" + "=" * 80)
 print("検証データで予測を実行します...")
 print("=" * 80)
-val_predictions_raw = RankPredictor.predict(model, val_df, rank_predictor.features)
+test_predictions_without_evaluation_data = RankPredictor.predict(model, test_data_with_enhanced_features, rank_predictor.features)
 
-# 馬番を取得してval_predictions_rawに追加（マージキー用）
-# val_dfにhorse_number（英語キー）が含まれている場合はそれを使用
-# 含まれていない場合はoriginal_dfから馬番（日本語キー）を取得
-val_df_for_merge = val_df.copy()
-if val_df_for_merge.index.name == "race_key":
-    val_df_for_merge = val_df_for_merge.reset_index()
-elif "race_key" not in val_df_for_merge.columns:
-    raise ValueError("val_dfにrace_key列が含まれていません")
+# 馬番を取得してtest_predictions_without_evaluation_dataに追加（マージキー用）
+# test_data_with_enhanced_featuresにhorse_number（英語キー）が含まれている場合はそれを使用
+# 含まれていない場合はevaluation_data_with_japanese_keysから馬番（日本語キー）を取得
+test_data_for_merging = test_data_with_enhanced_features.copy()
+if test_data_for_merging.index.name == "race_key":
+    test_data_for_merging = test_data_for_merging.reset_index()
+elif "race_key" not in test_data_for_merging.columns:
+    raise ValueError("test_data_with_enhanced_featuresにrace_key列が含まれていません")
 
-# val_predictions_rawとval_df_for_mergeの行数が一致することを確認
-if len(val_predictions_raw) != len(val_df_for_merge):
-    raise ValueError(f"予測結果の行数({len(val_predictions_raw)})とval_dfの行数({len(val_df_for_merge)})が一致しません")
+# test_predictions_without_evaluation_dataとtest_data_for_mergingの行数が一致することを確認
+if len(test_predictions_without_evaluation_data) != len(test_data_for_merging):
+    raise ValueError(f"予測結果の行数({len(test_predictions_without_evaluation_data)})とtest_data_with_enhanced_featuresの行数({len(test_data_for_merging)})が一致しません")
 
-# val_dfにhorse_number（英語キー）が含まれているか確認
-if "horse_number" in val_df_for_merge.columns:
-    # val_dfにhorse_numberが含まれている場合はそれを使用
-    val_predictions_raw["馬番"] = val_df_for_merge["horse_number"].values
+# test_data_with_enhanced_featuresにhorse_number（英語キー）が含まれているか確認
+if "horse_number" in test_data_for_merging.columns:
+    # test_data_with_enhanced_featuresにhorse_numberが含まれている場合はそれを使用
+    test_predictions_without_evaluation_data["馬番"] = test_data_for_merging["horse_number"].values
 else:
-    # val_dfにhorse_numberが含まれていない場合はoriginal_dfから取得
-    original_df_for_merge = original_df.copy()
-    if original_df_for_merge.index.name == "race_key":
-        original_df_for_merge = original_df_for_merge.reset_index()
-    elif "race_key" not in original_df_for_merge.columns:
-        raise ValueError("original_dfにrace_key列が含まれていません")
+    # test_data_with_enhanced_featuresにhorse_numberが含まれていない場合はevaluation_data_with_japanese_keysから取得
+    evaluation_data_for_merging = evaluation_data_with_japanese_keys.copy()
+    if evaluation_data_for_merging.index.name == "race_key":
+        evaluation_data_for_merging = evaluation_data_for_merging.reset_index()
+    elif "race_key" not in evaluation_data_for_merging.columns:
+        raise ValueError("evaluation_data_with_japanese_keysにrace_key列が含まれていません")
     
-    if "馬番" not in original_df_for_merge.columns:
-        raise ValueError("original_dfに馬番列が含まれていません")
+    if "馬番" not in evaluation_data_for_merging.columns:
+        raise ValueError("evaluation_data_with_japanese_keysに馬番列が含まれていません")
     
     # race_keyでマージして馬番を取得
-    # val_dfと同じ順序で予測結果が返されるため、race_keyでマージ
-    val_df_race_keys = pd.DataFrame({
-        "race_key": val_df_for_merge["race_key"].values,
-        "_order": range(len(val_df_for_merge))
+    # test_data_with_enhanced_featuresと同じ順序で予測結果が返されるため、race_keyでマージ
+    test_data_race_keys_for_merging = pd.DataFrame({
+        "race_key": test_data_for_merging["race_key"].values,
+        "_order": range(len(test_data_for_merging))
     })
-    # original_dfからrace_keyと馬番の対応関係を取得
+    # evaluation_data_with_japanese_keysからrace_keyと馬番の対応関係を取得
     # 同じrace_keyに複数の馬がいる場合を考慮して、行の順序で対応
-    original_df_subset = original_df_for_merge[["race_key", "馬番"]].copy()
-    original_df_subset["_order"] = range(len(original_df_subset))
+    evaluation_data_subset_with_horse_numbers = evaluation_data_for_merging[["race_key", "馬番"]].copy()
+    evaluation_data_subset_with_horse_numbers["_order"] = range(len(evaluation_data_subset_with_horse_numbers))
     
     # race_keyでマージ（同じrace_keyに複数の馬がいる場合、行の順序で対応）
-    merged = val_df_race_keys.merge(original_df_subset, on=["race_key", "_order"], how="left")
+    merged_with_horse_numbers = test_data_race_keys_for_merging.merge(evaluation_data_subset_with_horse_numbers, on=["race_key", "_order"], how="left")
     
     # マージに失敗した場合はrace_keyのみでマージ（順序が一致している場合）
-    if merged["馬番"].isna().any():
+    if merged_with_horse_numbers["馬番"].isna().any():
         # race_keyのみでマージ（最初の馬を取得）
-        merged = val_df_race_keys.merge(
-            original_df_subset[["race_key", "馬番"]].drop_duplicates(subset="race_key", keep="first"),
+        merged_with_horse_numbers = test_data_race_keys_for_merging.merge(
+            evaluation_data_subset_with_horse_numbers[["race_key", "馬番"]].drop_duplicates(subset="race_key", keep="first"),
             on="race_key",
             how="left"
         )
     
-    val_predictions_raw["馬番"] = merged["馬番"].values
+    test_predictions_without_evaluation_data["馬番"] = merged_with_horse_numbers["馬番"].values
 
-# original_df（eval_df、日本語キー、evaluation_schema.jsonに基づいて選択済み）を使用
+# evaluation_data_with_japanese_keys（eval_df、日本語キー、evaluation_schema.jsonに基づいて選択済み）を使用
 # 注: キャッシュから読み込んだeval_dfは既にevaluation_schema.jsonに基づいて選択されているため、
 #     再度select_evaluation()を呼び出す必要はない（仕様書に沿った実装）
-original_eval = original_df.copy()
+evaluation_data_with_reset_index = evaluation_data_with_japanese_keys.copy()
 
 # インデックスがrace_keyの場合はリセット
-if original_eval.index.name == "race_key":
-    original_eval = original_eval.reset_index()
-elif "race_key" not in original_eval.columns:
-    raise ValueError("original_evalにrace_key列が含まれていません")
+if evaluation_data_with_reset_index.index.name == "race_key":
+    evaluation_data_with_reset_index = evaluation_data_with_reset_index.reset_index()
+elif "race_key" not in evaluation_data_with_reset_index.columns:
+    raise ValueError("evaluation_data_with_reset_indexにrace_key列が含まれていません")
 
 # キャッシュデータの整合性確認（evaluation_schema.jsonに基づく必須カラムの存在確認）
-required_eval_cols = ["race_key", "馬番", "着順"]
-missing_cols = [col for col in required_eval_cols if col not in original_eval.columns]
-if missing_cols:
-    raise ValueError(f"キャッシュから読み込んだeval_dfがevaluation_schema.jsonに準拠していません。必須カラムが不足: {missing_cols}。キャッシュを削除して再処理してください。")
+required_evaluation_columns_for_prediction = ["race_key", "馬番", "着順"]
+missing_evaluation_columns_for_prediction = [col for col in required_evaluation_columns_for_prediction if col not in evaluation_data_with_reset_index.columns]
+if missing_evaluation_columns_for_prediction:
+    raise ValueError(f"キャッシュから読み込んだeval_dfがevaluation_schema.jsonに準拠していません。必須カラムが不足: {missing_evaluation_columns_for_prediction}。キャッシュを削除して再処理してください。")
 
-print(f"評価用データのカラム数: {len(original_eval.columns)}")
-print(f"評価用データのカラム: {list(original_eval.columns)[:10]}...")  # 最初の10カラムを表示
+print(f"評価用データのカラム数: {len(evaluation_data_with_reset_index.columns)}")
+print(f"評価用データのカラム: {list(evaluation_data_with_reset_index.columns)[:10]}...")  # 最初の10カラムを表示
 
 # 予測結果をベースに、評価に必要な最小限の情報だけを追加
-val_predictions = val_predictions_raw.copy()
+test_predictions_with_evaluation_data = test_predictions_without_evaluation_data.copy()
 
 # 評価に必要な情報を追加（race_keyと馬番でマージ）
-eval_data = original_eval.copy()
-val_predictions = val_predictions.merge(eval_data, on=["race_key", "馬番"], how="left")
+evaluation_data_for_prediction_merge = evaluation_data_with_reset_index.copy()
+test_predictions_with_evaluation_data = test_predictions_with_evaluation_data.merge(evaluation_data_for_prediction_merge, on=["race_key", "馬番"], how="left")
 
 # 予測順位を追加（レースごとにpredicted_scoreでソートして順位を付与）
-val_predictions = val_predictions.sort_values(["race_key", "predicted_score"], ascending=[True, False])
-val_predictions["predicted_rank"] = val_predictions.groupby("race_key").cumcount() + 1
+test_predictions_with_evaluation_data = test_predictions_with_evaluation_data.sort_values(["race_key", "predicted_score"], ascending=[True, False])
+test_predictions_with_evaluation_data["predicted_rank"] = test_predictions_with_evaluation_data.groupby("race_key").cumcount() + 1
 
 # 評価用にrank列を追加（着順から）
-if "着順" in val_predictions.columns and "rank" not in val_predictions.columns:
-    val_predictions["rank"] = pd.to_numeric(val_predictions["着順"], errors="coerce")
+if "着順" in test_predictions_with_evaluation_data.columns and "rank" not in test_predictions_with_evaluation_data.columns:
+    test_predictions_with_evaluation_data["rank"] = pd.to_numeric(test_predictions_with_evaluation_data["着順"], errors="coerce")
 
-if "rank" not in val_predictions.columns or "馬番" not in val_predictions.columns:
+if "rank" not in test_predictions_with_evaluation_data.columns or "馬番" not in test_predictions_with_evaluation_data.columns:
     raise ValueError("結合後の予測結果に必須列が含まれていません")
 
-print(f"予測完了: {len(val_predictions)}件")
+print(f"予測完了: {len(test_predictions_with_evaluation_data)}件")
 print(f"\n予測結果のサンプル:")
-print(val_predictions.head(10))
+print(test_predictions_with_evaluation_data.head(10))
 
 # オッズデータの有無を確認
-has_odds = "確定単勝オッズ" in val_predictions.columns and val_predictions["確定単勝オッズ"].notna().any()
-odds_col = "確定単勝オッズ" if has_odds else None
+has_win_odds_data = "確定単勝オッズ" in test_predictions_with_evaluation_data.columns and test_predictions_with_evaluation_data["確定単勝オッズ"].notna().any()
+win_odds_column_name = "確定単勝オッズ" if has_win_odds_data else None
 
 print("\n" + "=" * 60)
-print(f"モデル評価（{'オッズあり' if has_odds else 'オッズなし'}）:")
+print(f"モデル評価（{'オッズあり' if has_win_odds_data else 'オッズなし'}）:")
 print("=" * 60)
 from src.evaluator import evaluate_model, print_evaluation_results
-evaluation_result = evaluate_model(val_predictions, odds_col=odds_col)
+evaluation_result = evaluate_model(test_predictions_with_evaluation_data, odds_col=win_odds_column_name)
 print_evaluation_results(evaluation_result)
 
 # %%
 # ## 特徴量重要度
-importance = model.feature_importance(importance_type='gain')
-feature_names = [f for f in rank_predictor.features.encoded_feature_names if f in val_df.columns]
+feature_importance_scores = model.feature_importance(importance_type='gain')
+encoded_feature_names_from_predictor = [f for f in rank_predictor.features.encoded_feature_names if f in test_data_with_enhanced_features.columns]
 
 # 新しく追加された特徴量も含めて重要度を計算
-all_feature_names = list(val_df.columns)
+all_feature_names_in_test_data = list(test_data_with_enhanced_features.columns)
 # rank列とrace_key列を除外
-all_feature_names = [f for f in all_feature_names if f not in ['rank', 'race_key']]
+all_feature_names_in_test_data = [f for f in all_feature_names_in_test_data if f not in ['rank', 'race_key']]
 
 # 重要度と特徴量名を対応付け
-importance_dict = {}
-for i, feat_name in enumerate(feature_names[:len(importance)]):
-    if feat_name in importance_dict:
+feature_importance_dict = {}
+for i, feature_name in enumerate(encoded_feature_names_from_predictor[:len(feature_importance_scores)]):
+    if feature_name in feature_importance_dict:
         # 重複がある場合は最大値を取る
-        importance_dict[feat_name] = max(importance_dict[feat_name], importance[i])
+        feature_importance_dict[feature_name] = max(feature_importance_dict[feature_name], feature_importance_scores[i])
     else:
-        importance_dict[feat_name] = importance[i]
+        feature_importance_dict[feature_name] = feature_importance_scores[i]
 
 # 新しく追加された特徴量の重要度を取得（モデルに含まれている場合）
-model_feature_names = model.feature_name()
-for i, feat_name in enumerate(model_feature_names):
-    if feat_name not in importance_dict:
+model_feature_names_from_lightgbm = model.feature_name()
+for i, feature_name in enumerate(model_feature_names_from_lightgbm):
+    if feature_name not in feature_importance_dict:
         # 新しく追加された特徴量
-        if i < len(importance):
-            importance_dict[feat_name] = importance[i]
+        if i < len(feature_importance_scores):
+            feature_importance_dict[feature_name] = feature_importance_scores[i]
 
-importance_df = pd.DataFrame({
-    'feature': list(importance_dict.keys()),
-    'importance': list(importance_dict.values())
+feature_importance_dataframe = pd.DataFrame({
+    'feature': list(feature_importance_dict.keys()),
+    'importance': list(feature_importance_dict.values())
 }).sort_values('importance', ascending=False)
 
 print("\n特徴量重要度（上位30）:")
-print(importance_df.head(30))
+print(feature_importance_dataframe.head(30))
 
 # 新しく追加された特徴量の重要度を確認
-new_features = [f for f in importance_df['feature'] if '_rank' in f or '_x_' in f]
-if new_features:
+newly_added_feature_names = [f for f in feature_importance_dataframe['feature'] if '_rank' in f or '_x_' in f]
+if newly_added_feature_names:
     print(f"\n新しく追加された特徴量（上位10）:")
-    new_features_df = importance_df[importance_df['feature'].isin(new_features)].head(10)
-    print(new_features_df)
+    newly_added_features_dataframe = feature_importance_dataframe[feature_importance_dataframe['feature'].isin(newly_added_feature_names)].head(10)
+    print(newly_added_features_dataframe)
 
 # 可視化
 plt.figure(figsize=(12, 10))
-sns.barplot(data=importance_df.head(30), y='feature', x='importance')
+sns.barplot(data=feature_importance_dataframe.head(30), y='feature', x='importance')
 plt.title('特徴量重要度（上位30）')
 plt.xlabel('重要度')
 plt.tight_layout()

@@ -37,6 +37,8 @@ def load_jrdb_npz_to_dataframe(file_path: Union[str, Path]) -> pd.DataFrame:
             # まず空文字列をNaNに変換
             col_series = df[col].copy()
             col_series = col_series.replace('', np.nan)
+            # FutureWarningを回避するため、infer_objectsを使用
+            col_series = col_series.infer_objects(copy=False)
             # 数値に変換可能な場合は数値型に変換、できない場合は文字列のまま
             numeric_series = pd.to_numeric(col_series, errors='coerce')
             # 数値に変換できた行が存在する場合、その列は数値型として扱う

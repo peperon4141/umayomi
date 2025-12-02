@@ -1,4 +1,4 @@
-"""DataProcessorの統合テスト - NpzLoader.load()をモックして簡易データでテスト"""
+"""DataProcessorの統合テスト - ParquetLoader.load()をモックして簡易データでテスト"""
 
 import pandas as pd
 import pytest
@@ -15,9 +15,9 @@ class TestDataProcessor:
     def processor(self):
         """DataProcessorインスタンスを作成"""
         base_path = Path(__file__).parent.parent.parent.parent.parent
-        return DataProcessor(base_path=base_path)
+        return DataProcessor(base_path=base_path, use_cache=False)
 
-    @patch('src.data_processer.main.NpzLoader.load')
+    @patch('src.data_processer._01_parquet_loader.ParquetLoader.load')
     def test_process_without_split(self, mock_load, processor, simple_data_dict):
         """split_date未指定時のテスト"""
         mock_load.return_value = simple_data_dict
@@ -32,7 +32,7 @@ class TestDataProcessor:
         assert "race_key" in result.index.names or "race_key" in result.columns
         mock_load.assert_called_once_with(['KYI', 'BAC', 'SED'], 2024)
 
-    @patch('src.data_processer.main.NpzLoader.load')
+    @patch('src.data_processer._01_parquet_loader.ParquetLoader.load')
     def test_process_with_split(self, mock_load, processor, simple_data_dict):
         """split_date指定時のテスト"""
         mock_load.return_value = simple_data_dict
@@ -56,7 +56,7 @@ class TestDataProcessor:
             assert '確定単勝オッズ' in eval_df.columns
         mock_load.assert_called_once_with(['KYI', 'BAC', 'SED'], 2024)
 
-    @patch('src.data_processer.main.NpzLoader.load')
+    @patch('src.data_processer._01_parquet_loader.ParquetLoader.load')
     def test_process_minimal_data(self, mock_load, processor):
         """最小限のデータ（KYI+BACのみ）でのテスト"""
         minimal_data = {
@@ -90,7 +90,7 @@ class TestDataProcessor:
         assert len(result) > 0
         mock_load.assert_called_once_with(['KYI', 'BAC'], 2024)
 
-    @patch('src.data_processer.main.NpzLoader.load')
+    @patch('src.data_processer._01_parquet_loader.ParquetLoader.load')
     def test_process_missing_required_data(self, mock_load, processor):
         """必須データ（KYI/BAC）がない場合のエラーテスト"""
         incomplete_data = {
@@ -110,7 +110,7 @@ class TestDataProcessor:
                 year=2024
             )
 
-    @patch('src.data_processer.main.NpzLoader.load')
+    @patch('src.data_processer._01_parquet_loader.ParquetLoader.load')
     def test_process_empty_data(self, mock_load, processor):
         """空のデータの場合のエラーテスト"""
         mock_load.return_value = {}
@@ -119,5 +119,100 @@ class TestDataProcessor:
             processor.process(
                 data_types=['KYI', 'BAC'],
                 year=2024
+            )
+
+    @patch('src.data_processer._01_parquet_loader.ParquetLoader.load')
+    def test_process_multiple_years_with_split(self, mock_load, processor, simple_data_dict):
+        """process_multiple_yearsのsplit_date指定時のテスト"""
+        # 2024年のデータを後半に設定（split_date="2024-06-01"で分割されるように）
+        data_2023 = simple_data_dict.copy()
+        data_2024 = simple_data_dict.copy()
+        # 2024年のBACデータの年月日を後半に設定
+        data_2024["BAC"] = data_2024["BAC"].copy()
+        data_2024["BAC"]["年月日"] = 20240701  # 2024年7月1日（split_dateより後）
+        data_2024["SED"] = data_2024["SED"].copy()
+        data_2024["SED"]["年月日"] = 20240701
+        
+        def load_side_effect(data_types, year):
+            if data_types == ["SED", "BAC"]:
+                # SED/BAC読み込み用
+                if year == 2023:
+                    return {
+                        "SED": data_2023.get("SED"),
+                        "BAC": data_2023.get("BAC"),
+                    }
+                else:
+                    return {
+                        "SED": data_2024.get("SED"),
+                        "BAC": data_2024.get("BAC"),
+                    }
+            # 通常のデータ読み込み
+            if year == 2023:
+                return data_2023
+            else:
+                return data_2024
+        
+        mock_load.side_effect = load_side_effect
+        
+        train_df, test_df, eval_df = processor.process_multiple_years(
+            data_types=['KYI', 'BAC', 'SED'],
+            years=[2023, 2024],
+            split_date="2024-06-01"
+        )
+        
+        assert isinstance(train_df, pd.DataFrame)
+        assert isinstance(test_df, pd.DataFrame)
+        assert isinstance(eval_df, pd.DataFrame)
+        assert len(train_df) > 0
+        # テストデータは0件でも許容（データによっては分割されない場合がある）
+        assert len(eval_df) > 0
+
+    @patch('src.data_processer._01_parquet_loader.ParquetLoader.load')
+    def test_process_multiple_years_without_split(self, mock_load, processor, simple_data_dict):
+        """process_multiple_yearsのsplit_date未指定時のテスト"""
+        def load_side_effect(data_types, year):
+            if data_types == ["SED", "BAC"]:
+                return {
+                    "SED": simple_data_dict.get("SED"),
+                    "BAC": simple_data_dict.get("BAC"),
+                }
+            return simple_data_dict
+        
+        mock_load.side_effect = load_side_effect
+        
+        result = processor.process_multiple_years(
+            data_types=['KYI', 'BAC', 'SED'],
+            years=[2023, 2024],
+            split_date=None
+        )
+        
+        assert isinstance(result, pd.DataFrame)
+        assert len(result) > 0
+
+    @patch('src.data_processer._01_parquet_loader.ParquetLoader.load')
+    def test_process_multiple_years_empty_years(self, mock_load, processor):
+        """process_multiple_yearsでyearsが空の場合のエラーテスト"""
+        with pytest.raises(ValueError, match="yearsは空にできません"):
+            processor.process_multiple_years(
+                data_types=['KYI', 'BAC'],
+                years=[],
+                split_date=None
+            )
+
+    @patch('src.data_processer._01_parquet_loader.ParquetLoader.load')
+    def test_process_multiple_years_missing_bac(self, mock_load, processor):
+        """process_multiple_yearsでBACデータが存在しない場合のエラーテスト"""
+        def load_side_effect(data_types, year):
+            if data_types == ["SED", "BAC"]:
+                return {"SED": pd.DataFrame()}  # BACが存在しない
+            return {"KYI": pd.DataFrame()}
+        
+        mock_load.side_effect = load_side_effect
+        
+        with pytest.raises(ValueError, match="BACデータは必須です"):
+            processor.process_multiple_years(
+                data_types=['KYI', 'BAC'],
+                years=[2023, 2024],
+                split_date=None
             )
 
