@@ -159,18 +159,20 @@ class FeatureConverter:
     @staticmethod
     def create_bac_date_mapping(bac_df: pd.DataFrame) -> dict[tuple, str]:
         """BACデータから年月日マッピングを作成（場コード、回、日、R）-> 年月日"""
-        bac_df = bac_df.copy()
-        bac_df["key"] = (
-            bac_df["場コード"].fillna(0).astype(int).astype(str).str.zfill(2)
+        # 必要なカラムのみを抽出してメモリ使用量を削減
+        required_cols = ["場コード", "回", "日", "R", "年月日"]
+        bac_df_subset = bac_df[required_cols].copy()
+        bac_df_subset["key"] = (
+            bac_df_subset["場コード"].fillna(0).astype(int).astype(str).str.zfill(2)
             + "_"
-            + bac_df["回"].fillna(1).astype(int).astype(str).str.zfill(2)
+            + bac_df_subset["回"].fillna(1).astype(int).astype(str).str.zfill(2)
             + "_"
-            + bac_df["日"].fillna("1").astype(str).str.lower()
+            + bac_df_subset["日"].fillna("1").astype(str).str.lower()
             + "_"
-            + bac_df["R"].fillna(1).astype(int).astype(str).str.zfill(2)
+            + bac_df_subset["R"].fillna(1).astype(int).astype(str).str.zfill(2)
         )
-        bac_df["ymd"] = bac_df["年月日"].apply(FeatureConverter.safe_ymd)
-        bac_df_filtered = bac_df[bac_df["ymd"].str.len() == 8].copy()
+        bac_df_subset["ymd"] = bac_df_subset["年月日"].apply(FeatureConverter.safe_ymd)
+        bac_df_filtered = bac_df_subset[bac_df_subset["ymd"].str.len() == 8]
 
         date_map = {}
         for _, row in bac_df_filtered.iterrows():
@@ -187,18 +189,20 @@ class FeatureConverter:
     @staticmethod
     def create_bac_date_mapping_for_merge(bac_df: pd.DataFrame) -> pd.DataFrame:
         """BACデータから年月日マッピングを作成（マージ用DataFrame形式）"""
-        bac_df = bac_df.copy()
-        bac_df["key"] = (
-            bac_df["場コード"].fillna(0).astype(int).astype(str).str.zfill(2)
+        # 必要なカラムのみを抽出してメモリ使用量を削減
+        required_cols = ["場コード", "回", "日", "R", "年月日"]
+        bac_df_subset = bac_df[required_cols].copy()
+        bac_df_subset["key"] = (
+            bac_df_subset["場コード"].fillna(0).astype(int).astype(str).str.zfill(2)
             + "_"
-            + bac_df["回"].fillna(1).astype(int).astype(str).str.zfill(2)
+            + bac_df_subset["回"].fillna(1).astype(int).astype(str).str.zfill(2)
             + "_"
-            + bac_df["日"].fillna("1").astype(str).str.lower()
+            + bac_df_subset["日"].fillna("1").astype(str).str.lower()
             + "_"
-            + bac_df["R"].fillna(1).astype(int).astype(str).str.zfill(2)
+            + bac_df_subset["R"].fillna(1).astype(int).astype(str).str.zfill(2)
         )
-        bac_df["ymd"] = bac_df["年月日"].apply(FeatureConverter.safe_ymd)
-        bac_df_filtered = bac_df[bac_df["ymd"].str.len() == 8].copy()
+        bac_df_subset["ymd"] = bac_df_subset["年月日"].apply(FeatureConverter.safe_ymd)
+        bac_df_filtered = bac_df_subset[bac_df_subset["ymd"].str.len() == 8]
 
         return bac_df_filtered[["key", "ymd"]]
 
@@ -230,34 +234,43 @@ class FeatureConverter:
         df: pd.DataFrame, bac_df: Optional[pd.DataFrame] = None, use_bac_date: bool = True
     ) -> pd.DataFrame:
         """DataFrameにrace_keyを追加（統一化版）"""
+        # main.pyから参照で渡されるため、ここでcopy()が必要
         df = df.copy()
+        bac_mapping_df = None
+        
+        try:
+            if use_bac_date and bac_df is not None:
+                bac_mapping_df = FeatureConverter.create_bac_date_mapping_for_merge(bac_df)
+                df["key"] = (
+                    df["場コード"].fillna(0).astype(int).astype(str).str.zfill(2)
+                    + "_"
+                    + df["回"].fillna(1).astype(int).astype(str).str.zfill(2)
+                    + "_"
+                    + df["日"].fillna("1").astype(str).str.lower()
+                    + "_"
+                    + df["R"].fillna(1).astype(int).astype(str).str.zfill(2)
+                )
+                df = df.merge(bac_mapping_df, on="key", how="left", suffixes=("", "_bac"))
+                year, month, day = FeatureConverter.extract_ymd_from_df_vectorized(
+                    df, ymd_col="ymd", year_col="年", ymd_fallback_col="年月日"
+                )
+                df = df.drop(columns=["key", "ymd"], errors="ignore")
+            else:
+                year, month, day = FeatureConverter.extract_ymd_from_df_vectorized(
+                    df, ymd_col="年月日", year_col="年"
+                )
 
-        if use_bac_date and bac_df is not None:
-            bac_mapping_df = FeatureConverter.create_bac_date_mapping_for_merge(bac_df)
-            df["key"] = (
-                df["場コード"].fillna(0).astype(int).astype(str).str.zfill(2)
-                + "_"
-                + df["回"].fillna(1).astype(int).astype(str).str.zfill(2)
-                + "_"
-                + df["日"].fillna("1").astype(str).str.lower()
-                + "_"
-                + df["R"].fillna(1).astype(int).astype(str).str.zfill(2)
-            )
-            df = df.merge(bac_mapping_df, on="key", how="left", suffixes=("", "_bac"))
-            year, month, day = FeatureConverter.extract_ymd_from_df_vectorized(
-                df, ymd_col="ymd", year_col="年", ymd_fallback_col="年月日"
-            )
-            df = df.drop(columns=["key", "ymd"], errors="ignore")
-        else:
-            year, month, day = FeatureConverter.extract_ymd_from_df_vectorized(
-                df, ymd_col="年月日", year_col="年"
+            df["race_key"] = FeatureConverter.generate_race_key_vectorized(
+                year, month, day, df["場コード"], df["回"], df["日"], df["R"]
             )
 
-        df["race_key"] = FeatureConverter.generate_race_key_vectorized(
-            year, month, day, df["場コード"], df["回"], df["日"], df["R"]
-        )
-
-        return df
+            return df
+        finally:
+            # クリーンアップ: 不要なデータを削除
+            if bac_mapping_df is not None:
+                del bac_mapping_df
+            import gc
+            gc.collect()
 
     @staticmethod
     def get_datetime_from_race_key(race_key: str) -> int:
@@ -297,27 +310,34 @@ class FeatureConverter:
     @staticmethod
     def add_start_datetime_to_df(df: pd.DataFrame) -> pd.DataFrame:
         """DataFrameにstart_datetimeを追加（統一化）"""
+        # main.pyから参照で渡されるため、ここでcopy()が必要
         df = df.copy()
+        
+        try:
+            if "start_datetime" in df.columns:
+                return df
 
-        if "start_datetime" in df.columns:
+            if "年月日" in df.columns and "発走時間" in df.columns:
+                ymd_str = df["年月日"].fillna(0).astype(int).astype(str).str.zfill(8)
+                time_str = df["発走時間"].fillna(0).astype(int).astype(str).str.zfill(4)
+                mask = df["年月日"].notna() & df["発走時間"].notna()
+                df["start_datetime"] = (ymd_str + time_str).astype(int)
+                df.loc[~mask, "start_datetime"] = 0
+            elif "年月日" in df.columns:
+                ymd_str = df["年月日"].fillna(0).astype(int).astype(str).str.zfill(8)
+                df["start_datetime"] = ymd_str.astype(int) * 10000
+                df.loc[df["年月日"].isna(), "start_datetime"] = 0
+            elif "race_key" in df.columns:
+                df["start_datetime"] = FeatureConverter.get_datetime_from_race_key_vectorized(
+                    df["race_key"]
+                )
+            else:
+                df["start_datetime"] = 0
+
             return df
-
-        if "年月日" in df.columns and "発走時間" in df.columns:
-            ymd_str = df["年月日"].fillna(0).astype(int).astype(str).str.zfill(8)
-            time_str = df["発走時間"].fillna(0).astype(int).astype(str).str.zfill(4)
-            mask = df["年月日"].notna() & df["発走時間"].notna()
-            df["start_datetime"] = (ymd_str + time_str).astype(int)
-            df.loc[~mask, "start_datetime"] = 0
-        elif "年月日" in df.columns:
-            ymd_str = df["年月日"].fillna(0).astype(int).astype(str).str.zfill(8)
-            df["start_datetime"] = ymd_str.astype(int) * 10000
-            df.loc[df["年月日"].isna(), "start_datetime"] = 0
-        elif "race_key" in df.columns:
-            df["start_datetime"] = FeatureConverter.get_datetime_from_race_key_vectorized(
-                df["race_key"]
-            )
-        else:
-            df["start_datetime"] = 0
-
-        return df
+        finally:
+            # この関数内で作成された中間変数は自動的に削除される
+            # 必要に応じて明示的に削除
+            import gc
+            gc.collect()
 

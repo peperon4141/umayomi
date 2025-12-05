@@ -5,124 +5,124 @@ import pandas as pd
 from tqdm import tqdm
 
 
-def _process_group_time_series_stats(
-    group_value, group_stats, group_targets, group_col, time_col, prefix
-):
-    """グループごとの時系列統計量を計算（並列化用）"""
-    group_stats = group_stats.sort_values(by=time_col).reset_index(drop=True)
-    
-    if len(group_stats) == 0 or len(group_targets) == 0:
-        return pd.DataFrame()
-    
-    group_stats_times = group_stats[time_col].values
-    group_targets_times = group_targets[time_col].values
-    group_targets_indices = group_targets['_original_index'].values
-    indices = np.searchsorted(group_stats_times, group_targets_times, side='left') - 1
-    
-    n_targets = len(group_targets)
-    result_data = {
-        group_col: [group_value] * n_targets,
-        time_col: group_targets_times,
-        '_original_index': group_targets_indices,
-    }
-    
-    valid_mask = indices >= 0
-    cumsum_1st_col = group_stats[f"{prefix}_cumsum_1st"].values
-    cumsum_3rd_col = group_stats[f"{prefix}_cumsum_3rd"].values
-    cumsum_rank_col = group_stats[f"{prefix}_cumsum_rank"].values
-    cumcount_col = group_stats[f"{prefix}_cumcount"].values
-    
-    result_data[f"{prefix}_cumsum_1st"] = np.zeros(n_targets, dtype=float)
-    result_data[f"{prefix}_cumsum_3rd"] = np.zeros(n_targets, dtype=float)
-    result_data[f"{prefix}_cumsum_rank"] = np.zeros(n_targets, dtype=float)
-    result_data[f"{prefix}_cumcount"] = np.zeros(n_targets, dtype=int)
-    
-    if valid_mask.any():
-        valid_indices = indices[valid_mask]
-        result_data[f"{prefix}_cumsum_1st"][valid_mask] = cumsum_1st_col[valid_indices]
-        result_data[f"{prefix}_cumsum_3rd"][valid_mask] = cumsum_3rd_col[valid_indices]
-        result_data[f"{prefix}_cumsum_rank"][valid_mask] = cumsum_rank_col[valid_indices]
-        result_data[f"{prefix}_cumcount"][valid_mask] = cumcount_col[valid_indices]
-    
-    return pd.DataFrame(result_data)
-
-
-def _process_group_recent_races(
-    group_value, group_stats, group_targets, group_col, time_col, num_races, prefix
-):
-    """グループごとの直近レースを抽出（並列化用）"""
-    group_stats = group_stats.sort_values(by=time_col).reset_index(drop=True)
-    
-    prefix_jp = {"horse": "馬", "jockey": "騎手", "trainer": "調教師"}.get(prefix)
-    if not prefix_jp:
-        raise ValueError(f"未知のprefix: {prefix}")
-    
-    field_mapping = {
-        'rank': '着順', 'time': 'タイム', 'distance': '距離',
-        'course_type': '芝ダ障害コード', 'ground_condition': '馬場状態',
-        'num_horses': '頭数', 'race_num': 'R'
-    }
-    
-    if len(group_stats) == 0 or len(group_targets) == 0:
-        result_cols = [group_col, time_col, '_original_index'] + [
-            f"{prefix_jp}直近{i}{field_mapping[col]}"
-            for i in range(1, num_races + 1)
-            for col in ['rank', 'time', 'distance', 'course_type', 'ground_condition', 'num_horses', 'race_num']
-        ] + [
-            f"{prefix_jp}直近{i}race_key"  # 日程情報（リーク検証用）
-            for i in range(1, num_races + 1)
-        ]
-        return pd.DataFrame(columns=result_cols)
-    
-    group_stats_times = group_stats[time_col].values
-    group_targets_times = group_targets[time_col].values
-    group_targets_indices = group_targets['_original_index'].values
-    n_targets = len(group_targets)
-    
-    result_data = {
-        group_col: np.full(n_targets, group_value),
-        time_col: group_targets_times,
-        '_original_index': group_targets_indices,
-    }
-    
-    for i in range(1, num_races + 1):
-        for en_col, jp_col in field_mapping.items():
-            result_data[f"{prefix_jp}直近{i}{jp_col}"] = np.full(n_targets, np.nan, dtype=float)
-        # 日程情報（リーク検証用）
-        result_data[f"{prefix_jp}直近{i}race_key"] = np.full(n_targets, None, dtype=object)
-    
-    stats_cols = ["着順", "タイム", "距離", "芝ダ障害コード", "馬場状態", "頭数", "R"]
-    available_cols = [col for col in stats_cols if col in group_stats.columns]
-    stats_arrays = {col: group_stats[col].values for col in available_cols}
-    
-    # race_keyも取得（日程情報用）
-    race_key_array = None
-    if "race_key" in group_stats.columns:
-        race_key_array = group_stats["race_key"].values
-    
-    search_indices = np.searchsorted(group_stats_times, group_targets_times, side='left')
-    
-    for target_idx in range(n_targets):
-        past_count = search_indices[target_idx]
-        if past_count > 0:
-            start_idx = max(0, past_count - num_races)
-            recent_indices = np.arange(start_idx, past_count)
-            for i in range(1, num_races + 1):
-                race_idx_in_recent = len(recent_indices) - i
-                if race_idx_in_recent >= 0:
-                    race_idx = recent_indices[race_idx_in_recent]
-                    for en_col, jp_col in field_mapping.items():
-                        if jp_col in stats_arrays:
-                            result_data[f"{prefix_jp}直近{i}{jp_col}"][target_idx] = stats_arrays[jp_col][race_idx]
-                    # 日程情報（リーク検証用）
-                    if race_key_array is not None:
-                        result_data[f"{prefix_jp}直近{i}race_key"][target_idx] = race_key_array[race_idx]
-    
-    return pd.DataFrame(result_data)
-
-
 class JockeyStatistics:
     """騎手の過去成績統計を計算するクラス"""
+
+    @staticmethod
+    def _process_group_time_series_stats(
+        group_value, group_stats, group_targets, group_col, time_col, prefix
+    ):
+        """グループごとの時系列統計量を計算（並列化用）"""
+        group_stats = group_stats.sort_values(by=time_col).reset_index(drop=True)
+        
+        if len(group_stats) == 0 or len(group_targets) == 0:
+            return pd.DataFrame()
+        
+        group_stats_times = group_stats[time_col].values
+        group_targets_times = group_targets[time_col].values
+        group_targets_indices = group_targets['_original_index'].values
+        indices = np.searchsorted(group_stats_times, group_targets_times, side='left') - 1
+        
+        n_targets = len(group_targets)
+        result_data = {
+            group_col: [group_value] * n_targets,
+            time_col: group_targets_times,
+            '_original_index': group_targets_indices,
+        }
+        
+        valid_mask = indices >= 0
+        cumsum_1st_col = group_stats[f"{prefix}_cumsum_1st"].values
+        cumsum_3rd_col = group_stats[f"{prefix}_cumsum_3rd"].values
+        cumsum_rank_col = group_stats[f"{prefix}_cumsum_rank"].values
+        cumcount_col = group_stats[f"{prefix}_cumcount"].values
+        
+        result_data[f"{prefix}_cumsum_1st"] = np.zeros(n_targets, dtype=float)
+        result_data[f"{prefix}_cumsum_3rd"] = np.zeros(n_targets, dtype=float)
+        result_data[f"{prefix}_cumsum_rank"] = np.zeros(n_targets, dtype=float)
+        result_data[f"{prefix}_cumcount"] = np.zeros(n_targets, dtype=int)
+        
+        if valid_mask.any():
+            valid_indices = indices[valid_mask]
+            result_data[f"{prefix}_cumsum_1st"][valid_mask] = cumsum_1st_col[valid_indices]
+            result_data[f"{prefix}_cumsum_3rd"][valid_mask] = cumsum_3rd_col[valid_indices]
+            result_data[f"{prefix}_cumsum_rank"][valid_mask] = cumsum_rank_col[valid_indices]
+            result_data[f"{prefix}_cumcount"][valid_mask] = cumcount_col[valid_indices]
+        
+        return pd.DataFrame(result_data)
+
+    @staticmethod
+    def _process_group_recent_races(
+        group_value, group_stats, group_targets, group_col, time_col, num_races, prefix
+    ):
+        """グループごとの直近レースを抽出（並列化用）"""
+        group_stats = group_stats.sort_values(by=time_col).reset_index(drop=True)
+        
+        prefix_jp = {"horse": "馬", "jockey": "騎手", "trainer": "調教師"}.get(prefix)
+        if not prefix_jp:
+            raise ValueError(f"未知のprefix: {prefix}")
+        
+        field_mapping = {
+            'rank': '着順', 'time': 'タイム', 'distance': '距離',
+            'course_type': '芝ダ障害コード', 'ground_condition': '馬場状態',
+            'num_horses': '頭数', 'race_num': 'R'
+        }
+        
+        if len(group_stats) == 0 or len(group_targets) == 0:
+            result_cols = [group_col, time_col, '_original_index'] + [
+                f"{prefix_jp}直近{i}{field_mapping[col]}"
+                for i in range(1, num_races + 1)
+                for col in ['rank', 'time', 'distance', 'course_type', 'ground_condition', 'num_horses', 'race_num']
+            ] + [
+                f"{prefix_jp}直近{i}race_key"  # 日程情報（リーク検証用）
+                for i in range(1, num_races + 1)
+            ]
+            return pd.DataFrame(columns=result_cols)
+        
+        group_stats_times = group_stats[time_col].values
+        group_targets_times = group_targets[time_col].values
+        group_targets_indices = group_targets['_original_index'].values
+        n_targets = len(group_targets)
+        
+        result_data = {
+            group_col: np.full(n_targets, group_value),
+            time_col: group_targets_times,
+            '_original_index': group_targets_indices,
+        }
+        
+        for i in range(1, num_races + 1):
+            for en_col, jp_col in field_mapping.items():
+                result_data[f"{prefix_jp}直近{i}{jp_col}"] = np.full(n_targets, np.nan, dtype=float)
+            # 日程情報（リーク検証用）
+            result_data[f"{prefix_jp}直近{i}race_key"] = np.full(n_targets, None, dtype=object)
+        
+        stats_cols = ["着順", "タイム", "距離", "芝ダ障害コード", "馬場状態", "頭数", "R"]
+        available_cols = [col for col in stats_cols if col in group_stats.columns]
+        stats_arrays = {col: group_stats[col].values for col in available_cols}
+        
+        # race_keyも取得（日程情報用）
+        race_key_array = None
+        if "race_key" in group_stats.columns:
+            race_key_array = group_stats["race_key"].values
+        
+        search_indices = np.searchsorted(group_stats_times, group_targets_times, side='left')
+        
+        for target_idx in range(n_targets):
+            past_count = search_indices[target_idx]
+            if past_count > 0:
+                start_idx = max(0, past_count - num_races)
+                recent_indices = np.arange(start_idx, past_count)
+                for i in range(1, num_races + 1):
+                    race_idx_in_recent = len(recent_indices) - i
+                    if race_idx_in_recent >= 0:
+                        race_idx = recent_indices[race_idx_in_recent]
+                        for en_col, jp_col in field_mapping.items():
+                            if jp_col in stats_arrays:
+                                result_data[f"{prefix_jp}直近{i}{jp_col}"][target_idx] = stats_arrays[jp_col][race_idx]
+                        # 日程情報（リーク検証用）
+                        if race_key_array is not None:
+                            result_data[f"{prefix_jp}直近{i}race_key"][target_idx] = race_key_array[race_idx]
+        
+        return pd.DataFrame(result_data)
 
     @staticmethod
     def calculate(stats_df: pd.DataFrame, target_df: pd.DataFrame) -> pd.DataFrame:
@@ -151,7 +151,8 @@ class JockeyStatistics:
             )
         else:
             # フラグメント化を回避するため、pd.concatを使用
-            jockey_stats_subset = jockey_stats[[col for col in jockey_stats.columns if col not in key_cols]].copy()
+            # 列の抽出は新しいDataFrameを作成するため、明示的なcopy()は不要
+            jockey_stats_subset = jockey_stats[[col for col in jockey_stats.columns if col not in key_cols]]
             target_df_merged = pd.concat([target_df_sorted, jockey_stats_subset], axis=1)
         
         assert len(target_df_merged) == len(jockey_recent_races), "行数が一致しません"
@@ -163,7 +164,8 @@ class JockeyStatistics:
             )
         else:
             # フラグメント化を回避するため、pd.concatを使用
-            jockey_recent_subset = jockey_recent_races[[col for col in jockey_recent_races.columns if col not in key_cols]].copy()
+            # 列の抽出は新しいDataFrameを作成するため、明示的なcopy()は不要
+            jockey_recent_subset = jockey_recent_races[[col for col in jockey_recent_races.columns if col not in key_cols]]
             target_df_merged = pd.concat([target_df_merged, jockey_recent_subset], axis=1)
         
         target_index_df = pd.DataFrame({'_original_index': target_original_index})
@@ -213,7 +215,7 @@ class JockeyStatistics:
             for group_value in valid_groups:
                 group_stats = grouped_stats.get_group(group_value)
                 group_targets = grouped_targets.get_group(group_value)[[group_col, time_col, '_original_index']]
-                result_df = _process_group_time_series_stats(
+                result_df = JockeyStatistics._process_group_time_series_stats(
                     group_value, group_stats, group_targets, group_col, time_col, prefix
                 )
                 if len(result_df) > 0:
@@ -289,7 +291,7 @@ class JockeyStatistics:
             for group_value in valid_groups:
                 group_stats = grouped_stats.get_group(group_value)
                 group_targets = grouped_targets.get_group(group_value)[[group_col, time_col, '_original_index']]
-                result_df = _process_group_recent_races(
+                result_df = JockeyStatistics._process_group_recent_races(
                     group_value, group_stats, group_targets, group_col, time_col, num_races, prefix
                 )
                 if len(result_df) > 0:

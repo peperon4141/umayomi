@@ -1,192 +1,160 @@
 """メインのオーケストレーター - シンプルで明確なデータ処理フロー"""
 
+import gc
 from datetime import datetime
 from pathlib import Path
 from typing import List, Optional, Tuple, Union
 
 import pandas as pd
 
-from ._07_cache_manager import CacheManager
+from src.utils.cache_manager import CacheManager
+from src.utils.schema_loader import SchemaLoader
+from src.utils.parquet_loader import ParquetLoader
 from ._06_column_selector import ColumnSelector
 from ._02_jrdb_combiner import JrdbCombiner
 from ._04_key_converter import KeyConverter
-from ._01_parquet_loader import ParquetLoader
 from ._05_time_series_splitter import TimeSeriesSplitter
 from ._03_feature_extractor import FeatureExtractor
+
+# 使用するデータタイプの定数定義
+_DATA_TYPES = [
+    'BAC',  # 番組データ（レース条件・出走馬一覧）
+    'KYI',  # 競走馬データ（牧場先情報付き・最も詳細）
+    'SED',  # 成績速報データ（過去の成績・前走データ抽出に使用）
+    'UKC',  # 馬基本データ（血統登録番号・性別・生年月日・血統情報）
+    'TYB',  # 直前情報データ（出走直前の馬の状態・当日予想に最重要）
+]
 
 
 class DataProcessor:
     """データ処理のメインオーケストレーター"""
 
-    def __init__(self, base_path: Optional[Union[str, Path]] = None, use_cache: bool = True):
+    def __init__(
+        self,
+        base_path: Path,
+        parquet_base_path: Path,
+        use_cache: bool = True,
+    ):
         """
         初期化
         
         Args:
-            base_path: プロジェクトのベースパス（デフォルト: プロジェクトルート）
+            base_path: プロジェクトルートパス
+            parquet_base_path: Parquetファイルのベースパス
             use_cache: キャッシュを使用するかどうか（デフォルト: True）
         """
-        if base_path is None:
-            base_path = Path(__file__).parent.parent.parent.parent
         self._base_path = Path(base_path)
-
-        self._parquet_loader = ParquetLoader(self._base_path / "apps" / "prediction" / "cache" / "jrdb" / "parquet")
-        self._jrdb_combiner = JrdbCombiner(self._base_path)
-        self._feature_extractor = FeatureExtractor()
-        self._key_converter = KeyConverter(self._base_path)
-        self._time_series_splitter = TimeSeriesSplitter()
-        self._column_selector = ColumnSelector(self._base_path)
+        self._parquet_base_path = Path(parquet_base_path)
         
-        # キャッシュマネージャーを初期化
-        cache_dir = self._base_path / "apps" / "prediction" / "cache"
-        self._cache_manager = CacheManager(cache_dir) if use_cache else None
+        # スキーマローダーを初期化
+        schemas_base_path = self._base_path / "packages" / "data" / "schemas"
+        self._schema_loader = SchemaLoader(schemas_base_path)
+        # スキーマを読み込み（キャッシュとして保持）
+        self._full_info_schema = self._schema_loader.load_full_info_schema()
+        self._training_schema = self._schema_loader.load_training_schema()
+        self._evaluation_schema = self._schema_loader.load_evaluation_schema()
+        self._category_mappings = self._schema_loader.load_category_mappings()
+        
+        # Parquetローダーを初期化
+        self._parquet_loader = ParquetLoader(self._parquet_base_path)
+        
+        # キャッシュマネージャーを初期化（staticなパスを持つ）
+        prediction_app_path = self._base_path / "apps" / "prediction"
+        self._cache_manager = CacheManager(prediction_app_path) if use_cache else None
         self._use_cache = use_cache
 
-    def process(
-        self,
-        data_types: List[str],
-        year: int = 2024,
-        split_date: Optional[Union[str, datetime]] = None,
-    ) -> Union[pd.DataFrame, Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]]:
+    def _load_sed_bac_for_year(self, target_year: int, available_years: Optional[List[int]] = None) -> Tuple[Optional[pd.DataFrame], pd.DataFrame]:
         """
-        データ処理の全ステップを実行
+        指定年度の前走データ抽出に必要なSED/BACデータを読み込み
+        
+        処理対象年度より前の年度のデータを読み込む（前走データ抽出用）
         
         Args:
-            data_types: データタイプのリスト
-            year: 年度
-            split_date: 時系列分割日時（指定時は分割実行）
+            target_year: 処理対象年度
+            available_years: 利用可能な年度のリスト（Noneの場合は、処理対象年度より前の年度を自動検出）
         
         Returns:
-            split_date指定時: (train_df, test_df, eval_df)
-            split_date未指定時: converted_df
-        """
-        # キャッシュから読み込みを試行
-        if self._use_cache and self._cache_manager is not None:
-            cached_data = self._cache_manager.load(data_types, year, split_date)
-            if cached_data is not None:
-                print("キャッシュから前処理済みデータを読み込みました")
-                return cached_data
-
-        # ステップ1: データ読み込みと結合
-        print("[_01_] データ読み込みと前処理を開始します...")
-        data_dict = self._parquet_loader.load(data_types, year)
-        print(f"[_01_] データ読み込み完了: {len(data_dict)}件のデータタイプ")
-        
-        print("[_02_] データ結合中...")
-        raw_df = self._jrdb_combiner.combine(data_dict)
-        print(f"[_02_] データ結合完了: {len(raw_df):,}件")
-
-        # ステップ2: 特徴量追加（並列処理）
-        bac_df = data_dict.get("BAC")
-        if bac_df is None:
-            raise ValueError("BACデータは必須です。data_dictに'BAC'が存在しません。")
-        
-        sed_df = data_dict.get("SED")
-        if sed_df is not None:
-            featured_df = self._feature_extractor.extract_all_parallel(raw_df, sed_df, bac_df)
-            del raw_df  # 使用済みのため削除
-        else:
-            featured_df = raw_df
-
-        # featured_dfをキャッシュに保存
-        if self._use_cache and self._cache_manager is not None:
-            self._cache_manager.save(
-                data_types, year, split_date, featured_df=featured_df
-            )
-
-        # データ変換とインデックス設定
-        converted_df, featured_df_for_eval = self._convert_and_prepare_data(featured_df, split_date)
-
-        # 時系列分割とカラム選択（split_date指定時）
-        if split_date is not None:
-            if featured_df_for_eval is None:
-                raise ValueError("split_date指定時はfeatured_dfが必要です。")
-            train_df, test_df, eval_df = self._split_and_select_columns(converted_df, featured_df_for_eval, split_date)
-            
-            # キャッシュに保存（converted_dfも保存）
-            if self._use_cache and self._cache_manager is not None:
-                self._cache_manager.save(
-                    data_types, year, split_date, 
-                    train_df=train_df, test_df=test_df, eval_df=eval_df,
-                    converted_df=converted_df
-                )
-            
-            print(f"\n前処理完了: 学習={len(train_df):,}件, テスト={len(test_df):,}件")
-            return train_df, test_df, eval_df
-
-        return converted_df
-
-    def _load_all_years_sed_bac(self, years: List[int]) -> Tuple[Optional[pd.DataFrame], pd.DataFrame]:
-        """
-        全年度のSED/BACデータを読み込み・結合
-        
-        Args:
-            years: 年度のリスト
-        
-        Returns:
-            (all_sed_df, all_bac_df) - BACは必須のためNoneにならない
+            (sed_df, bac_df) - BACは必須のためNoneにならない
         
         Raises:
             ValueError: BACデータが存在しない場合
         """
-        print(f"[_01_] 全年度のSED/BACデータを読み込み・結合中（前走データ抽出用）...")
-        all_sed_dfs = []
-        all_bac_dfs = []
-        for year in years:
-            data_dict = self._parquet_loader.load(["SED", "BAC"], year)
-            if "SED" in data_dict and data_dict["SED"] is not None:
-                all_sed_dfs.append(data_dict["SED"])
-            if "BAC" in data_dict and data_dict["BAC"] is not None:
-                all_bac_dfs.append(data_dict["BAC"])
-        
-        # 空のDataFrameを除外してから結合（FutureWarningを回避）
-        all_sed_dfs_filtered = [df for df in all_sed_dfs if len(df) > 0]
-        all_bac_dfs_filtered = [df for df in all_bac_dfs if len(df) > 0]
-        
-        # メモリ効率化: 段階的に結合
-        if all_sed_dfs_filtered:
-            all_sed_df = all_sed_dfs_filtered[0].copy()
-            for df in all_sed_dfs_filtered[1:]:
-                all_sed_df = pd.concat([all_sed_df, df.copy()], ignore_index=True)
-                del df
-                import gc
-                gc.collect()
+        # 処理対象年度より前の年度のデータを読み込む
+        if available_years is not None:
+            previous_years = [y for y in available_years if y < target_year]
         else:
-            all_sed_df = None
+            # 利用可能な年度のリストが指定されていない場合、処理対象年度より前の年度を自動検出
+            # 最大5年前まで検索（前走データは最大5走前まで必要）
+            previous_years = [y for y in range(target_year - 5, target_year) if y >= 2000]
+        
+        if not previous_years:
+            # 前年度のデータがない場合は、処理対象年度のデータのみを使用
+            previous_years = [target_year]
+        
+        print(f"[_01_] {target_year}年の前走データ抽出用にSED/BACデータを読み込み中（対象年度: {previous_years}）...")
+        
+        sed_dfs = []
+        bac_dfs = []
+        try:
+            for year in previous_years:
+                try:
+                    data_dict = self._parquet_loader.load_parquet_files(["SED", "BAC"], year)
+                    if "SED" in data_dict and data_dict["SED"] is not None and len(data_dict["SED"]) > 0:
+                        sed_dfs.append(data_dict["SED"])
+                    if "BAC" in data_dict and data_dict["BAC"] is not None and len(data_dict["BAC"]) > 0:
+                        bac_dfs.append(data_dict["BAC"])
+                except (FileNotFoundError, ValueError):
+                    # 年度のデータが存在しない場合はスキップ
+                    continue
             
-        if all_bac_dfs_filtered:
-            all_bac_df = all_bac_dfs_filtered[0].copy()
-            for df in all_bac_dfs_filtered[1:]:
-                all_bac_df = pd.concat([all_bac_df, df.copy()], ignore_index=True)
-                del df
-                import gc
-                gc.collect()
-        else:
-            all_bac_df = None
-        
-        # リストを削除
-        del all_sed_dfs, all_bac_dfs, all_sed_dfs_filtered, all_bac_dfs_filtered
-        import gc
-        gc.collect()
-        
-        if all_bac_df is None:
-            raise ValueError("BACデータは必須です。全年度のBACデータが存在しません。")
-        
-        print(f"[_01_] 全年度のSEDデータ: {len(all_sed_df):,}件" if all_sed_df is not None else "[_01_] 全年度のSEDデータ: なし")
-        print(f"[_01_] 全年度のBACデータ: {len(all_bac_df):,}件")
-        return all_sed_df, all_bac_df
+            # 空のDataFrameを除外
+            sed_dfs = [df for df in sed_dfs if len(df) > 0]
+            bac_dfs = [df for df in bac_dfs if len(df) > 0]
+            
+            # 段階的に結合（コピーを最小化）
+            sed_df = None
+            if sed_dfs:
+                sed_df = sed_dfs[0]  # 最初のDataFrameは参照を使用（コピーしない）
+                for df in sed_dfs[1:]:
+                    sed_df = pd.concat([sed_df, df], ignore_index=True)
+                    del df
+                    gc.collect()
+            
+            bac_df = None
+            if bac_dfs:
+                bac_df = bac_dfs[0]  # 最初のDataFrameは参照を使用（コピーしない）
+                for df in bac_dfs[1:]:
+                    bac_df = pd.concat([bac_df, df], ignore_index=True)
+                    del df
+                    gc.collect()
+            
+            # リストを削除
+            del sed_dfs, bac_dfs
+            gc.collect()
+            
+            if bac_df is None:
+                raise ValueError(f"BACデータは必須です。{target_year}年の前走データ抽出用のBACデータが存在しません。")
+            
+            print(f"[_01_] {target_year}年用SEDデータ: {len(sed_df):,}件" if sed_df is not None else f"[_01_] {target_year}年用SEDデータ: なし")
+            print(f"[_01_] {target_year}年用BACデータ: {len(bac_df):,}件")
+            return sed_df, bac_df
+        finally:
+            # クリーンアップ: 中間データを削除
+            if 'sed_dfs' in locals():
+                del sed_dfs
+            if 'bac_dfs' in locals():
+                del bac_dfs
+            gc.collect()
 
     def _process_single_year_features(
-        self, year: int, data_types: List[str], all_sed_df: Optional[pd.DataFrame], all_bac_df: pd.DataFrame
+        self, year: int, available_years: Optional[List[int]] = None
     ) -> pd.DataFrame:
         """
         単一年度の特徴量抽出を実行
         
         Args:
             year: 年度
-            data_types: データタイプのリスト
-            all_sed_df: 全年度のSEDデータ（None可）
-            all_bac_df: 全年度のBACデータ（必須）
+            available_years: 利用可能な年度のリスト（前走データ抽出用、Noneの場合は自動検出）
         
         Returns:
             特徴量抽出済みDataFrame
@@ -195,37 +163,54 @@ class DataProcessor:
         print(f"[_01_] {year}年のデータを処理中...")
         print(f"{'='*80}")
         
-        data_dict = self._parquet_loader.load(data_types, year)
-        raw_df = self._jrdb_combiner.combine(data_dict)
+        # 必要なデータを都度読み込む
+        # まずKYIとBACを読み込む（結合のベースに必要・必須）
+        kyi_df = self._parquet_loader.load_annual_pack_parquet("KYI", year)
+        bac_df = self._parquet_loader.load_annual_pack_parquet("BAC", year)
+        ukc_df = self._parquet_loader.load_annual_pack_parquet("UKC", year)
+        tyb_df = self._parquet_loader.load_annual_pack_parquet("TYB", year)
+        
+        # 結合処理を実行（結合時のみdata_dictを作成）
+        raw_df = JrdbCombiner.combine({
+            "KYI": kyi_df,
+            "BAC": bac_df,
+            "UKC": ukc_df,
+            "TYB": tyb_df,
+        }, self._full_info_schema)
+        
+        # 結合後は不要なDataFrameを削除（bac_dfは後で使用するため保持）
+        del kyi_df, ukc_df, tyb_df
+        gc.collect()
         print(f"[_02_] {year}年のデータ結合完了: {len(raw_df):,}件")
         
-        print(f"[_03_] {year}年の特徴量追加中（全年度のSED/BACデータを使用）...")
-        if all_sed_df is not None:
-            featured_df = self._feature_extractor.extract_all_parallel(raw_df, all_sed_df, all_bac_df)
-            # メモリ解放
-            del raw_df
-        else:
-            featured_df = raw_df
-        del data_dict
+        # 前走データ抽出用のSED/BACデータを読み込み（必要な年度のみ）
+        sed_df, bac_df = self._load_sed_bac_for_year(year, available_years)
         
-        import gc
-        gc.collect()
+        # 処理対象年度のSEDデータも読み込む（特徴量抽出に必要・_DATA_TYPESに含まれているため、存在することが期待される）
+        if sed_df is None:
+            sed_df = self._parquet_loader.load_annual_pack_parquet("SED", year)
         
-        print(f"[_03_] {year}年の特徴量抽出完了: {len(featured_df):,}件")
-        
-        # メモリ効率化: データ型を最適化（早い段階で実行）
+        print(f"[_03_] {year}年の特徴量追加中...")
         try:
-            # 数値カラムの型を最適化
-            for col in featured_df.select_dtypes(include=['int64']).columns:
-                if featured_df[col].min() >= 0 and featured_df[col].max() <= 2147483647:
-                    featured_df[col] = featured_df[col].astype('int32')
-            for col in featured_df.select_dtypes(include=['float64']).columns:
-                featured_df[col] = pd.to_numeric(featured_df[col], downcast='float')
+            # SEDは必須データなので、存在しない場合は既に例外が投げられている
+            featured_df = FeatureExtractor.extract_all_parallel(raw_df, sed_df, bac_df)
+            # メモリ解放
+            del raw_df, sed_df, bac_df
+            
             gc.collect()
-        except Exception as e:
-            print(f"警告: データ型最適化でエラーが発生しました（処理は続行）: {e}")
-        
-        return featured_df
+            
+            print(f"[_03_] {year}年の特徴量抽出完了: {len(featured_df):,}件")
+            
+            return featured_df
+        finally:
+            # クリーンアップ: 不要なデータを削除
+            if 'raw_df' in locals():
+                del raw_df
+            if 'sed_df' in locals():
+                del sed_df
+            if 'bac_df' in locals():
+                del bac_df
+            gc.collect()
 
     def _convert_and_prepare_data(
         self, featured_df: pd.DataFrame, split_date: Optional[Union[str, datetime]]
@@ -241,9 +226,9 @@ class DataProcessor:
             (converted_df, featured_df) - split_date未指定時はfeatured_dfはNone
         """
         print("[_04_] データ変換中（キー変換・数値化）...")
-        converted_df = self._key_converter.convert(featured_df)
+        converted_df = KeyConverter.convert(featured_df, self._full_info_schema, self._training_schema, self._category_mappings)
         print("[_04_] データ最適化中...")
-        converted_df = self._key_converter.optimize(converted_df)
+        converted_df = KeyConverter.optimize(converted_df, self._training_schema)
         print("[_04_] データ変換完了")
         
         if split_date is None:
@@ -272,16 +257,16 @@ class DataProcessor:
             (train_df, test_df, eval_df)
         """
         print(f"[_05_] 時系列分割中（分割日時: {split_date}）...")
-        train_df, test_df = self._time_series_splitter.split(converted_df, split_date)
+        train_df, test_df = TimeSeriesSplitter.split(converted_df, split_date)
         print(f"[_05_] 時系列分割完了: 学習={len(train_df):,}件, テスト={len(test_df):,}件")
         
         print("[_06_] 学習用カラム選択中...")
-        train_df = self._column_selector.select_training(train_df)
-        test_df = self._column_selector.select_training(test_df)
+        train_df = ColumnSelector.select_training(train_df, self._full_info_schema, self._training_schema)
+        test_df = ColumnSelector.select_training(test_df, self._full_info_schema, self._training_schema)
         print("[_06_] 学習用カラム選択完了")
         
         print("[_06_] 評価用データ準備中...")
-        eval_df = self._column_selector.select_evaluation(featured_df)
+        eval_df = ColumnSelector.select_evaluation(featured_df, self._evaluation_schema)
         if "race_key" in eval_df.columns:
             eval_df.set_index("race_key", inplace=True)
             if "start_datetime" in eval_df.columns:
@@ -292,7 +277,6 @@ class DataProcessor:
 
     def process_multiple_years(
         self,
-        data_types: List[str],
         years: List[int],
         split_date: Optional[Union[str, datetime]] = None,
     ) -> Union[pd.DataFrame, Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]]:
@@ -300,7 +284,6 @@ class DataProcessor:
         複数年度のデータを処理（全年度のSED/BACデータを使用して前走データを抽出）
         
         Args:
-            data_types: データタイプのリスト
             years: 年度のリスト
             split_date: 時系列分割日時（指定時は分割実行）
         
@@ -314,35 +297,45 @@ class DataProcessor:
         if not years:
             raise ValueError("yearsは空にできません。")
         
-        # 全年度のSED/BACデータを事前に読み込み・結合
-        all_sed_df, all_bac_df = self._load_all_years_sed_bac(years)
-        
         # 年度ごとに分割して処理（メモリ使用量を削減）
+        # 各年度で必要なデータだけを読み込む
         featured_dfs = []
-        for year in years:
-            featured_df = self._process_single_year_features(year, data_types, all_sed_df, all_bac_df)
-            featured_dfs.append(featured_df)
-            # 各年度処理後にメモリを解放
-            import gc
+        try:
+            for i, year in enumerate(years):
+                # 前走データ抽出用に、処理対象年度より前の年度も含めたリストを渡す
+                # ただし、利用可能な年度を自動検出する場合はNoneを渡す
+                year_featured_df = self._process_single_year_features(year, available_years=years)
+                if year_featured_df is not None and len(year_featured_df) > 0:
+                    featured_dfs.append(year_featured_df)
+                
+                # 各年度処理後にメモリを解放
+                gc.collect()
+            
+            # 年度ごとの特徴量抽出結果を結合
+            print(f"\n{'='*80}")
+            print("[_03_] 年度ごとの特徴量抽出結果を結合中...")
+            print(f"{'='*80}")
+            
+            if not featured_dfs:
+                raise ValueError("特徴量抽出結果が空です。")
+            
+            # 段階的に結合してメモリ使用量を削減
+            if len(featured_dfs) == 1:
+                featured_df = featured_dfs[0]
+            else:
+                featured_df = featured_dfs[0]  # 最初のDataFrameは参照を使用
+                for i, df in enumerate(featured_dfs[1:], 1):
+                    featured_df = pd.concat([featured_df, df], ignore_index=True)
+                    del df
+                    if i % 2 == 0:  # 2つ結合するごとにガベージコレクション
+                        gc.collect()
+            
+            print(f"[_03_] 結合完了: {len(featured_df):,}件")
+        finally:
+            # クリーンアップ: 中間データを削除
+            if 'featured_dfs' in locals():
+                del featured_dfs
             gc.collect()
-        
-        # 全年度のSED/BACデータを削除（使用済み）
-        del all_sed_df, all_bac_df
-        import gc
-        gc.collect()
-        
-        # 年度ごとの特徴量抽出結果を結合
-        print(f"\n{'='*80}")
-        print("[_03_] 年度ごとの特徴量抽出結果を結合中...")
-        print(f"{'='*80}")
-        # 空のDataFrameを除外してから結合（FutureWarningを回避）
-        featured_dfs_filtered = [df for df in featured_dfs if len(df) > 0]
-        if not featured_dfs_filtered:
-            raise ValueError("特徴量抽出結果が空です。")
-        featured_df = pd.concat(featured_dfs_filtered, ignore_index=True)
-        del featured_dfs
-        gc.collect()
-        print(f"[_03_] 結合完了: {len(featured_df):,}件")
         
         # データ変換とインデックス設定
         converted_df, featured_df_for_eval = self._convert_and_prepare_data(featured_df, split_date)

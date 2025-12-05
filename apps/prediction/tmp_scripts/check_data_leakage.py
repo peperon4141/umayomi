@@ -200,7 +200,12 @@ def main():
     # データを読み込み
     base_project_path = Path(__file__).resolve().parent.parent.parent  # tmp_scripts -> notebooks -> apps/prediction
     BASE_PATH = base_project_path.parent.parent / "notebooks" / "data"
-    data_processor = DataProcessor(base_path=base_project_path.parent.parent)
+    base_path = base_project_path.parent.parent  # apps/prediction -> apps -> umayomi
+    parquet_base_path = base_project_path / 'cache' / 'jrdb' / 'parquet'
+    data_processor = DataProcessor(
+        base_path=base_path,
+        parquet_base_path=parquet_base_path
+    )
     
     DATA_TYPES = ['BAC', 'KYI', 'SED']  # 最小限のデータタイプでチェック
     YEAR = 2024
@@ -213,7 +218,6 @@ def main():
     
     try:
         train_df, test_df, eval_df = data_processor.process(
-            data_types=DATA_TYPES,
             year=YEAR,
             split_date=SPLIT_DATE,
         )

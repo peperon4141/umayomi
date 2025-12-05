@@ -1,7 +1,6 @@
 """カラム選択処理"""
 
-from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import List, Optional
 
 import pandas as pd
 
@@ -9,24 +8,33 @@ from ._06_01_column_filter import ColumnFilter
 
 
 class ColumnSelector:
-    """学習用・評価用カラムを選択するクラス"""
+    """学習用・評価用カラムを選択するクラス（staticメソッドのみ）"""
 
-    def __init__(self, base_path: Path):
-        """初期化。base_path: プロジェクトのベースパス"""
-        self._column_filter = ColumnFilter(base_path)
+    @staticmethod
+    def select_training(df: pd.DataFrame, full_info_schema: dict, training_schema: dict) -> pd.DataFrame:
+        """
+        学習用カラムを選択
+        
+        Args:
+            df: 変換済みDataFrame（英語キー）
+            full_info_schema: full_info_schema.jsonの内容
+            training_schema: training_schema.jsonの内容
+        
+        Returns:
+            学習用カラムのみのDataFrame
+        """
+        return ColumnFilter.filter_training_columns(df, full_info_schema, training_schema)
 
-    def select_training(self, df: pd.DataFrame) -> pd.DataFrame:
-        """学習用カラムを選択。df: 変換済みDataFrame（英語キー）。学習用カラムのみのDataFrameを返す"""
-        return self._column_filter.filter_training_columns(df)
-
+    @staticmethod
     def select_evaluation(
-        self, df: pd.DataFrame, include_optional: bool = True, metrics: Optional[List[str]] = None
+        df: pd.DataFrame, evaluation_schema: dict, include_optional: bool = True, metrics: Optional[List[str]] = None
     ) -> pd.DataFrame:
         """
         評価用カラムを選択（evaluation_schema.jsonに基づく）。
         
         Args:
             df: 結合済みDataFrame（日本語キー）
+            evaluation_schema: evaluation_schema.jsonの内容
             include_optional: オプションカラムを含めるか（デフォルト: True）
             metrics: 評価指標のリスト（指定された場合、その指標に必要なカラムのみを選択）
             
@@ -34,9 +42,9 @@ class ColumnSelector:
             評価用カラムのみのDataFrame（日本語キー）
         """
         if metrics:
-            eval_cols = self._column_filter.get_evaluation_columns_by_metrics(df, metrics)
+            eval_cols = ColumnFilter.get_evaluation_columns_by_metrics(df, evaluation_schema, metrics)
         else:
-            eval_cols = self._column_filter.get_evaluation_columns(df, include_optional=include_optional)
+            eval_cols = ColumnFilter.get_evaluation_columns(df, evaluation_schema, include_optional=include_optional)
         
         if eval_cols:
             return df[eval_cols].copy()

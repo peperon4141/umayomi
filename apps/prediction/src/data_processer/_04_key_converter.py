@@ -1,31 +1,47 @@
 """データ変換処理（キー変換、数値化、最適化）"""
 
-from pathlib import Path
-
 import pandas as pd
 
-from ._04_03_dtype_optimizer import optimize, cleanup_object_columns
+from ._04_03_dtype_optimizer import DtypeOptimizer
 from ._04_02_label_encoder import LabelEncoder
-from ._04_01_numeric_converter import convert_to_numeric, convert_prev_race_types
+from ._04_01_numeric_converter import NumericConverter
 
 
 class KeyConverter:
-    """キー変換と数値化を行うクラス"""
+    """キー変換と数値化を行うクラス（staticメソッドのみ）"""
 
-    def __init__(self, base_path: Path):
-        """初期化。base_path: プロジェクトのベースパス"""
-        self._base_path = Path(base_path)
-
-    def convert(self, df: pd.DataFrame) -> pd.DataFrame:
-        """日本語キー→英語キー変換と数値化。df: 日本語キーのDataFrame。英語キーのDataFrame（数値化済み）を返す"""
-        df = convert_to_numeric(df, base_path=self._base_path)
-        df = convert_prev_race_types(df)
-        df = LabelEncoder(base_path=self._base_path).encode(df)
+    @staticmethod
+    def convert(df: pd.DataFrame, full_info_schema: dict, training_schema: dict, category_mappings: dict) -> pd.DataFrame:
+        """
+        日本語キー→英語キー変換と数値化
+        
+        Args:
+            df: 日本語キーのDataFrame
+            full_info_schema: full_info_schema.jsonの内容
+            training_schema: training_schema.jsonの内容
+            category_mappings: カテゴリマッピングの辞書
+        
+        Returns:
+            英語キーのDataFrame（数値化済み）
+        """
+        df = NumericConverter.convert_to_numeric(df, full_info_schema)
+        df = NumericConverter.convert_prev_race_types(df)
+        df = LabelEncoder.encode(df, training_schema, category_mappings)
         return df
 
-    def optimize(self, df: pd.DataFrame) -> pd.DataFrame:
-        """データ型を最適化。df: 変換済みDataFrame。最適化済みDataFrameを返す"""
-        df = optimize(df, base_path=self._base_path)
-        df = cleanup_object_columns(df)
+    @staticmethod
+    def optimize(df: pd.DataFrame, training_schema: dict) -> pd.DataFrame:
+        """
+        データ型を最適化
+        
+        Args:
+            df: 変換済みDataFrame
+            training_schema: training_schema.jsonの内容
+        
+        Returns:
+            最適化済みDataFrame
+        """
+        df = DtypeOptimizer.optimize(df, training_schema)
+        df = DtypeOptimizer.cleanup_object_columns(df)
         return df
 

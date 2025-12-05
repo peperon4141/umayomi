@@ -86,14 +86,13 @@ else:
 # %%
 # ## データ読み込みと前処理
 base_project_path = Path(__file__).resolve().parent.parent  # notebooks/ -> apps/prediction/
-data_processor = DataProcessor(base_path=base_project_path.parent.parent)  # apps/prediction/ -> プロジェクトルート
+data_processor = DataProcessor()
 
 print("データ読み込みと前処理を開始します...")
 split_date = "2024-06-01"
 
 try:
     train_df, test_df, eval_df = data_processor.process(
-        data_types=DATA_TYPES,
         year=YEARS[0],
         split_date=split_date,
     )

@@ -280,7 +280,7 @@ def main():
     
     # データ処理を実行（キャッシュから読み込むか、新規に処理）
     base_path = project_root.parent.parent  # apps/prediction -> apps -> umayomi
-    data_processor = DataProcessor(base_path=base_path, use_cache=True)
+    data_processor = DataProcessor(use_cache=True)
     
     data_types = ["KYI", "BAC", "SED", "UKC", "TYB"]
     years = [2023, 2024]
@@ -292,7 +292,6 @@ def main():
     print(f"  分割日時: {split_date}")
     
     train_df, test_df, eval_df = data_processor.process_multiple_years(
-        data_types=data_types,
         years=years,
         split_date=split_date
     )

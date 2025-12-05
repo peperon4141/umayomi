@@ -35,14 +35,13 @@ def main():
     # キャッシュからデータを読み込み（train_rank_model_v1.pyと同じ処理）
     from src.data_processer import DataProcessor
     
-    data_processor = DataProcessor(base_path=base_project_path.parent.parent)
+    data_processor = DataProcessor()
     
     # 2023と2024のデータを結合してチェック
     print("\nデータを読み込み中（キャッシュから）...")
     
     # 2024年のデータを読み込み
     train_df, test_df, eval_df = data_processor.process(
-        data_types=DATA_TYPES,
         year=2024,
         split_date=split_date,
     )

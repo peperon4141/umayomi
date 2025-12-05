@@ -29,7 +29,12 @@ def main():
     
     # データ処理を実行（キャッシュから読み込む）
     base_path = project_root.parent.parent  # apps/prediction -> apps -> umayomi
-    data_processor = DataProcessor(base_path=base_path, use_cache=True)
+    parquet_base_path = project_root / 'cache' / 'jrdb' / 'parquet'
+    data_processor = DataProcessor(
+        base_path=base_path,
+        parquet_base_path=parquet_base_path,
+        use_cache=True
+    )
     
     data_types = ["KYI", "BAC", "SED", "UKC", "TYB"]
     years = [2024]
@@ -42,7 +47,6 @@ def main():
     
     try:
         train_df, test_df, eval_df = data_processor.process_multiple_years(
-            data_types=data_types,
             years=years,
             split_date=split_date
         )

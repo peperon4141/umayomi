@@ -12,14 +12,13 @@ sys.path.insert(0, str(project_root))
 from src.data_processer import DataProcessor
 
 base_project_path = Path(__file__).resolve().parent.parent
-data_processor = DataProcessor(base_path=base_project_path.parent.parent)
+data_processor = DataProcessor()
 
 DATA_TYPES = ['BAC', 'KYI', 'SED', 'UKC', 'TYB']
 YEAR = 2024
 SPLIT_DATE = '2024-06-01'
 
 train_df, test_df, eval_df = data_processor.process(
-    data_types=DATA_TYPES,
     year=YEAR,
     split_date=SPLIT_DATE,
 )

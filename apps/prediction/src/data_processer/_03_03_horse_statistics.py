@@ -5,49 +5,6 @@ import pandas as pd
 from tqdm import tqdm
 
 
-def _process_group_time_series_stats(
-    group_value, group_stats, target_sorted, group_col, time_col, prefix
-):
-    """グループごとの時系列統計量を計算（並列化用）"""
-    group_stats = group_stats.sort_values(by=time_col).reset_index(drop=True)
-    group_targets = target_sorted[target_sorted[group_col] == group_value]
-    
-    if len(group_stats) == 0 or len(group_targets) == 0:
-        return pd.DataFrame()
-    
-    group_stats_times = group_stats[time_col].values
-    group_targets_times = group_targets[time_col].values
-    group_targets_indices = group_targets['_original_index'].values
-    indices = np.searchsorted(group_stats_times, group_targets_times, side='left') - 1
-    
-    n_targets = len(group_targets)
-    result_data = {
-        group_col: [group_value] * n_targets,
-        time_col: group_targets_times,
-        '_original_index': group_targets_indices,
-    }
-    
-    valid_mask = indices >= 0
-    cumsum_1st_col = group_stats[f"{prefix}_cumsum_1st"].values
-    cumsum_3rd_col = group_stats[f"{prefix}_cumsum_3rd"].values
-    cumsum_rank_col = group_stats[f"{prefix}_cumsum_rank"].values
-    cumcount_col = group_stats[f"{prefix}_cumcount"].values
-    
-    result_data[f"{prefix}_cumsum_1st"] = np.zeros(n_targets, dtype=float)
-    result_data[f"{prefix}_cumsum_3rd"] = np.zeros(n_targets, dtype=float)
-    result_data[f"{prefix}_cumsum_rank"] = np.zeros(n_targets, dtype=float)
-    result_data[f"{prefix}_cumcount"] = np.zeros(n_targets, dtype=int)
-    
-    if valid_mask.any():
-        valid_indices = indices[valid_mask]
-        result_data[f"{prefix}_cumsum_1st"][valid_mask] = cumsum_1st_col[valid_indices]
-        result_data[f"{prefix}_cumsum_3rd"][valid_mask] = cumsum_3rd_col[valid_indices]
-        result_data[f"{prefix}_cumsum_rank"][valid_mask] = cumsum_rank_col[valid_indices]
-        result_data[f"{prefix}_cumcount"][valid_mask] = cumcount_col[valid_indices]
-    
-    return pd.DataFrame(result_data)
-
-
 class HorseStatistics:
     """馬の過去成績統計を計算するクラス"""
 
@@ -75,7 +32,8 @@ class HorseStatistics:
             )
         else:
             # フラグメント化を回避するため、pd.concatを使用
-            horse_stats_subset = horse_stats[[col for col in horse_stats.columns if col not in key_cols]].copy()
+            # 列の抽出は新しいDataFrameを作成するため、明示的なcopy()は不要
+            horse_stats_subset = horse_stats[[col for col in horse_stats.columns if col not in key_cols]]
             target_df_merged = pd.concat([target_df_sorted, horse_stats_subset], axis=1)
 
         target_index_df = pd.DataFrame({'_original_index': target_original_index})
@@ -86,6 +44,49 @@ class HorseStatistics:
         del target_df_sorted, horse_stats, target_df_merged, target_index_df
 
         return target_df
+
+    @staticmethod
+    def _process_group_time_series_stats(
+        group_value, group_stats, target_sorted, group_col, time_col, prefix
+    ):
+        """グループごとの時系列統計量を計算"""
+        group_stats = group_stats.sort_values(by=time_col).reset_index(drop=True)
+        group_targets = target_sorted[target_sorted[group_col] == group_value]
+        
+        if len(group_stats) == 0 or len(group_targets) == 0:
+            return pd.DataFrame()
+        
+        group_stats_times = group_stats[time_col].values
+        group_targets_times = group_targets[time_col].values
+        group_targets_indices = group_targets['_original_index'].values
+        indices = np.searchsorted(group_stats_times, group_targets_times, side='left') - 1
+        
+        n_targets = len(group_targets)
+        result_data = {
+            group_col: [group_value] * n_targets,
+            time_col: group_targets_times,
+            '_original_index': group_targets_indices,
+        }
+        
+        valid_mask = indices >= 0
+        cumsum_1st_col = group_stats[f"{prefix}_cumsum_1st"].values
+        cumsum_3rd_col = group_stats[f"{prefix}_cumsum_3rd"].values
+        cumsum_rank_col = group_stats[f"{prefix}_cumsum_rank"].values
+        cumcount_col = group_stats[f"{prefix}_cumcount"].values
+        
+        result_data[f"{prefix}_cumsum_1st"] = np.zeros(n_targets, dtype=float)
+        result_data[f"{prefix}_cumsum_3rd"] = np.zeros(n_targets, dtype=float)
+        result_data[f"{prefix}_cumsum_rank"] = np.zeros(n_targets, dtype=float)
+        result_data[f"{prefix}_cumcount"] = np.zeros(n_targets, dtype=int)
+        
+        if valid_mask.any():
+            valid_indices = indices[valid_mask]
+            result_data[f"{prefix}_cumsum_1st"][valid_mask] = cumsum_1st_col[valid_indices]
+            result_data[f"{prefix}_cumsum_3rd"][valid_mask] = cumsum_3rd_col[valid_indices]
+            result_data[f"{prefix}_cumsum_rank"][valid_mask] = cumsum_rank_col[valid_indices]
+            result_data[f"{prefix}_cumcount"][valid_mask] = cumcount_col[valid_indices]
+        
+        return pd.DataFrame(result_data)
 
     @staticmethod
     def _calculate_time_series_stats(
@@ -123,7 +124,7 @@ class HorseStatistics:
         with tqdm(total=len(valid_groups), desc=f"{prefix}グループ処理", leave=True, unit="groups") as pbar:
             for group_value in valid_groups:
                 group_stats = grouped_stats.get_group(group_value)
-                result_df = _process_group_time_series_stats(
+                result_df = HorseStatistics._process_group_time_series_stats(
                     group_value, group_stats, target_sorted, group_col, time_col, prefix
                 )
                 if len(result_df) > 0:

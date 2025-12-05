@@ -65,7 +65,7 @@ def main():
     SPLIT_DATE = "2024-06-01"
     
     # DataProcessorでデータを読み込み（キャッシュから）
-    data_processor = DataProcessor(base_path=base_project_path.parent.parent)
+    data_processor = DataProcessor()
     
     print(f"\nデータ読み込み中（キャッシュから）...")
     print(f"  データタイプ: {DATA_TYPES}")
@@ -74,7 +74,6 @@ def main():
     
     try:
         train_df, test_df, eval_df = data_processor.process(
-            data_types=DATA_TYPES,
             year=YEAR,
             split_date=SPLIT_DATE,
         )

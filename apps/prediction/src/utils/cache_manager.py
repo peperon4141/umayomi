@@ -6,21 +6,26 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Union
 
-import numpy as np
 import pandas as pd
 
 
 class CacheManager:
-    """前処理済みデータのキャッシュ管理クラス"""
+    """前処理済みデータのキャッシュ管理クラス（staticなパスを持つ）"""
 
-    def __init__(self, cache_dir: Union[str, Path] = "cache"):
+    def __init__(self, prediction_app_path: Optional[Union[str, Path]] = None):
         """
         初期化
-
+        
         Args:
-            cache_dir: キャッシュディレクトリのパス（プロジェクトルートからの相対パス）
+            prediction_app_path: apps/predictionディレクトリのパス（デフォルト: 自動検出）
         """
-        self._cache_dir = Path(cache_dir)
+        if prediction_app_path is None:
+            # apps/predictionディレクトリを自動検出（このファイルから2階層上）
+            prediction_app_path = Path(__file__).parent.parent.parent
+        self._prediction_app_path = Path(prediction_app_path)
+        
+        # staticなキャッシュディレクトリパス
+        self._cache_dir = self._prediction_app_path / "cache"
         self._cache_dir.mkdir(parents=True, exist_ok=True)
 
     def _generate_cache_key(
@@ -346,7 +351,7 @@ class CacheManager:
                     print(f"[_07_] キャッシュを削除: {path}")
         else:
             # すべてのキャッシュを削除
-            for path in self._cache_dir.glob("*.npz"):
+            for path in self._cache_dir.glob("*.parquet"):
                 path.unlink()
             for path in self._cache_dir.glob("*.json"):
                 path.unlink()
