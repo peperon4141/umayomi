@@ -12,26 +12,6 @@ class LabelEncoder:
     _label_encoders: Dict[str, preprocessing.LabelEncoder] = {}
 
     @staticmethod
-    def _get_categorical_features(training_schema: dict, category_mappings: Dict[str, dict]) -> list[dict]:
-        """カテゴリカル特徴量の定義を取得"""
-        categorical = []
-        for col in training_schema.get("columns", []):
-            if col.get("type") == "categorical":
-                feature_name = col.get("name")
-                if not feature_name:
-                    continue
-                cat_def = {"name": feature_name}
-                category_mapping_name = col.get("category_mapping_name")
-                if category_mapping_name and category_mapping_name in category_mappings:
-                    cat_data = category_mappings[category_mapping_name]
-                    if cat_data.get("type") == "map":
-                        cat_def["map"] = cat_data.get("mapping", {})
-                    elif cat_data.get("type") == "list":
-                        cat_def["list"] = cat_data.get("categories", [])
-                categorical.append(cat_def)
-        return categorical
-
-    @staticmethod
     def encode(df: pd.DataFrame, training_schema: dict, category_mappings: Dict[str, dict]) -> pd.DataFrame:
         """
         カテゴリカル特徴量をラベルエンコーディング
@@ -98,3 +78,28 @@ class LabelEncoder:
                 del encoded_columns
             import gc
             gc.collect()
+
+    @staticmethod
+    def _get_categorical_features(training_schema: dict, category_mappings: Dict[str, dict]) -> list[dict]:
+        """カテゴリカル特徴量の定義を取得"""
+        categorical = []
+        for col in training_schema.get("columns", []):
+            if col.get("type") == "categorical":
+                feature_name = col.get("name")
+                if not feature_name:
+                    continue
+                cat_def = {"name": feature_name}
+                category_mapping_name = col.get("category_mapping_name")
+                if category_mapping_name and category_mapping_name in category_mappings:
+                    cat_data = category_mappings[category_mapping_name]
+                    cat_type = cat_data.get("type")
+                    if cat_type == "map":
+                        if "mapping" not in cat_data:
+                            raise ValueError(f"カテゴリマッピング '{category_mapping_name}' のtypeが'map'ですが、'mapping'が定義されていません。")
+                        cat_def["map"] = cat_data["mapping"]
+                    elif cat_type == "list":
+                        if "categories" not in cat_data:
+                            raise ValueError(f"カテゴリマッピング '{category_mapping_name}' のtypeが'list'ですが、'categories'が定義されていません。")
+                        cat_def["list"] = cat_data["categories"]
+                categorical.append(cat_def)
+        return categorical

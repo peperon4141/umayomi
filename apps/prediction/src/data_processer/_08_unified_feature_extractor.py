@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
-from ._03_01_feature_converter import FeatureConverter
+from src.utils.feature_converter import FeatureConverter
 
 
 class UnifiedFeatureExtractor:

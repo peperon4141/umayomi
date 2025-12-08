@@ -4,6 +4,7 @@
   "recordLength": 128,
   "encoding": "ShiftJIS",
   "lineEnding": "CRLF",
+  "identifierColumns": ["race_key", "馬番"],
   "fields": [
     {"name":"場コード","start":1,"length":2,"type":"integer_nine","description":"場コード"},
     {"name":"年","start":3,"length":2,"type":"integer_nine","description":"年"},

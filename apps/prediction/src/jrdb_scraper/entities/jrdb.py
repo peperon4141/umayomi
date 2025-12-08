@@ -77,7 +77,7 @@ JRDB_DATA_TYPE_INFO: Dict[JRDBDataType, JRDBDataTypeInfo] = {
         'dataFileBaseUrl': 'https://jrdb.com/member/data/Kyi',
         'dataFileDirectory': 'Kyi',
         'hasAnnualPack': True,
-        'isMasterData': False
+        'isMasterData': False,
     },
     JRDBDataType.KYH: {
         'dataType': JRDBDataType.KYH,
@@ -86,7 +86,7 @@ JRDB_DATA_TYPE_INFO: Dict[JRDBDataType, JRDBDataTypeInfo] = {
         'dataFileBaseUrl': 'https://jrdb.com/member/data/Kyh',
         'dataFileDirectory': 'Kyh',
         'hasAnnualPack': True,
-        'isMasterData': False
+        'isMasterData': False,
     },
     JRDBDataType.KYG: {
         'dataType': JRDBDataType.KYG,
@@ -95,7 +95,7 @@ JRDB_DATA_TYPE_INFO: Dict[JRDBDataType, JRDBDataTypeInfo] = {
         'dataFileBaseUrl': 'https://jrdb.com/member/data/Kyg',
         'dataFileDirectory': 'Kyg',
         'hasAnnualPack': True,
-        'isMasterData': False
+        'isMasterData': False,
     },
     JRDBDataType.KKA: {
         'dataType': JRDBDataType.KKA,
@@ -104,7 +104,7 @@ JRDB_DATA_TYPE_INFO: Dict[JRDBDataType, JRDBDataTypeInfo] = {
         'dataFileBaseUrl': 'https://jrdb.com/member/data/Kka',
         'dataFileDirectory': 'Kka',
         'hasAnnualPack': False,
-        'isMasterData': False
+        'isMasterData': False,
     },
     # BA系（番組データ）- 日付単位で更新
     JRDBDataType.BAC: {
@@ -114,7 +114,7 @@ JRDB_DATA_TYPE_INFO: Dict[JRDBDataType, JRDBDataTypeInfo] = {
         'dataFileBaseUrl': 'https://jrdb.com/member/data/Bac',
         'dataFileDirectory': 'Bac',
         'hasAnnualPack': True,
-        'isMasterData': False
+        'isMasterData': False,
     },
     JRDBDataType.BAB: {
         'dataType': JRDBDataType.BAB,
@@ -123,7 +123,7 @@ JRDB_DATA_TYPE_INFO: Dict[JRDBDataType, JRDBDataTypeInfo] = {
         'dataFileBaseUrl': 'https://jrdb.com/member/data/Bab',
         'dataFileDirectory': 'Bab',
         'hasAnnualPack': True,
-        'isMasterData': False
+        'isMasterData': False,
     },
     # KA系（開催データ）- 日付単位で更新、年度パックなし
     JRDBDataType.KAA: {
@@ -133,7 +133,7 @@ JRDB_DATA_TYPE_INFO: Dict[JRDBDataType, JRDBDataTypeInfo] = {
         'dataFileBaseUrl': 'https://jrdb.com/member/data/Kaa',
         'dataFileDirectory': 'Kaa',
         'hasAnnualPack': False,
-        'isMasterData': False
+        'isMasterData': False,
     },
     JRDBDataType.KAB: {
         'dataType': JRDBDataType.KAB,
@@ -142,7 +142,7 @@ JRDB_DATA_TYPE_INFO: Dict[JRDBDataType, JRDBDataTypeInfo] = {
         'dataFileBaseUrl': 'https://jrdb.com/member/data/Kab',
         'dataFileDirectory': 'Kab',
         'hasAnnualPack': False,
-        'isMasterData': False
+        'isMasterData': False,
     },
     # KT系（登録馬データ）- 日付単位で更新、年度パックなし
     JRDBDataType.KTA: {
@@ -152,7 +152,7 @@ JRDB_DATA_TYPE_INFO: Dict[JRDBDataType, JRDBDataTypeInfo] = {
         'dataFileBaseUrl': 'https://jrdb.com/member/data/Kta',
         'dataFileDirectory': 'Kta',
         'hasAnnualPack': False,
-        'isMasterData': False
+        'isMasterData': False,
     },
     # O系（オッズデータ）- 日付単位で更新、年度パックなし
     JRDBDataType.OZ: {
@@ -162,7 +162,7 @@ JRDB_DATA_TYPE_INFO: Dict[JRDBDataType, JRDBDataTypeInfo] = {
         'dataFileBaseUrl': 'https://jrdb.com/member/data/Oz',
         'dataFileDirectory': 'Oz',
         'hasAnnualPack': False,
-        'isMasterData': False
+        'isMasterData': False,
     },
     JRDBDataType.OW: {
         'dataType': JRDBDataType.OW,
@@ -171,7 +171,7 @@ JRDB_DATA_TYPE_INFO: Dict[JRDBDataType, JRDBDataTypeInfo] = {
         'dataFileBaseUrl': 'https://jrdb.com/member/data/Oz',
         'dataFileDirectory': 'Oz',
         'hasAnnualPack': False,
-        'isMasterData': False
+        'isMasterData': False,
     },
     JRDBDataType.OU: {
         'dataType': JRDBDataType.OU,
@@ -180,7 +180,7 @@ JRDB_DATA_TYPE_INFO: Dict[JRDBDataType, JRDBDataTypeInfo] = {
         'dataFileBaseUrl': 'https://jrdb.com/member/data/Ou',
         'dataFileDirectory': 'Ou',
         'hasAnnualPack': False,
-        'isMasterData': False
+        'isMasterData': False,
     },
     JRDBDataType.OT: {
         'dataType': JRDBDataType.OT,
@@ -189,7 +189,7 @@ JRDB_DATA_TYPE_INFO: Dict[JRDBDataType, JRDBDataTypeInfo] = {
         'dataFileBaseUrl': 'https://jrdb.com/member/data/Ot',
         'dataFileDirectory': 'Ot',
         'hasAnnualPack': False,
-        'isMasterData': False
+        'isMasterData': False,
     },
     JRDBDataType.OV: {
         'dataType': JRDBDataType.OV,
@@ -198,7 +198,7 @@ JRDB_DATA_TYPE_INFO: Dict[JRDBDataType, JRDBDataTypeInfo] = {
         'dataFileBaseUrl': 'https://jrdb.com/member/data/Ov',
         'dataFileDirectory': 'Ov',
         'hasAnnualPack': False,
-        'isMasterData': False
+        'isMasterData': False,
     },
     # HJ系（払戻情報データ）- 日付単位で更新
     JRDBDataType.HJC: {
@@ -208,7 +208,7 @@ JRDB_DATA_TYPE_INFO: Dict[JRDBDataType, JRDBDataTypeInfo] = {
         'dataFileBaseUrl': 'https://jrdb.com/member/data/Hjc',
         'dataFileDirectory': 'Hjc',
         'hasAnnualPack': True,
-        'isMasterData': False
+        'isMasterData': False,
     },
     JRDBDataType.HJB: {
         'dataType': JRDBDataType.HJB,
@@ -217,7 +217,7 @@ JRDB_DATA_TYPE_INFO: Dict[JRDBDataType, JRDBDataTypeInfo] = {
         'dataFileBaseUrl': 'https://jrdb.com/member/data/Hjb',
         'dataFileDirectory': 'Hjb',
         'hasAnnualPack': False,
-        'isMasterData': False
+        'isMasterData': False,
     },
     # SE系（成績データ）- 日付単位で更新、年度パックあり
     # 注意: SRBとSRAはSED/SECに同梱されているため、個別のデータタイプとして定義しない
@@ -228,7 +228,7 @@ JRDB_DATA_TYPE_INFO: Dict[JRDBDataType, JRDBDataTypeInfo] = {
         'dataFileBaseUrl': 'https://jrdb.com/member/data/Sed',
         'dataFileDirectory': 'Sed',
         'hasAnnualPack': True,
-        'isMasterData': False
+        'isMasterData': False,
     },
     JRDBDataType.SEC: {
         'dataType': JRDBDataType.SEC,
@@ -237,7 +237,7 @@ JRDB_DATA_TYPE_INFO: Dict[JRDBDataType, JRDBDataTypeInfo] = {
         'dataFileBaseUrl': 'https://jrdb.com/member/data/Sec',
         'dataFileDirectory': 'Sec',
         'hasAnnualPack': True,
-        'isMasterData': False
+        'isMasterData': False,
     },
     # ZE系（前走データ）- 成績データと同じフォーマット、年度パックなし
     JRDBDataType.ZED: {
@@ -247,7 +247,7 @@ JRDB_DATA_TYPE_INFO: Dict[JRDBDataType, JRDBDataTypeInfo] = {
         'dataFileBaseUrl': 'https://jrdb.com/member/data/Zed',
         'dataFileDirectory': 'Zed',
         'hasAnnualPack': False,
-        'isMasterData': False
+        'isMasterData': False,
     },
     JRDBDataType.ZEC: {
         'dataType': JRDBDataType.ZEC,
@@ -256,7 +256,7 @@ JRDB_DATA_TYPE_INFO: Dict[JRDBDataType, JRDBDataTypeInfo] = {
         'dataFileBaseUrl': 'https://jrdb.com/member/data/Zec',
         'dataFileDirectory': 'Zec',
         'hasAnnualPack': False,
-        'isMasterData': False
+        'isMasterData': False,
     },
     # その他 - 日付単位で更新
     JRDBDataType.UKC: {
@@ -266,7 +266,7 @@ JRDB_DATA_TYPE_INFO: Dict[JRDBDataType, JRDBDataTypeInfo] = {
         'dataFileBaseUrl': 'https://jrdb.com/member/data/Ukc',
         'dataFileDirectory': 'Ukc',
         'hasAnnualPack': True,
-        'isMasterData': False
+        'isMasterData': False,
     },
     JRDBDataType.JOA: {
         'dataType': JRDBDataType.JOA,
@@ -275,7 +275,7 @@ JRDB_DATA_TYPE_INFO: Dict[JRDBDataType, JRDBDataTypeInfo] = {
         'dataFileBaseUrl': 'https://jrdb.com/member/data/Jo',
         'dataFileDirectory': 'Jo',
         'hasAnnualPack': False,
-        'isMasterData': False
+        'isMasterData': False,
     },
     JRDBDataType.TYB: {
         'dataType': JRDBDataType.TYB,
@@ -284,7 +284,7 @@ JRDB_DATA_TYPE_INFO: Dict[JRDBDataType, JRDBDataTypeInfo] = {
         'dataFileBaseUrl': 'https://jrdb.com/member/data/Tyb',
         'dataFileDirectory': 'Tyb',
         'hasAnnualPack': True,
-        'isMasterData': False
+        'isMasterData': False,
     },
     # 騎手・調教師データ（週単位で更新）- 年度パックなし、マスターデータ
     JRDBDataType.KZA: {
@@ -294,7 +294,7 @@ JRDB_DATA_TYPE_INFO: Dict[JRDBDataType, JRDBDataTypeInfo] = {
         'dataFileBaseUrl': 'https://jrdb.com/member/data/Ks',
         'dataFileDirectory': 'Ks',
         'hasAnnualPack': False,
-        'isMasterData': True
+        'isMasterData': True,
     },
     JRDBDataType.KSA: {
         'dataType': JRDBDataType.KSA,
@@ -303,7 +303,7 @@ JRDB_DATA_TYPE_INFO: Dict[JRDBDataType, JRDBDataTypeInfo] = {
         'dataFileBaseUrl': 'https://jrdb.com/member/data/Ks',
         'dataFileDirectory': 'Ks',
         'hasAnnualPack': False,
-        'isMasterData': False
+        'isMasterData': False,
     },
     JRDBDataType.CZA: {
         'dataType': JRDBDataType.CZA,
@@ -312,7 +312,7 @@ JRDB_DATA_TYPE_INFO: Dict[JRDBDataType, JRDBDataTypeInfo] = {
         'dataFileBaseUrl': 'https://jrdb.com/member/data/Cs',
         'dataFileDirectory': 'Cs',
         'hasAnnualPack': False,
-        'isMasterData': True
+        'isMasterData': True,
     },
     JRDBDataType.CSA: {
         'dataType': JRDBDataType.CSA,
@@ -321,7 +321,7 @@ JRDB_DATA_TYPE_INFO: Dict[JRDBDataType, JRDBDataTypeInfo] = {
         'dataFileBaseUrl': 'https://jrdb.com/member/data/Cs',
         'dataFileDirectory': 'Cs',
         'hasAnnualPack': False,
-        'isMasterData': False
+        'isMasterData': False,
     }
 }
 

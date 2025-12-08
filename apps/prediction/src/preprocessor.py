@@ -9,7 +9,7 @@ import pandas as pd
 from sklearn import preprocessing
 
 from .cache_loader import CacheLoader
-from .feature_converter import FeatureConverter
+from src.utils.feature_converter import FeatureConverter
 from .feature_extractors import PreviousRaceExtractor, StatisticalFeatureCalculator
 from .features import Features
 

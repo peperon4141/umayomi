@@ -4,6 +4,7 @@
   "recordLength": 272,
   "encoding": "ShiftJIS",
   "lineEnding": "CRLF",
+  "identifierColumns": ["騎手コード"],
   "fields": [
     {"name":"騎手コード","start":1,"length":5,"type":"integer_nine","description":"騎手コード"},
     {"name":"登録抹消フラグ","start":6,"length":1,"type":"integer_nine","description":"1:抹消,0:現役"},

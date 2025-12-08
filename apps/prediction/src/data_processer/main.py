@@ -8,8 +8,9 @@ from typing import List, Optional, Tuple, Union
 import pandas as pd
 
 from src.utils.cache_manager import CacheManager
-from src.utils.schema_loader import SchemaLoader
+from src.utils.schema_loader import SchemaLoader, SchemaFile
 from src.utils.parquet_loader import ParquetLoader
+from src.utils.jrdb_format_loader import JRDBFormatLoader
 from ._06_column_selector import ColumnSelector
 from ._02_jrdb_combiner import JrdbCombiner
 from ._04_key_converter import KeyConverter
@@ -49,11 +50,21 @@ class DataProcessor:
         # スキーマローダーを初期化
         schemas_base_path = self._base_path / "packages" / "data" / "schemas"
         self._schema_loader = SchemaLoader(schemas_base_path)
+        # フォーマットローダーを初期化
+        formats_dir = self._base_path / "apps" / "prediction" / "src" / "jrdb_scraper" / "formats"
+        self._format_loader = JRDBFormatLoader(formats_dir)
         # スキーマを読み込み（キャッシュとして保持）
-        self._full_info_schema = self._schema_loader.load_full_info_schema()
-        self._training_schema = self._schema_loader.load_training_schema()
-        self._evaluation_schema = self._schema_loader.load_evaluation_schema()
-        self._category_mappings = self._schema_loader.load_category_mappings()
+        self._combined_schema = self._schema_loader.load_schema(SchemaFile.COMBINED)  # データ結合用（_02_）
+        self._feature_extraction_schema = self._schema_loader.load_schema(SchemaFile.FEATURE_EXTRACTION)  # 特徴量抽出用（_03_）
+        self._horse_statistics_schema = self._schema_loader.load_schema(SchemaFile.HORSE_STATISTICS)  # 馬統計量用（_03_）
+        self._jockey_statistics_schema = self._schema_loader.load_schema(SchemaFile.JOCKEY_STATISTICS)  # 騎手統計量用（_03_）
+        self._trainer_statistics_schema = self._schema_loader.load_schema(SchemaFile.TRAINER_STATISTICS)  # 調教師統計量用（_03_）
+        self._previous_race_extractor_schema = self._schema_loader.load_schema(SchemaFile.PREVIOUS_RACE_EXTRACTOR)  # 前走データ抽出用（_03_）
+        self._key_mapping_schema = self._schema_loader.load_schema(SchemaFile.KEY_MAPPING)  # キー変換用（_04_）
+        self._column_selection_schema = self._schema_loader.load_schema(SchemaFile.COLUMN_SELECTION)  # カラム選択用（_06_）
+        self._training_schema = self._schema_loader.load_schema(SchemaFile.TRAINING)  # 学習用（_04_, _06_）
+        self._evaluation_schema = self._schema_loader.load_schema(SchemaFile.EVALUATION)  # 評価用（_06_）
+        self._category_mappings = self._schema_loader.load_category_mappings()  # カテゴリマッピング（_04_）
         
         # Parquetローダーを初期化
         self._parquet_loader = ParquetLoader(self._parquet_base_path)
@@ -91,7 +102,6 @@ class DataProcessor:
             # 前年度のデータがない場合は、処理対象年度のデータのみを使用
             previous_years = [target_year]
         
-        print(f"[_01_] {target_year}年の前走データ抽出用にSED/BACデータを読み込み中（対象年度: {previous_years}）...")
         
         sed_dfs = []
         bac_dfs = []
@@ -135,8 +145,6 @@ class DataProcessor:
             if bac_df is None:
                 raise ValueError(f"BACデータは必須です。{target_year}年の前走データ抽出用のBACデータが存在しません。")
             
-            print(f"[_01_] {target_year}年用SEDデータ: {len(sed_df):,}件" if sed_df is not None else f"[_01_] {target_year}年用SEDデータ: なし")
-            print(f"[_01_] {target_year}年用BACデータ: {len(bac_df):,}件")
             return sed_df, bac_df
         finally:
             # クリーンアップ: 中間データを削除
@@ -159,48 +167,38 @@ class DataProcessor:
         Returns:
             特徴量抽出済みDataFrame
         """
-        print(f"\n{'='*80}")
-        print(f"[_01_] {year}年のデータを処理中...")
-        print(f"{'='*80}")
-        
-        # 必要なデータを都度読み込む
-        # まずKYIとBACを読み込む（結合のベースに必要・必須）
+        # 必要なデータを読み込む
         kyi_df = self._parquet_loader.load_annual_pack_parquet("KYI", year)
         bac_df = self._parquet_loader.load_annual_pack_parquet("BAC", year)
         ukc_df = self._parquet_loader.load_annual_pack_parquet("UKC", year)
         tyb_df = self._parquet_loader.load_annual_pack_parquet("TYB", year)
+        sed_df_for_combine = self._parquet_loader.load_annual_pack_parquet("SED", year)
         
-        # 結合処理を実行（結合時のみdata_dictを作成）
+        # 結合処理を実行
+        from src.jrdb_scraper.entities.jrdb import JRDBDataType
         raw_df = JrdbCombiner.combine({
-            "KYI": kyi_df,
-            "BAC": bac_df,
-            "UKC": ukc_df,
-            "TYB": tyb_df,
-        }, self._full_info_schema)
+            JRDBDataType.KYI: kyi_df,
+            JRDBDataType.BAC: bac_df,
+            JRDBDataType.UKC: ukc_df,
+            JRDBDataType.TYB: tyb_df,
+            JRDBDataType.SED: sed_df_for_combine,
+        }, self._combined_schema, self._format_loader)
         
-        # 結合後は不要なDataFrameを削除（bac_dfは後で使用するため保持）
-        del kyi_df, ukc_df, tyb_df
+        # 不要なDataFrameを削除
+        del kyi_df, ukc_df, tyb_df, sed_df_for_combine
         gc.collect()
-        print(f"[_02_] {year}年のデータ結合完了: {len(raw_df):,}件")
         
-        # 前走データ抽出用のSED/BACデータを読み込み（必要な年度のみ）
+        # 前走データ抽出用のSED/BACデータを読み込み
         sed_df, bac_df = self._load_sed_bac_for_year(year, available_years)
         
-        # 処理対象年度のSEDデータも読み込む（特徴量抽出に必要・_DATA_TYPESに含まれているため、存在することが期待される）
-        if sed_df is None:
-            sed_df = self._parquet_loader.load_annual_pack_parquet("SED", year)
-        
-        print(f"[_03_] {year}年の特徴量追加中...")
         try:
-            # SEDは必須データなので、存在しない場合は既に例外が投げられている
-            featured_df = FeatureExtractor.extract_all_parallel(raw_df, sed_df, bac_df)
-            # メモリ解放
+            featured_df = FeatureExtractor.extract_all_parallel(
+                raw_df, sed_df, bac_df, self._feature_extraction_schema,
+                self._horse_statistics_schema, self._jockey_statistics_schema,
+                self._trainer_statistics_schema, self._previous_race_extractor_schema
+            )
             del raw_df, sed_df, bac_df
-            
             gc.collect()
-            
-            print(f"[_03_] {year}年の特徴量抽出完了: {len(featured_df):,}件")
-            
             return featured_df
         finally:
             # クリーンアップ: 不要なデータを削除
@@ -225,11 +223,8 @@ class DataProcessor:
         Returns:
             (converted_df, featured_df) - split_date未指定時はfeatured_dfはNone
         """
-        print("[_04_] データ変換中（キー変換・数値化）...")
-        converted_df = KeyConverter.convert(featured_df, self._full_info_schema, self._training_schema, self._category_mappings)
-        print("[_04_] データ最適化中...")
+        converted_df = KeyConverter.convert(featured_df, self._key_mapping_schema, self._training_schema, self._category_mappings)
         converted_df = KeyConverter.optimize(converted_df, self._training_schema)
-        print("[_04_] データ変換完了")
         
         if split_date is None:
             del featured_df
@@ -256,22 +251,14 @@ class DataProcessor:
         Returns:
             (train_df, test_df, eval_df)
         """
-        print(f"[_05_] 時系列分割中（分割日時: {split_date}）...")
         train_df, test_df = TimeSeriesSplitter.split(converted_df, split_date)
-        print(f"[_05_] 時系列分割完了: 学習={len(train_df):,}件, テスト={len(test_df):,}件")
-        
-        print("[_06_] 学習用カラム選択中...")
-        train_df = ColumnSelector.select_training(train_df, self._full_info_schema, self._training_schema)
-        test_df = ColumnSelector.select_training(test_df, self._full_info_schema, self._training_schema)
-        print("[_06_] 学習用カラム選択完了")
-        
-        print("[_06_] 評価用データ準備中...")
+        train_df = ColumnSelector.select_training(train_df, self._column_selection_schema, self._training_schema)
+        test_df = ColumnSelector.select_training(test_df, self._column_selection_schema, self._training_schema)
         eval_df = ColumnSelector.select_evaluation(featured_df, self._evaluation_schema)
         if "race_key" in eval_df.columns:
             eval_df.set_index("race_key", inplace=True)
             if "start_datetime" in eval_df.columns:
                 eval_df = eval_df.sort_values("start_datetime", ascending=True)
-        print("[_06_] 評価用データ準備完了")
         
         return train_df, test_df, eval_df
 
@@ -312,10 +299,6 @@ class DataProcessor:
                 gc.collect()
             
             # 年度ごとの特徴量抽出結果を結合
-            print(f"\n{'='*80}")
-            print("[_03_] 年度ごとの特徴量抽出結果を結合中...")
-            print(f"{'='*80}")
-            
             if not featured_dfs:
                 raise ValueError("特徴量抽出結果が空です。")
             
@@ -327,10 +310,8 @@ class DataProcessor:
                 for i, df in enumerate(featured_dfs[1:], 1):
                     featured_df = pd.concat([featured_df, df], ignore_index=True)
                     del df
-                    if i % 2 == 0:  # 2つ結合するごとにガベージコレクション
+                    if i % 2 == 0:
                         gc.collect()
-            
-            print(f"[_03_] 結合完了: {len(featured_df):,}件")
         finally:
             # クリーンアップ: 中間データを削除
             if 'featured_dfs' in locals():
@@ -349,7 +330,6 @@ class DataProcessor:
             # TODO: 複数年度のキャッシュ機能を実装する場合は、CacheManagerを拡張して
             # キャッシュキーに全年度を含める必要がある。現時点ではキャッシュをスキップする。
             
-            print(f"\n前処理完了: 学習={len(train_df):,}件, テスト={len(test_df):,}件")
             return train_df, test_df, eval_df
         
         return converted_df

@@ -11,7 +11,7 @@ import pandas as pd
 from tqdm import tqdm
 
 from .data_loader import load_annual_pack_npz
-from .feature_converter import FeatureConverter
+from src.utils.feature_converter import FeatureConverter
 
 
 class CacheLoader:

@@ -14,6 +14,9 @@ class FeatureConverter:
     特徴量変換を担当するユーティリティクラス
     race_key生成、年月日処理などを統一化
     """
+    
+    # race_key生成に必要なカラム（データタイプに関係なく、これらのカラムがあればrace_keyを生成可能）
+    RACE_KEY_REQUIRED_COLUMNS = ["場コード", "年", "回", "日", "R"]
 
     @staticmethod
     def safe_int(value, default: int = 0) -> int:
@@ -160,7 +163,7 @@ class FeatureConverter:
     def create_bac_date_mapping(bac_df: pd.DataFrame) -> dict[tuple, str]:
         """BACデータから年月日マッピングを作成（場コード、回、日、R）-> 年月日"""
         # 必要なカラムのみを抽出してメモリ使用量を削減
-        required_cols = ["場コード", "回", "日", "R", "年月日"]
+        required_cols = FeatureConverter.RACE_KEY_REQUIRED_COLUMNS + ["年月日"]
         bac_df_subset = bac_df[required_cols].copy()
         bac_df_subset["key"] = (
             bac_df_subset["場コード"].fillna(0).astype(int).astype(str).str.zfill(2)
@@ -190,7 +193,7 @@ class FeatureConverter:
     def create_bac_date_mapping_for_merge(bac_df: pd.DataFrame) -> pd.DataFrame:
         """BACデータから年月日マッピングを作成（マージ用DataFrame形式）"""
         # 必要なカラムのみを抽出してメモリ使用量を削減
-        required_cols = ["場コード", "回", "日", "R", "年月日"]
+        required_cols = FeatureConverter.RACE_KEY_REQUIRED_COLUMNS + ["年月日"]
         bac_df_subset = bac_df[required_cols].copy()
         bac_df_subset["key"] = (
             bac_df_subset["場コード"].fillna(0).astype(int).astype(str).str.zfill(2)
@@ -267,7 +270,7 @@ class FeatureConverter:
             return df
         finally:
             # クリーンアップ: 不要なデータを削除
-            if bac_mapping_df is not None:
+            if 'bac_mapping_df' in locals() and bac_mapping_df is not None:
                 del bac_mapping_df
             import gc
             gc.collect()

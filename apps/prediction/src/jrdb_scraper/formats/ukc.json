@@ -4,6 +4,7 @@
   "recordLength": 292,
   "encoding": "ShiftJIS",
   "lineEnding": "CRLF",
+  "identifierColumns": ["血統登録番号"],
   "fields": [
     {"name":"血統登録番号","start":1,"length":8,"type":"string","description":"血統登録番号"},
     {"name":"馬名","start":9,"length":36,"type":"string","description":"全角１８文字"},

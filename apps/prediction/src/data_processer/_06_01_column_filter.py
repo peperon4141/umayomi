@@ -41,9 +41,13 @@ class ColumnFilter:
         missing_columns = training_columns - set(df.columns)
         
         # ターゲット変数が欠けている場合はエラー
-        target_variable = training_schema.get("target_variable", {})
+        if "target_variable" not in training_schema:
+            raise ValueError("training_schemaにtarget_variableが定義されていません。スキーマファイルを確認してください。")
+        target_variable = training_schema["target_variable"]
         target_name = target_variable.get("name")
-        if target_name and target_name not in df.columns:
+        if not target_name:
+            raise ValueError("training_schemaのtarget_variableにnameが定義されていません。スキーマファイルを確認してください。")
+        if target_name not in df.columns:
             raise ValueError(f"ターゲット変数 '{target_name}' がDataFrameに存在しません。学習時に必須です。")
         
         if missing_columns:

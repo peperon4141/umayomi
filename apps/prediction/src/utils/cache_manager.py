@@ -228,7 +228,6 @@ class CacheManager:
         # メタデータを確認
         metadata_path = cache_paths["metadata"]
         if not metadata_path.exists():
-            print(f"[_07_] [DEBUG] キャッシュメタデータが見つかりません: {metadata_path}")
             return None
 
         try:

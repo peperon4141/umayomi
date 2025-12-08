@@ -48,9 +48,9 @@ class DataSplitter:
             return train_df, test_df
         finally:
             # クリーンアップ: 不要なデータを削除
-            if start_datetime_dt is not None:
+            if 'start_datetime_dt' in locals() and start_datetime_dt is not None:
                 del start_datetime_dt
-            if train_mask is not None:
+            if 'train_mask' in locals() and train_mask is not None:
                 del train_mask
             import gc
             gc.collect()

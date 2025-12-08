@@ -2,22 +2,43 @@
 
 import os
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from typing import Dict
 
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
-from ._03_01_feature_converter import FeatureConverter
+from src.utils.feature_converter import FeatureConverter
 
 
 class PreviousRaceExtractor:
     """前走データ抽出クラス（staticメソッドのみ）"""
+    
+    # 前走データカラム
+    PREV_RACE_COLUMNS = ["着順", "タイム", "距離", "頭数", "芝ダ障害コード", "馬場状態", "R"]
+    
+    # グループ化カラム
+    GROUP_COLUMN_HORSE = "血統登録番号"
+    
+    # 環境変数
+    ENV_DATA_PROCESSER_MAX_WORKERS = "DATA_PROCESSER_MAX_WORKERS"
+    DEFAULT_DATA_PROCESSER_WORKERS = 4
+    
+    # 前走データ数
+    PREV_RACES_COUNT = 5
 
     @staticmethod
-    def extract(df: pd.DataFrame, sed_df: pd.DataFrame, bac_df: pd.DataFrame) -> pd.DataFrame:
+    def extract(df: pd.DataFrame, sed_df: pd.DataFrame, bac_df: pd.DataFrame, full_info_schema: Dict, schema: Dict) -> pd.DataFrame:
         """SEDデータから前走データを抽出。前走データが追加されたDataFrameを返す。"""
         if bac_df is None:
             raise ValueError("BACデータは必須です。bac_dfがNoneです。")
+        if full_info_schema is None:
+            raise ValueError("full_info_schemaは必須です。スキーマ情報が提供されていません。")
+        if schema is None:
+            raise ValueError("スキーマが提供されていません。")
+        if "joinKeys" not in schema:
+            raise ValueError("スキーマにjoinKeysが定義されていません。スキーマファイルを確認してください。")
+        merge_keys = schema["joinKeys"]
         # 前走データを追加するため、元のDataFrameを変更する必要がある
         # main.pyから参照で渡されるため、ここでcopy()が必要
         df = df.copy()  # 前走データを追加するため、コピーが必要
@@ -30,7 +51,7 @@ class PreviousRaceExtractor:
         
         try:
             # 前走データ用のカラムを初期化
-            for i in range(1, 6):
+            for i in range(1, PreviousRaceExtractor.PREV_RACES_COUNT + 1):
                 prev_cols = [
                     f"prev_{i}_race_num",
                     f"prev_{i}_num_horses",
@@ -51,12 +72,27 @@ class PreviousRaceExtractor:
                         else:
                             df[col] = np.nan
 
+            # スキーマから前走データに必要なカラムを取得
+            # 前走データで使用するカラム: 着順(SED), タイム(SED), 距離(BAC), 頭数(BAC), 
+            # 芝ダ障害コード(BAC), 馬場状態(SED), R(KYI)
+            if "columns" not in full_info_schema: raise ValueError("full_info_schemaにcolumnsが定義されていません。スキーマファイルを確認してください。")
+            prev_race_columns = {}
+            for col_def in full_info_schema["columns"]:
+                if "name" not in col_def: raise ValueError("スキーマのカラム定義にnameが含まれていません。スキーマファイルを確認してください。")
+                if "source" not in col_def: raise ValueError("スキーマのカラム定義にsourceが含まれていません。スキーマファイルを確認してください。")
+                col_name = col_def["name"]
+                col_source = col_def["source"]
+                # 前走データで使用するカラムを特定
+                if col_name in PreviousRaceExtractor.PREV_RACE_COLUMNS:
+                    if col_source in ["SED", "BAC", "KYI"]:
+                        prev_race_columns[col_name] = col_source
+
             # 血統登録番号と年月日で前走を検索
             # SEDデータにrace_keyと年月日を追加（BACデータの年月日基準）
             sed_df_with_key = PreviousRaceExtractor._add_race_key_to_sed_df(sed_df, bac_df)
 
             # 前走データ抽出の準備
-            if "血統登録番号" in df.columns and "race_key" in df.columns:
+            if PreviousRaceExtractor.GROUP_COLUMN_HORSE in df.columns and "race_key" in df.columns:
                 # race_keyが存在するSEDデータのみを使用（フィルタリングのみ、コピーは後で必要になったら実行）
                 # フィルタリングとソートで新しいDataFrameが作成されるため、明示的なcopy()は不要
                 sed_df_with_key_filtered = sed_df_with_key[
@@ -77,17 +113,17 @@ class PreviousRaceExtractor:
 
                 # 各馬の前走データを抽出（シーケンシャル処理）
                 # 各馬のデータを準備
-                horse_ids = [h for h in df["血統登録番号"].unique() if not pd.isna(h)]
+                horse_ids = [h for h in df[PreviousRaceExtractor.GROUP_COLUMN_HORSE].unique() if not pd.isna(h)]
                 horse_data_list = []
                 for horse_id in horse_ids:
                     horse_sed = sed_df_with_key_filtered[
-                        sed_df_with_key_filtered["血統登録番号"] == horse_id
+                        sed_df_with_key_filtered[PreviousRaceExtractor.GROUP_COLUMN_HORSE] == horse_id
                     ]
 
                     if len(horse_sed) == 0:
                         continue
 
-                    horse_main = df[df["血統登録番号"] == horse_id]
+                    horse_main = df[df[PreviousRaceExtractor.GROUP_COLUMN_HORSE] == horse_id]
                     horse_main_indices = horse_main.index.tolist()
                     horse_main_race_keys = horse_main["race_key"].tolist()
                     
@@ -106,16 +142,12 @@ class PreviousRaceExtractor:
 
                 # 並列処理で高速化（各馬の処理は独立しているため並列化可能）
                 if len(horse_data_list) > 0:
-                    # 環境変数DATA_PROCESSER_MAX_WORKERSが設定されていない場合のデフォルト値
-                    # デフォルト値4は、CPUコア数に応じて調整可能なオプショナルな設定値
-                    # パフォーマンスチューニングのため、環境変数で上書き可能
-                    max_workers = int(os.environ.get("DATA_PROCESSER_MAX_WORKERS", "4"))
-                    print(f"[_03_02_] 前走データ抽出中（並列処理、{len(horse_data_list)}頭、ワーカー数: {max_workers}）...")
+                    max_workers = int(os.environ.get(PreviousRaceExtractor.ENV_DATA_PROCESSER_MAX_WORKERS, PreviousRaceExtractor.DEFAULT_DATA_PROCESSER_WORKERS))
                     all_results = []
                     
                     with ThreadPoolExecutor(max_workers=max_workers) as executor:
                         futures = {
-                            executor.submit(PreviousRaceExtractor._process_horse_previous_races, horse_id, horse_main_indices, horse_main_race_keys, horse_sed, horse_main_datetimes): horse_id
+                            executor.submit(PreviousRaceExtractor._process_horse_previous_races, horse_id, horse_main_indices, horse_main_race_keys, horse_sed, horse_main_datetimes, prev_race_columns): horse_id
                             for horse_id, horse_main_indices, horse_main_race_keys, horse_sed, horse_main_datetimes in horse_data_list
                         }
                         
@@ -128,8 +160,7 @@ class PreviousRaceExtractor:
                                     pbar.update(1)
                                 except Exception as e:
                                     horse_id = futures[future]
-                                    print(f"[_03_02_] 馬ID {horse_id} の処理でエラー: {e}")
-                                    raise
+                                    raise RuntimeError(f"馬ID {horse_id} の処理でエラー: {e}") from e
 
                     # 結果を結合してDataFrameに反映（一括更新で高速化）
                     prev_cols = [
@@ -163,25 +194,28 @@ class PreviousRaceExtractor:
                             else:
                                 df.loc[list(update_dict[col].keys()), col] = pd.Series(update_dict[col])
             
+            # _03_feature_extractor.pyでmergeする際にrace_keyと馬番をカラムとして使用するため、MultiIndexの場合はreset_indexが必要
+            if isinstance(df.index, pd.MultiIndex) and df.index.names == merge_keys:
+                return df.reset_index()
             return df
         finally:
             # クリーンアップ: 不要なデータを削除
-            if sed_df_with_key is not None:
+            if 'sed_df_with_key' in locals() and sed_df_with_key is not None:
                 del sed_df_with_key
-            if sed_df_with_key_filtered is not None:
+            if 'sed_df_with_key_filtered' in locals() and sed_df_with_key_filtered is not None:
                 del sed_df_with_key_filtered
-            if horse_data_list is not None:
+            if 'horse_data_list' in locals() and horse_data_list is not None:
                 del horse_data_list
-            if all_results is not None:
+            if 'all_results' in locals() and all_results is not None:
                 del all_results
-            if update_dict is not None:
+            if 'update_dict' in locals() and update_dict is not None:
                 del update_dict
             import gc
             gc.collect()
 
     @staticmethod
     def _process_horse_previous_races(
-        horse_id, horse_main_indices, horse_main_race_keys, horse_sed_df, horse_main_datetimes
+        horse_id, horse_main_indices, horse_main_race_keys, horse_sed_df, horse_main_datetimes, prev_race_columns: Dict[str, str]
     ):
         """1頭の馬の前走データを抽出（並列化用）"""
         results = []
@@ -208,22 +242,23 @@ class PreviousRaceExtractor:
             if len(prev_indices) == 0:
                 continue
 
-            # 最後の5件を取得（既にソート済みなので、末尾から取得）
-            prev_indices = prev_indices[-5:] if len(prev_indices) >= 5 else prev_indices
+            # 最後のN件を取得（既にソート済みなので、末尾から取得）
+            prev_indices = prev_indices[-PreviousRaceExtractor.PREV_RACES_COUNT:] if len(prev_indices) >= PreviousRaceExtractor.PREV_RACES_COUNT else prev_indices
             prev_races = horse_sed_df.iloc[prev_indices]
 
-            # 前走データを設定（1走前から5走前まで、新しい順）
+            # 前走データを設定（1走前からN走前まで、新しい順）
             prev_races_sorted = prev_races.iloc[::-1]
 
             result_dict = {"index": idx}
-            for i in range(min(5, len(prev_races_sorted))):
+            for i in range(min(PreviousRaceExtractor.PREV_RACES_COUNT, len(prev_races_sorted))):
                 prev_row = prev_races_sorted.iloc[i]
-                result_dict[f"prev_{i + 1}_rank"] = prev_row.get("着順", np.nan)
-                result_dict[f"prev_{i + 1}_time"] = prev_row.get("タイム", np.nan)
-                result_dict[f"prev_{i + 1}_distance"] = prev_row.get("距離", np.nan)
-                result_dict[f"prev_{i + 1}_num_horses"] = prev_row.get("頭数", np.nan)
-                result_dict[f"prev_{i + 1}_course_type"] = prev_row.get("芝ダ障害コード", np.nan)
-                result_dict[f"prev_{i + 1}_ground_condition"] = prev_row.get("馬場状態", np.nan)
+                # スキーマから取得したカラムを使用
+                result_dict[f"prev_{i + 1}_rank"] = prev_row.get("着順", np.nan) if "着順" in prev_race_columns else np.nan
+                result_dict[f"prev_{i + 1}_time"] = prev_row.get("タイム", np.nan) if "タイム" in prev_race_columns else np.nan
+                result_dict[f"prev_{i + 1}_distance"] = prev_row.get("距離", np.nan) if "距離" in prev_race_columns else np.nan
+                result_dict[f"prev_{i + 1}_num_horses"] = prev_row.get("頭数", np.nan) if "頭数" in prev_race_columns else np.nan
+                result_dict[f"prev_{i + 1}_course_type"] = prev_row.get("芝ダ障害コード", np.nan) if "芝ダ障害コード" in prev_race_columns else np.nan
+                result_dict[f"prev_{i + 1}_ground_condition"] = prev_row.get("馬場状態", np.nan) if "馬場状態" in prev_race_columns else np.nan
                 result_dict[f"prev_{i + 1}_race_key"] = prev_row.get("race_key", np.nan)  # 日程情報（リーク検証用）
 
             results.append(result_dict)

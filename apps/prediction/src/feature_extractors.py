@@ -10,7 +10,7 @@ import pandas as pd
 from joblib import Parallel, delayed
 
 from .cache_loader import CacheLoader
-from .feature_converter import FeatureConverter
+from src.utils.feature_converter import FeatureConverter
 
 
 class PreviousRaceExtractor:

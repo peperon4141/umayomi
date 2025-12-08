@@ -1,0 +1,13 @@
+{
+  "description": "馬統計モジュールの出力スキーマ定義",
+  "module": "_03_03_horse_statistics",
+  "joinKeys": ["race_key", "馬番"],
+  "outputColumns": [
+    {"name": "race_key", "type": "string", "description": "マージキー：レース識別子", "use_for_training": false},
+    {"name": "馬番", "type": "integer", "description": "マージキー：馬番", "use_for_training": false},
+    {"name": "馬勝率", "type": "numeric", "description": "過去の1着率（start_datetimeより前のデータのみ使用）", "use_for_training": true},
+    {"name": "馬連対率", "type": "numeric", "description": "過去の連対率（1-3着率、start_datetimeより前のデータのみ使用）", "use_for_training": true},
+    {"name": "馬平均着順", "type": "numeric", "description": "過去の平均着順（start_datetimeより前のデータのみ使用）", "use_for_training": true},
+    {"name": "馬出走回数", "type": "integer", "description": "過去の出走回数（start_datetimeより前のデータのみ使用）", "use_for_training": true}
+  ]
+}

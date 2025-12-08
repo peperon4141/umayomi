@@ -15,4 +15,5 @@ joblib
 torch
 ruff
 pytest
+psutil
 

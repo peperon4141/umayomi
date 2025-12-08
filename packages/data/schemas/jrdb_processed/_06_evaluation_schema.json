@@ -1,0 +1,125 @@
+{
+  "description": "評価用データのスキーマ定義（予測結果と結合する評価用カラム）",
+  "merge_keys": {"description": "予測結果と評価用データを結合する際のキー", "keys": ["race_key", "馬番"]},
+  "columns": [
+    {"name": "race_key", "type": "string", "required": true, "description": "レースキー（マージキー、必須）", "category": "merge_key"},
+    {"name": "馬番", "type": "integer", "required": true, "description": "馬番（マージキー、必須）", "category": "merge_key"},
+    {"name": "着順", "type": "integer", "required": true, "description": "実際の着順（評価指標計算に必須）", "category": "required"},
+    {"name": "WIN5フラグ", "type": "integer", "required": false, "description": "WIN5対象レースのフラグ（1～5、WIN5評価用）", "category": "optional", "evaluation_metrics": ["win5_accuracy", "win5_success_days", "win5_total_days"]},
+    {"name": "確定単勝オッズ", "type": "string", "required": false, "description": "確定単勝オッズ（回収率計算用）", "category": "optional", "evaluation_metrics": ["return_rate_single"]},
+    {"name": "確定複勝オッズ", "type": "string", "required": false, "description": "確定複勝オッズ（複勝回収率計算用）", "category": "optional", "evaluation_metrics": ["return_rate_place"]},
+    {"name": "確定3連複オッズ", "type": "string", "required": false, "description": "確定3連複オッズ（3連複回収率計算用）", "category": "optional", "evaluation_metrics": ["return_rate_trio"]},
+    {"name": "タイム", "type": "integer", "required": false, "description": "レースタイム（タイム評価用）", "category": "optional", "evaluation_metrics": ["time_analysis"]},
+    {"name": "着差", "type": "string", "required": false, "description": "着差（着差評価用）", "category": "optional", "evaluation_metrics": ["margin_analysis"]},
+    {"name": "本賞金", "type": "integer", "required": false, "description": "本賞金（賞金評価用）", "category": "optional", "evaluation_metrics": ["prize_analysis"]},
+    {"name": "確定単勝人気順位", "type": "integer", "required": false, "description": "確定単勝人気順位（人気順位分析用）", "category": "optional", "evaluation_metrics": ["popularity_analysis"]},
+    {"name": "異常区分", "type": "integer", "required": false, "description": "異常区分（取消・除外などの判定用）", "category": "optional", "evaluation_metrics": ["exclusion_analysis"]}
+  ],
+  "column_categories": {
+    "merge_key": {
+      "description": "予測結果と評価用データを結合する際のキー",
+      "required": true
+    },
+    "required": {
+      "description": "評価指標計算に必須のカラム",
+      "required": true
+    },
+    "optional": {
+      "description": "特定の評価指標計算に使用するオプションカラム",
+      "required": false
+    }
+  },
+  "evaluation_metrics": {
+  "description": "各評価指標に必要なカラムのマッピング",
+  "ndcg": {
+    "required_columns": [
+      "着順"
+    ],
+    "description": "NDCG@1, NDCG@2, NDCG@3の計算に使用"
+  },
+  "hit_rate": {
+    "required_columns": [
+      "着順"
+    ],
+    "description": "的中率（1着、3着内）の計算に使用"
+  },
+  "rank_error": {
+    "required_columns": [
+      "着順"
+    ],
+    "description": "順位誤差の計算に使用"
+  },
+  "return_rate_single": {
+    "required_columns": [
+      "確定単勝オッズ"
+    ],
+    "description": "単勝回収率の計算に使用"
+  },
+  "return_rate_place": {
+    "required_columns": [
+      "確定複勝オッズ"
+    ],
+    "description": "複勝回収率の計算に使用"
+  },
+  "return_rate_trio": {
+    "required_columns": [
+      "確定3連複オッズ"
+    ],
+    "description": "3連複回収率の計算に使用"
+  },
+  "win5_accuracy": {
+    "required_columns": [
+      "WIN5フラグ",
+      "着順"
+    ],
+    "description": "WIN5的中率の計算に使用"
+  },
+  "win5_success_days": {
+    "required_columns": [
+      "WIN5フラグ",
+      "着順"
+    ],
+    "description": "WIN5成功日数の計算に使用"
+  },
+  "win5_total_days": {
+    "required_columns": [
+      "WIN5フラグ"
+    ],
+    "description": "WIN5総日数の計算に使用"
+  }
+  },
+  "usage": {
+  "description": "評価用スキーマの使用方法",
+  "default_columns": {
+    "description": "デフォルトで使用されるカラム（評価に必要な最小限）",
+    "columns": [
+      "race_key",
+      "馬番",
+      "着順"
+    ],
+    "optional_auto_add": [
+      "WIN5フラグ",
+      "確定単勝オッズ"
+    ]
+  },
+  "custom_columns": {
+    "description": "カスタマイズ可能なカラム",
+    "example": [
+      "タイム",
+      "着差",
+      "本賞金",
+      "確定複勝オッズ",
+      "確定3連複オッズ"
+    ]
+  },
+  "merge_process": {
+    "description": "予測結果と評価用データの結合プロセス",
+    "steps": [
+      "1. 予測結果（predictions）をベースに、race_keyと馬番でマージ",
+      "2. eval_dfから指定された列のみを追加",
+      "3. 存在しない列を指定した場合は無視される",
+      "4. 評価に必要な列（着順、WIN5フラグ、確定単勝オッズ）は自動的に追加される"
+    ]
+  }
+  }
+}

@@ -1,5 +1,6 @@
 """データ型を最適化してメモリ使用量と計算速度を向上させる（float64→float32, int64→int32）"""
 
+import gc
 from typing import List
 
 import pandas as pd
@@ -10,12 +11,14 @@ class DtypeOptimizer:
     @staticmethod
     def _get_categorical_features(training_schema: dict) -> List[dict]:
         """カテゴリカル特徴量の定義を取得"""
+        if "columns" not in training_schema: raise ValueError("training_schemaにcolumnsが定義されていません。スキーマファイルを確認してください。")
         categorical = []
-        for col in training_schema.get("columns", []):
-            if col.get("type") == "categorical":
-                feature_name = col.get("name")
-                if feature_name:
-                    categorical.append({"name": feature_name})
+        for col in training_schema["columns"]:
+            if "type" not in col: raise ValueError("スキーマのカラム定義にtypeが含まれていません。スキーマファイルを確認してください。")
+            if col["type"] == "categorical":
+                if "name" not in col: raise ValueError("カテゴリカル特徴量の定義にnameが含まれていません。スキーマファイルを確認してください。")
+                feature_name = col["name"]
+                categorical.append({"name": feature_name})
         return categorical
 
     @staticmethod
@@ -50,7 +53,6 @@ class DtypeOptimizer:
             return df
         finally:
             # この関数内で作成された中間変数は自動的に削除される
-            import gc
             gc.collect()
 
     @staticmethod
@@ -73,5 +75,4 @@ class DtypeOptimizer:
             return df
         finally:
             # この関数内で作成された中間変数は自動的に削除される
-            import gc
             gc.collect()

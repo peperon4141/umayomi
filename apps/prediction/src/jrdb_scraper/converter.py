@@ -11,71 +11,9 @@ import pandas as pd
 from .entities.jrdb import JRDBDataType
 from .lzh_extractor import extract_data_type_from_file_name, extract_lzh_file
 from .parsers.jrdb_parser import parse_jrdb_data_from_buffer
+from src.utils.feature_converter import FeatureConverter
 
 logger = logging.getLogger(__name__)
-
-
-def _add_race_key_to_dataframe(df: pd.DataFrame, use_ymd_column: bool = True) -> pd.DataFrame:
-    """DataFrameにrace_keyを追加（年月日カラムまたは年・月・日カラムがある場合のみ）
-    
-    Args:
-        df: DataFrame
-        use_ymd_column: 年月日カラムを使用するかどうか（True: 年月日カラム、False: 年・月・日カラム）
-    
-    Returns:
-        race_keyが追加されたDataFrame（追加できない場合はそのまま返す）
-    """
-    # 必須カラムを確認
-    base_required_columns = ["場コード", "回", "日", "R"]
-    
-    if use_ymd_column:
-        # 年月日カラムを使用する場合
-        required_columns = base_required_columns + ["年月日"]
-        if not all(col in df.columns for col in required_columns):
-            logger.debug("race_key生成に必要なカラム（年月日）が不足しています。race_keyは追加しません。")
-            return df
-        
-        df = df.copy()
-        # 年月日から年、月、日を抽出
-        year = pd.to_numeric(df["年月日"].astype(str).str[:4], errors="coerce")
-        month = pd.to_numeric(df["年月日"].astype(str).str[4:6], errors="coerce")
-        day = pd.to_numeric(df["年月日"].astype(str).str[6:8], errors="coerce")
-    else:
-        # 年・月・日カラムを使用する場合
-        required_columns = base_required_columns + ["年"]
-        if not all(col in df.columns for col in required_columns):
-            logger.debug("race_key生成に必要なカラム（年）が不足しています。race_keyは追加しません。")
-            return df
-        
-        df = df.copy()
-        # 年・月・日カラムから取得（月・日は別途計算が必要な場合がある）
-        year = pd.to_numeric(df["年"].fillna(0).astype(int), errors="coerce")
-        # 年が2桁の場合は2000年を加算
-        year = year.apply(lambda y: 2000 + y if y < 100 else y)
-        
-        # 月・日は年月日カラムがない場合は取得できない
-        if "年月日" in df.columns:
-            month = pd.to_numeric(df["年月日"].astype(str).str[4:6], errors="coerce")
-            day = pd.to_numeric(df["年月日"].astype(str).str[6:8], errors="coerce")
-        else:
-            # 年月日カラムがない場合（KYI, TYBなど）
-            # 月・日の情報がないため、完全なrace_keyは生成できない
-            # 後でBACデータとマージする際にrace_keyを取得する必要がある
-            logger.debug("月・日の情報が不足しています。race_keyは後でBACデータとマージする際に取得します。")
-            return df
-    
-    # 場コード、回、日、Rを文字列に変換（ゼロパディング）
-    place_code_str = df["場コード"].fillna(0).astype(int).astype(str).str.zfill(2)
-    round_str = df["回"].fillna(1).astype(int).astype(str).str.zfill(2)
-    day_str = df["日"].fillna("1").astype(str).str.lower()
-    race_str = df["R"].fillna(1).astype(int).astype(str).str.zfill(2)
-    
-    # race_keyを生成: YYYYMMDD_場コード_回_日_R
-    date_str = year.astype(str).str.zfill(4) + month.astype(str).str.zfill(2) + day.astype(str).str.zfill(2)
-    df["race_key"] = date_str + "_" + place_code_str + "_" + round_str + "_" + day_str + "_" + race_str
-    
-    logger.info(f"race_keyを追加しました: {len(df)}件")
-    return df
 
 
 def convert_to_parquet(
@@ -103,17 +41,29 @@ def convert_to_parquet(
     # DataFrameに変換
     df = pd.DataFrame(records)
     
-    # データタイプに応じて結合キーを追加
-    if dataType is not None:
-        data_type_str = dataType.value if isinstance(dataType, JRDBDataType) else str(dataType)
+    # race_key生成に必要なカラムをチェック（データタイプに関係なく）
+    required_columns = FeatureConverter.RACE_KEY_REQUIRED_COLUMNS
+    has_required_columns = all(col in df.columns for col in required_columns)
+    
+    if has_required_columns:
+        # 必要なカラムが全て存在する場合は、race_keyを追加
+        data_type_str = dataType.value if isinstance(dataType, JRDBDataType) else str(dataType) if dataType is not None else "unknown"
+        logger.info(f"データタイプ '{data_type_str}' にrace_keyを追加中... (必要なカラムが揃っています)")
         
-        # race_keyが必要なデータタイプ（年月日カラムがある場合のみ生成）
-        # BAC, SED: 年月日カラムがあるので生成可能
-        # KYI, TYB: 年月日カラムがないため、race_keyは生成しない（後でBACデータとマージする際に取得）
-        if data_type_str in ["BAC", "SED"]:
-            df = _add_race_key_to_dataframe(df, use_ymd_column=True)
+        # 年月日カラムがある場合はそれを使用、ない場合は年カラムから年を取得（月日はデフォルトで1）
+        df = FeatureConverter.add_race_key_to_df(df, bac_df=None, use_bac_date=False)
         
-        # UKCは血統登録番号が既に含まれているので追加処理不要
+        if "race_key" not in df.columns:
+            logger.error(f"データタイプ '{data_type_str}' にrace_keyの追加に失敗しました。利用可能なカラム: {list(df.columns)[:10]}")
+            raise ValueError(f"データタイプ '{data_type_str}' にrace_keyの追加に失敗しました。")
+        
+        race_key_count = df['race_key'].notna().sum()
+        logger.info(f"データタイプ '{data_type_str}' にrace_keyを追加しました。race_keyの行数: {race_key_count}/{len(df)}")
+    else:
+        # 必要なカラムが揃っていない場合は、race_keyを追加しない
+        missing_columns = [col for col in required_columns if col not in df.columns]
+        data_type_str = dataType.value if isinstance(dataType, JRDBDataType) else str(dataType) if dataType is not None else "unknown"
+        logger.info(f"データタイプ '{data_type_str}' にrace_keyを追加しません。必要なカラムが不足しています: {missing_columns}")
     
     # Parquet形式で保存
     df.to_parquet(

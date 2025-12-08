@@ -44,8 +44,7 @@ MODEL_PATH.parent.mkdir(parents=True, exist_ok=True)
 # データ読み込みと前処理
 import os
 import warnings
-os.environ["DATA_PROCESSER_MAX_WORKERS"] = "1"
-os.environ["FEATURE_EXTRACTOR_MAX_WORKERS"] = "1"
+# メモリ最適化により、デフォルト値（DATA_PROCESSER_MAX_WORKERS=4, FEATURE_EXTRACTOR_MAX_WORKERS=2）を使用
 os.environ["PYTHONUNBUFFERED"] = "1"
 warnings.filterwarnings("ignore", category=UserWarning, module="multiprocessing.resource_tracker")
 
@@ -89,20 +88,19 @@ if missing:
     raise ValueError(f"評価用データに必須カラムが不足: {missing}。キャッシュを削除して再処理してください。")
 
 # %%
+# モデル学習前のデータ保存（特徴量強化前）
+PRE_TRAINING_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+file_prefix = f"{YEARS[0]}_{TRAIN_TEST_SPLIT_DATE.replace('-', '')}"
+train_data.to_parquet(PRE_TRAINING_CACHE_DIR / f"train_{file_prefix}.parquet")
+test_data.to_parquet(PRE_TRAINING_CACHE_DIR / f"test_{file_prefix}.parquet")
+print(f"モデル学習前データ保存完了: {PRE_TRAINING_CACHE_DIR}")
+
+# %%
 # 特徴量強化
 train_data_enhanced = enhance_features(train_data, "race_key")
 test_data_enhanced = enhance_features(test_data, "race_key")
 del train_data, test_data
 print(f"特徴量強化完了: 学習={train_data_enhanced.shape}, テスト={test_data_enhanced.shape}")
-
-# %%
-# モデル学習前のデータ保存
-PRE_TRAINING_CACHE_DIR.mkdir(parents=True, exist_ok=True)
-
-file_prefix = f"{YEARS[0]}_{TRAIN_TEST_SPLIT_DATE.replace('-', '')}"
-train_data.to_parquet(PRE_TRAINING_CACHE_DIR / f"train_{file_prefix}.parquet")
-test_data.to_parquet(PRE_TRAINING_CACHE_DIR / f"test_{file_prefix}.parquet")
-print(f"モデル学習前データ保存完了: {PRE_TRAINING_CACHE_DIR}")
 
 # %%
 # モデル学習

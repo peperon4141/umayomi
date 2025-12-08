@@ -1,5 +1,7 @@
 """馬の過去成績統計を計算するクラス"""
 
+from typing import Dict
+
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
@@ -7,43 +9,57 @@ from tqdm import tqdm
 
 class HorseStatistics:
     """馬の過去成績統計を計算するクラス"""
+    
+    # グループ化カラム
+    GROUP_COLUMN = "血統登録番号"
+    TIME_COLUMN = "start_datetime"
+    
+    # 統計量プレフィックス
+    PREFIX = "horse"
+    JP_PREFIX = "馬"
 
     @staticmethod
-    def calculate(stats_df: pd.DataFrame, target_df: pd.DataFrame) -> pd.DataFrame:
+    def calculate(stats_df: pd.DataFrame, target_df: pd.DataFrame, schema: Dict) -> pd.DataFrame:
         """馬の過去成績統計特徴量を追加。各レースのstart_datetimeより前のデータのみを使用（未来情報を除外）。"""
-        if "血統登録番号" not in target_df.columns:
+        if HorseStatistics.GROUP_COLUMN not in target_df.columns:
             return target_df
 
-        target_original_index = target_df.index.copy()
-        target_df_sorted = target_df.sort_values(by=["血統登録番号", "start_datetime"]).reset_index(drop=True)
-        target_df_sorted['_original_index'] = target_original_index.values
+        # race_keyと馬番のMultiIndexは_02_ステップで設定済み
+        target_df_indexed = target_df
+
+        target_df_sorted = target_df_indexed.sort_values(by=[HorseStatistics.GROUP_COLUMN, HorseStatistics.TIME_COLUMN])
 
         horse_stats = HorseStatistics._calculate_time_series_stats(
-            stats_df, target_df_sorted, "血統登録番号", "start_datetime", "horse"
+            stats_df, target_df_sorted, HorseStatistics.GROUP_COLUMN, HorseStatistics.TIME_COLUMN, HorseStatistics.PREFIX, schema
+        )
+        
+        # スキーマからmerge_keysを取得
+        if "joinKeys" not in schema: raise ValueError("スキーマにjoinKeysが定義されていません。スキーマファイルを確認してください。")
+        merge_keys = schema["joinKeys"]
+
+        # race_keyと馬番をキーとしてmerge（dropnaでインデックスが変わる可能性があるため）
+        target_df_merged = target_df_sorted.reset_index()
+        key_cols = [HorseStatistics.GROUP_COLUMN, HorseStatistics.TIME_COLUMN]
+        horse_stats_subset = horse_stats[[col for col in horse_stats.columns if col not in key_cols]]
+        # race_keyと馬番がカラムとして存在することを確認
+        if not all(col in horse_stats_subset.columns for col in merge_keys):
+            # インデックスがMultiIndexの場合、reset_indexで追加
+            if isinstance(horse_stats_subset.index, pd.MultiIndex):
+                horse_stats_subset = horse_stats_subset.reset_index()
+            else:
+                raise ValueError(f"horse_statsに{merge_keys}がカラムとして存在しません。")
+        target_df_merged = target_df_merged.merge(
+            horse_stats_subset,
+            on=merge_keys,
+            how="left",
+            suffixes=("", "_horse_stats")
         )
 
-        key_cols = ["血統登録番号", "start_datetime"]
-        assert len(target_df_sorted) == len(horse_stats), "行数が一致しません"
-        keys_match = (target_df_sorted[key_cols].values == horse_stats[key_cols].values).all()
-        
-        if not keys_match:
-            target_df_merged = target_df_sorted.merge(
-                horse_stats, on=key_cols, how="left", suffixes=("", "_horse_stats"), sort=False
-            )
-        else:
-            # フラグメント化を回避するため、pd.concatを使用
-            # 列の抽出は新しいDataFrameを作成するため、明示的なcopy()は不要
-            horse_stats_subset = horse_stats[[col for col in horse_stats.columns if col not in key_cols]]
-            target_df_merged = pd.concat([target_df_sorted, horse_stats_subset], axis=1)
-
-        target_index_df = pd.DataFrame({'_original_index': target_original_index})
-        target_df = target_index_df.merge(target_df_merged, on='_original_index', how='left').drop(columns=['_original_index'])
-        target_df.index = target_original_index
-
         # 使用済みのDataFrameを削除
-        del target_df_sorted, horse_stats, target_df_merged, target_index_df
+        del target_df_sorted, horse_stats, target_df_indexed
 
-        return target_df
+        # _03_feature_extractor.pyでmergeする際にrace_keyと馬番をカラムとして使用するため、reset_indexが必要
+        return target_df_merged.reset_index()
 
     @staticmethod
     def _process_group_time_series_stats(
@@ -58,15 +74,17 @@ class HorseStatistics:
         
         group_stats_times = group_stats[time_col].values
         group_targets_times = group_targets[time_col].values
-        group_targets_indices = group_targets['_original_index'].values
+        # race_keyと馬番のMultiIndexを使用
+        group_targets_indices = group_targets.index.values
         indices = np.searchsorted(group_stats_times, group_targets_times, side='left') - 1
         
         n_targets = len(group_targets)
         result_data = {
             group_col: [group_value] * n_targets,
             time_col: group_targets_times,
-            '_original_index': group_targets_indices,
         }
+        # MultiIndexをDataFrameのインデックスとして使用
+        result_index = group_targets_indices
         
         valid_mask = indices >= 0
         cumsum_1st_col = group_stats[f"{prefix}_cumsum_1st"].values
@@ -86,21 +104,25 @@ class HorseStatistics:
             result_data[f"{prefix}_cumsum_rank"][valid_mask] = cumsum_rank_col[valid_indices]
             result_data[f"{prefix}_cumcount"][valid_mask] = cumcount_col[valid_indices]
         
-        return pd.DataFrame(result_data)
+        result_df = pd.DataFrame(result_data, index=result_index)
+        return result_df
 
     @staticmethod
     def _calculate_time_series_stats(
-        stats_df: pd.DataFrame, target_df: pd.DataFrame, group_col: str, time_col: str, prefix: str
+        stats_df: pd.DataFrame, target_df: pd.DataFrame, group_col: str, time_col: str, prefix: str, schema: Dict
     ) -> pd.DataFrame:
         """各レースのstart_datetimeより前のデータのみを使って統計量を計算（未来情報を完全に除外）。"""
-        target_original_index = target_df['_original_index'].values if '_original_index' in target_df.columns else target_df.index.copy()
-        stats_sorted = stats_df.sort_values(by=[group_col, time_col]).reset_index(drop=True)
+        # スキーマからmerge_keysを取得
+        if "joinKeys" not in schema: raise ValueError("スキーマにjoinKeysが定義されていません。スキーマファイルを確認してください。")
+        merge_keys = schema["joinKeys"]
+        # race_keyと馬番のMultiIndexを使用
+        target_original_index = target_df.index
+        stats_sorted = stats_df.sort_values(by=[group_col, time_col])
         # 新しいDataFrameを直接作成（コピーを避ける）
         target_sorted = pd.DataFrame({
             group_col: target_df[group_col].values,
             time_col: target_df[time_col].values,
-            '_original_index': target_df['_original_index'].values if '_original_index' in target_df.columns else target_df.index.values
-        })
+        }, index=target_df.index)
         
         stats_sorted[f"{prefix}_cumsum_1st"] = stats_sorted.groupby(group_col)["rank_1st"].cumsum()
         stats_sorted[f"{prefix}_cumsum_3rd"] = stats_sorted.groupby(group_col)["rank_3rd"].cumsum()
@@ -115,9 +137,14 @@ class HorseStatistics:
         valid_groups = [g for g in target_groups if g in grouped_stats.groups]
         
         if len(valid_groups) == 0:
-            return pd.DataFrame(columns=[group_col, time_col, '_original_index',
+            empty_df = pd.DataFrame(columns=[group_col, time_col,
                                         f"{prefix}_cumsum_1st", f"{prefix}_cumsum_3rd",
-                                        f"{prefix}_cumsum_rank", f"{prefix}_cumcount"])
+                                        f"{prefix}_cumsum_rank", f"{prefix}_cumcount"],
+                              index=target_original_index)
+            # インデックスがMultiIndexの場合、race_keyと馬番をカラムに追加
+            if isinstance(empty_df.index, pd.MultiIndex):
+                empty_df = empty_df.reset_index()
+            return empty_df
         
         # シーケンシャル処理でメモリ使用量を削減
         results = []
@@ -131,26 +158,77 @@ class HorseStatistics:
                     results.append(result_df)
                 pbar.update(1)
         
-        merged = pd.concat([df for df in results if len(df) > 0], ignore_index=True) if results else pd.DataFrame(
-            columns=[group_col, time_col, '_original_index',
-                    f"{prefix}_cumsum_1st", f"{prefix}_cumsum_3rd",
-                    f"{prefix}_cumsum_rank", f"{prefix}_cumcount"]
-        )
+        if results:
+            merged = pd.concat([df for df in results if len(df) > 0])
+            # pd.concatの結果がMultiIndexでない場合、target_original_indexを使ってreindex
+            if not isinstance(merged.index, pd.MultiIndex) and len(merged) > 0:
+                merged = merged.reindex(target_original_index)
+        else:
+            # resultsが空の場合、target_original_indexを使用して空のDataFrameを作成
+            merged = pd.DataFrame(
+                columns=[group_col, time_col,
+                        f"{prefix}_cumsum_1st", f"{prefix}_cumsum_3rd",
+                        f"{prefix}_cumsum_rank", f"{prefix}_cumcount"],
+                index=target_original_index
+            )
         
-        prefix_jp = {"horse": "馬", "jockey": "騎手", "trainer": "調教師"}.get(prefix)
-        if not prefix_jp:
-            raise ValueError(f"未知のprefix: {prefix}")
-        
-        merged[f"{prefix_jp}勝率"] = (merged[f"{prefix}_cumsum_1st"] / merged[f"{prefix}_cumcount"]).fillna(0.0)
-        merged[f"{prefix_jp}連対率"] = (merged[f"{prefix}_cumsum_3rd"] / merged[f"{prefix}_cumcount"]).fillna(0.0)
-        merged[f"{prefix_jp}平均着順"] = (merged[f"{prefix}_cumsum_rank"] / merged[f"{prefix}_cumcount"]).fillna(0.0)
-        merged[f"{prefix_jp}出走回数"] = merged[f"{prefix}_cumcount"].fillna(0).astype(int)
-        
-        target_index_df = pd.DataFrame({'_original_index': target_original_index})
-        result = target_index_df.merge(merged, on='_original_index', how='left').drop(columns=['_original_index'])
-        result.index = target_original_index
+        # 空のDataFrameの場合は列を追加しない
+        if len(merged) > 0:
+            merged[f"{HorseStatistics.JP_PREFIX}勝率"] = (merged[f"{HorseStatistics.PREFIX}_cumsum_1st"] / merged[f"{HorseStatistics.PREFIX}_cumcount"]).fillna(0.0)
+            merged[f"{HorseStatistics.JP_PREFIX}連対率"] = (merged[f"{HorseStatistics.PREFIX}_cumsum_3rd"] / merged[f"{HorseStatistics.PREFIX}_cumcount"]).fillna(0.0)
+            merged[f"{HorseStatistics.JP_PREFIX}平均着順"] = (merged[f"{HorseStatistics.PREFIX}_cumsum_rank"] / merged[f"{HorseStatistics.PREFIX}_cumcount"]).fillna(0.0)
+            merged[f"{HorseStatistics.JP_PREFIX}出走回数"] = merged[f"{HorseStatistics.PREFIX}_cumcount"].fillna(0).astype(int)
         
         # 使用済みのDataFrameを削除
-        del target_sorted, stats_sorted, grouped_stats, merged, target_index_df
+        del target_sorted, stats_sorted, grouped_stats
         
-        return result[[group_col, time_col, f"{prefix_jp}勝率", f"{prefix_jp}連対率", f"{prefix_jp}平均着順", f"{prefix_jp}出走回数"]]
+        # まずreset_index()でrace_keyと馬番をカラムに追加してから、必要なカラムを選択
+        if isinstance(merged.index, pd.MultiIndex):
+            merged = merged.reset_index()
+        elif len(merged) > 0:
+            # MultiIndexでない場合でも、target_original_indexがMultiIndexならreindexでMultiIndexに変換
+            if isinstance(target_original_index, pd.MultiIndex):
+                merged = merged.reindex(target_original_index)
+                if isinstance(merged.index, pd.MultiIndex):
+                    merged = merged.reset_index()
+                else:
+                    raise ValueError(
+                        f"mergedのインデックスがMultiIndexではありません（reindex後も）。"
+                        f"index type: {type(merged.index)}, "
+                        f"index names: {merged.index.names if hasattr(merged.index, 'names') else 'N/A'}, "
+                        f"columns: {merged.columns.tolist()}"
+                    )
+            else:
+                raise ValueError(
+                    f"mergedのインデックスがMultiIndexではありません。"
+                    f"index type: {type(merged.index)}, "
+                    f"index names: {merged.index.names if hasattr(merged.index, 'names') else 'N/A'}, "
+                    f"columns: {merged.columns.tolist()}"
+                )
+        
+        # race_keyと馬番がカラムとして存在することを確認
+        if not all(col in merged.columns for col in merge_keys):
+            raise ValueError(
+                f"mergedに{merge_keys}がカラムとして存在しません。"
+                f"columns: {merged.columns.tolist()}, "
+                f"index type: {type(merged.index)}, "
+                f"index names: {merged.index.names if hasattr(merged.index, 'names') else 'N/A'}"
+            )
+        
+        # race_keyと馬番を含めて必要なカラムを選択
+        required_cols = [
+            group_col, time_col,
+            f"{HorseStatistics.JP_PREFIX}勝率",
+            f"{HorseStatistics.JP_PREFIX}連対率",
+            f"{HorseStatistics.JP_PREFIX}平均着順",
+            f"{HorseStatistics.JP_PREFIX}出走回数"
+        ] + merge_keys
+        if len(merged) > 0:
+            result = merged[[col for col in merged.columns if col in required_cols]]
+        else:
+            # 空のDataFrameの場合でも、race_keyと馬番を含める
+            result = pd.DataFrame(columns=merge_keys, index=target_original_index)
+            if isinstance(result.index, pd.MultiIndex):
+                result = result.reset_index()
+        
+        return result
