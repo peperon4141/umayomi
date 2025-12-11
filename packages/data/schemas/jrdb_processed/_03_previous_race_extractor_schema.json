@@ -1,8 +1,9 @@
 {
   "description": "前走データ抽出モジュールの出力スキーマ定義",
   "module": "_03_02_previous_race_extractor",
+  "identifierColumns": ["race_key", "馬番"],
   "joinKeys": ["race_key", "馬番"],
-  "outputColumns": [
+  "columns": [
     {"name": "race_key", "type": "string", "description": "マージキー：レース識別子", "use_for_training": false},
     {"name": "馬番", "type": "integer", "description": "マージキー：馬番", "use_for_training": false},
     {"name": "prev_1_race_num", "type": "numeric", "description": "1走前のレース番号(R)", "use_for_training": true},

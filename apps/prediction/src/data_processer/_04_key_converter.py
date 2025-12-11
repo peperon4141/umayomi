@@ -1,17 +1,22 @@
 """データ変換処理（キー変換、数値化、最適化）"""
 
+from typing import TYPE_CHECKING, Dict
+
 import pandas as pd
 
 from ._04_03_dtype_optimizer import DtypeOptimizer
 from ._04_02_label_encoder import LabelEncoder
 from ._04_01_numeric_converter import NumericConverter
 
+if TYPE_CHECKING:
+    from src.utils.schema_loader import Schema
+
 
 class KeyConverter:
     """キー変換と数値化を行うクラス（staticメソッドのみ）"""
 
     @staticmethod
-    def convert(df: pd.DataFrame, full_info_schema: dict, training_schema: dict, category_mappings: dict) -> pd.DataFrame:
+    def convert(df: pd.DataFrame, full_info_schema: "Schema", training_schema: "Schema", category_mappings: Dict[str, dict]) -> pd.DataFrame:
         """
         日本語キー→英語キー変換と数値化
         
@@ -30,7 +35,7 @@ class KeyConverter:
         return df
 
     @staticmethod
-    def optimize(df: pd.DataFrame, training_schema: dict) -> pd.DataFrame:
+    def optimize(df: pd.DataFrame, training_schema: "Schema") -> pd.DataFrame:
         """
         データ型を最適化
         

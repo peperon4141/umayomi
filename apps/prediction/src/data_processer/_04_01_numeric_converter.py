@@ -1,18 +1,21 @@
 """full_info_schema.jsonを元に日本語キー→英語キー変換と数値型変換を行う"""
 
-from typing import Dict, Set
+from typing import Dict, Set, TYPE_CHECKING
 
 import numpy as np
 import pandas as pd
 
 from src.utils.feature_converter import FeatureConverter
 
+if TYPE_CHECKING:
+    from src.utils.schema_loader import Schema
+
 
 class NumericConverter:
     """日本語キー→英語キー変換と数値型変換を行うクラス（staticメソッドのみ）"""
 
     @staticmethod
-    def convert_to_numeric(df: pd.DataFrame, full_info_schema: dict) -> pd.DataFrame:
+    def convert_to_numeric(df: pd.DataFrame, full_info_schema: "Schema") -> pd.DataFrame:
         """
         日本語キー→英語キー変換と数値型変換を行う。
         full_info_schema.jsonのfeature_nameを使用して変換。
@@ -62,20 +65,26 @@ class NumericConverter:
     @staticmethod
     def _add_computed_fields(df: pd.DataFrame) -> None:
         """計算フィールドを追加（ageなど）。df: 対象のDataFrame（in-placeで変更）"""
-        # ageは日本語キー「年齢」として既に追加されている可能性があるため、英語キー「age」に変換
+        # ageと年齢の両方を生成
         if "age" not in df.columns and "年齢" in df.columns:
             df["age"] = df["年齢"]
-        elif "age" not in df.columns:
+        elif "年齢" not in df.columns and "age" in df.columns:
+            df["年齢"] = df["age"]
+        elif "age" not in df.columns and "年齢" not in df.columns:
             if "生年月日" in df.columns and "start_datetime" in df.columns:
                 birth_date = pd.to_datetime(df["生年月日"].astype(str), format="%Y%m%d", errors="coerce")
                 race_date = pd.to_datetime(df["start_datetime"].astype(str).str[:8], format="%Y%m%d", errors="coerce")
                 age = (race_date - birth_date).dt.days / 365.25
-                df["age"] = age.round().astype("Int64")
+                age_rounded = age.round().astype("Int64")
+                df["age"] = age_rounded
+                df["年齢"] = age_rounded
             elif "生年月日" in df.columns and "年月日" in df.columns:
                 birth_date = pd.to_datetime(df["生年月日"].astype(str), format="%Y%m%d", errors="coerce")
                 race_date = pd.to_datetime(df["年月日"].astype(str), format="%Y%m%d", errors="coerce")
                 age = (race_date - birth_date).dt.days / 365.25
-                df["age"] = age.round().astype("Int64")
+                age_rounded = age.round().astype("Int64")
+                df["age"] = age_rounded
+                df["年齢"] = age_rounded
 
     @staticmethod
     def convert_prev_race_types(df: pd.DataFrame) -> pd.DataFrame:
@@ -104,34 +113,49 @@ class NumericConverter:
             gc.collect()
 
     @staticmethod
-    def _get_field_mapping(schema: dict) -> Dict[str, str]:
+    def _get_field_mapping(schema: "Schema") -> Dict[str, str]:
         """日本語キー → 英語キー（feature_name）のマッピング"""
+        from src.utils.schema_loader import Column
         mapping = {}
-        for col in schema.get("columns", []):
-            jp_name = col.get("name")
-            feature_name = col.get("feature_name")
+        columns = schema.columns
+        for col in columns:
+            if isinstance(col, Column):
+                jp_name, feature_name = col.name, col.feature_name
+            else:
+                jp_name = col.get("name")
+                feature_name = col.get("feature_name")
             if jp_name and feature_name:
                 mapping[jp_name] = feature_name
         return mapping
 
     @staticmethod
-    def _get_numeric_features(schema: dict) -> Set[str]:
+    def _get_numeric_features(schema: "Schema") -> Set[str]:
         """数値特徴量のセット（英語キー）"""
+        from src.utils.schema_loader import Column
         numeric = set()
-        for col in schema.get("columns", []):
-            if col.get("type") == "numeric" or col.get("type") == "integer":
+        columns = schema.columns
+        for col in columns:
+            if isinstance(col, Column):
+                col_type, feature_name = col.type, col.feature_name
+            else:
+                col_type = col.get("type")
                 feature_name = col.get("feature_name")
-                if feature_name:
-                    numeric.add(feature_name)
+            if (col_type == "numeric" or col_type == "integer") and feature_name:
+                numeric.add(feature_name)
         return numeric
 
     @staticmethod
-    def _get_integer_features(schema: dict) -> Set[str]:
+    def _get_integer_features(schema: "Schema") -> Set[str]:
         """整数特徴量のセット（整数型にダウンキャスト可能なもの、英語キー）"""
+        from src.utils.schema_loader import Column
         integer = set()
-        for col in schema.get("columns", []):
-            col_type = col.get("type")
-            feature_name = col.get("feature_name")
+        columns = schema.columns
+        for col in columns:
+            if isinstance(col, Column):
+                col_type, feature_name = col.type, col.feature_name
+            else:
+                col_type = col.get("type")
+                feature_name = col.get("feature_name")
             if feature_name and (col_type == "integer" or col_type == "numeric"):
                 # 整数型の特徴量を判定
                 if any(keyword in feature_name for keyword in ["id", "number", "count", "rank", "frame", "round", "day", "num_horses", "race_num"]):
@@ -141,17 +165,23 @@ class NumericConverter:
     @staticmethod
     def _add_computed_fields(df: pd.DataFrame) -> None:
         """計算フィールドを追加（ageなど）。df: 対象のDataFrame（in-placeで変更）"""
-        # ageは日本語キー「年齢」として既に追加されている可能性があるため、英語キー「age」に変換
+        # ageと年齢の両方を生成
         if "age" not in df.columns and "年齢" in df.columns:
             df["age"] = df["年齢"]
-        elif "age" not in df.columns:
+        elif "年齢" not in df.columns and "age" in df.columns:
+            df["年齢"] = df["age"]
+        elif "age" not in df.columns and "年齢" not in df.columns:
             if "生年月日" in df.columns and "start_datetime" in df.columns:
                 birth_date = pd.to_datetime(df["生年月日"].astype(str), format="%Y%m%d", errors="coerce")
                 race_date = pd.to_datetime(df["start_datetime"].astype(str).str[:8], format="%Y%m%d", errors="coerce")
                 age = (race_date - birth_date).dt.days / 365.25
-                df["age"] = age.round().astype("Int64")
+                age_rounded = age.round().astype("Int64")
+                df["age"] = age_rounded
+                df["年齢"] = age_rounded
             elif "生年月日" in df.columns and "年月日" in df.columns:
                 birth_date = pd.to_datetime(df["生年月日"].astype(str), format="%Y%m%d", errors="coerce")
                 race_date = pd.to_datetime(df["年月日"].astype(str), format="%Y%m%d", errors="coerce")
                 age = (race_date - birth_date).dt.days / 365.25
-                df["age"] = age.round().astype("Int64")
+                age_rounded = age.round().astype("Int64")
+                df["age"] = age_rounded
+                df["年齢"] = age_rounded

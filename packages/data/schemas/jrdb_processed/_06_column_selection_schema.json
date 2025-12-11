@@ -1,5 +1,6 @@
 {
   "description": "カラム選択処理用スキーマ（学習用カラム判定）",
+  "identifierColumns": ["race_key", "馬番"],
   "columns": [
     {"name": "場コード", "feature_name": "place", "use_for_training": true},
     {"name": "回", "feature_name": "round", "use_for_training": true},

@@ -8,24 +8,28 @@ import pandas as pd
 
 from src.jrdb_scraper.entities.jrdb import JRDBDataType
 from src.utils.jrdb_format_loader import JRDBFormatLoader
+from src.utils.feature_converter import FeatureConverter
+from src.utils.schema_loader import Schema
 
 logger = logging.getLogger(__name__)
 
 class JrdbCombiner:
     """複数のJRDBデータタイプを1つのDataFrameに結合するクラス（static関数のみ）"""
+    
+    # データ結合設定
+    BASE_DATA_TYPE = JRDBDataType.KYI
+    TARGET_DATA_TYPES = [JRDBDataType.BAC, JRDBDataType.SED, JRDBDataType.UKC, JRDBDataType.TYB]
 
     @staticmethod
-    def combine(data_dict: Dict[JRDBDataType, pd.DataFrame], schema: Dict, format_loader: JRDBFormatLoader) -> pd.DataFrame:
+    def combine(data_dict: Dict[JRDBDataType, pd.DataFrame], schema: Schema, format_loader: JRDBFormatLoader) -> pd.DataFrame:
         """全データタイプを1つのDataFrameに結合（結合キーは各データタイプのidentifierColumnsから自動決定）"""
         # 早期バリデーション
         if not data_dict: raise ValueError("データが空です")
-        if JRDBDataType.KYI not in data_dict: raise ValueError(f"{JRDBDataType.KYI.value}データが必要です。現在のデータタイプ: {', '.join([dt.value for dt in data_dict.keys()])}")
+        if JrdbCombiner.BASE_DATA_TYPE not in data_dict: raise ValueError(f"{JrdbCombiner.BASE_DATA_TYPE.value}データが必要です。現在のデータタイプ: {', '.join([dt.value for dt in data_dict.keys()])}")
         if JRDBDataType.BAC not in data_dict: raise ValueError(f"{JRDBDataType.BAC.value}データが必要です。現在のデータタイプ: {', '.join([dt.value for dt in data_dict.keys()])}")
-        if "baseDataType" not in schema: raise ValueError("スキーマにbaseDataTypeが定義されていません。スキーマファイルを確認してください。")
-        if "columns" not in schema: raise ValueError("スキーマにcolumnsが定義されていません。スキーマファイルを確認してください。")
         
-        base_type = schema["baseDataType"]
-        target_data_types = [JRDBDataType(x) for x in schema["targetDataTypes"]]
+        base_type = JrdbCombiner.BASE_DATA_TYPE
+        target_data_types = JrdbCombiner.TARGET_DATA_TYPES
         # base DataFrameをコピーして、元のDataFrameへの参照を切る（メモリ効率化）
         # 注意: copy()はメモリを一時的に増やすが、後続のmerge操作でメモリを効率的に管理するため必要
         combined_df = data_dict[base_type].copy()
@@ -117,6 +121,12 @@ class JrdbCombiner:
                 # 結合処理後は定期的にガベージコレクションを実行（メモリ使用量を抑制）
                 gc.collect()
 
+            # 結合完了後にstart_datetimeを計算（race_keyが存在する場合、インデックス設定前）
+            if "race_key" in combined_df.columns and "start_datetime" not in combined_df.columns:
+                logger.info("start_datetimeを計算中...")
+                combined_df["start_datetime"] = FeatureConverter.get_datetime_from_race_key_vectorized(combined_df["race_key"])
+                logger.info("start_datetimeの計算完了")
+
             # baseのidentifierColumnsをMultiIndexに設定
             existing_index_columns = [col for col in base_format["identifierColumns"] if col in combined_df.columns]
             if len(existing_index_columns) == len(base_format["identifierColumns"]):
@@ -128,18 +138,11 @@ class JrdbCombiner:
             elif existing_index_columns:
                 logger.warning(f"baseのidentifierColumnsが不完全です。定義: {base_format['identifierColumns']}, 存在: {existing_index_columns}")
 
+            # スキーマ検証
+            schema.validate(combined_df)
+            
             return combined_df
 
         except Exception as e:
             logger.error(f"データ結合エラー: {type(e).__name__}: {str(e)}", exc_info=True)
             raise
-
-    @staticmethod
-    def _cleanup_resources(bac_df: pd.DataFrame = None, bac_df_subset: pd.DataFrame = None) -> None:
-        """リソースのクリーンアップ（未使用）"""
-        try:
-            if bac_df is not None: del bac_df
-            if bac_df_subset is not None: del bac_df_subset
-            gc.collect()
-        except Exception:
-            pass

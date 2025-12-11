@@ -1,5 +1,6 @@
 {
   "description": "評価用データのスキーマ定義（予測結果と結合する評価用カラム）",
+  "identifierColumns": ["race_key", "馬番"],
   "merge_keys": {"description": "予測結果と評価用データを結合する際のキー", "keys": ["race_key", "馬番"]},
   "columns": [
     {"name": "race_key", "type": "string", "required": true, "description": "レースキー（マージキー、必須）", "category": "merge_key"},

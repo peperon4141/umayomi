@@ -19,7 +19,8 @@ logger = logging.getLogger(__name__)
 def convert_to_parquet(
     records: List[Dict[str, Union[int, str, None]]],
     outputFilePath: Union[str, Path],
-    dataType: Optional[Union[JRDBDataType, str]] = None
+    dataType: Optional[Union[JRDBDataType, str]] = None,
+    bac_df: Optional[pd.DataFrame] = None
 ) -> None:
     """レコード配列をParquet形式で保存
     
@@ -27,6 +28,7 @@ def convert_to_parquet(
         records: レコード配列
         outputFilePath: 出力Parquetファイルパス
         dataType: データタイプ（race_key生成に使用、オプション）
+        bac_df: BACデータ（KYI等の年月日がないデータタイプのrace_key生成に使用、オプション）
     
     Raises:
         ValueError: レコードが0件の場合
@@ -50,8 +52,9 @@ def convert_to_parquet(
         data_type_str = dataType.value if isinstance(dataType, JRDBDataType) else str(dataType) if dataType is not None else "unknown"
         logger.info(f"データタイプ '{data_type_str}' にrace_keyを追加中... (必要なカラムが揃っています)")
         
-        # 年月日カラムがある場合はそれを使用、ない場合は年カラムから年を取得（月日はデフォルトで1）
-        df = FeatureConverter.add_race_key_to_df(df, bac_df=None, use_bac_date=False)
+        # 年月日カラムがないデータタイプ（KYI等）の場合は、BACデータから日付を取得
+        use_bac_date = bac_df is not None and "年月日" not in df.columns
+        df = FeatureConverter.add_race_key_to_df(df, bac_df=bac_df, use_bac_date=use_bac_date)
         
         if "race_key" not in df.columns:
             logger.error(f"データタイプ '{data_type_str}' にrace_keyの追加に失敗しました。利用可能なカラム: {list(df.columns)[:10]}")
@@ -125,7 +128,8 @@ def convert_lzh_to_parquet(
     lzhBuffer: bytes,
     dataType: Optional[Union[JRDBDataType, str]],
     year: int,
-    outputFilePath: Union[str, Path]
+    outputFilePath: Union[str, Path],
+    bac_df: Optional[pd.DataFrame] = None
 ) -> tuple[Union[JRDBDataType, str], List[Dict[str, Union[int, str, None]]]]:
     """lzhファイルからParquetファイルへの変換処理
     
@@ -134,11 +138,12 @@ def convert_lzh_to_parquet(
         dataType: データタイプ（オプション）
         year: 年
         outputFilePath: 出力Parquetファイルパス
+        bac_df: BACデータ（KYI等の年月日がないデータタイプのrace_key生成に使用、オプション）
     
     Returns:
         (実際のデータタイプ, レコード配列)
     """
     actualDataType, records = extract_and_parse_lzh_data(lzhBuffer, dataType)
-    convert_to_parquet(records, outputFilePath, dataType=actualDataType)
+    convert_to_parquet(records, outputFilePath, dataType=actualDataType, bac_df=bac_df)
     return (actualDataType, records)
 

@@ -208,12 +208,16 @@ def evaluate_model(
             race_odds = odds_values_all[start_idx:end_idx]
             race_rank_first = rank_values[0]
             
-            if pd.notna(race_odds[0]) and pd.notna(race_rank_first):
-                odds = float(race_odds[0])
-                if int(race_rank_first) == 1:
-                    total_return += odds * 100
-                total_investment += 100
-                valid_races += 1
+            if pd.notna(race_odds[0]) and pd.notna(race_rank_first) and str(race_odds[0]).strip() != "":
+                try:
+                    odds = float(race_odds[0])
+                    if int(race_rank_first) == 1:
+                        total_return += odds * 100
+                    total_investment += 100
+                    valid_races += 1
+                except (ValueError, TypeError):
+                    # オッズが数値に変換できない場合はスキップ
+                    pass
         
         # 6. WIN5評価用データ収集
         if has_win5_flag:

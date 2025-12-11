@@ -1,17 +1,20 @@
 """カラム選択処理"""
 
-from typing import List, Optional
+from typing import List, Optional, TYPE_CHECKING
 
 import pandas as pd
 
 from ._06_01_column_filter import ColumnFilter
+
+if TYPE_CHECKING:
+    from src.utils.schema_loader import Schema
 
 
 class ColumnSelector:
     """学習用・評価用カラムを選択するクラス（staticメソッドのみ）"""
 
     @staticmethod
-    def select_training(df: pd.DataFrame, full_info_schema: dict, training_schema: dict) -> pd.DataFrame:
+    def select_training(df: pd.DataFrame, full_info_schema: "Schema", training_schema: "Schema") -> pd.DataFrame:
         """
         学習用カラムを選択
         
@@ -27,7 +30,7 @@ class ColumnSelector:
 
     @staticmethod
     def select_evaluation(
-        df: pd.DataFrame, evaluation_schema: dict, include_optional: bool = True, metrics: Optional[List[str]] = None
+        df: pd.DataFrame, evaluation_schema: "Schema", include_optional: bool = True, metrics: Optional[List[str]] = None
     ) -> pd.DataFrame:
         """
         評価用カラムを選択（evaluation_schema.jsonに基づく）。

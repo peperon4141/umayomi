@@ -59,7 +59,8 @@ class DataProcessor:
         self._horse_statistics_schema = self._schema_loader.load_schema(SchemaFile.HORSE_STATISTICS)  # 馬統計量用（_03_）
         self._jockey_statistics_schema = self._schema_loader.load_schema(SchemaFile.JOCKEY_STATISTICS)  # 騎手統計量用（_03_）
         self._trainer_statistics_schema = self._schema_loader.load_schema(SchemaFile.TRAINER_STATISTICS)  # 調教師統計量用（_03_）
-        self._previous_race_extractor_schema = self._schema_loader.load_schema(SchemaFile.PREVIOUS_RACE_EXTRACTOR)  # 前走データ抽出用（_03_）
+        self._previous_race_extractor_schema_02 = self._schema_loader.load_schema(SchemaFile.PREVIOUS_RACE_EXTRACTOR_02)  # 前走データ抽出用（_03_02）
+        self._previous_race_extractor_schema = self._schema_loader.load_schema(SchemaFile.PREVIOUS_RACE_EXTRACTOR)  # 前走データ抽出用（_03_、キー変換後）
         self._key_mapping_schema = self._schema_loader.load_schema(SchemaFile.KEY_MAPPING)  # キー変換用（_04_）
         self._column_selection_schema = self._schema_loader.load_schema(SchemaFile.COLUMN_SELECTION)  # カラム選択用（_06_）
         self._training_schema = self._schema_loader.load_schema(SchemaFile.TRAINING)  # 学習用（_04_, _06_）
@@ -195,7 +196,8 @@ class DataProcessor:
             featured_df = FeatureExtractor.extract_all_parallel(
                 raw_df, sed_df, bac_df, self._feature_extraction_schema,
                 self._horse_statistics_schema, self._jockey_statistics_schema,
-                self._trainer_statistics_schema, self._previous_race_extractor_schema
+                self._trainer_statistics_schema, self._previous_race_extractor_schema_02,
+                self._feature_extraction_schema
             )
             del raw_df, sed_df, bac_df
             gc.collect()

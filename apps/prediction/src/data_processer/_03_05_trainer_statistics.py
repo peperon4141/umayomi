@@ -1,38 +1,45 @@
 """調教師の過去成績統計を計算するクラス"""
 
-from typing import Dict
-
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
+
+from src.utils.schema_loader import Schema
 
 
 class TrainerStatistics:
     """調教師の過去成績統計を計算するクラス"""
 
+    # 結合キー
+    MERGE_KEYS = ["race_key", "馬番"]
+    
+    # グループ化カラム
+    GROUP_COLUMN = "調教師コード"
+    TIME_COLUMN = "start_datetime"
+    
+    # 統計量プレフィックス
+    PREFIX = "trainer"
+    JP_PREFIX = "調教師"
+    
+    # 直近レース数
+    RECENT_RACES_COUNT = 3
+
     # 直近レース抽出に使用するカラム（SEDデータに含まれるカラム）
-    _REQUIRED_RECENT_RACE_COLUMNS = ["着順", "タイム", "馬場状態"]
+    _REQUIRED_RECENT_RACE_COLUMNS = ["着順", "タイム", "馬場状態", "R", "芝ダ障害コード", "頭数", "距離"]
 
     @staticmethod
-    def calculate(stats_df: pd.DataFrame, target_df: pd.DataFrame, schema: Dict) -> pd.DataFrame:
+    def calculate(stats_df: pd.DataFrame, target_df: pd.DataFrame, schema: Schema) -> pd.DataFrame:
         """調教師の過去成績統計特徴量と直近3レース詳細を追加。各レースのstart_datetimeより前のデータのみを使用（未来情報を除外）。"""
-        if TrainerStatistics.GROUP_COLUMN not in target_df.columns: return target_df
-
-        # race_keyと馬番のMultiIndexは_02_ステップで設定済み
-        target_df_indexed = target_df
-        
-        target_df_sorted = target_df_indexed.sort_values(by=[TrainerStatistics.GROUP_COLUMN, TrainerStatistics.TIME_COLUMN])
+        target_df_sorted = target_df.sort_values(by=[TrainerStatistics.GROUP_COLUMN, TrainerStatistics.TIME_COLUMN])
 
         trainer_stats = TrainerStatistics._calculate_time_series_stats(
-            stats_df, target_df_sorted, TrainerStatistics.GROUP_COLUMN, TrainerStatistics.TIME_COLUMN, TrainerStatistics.PREFIX, schema
+            stats_df, target_df_sorted, TrainerStatistics.GROUP_COLUMN, TrainerStatistics.TIME_COLUMN, TrainerStatistics.PREFIX
         )
         trainer_recent_races = TrainerStatistics._extract_recent_races(
-            stats_df, target_df_sorted, TrainerStatistics.GROUP_COLUMN, TrainerStatistics.TIME_COLUMN, TrainerStatistics.RECENT_RACES_COUNT, TrainerStatistics.PREFIX, schema
+            stats_df, target_df_sorted, TrainerStatistics.GROUP_COLUMN, TrainerStatistics.TIME_COLUMN, TrainerStatistics.RECENT_RACES_COUNT, TrainerStatistics.PREFIX
         )
 
-        # スキーマからmerge_keysを取得
-        if "joinKeys" not in schema: raise ValueError("スキーマにjoinKeysが定義されていません。スキーマファイルを確認してください。")
-        merge_keys = schema["joinKeys"]
+        merge_keys = TrainerStatistics.MERGE_KEYS
 
         # race_keyと馬番をキーとしてmerge（dropnaでインデックスが変わる可能性があるため）
         target_df_merged = target_df_sorted.reset_index()
@@ -60,7 +67,16 @@ class TrainerStatistics:
             if isinstance(trainer_recent_subset.index, pd.MultiIndex):
                 trainer_recent_subset = trainer_recent_subset.reset_index()
             else:
-                raise ValueError(f"trainer_recent_racesに{merge_keys}がカラムとして存在しません。")
+                # デバッグ情報を追加
+                raise ValueError(
+                    f"trainer_recent_racesに{merge_keys}がカラムとして存在しません。\n"
+                    f"  columns: {list(trainer_recent_subset.columns)[:20]}\n"
+                    f"  index type: {type(trainer_recent_subset.index)}\n"
+                    f"  index names: {trainer_recent_subset.index.names if hasattr(trainer_recent_subset.index, 'names') else 'N/A'}\n"
+                    f"  trainer_recent_races columns: {list(trainer_recent_races.columns)[:20]}\n"
+                    f"  trainer_recent_races index type: {type(trainer_recent_races.index)}\n"
+                    f"  trainer_recent_races index names: {trainer_recent_races.index.names if hasattr(trainer_recent_races.index, 'names') else 'N/A'}"
+                )
         target_df_merged = target_df_merged.merge(
             trainer_recent_subset,
             on=merge_keys,
@@ -69,10 +85,15 @@ class TrainerStatistics:
         )
 
         # 使用済みのDataFrameを削除
-        del target_df_sorted, trainer_stats, trainer_recent_races, target_df_indexed
+        del target_df_sorted, trainer_stats, trainer_recent_races
 
         # _03_feature_extractor.pyでmergeする際にrace_keyと馬番をカラムとして使用するため、reset_indexが必要
-        return target_df_merged.reset_index()
+        result_df = target_df_merged.reset_index()
+        
+        # スキーマ検証
+        schema.validate(result_df)
+        
+        return result_df
 
     @staticmethod
     def _get_available_recent_race_columns(df: pd.DataFrame) -> list[str]:
@@ -136,13 +157,15 @@ class TrainerStatistics:
         if not available_jp_columns:
             raise ValueError("stats_dfに必要なカラムが存在しません。")
         
+        prefix_jp = TrainerStatistics.JP_PREFIX
+        
         if len(group_stats) == 0 or len(group_targets) == 0:
             result_cols = [group_col, time_col] + [
-                f"{TrainerStatistics.JP_PREFIX}直近{i}{jp_col}"
+                f"{prefix_jp}直近{i}{jp_col}"
                 for i in range(1, num_races + 1)
                 for jp_col in available_jp_columns
             ] + [
-                f"{TrainerStatistics.JP_PREFIX}直近{i}race_key"  # 日程情報（リーク検証用）
+                f"{prefix_jp}直近{i}レースキー_SED"  # 日程情報（リーク検証用）
                 for i in range(1, num_races + 1)
             ]
             return pd.DataFrame(columns=result_cols)
@@ -162,9 +185,9 @@ class TrainerStatistics:
         
         for i in range(1, num_races + 1):
             for jp_col in available_jp_columns:
-                result_data[f"{TrainerStatistics.JP_PREFIX}直近{i}{jp_col}"] = np.full(n_targets, np.nan, dtype=float)
+                result_data[f"{prefix_jp}直近{i}{jp_col}"] = np.full(n_targets, np.nan, dtype=float)
             # 日程情報（リーク検証用）
-            result_data[f"{TrainerStatistics.JP_PREFIX}直近{i}race_key"] = np.full(n_targets, None, dtype=object)
+            result_data[f"{prefix_jp}直近{i}レースキー_SED"] = np.full(n_targets, None, dtype=object)
         
         stats_arrays = {col: group_stats[col].values for col in available_jp_columns}
         
@@ -185,10 +208,10 @@ class TrainerStatistics:
                     if race_idx_in_recent >= 0:
                         race_idx = recent_indices[race_idx_in_recent]
                         for jp_col in available_jp_columns:
-                            result_data[f"{prefix_jp}直近{i}{jp_col}"][target_idx] = stats_arrays[jp_col][race_idx]
+                            result_data[f"{TrainerStatistics.JP_PREFIX}直近{i}{jp_col}"][target_idx] = stats_arrays[jp_col][race_idx]
                         # 日程情報（リーク検証用）
                         if race_key_array is not None:
-                            result_data[f"{prefix_jp}直近{i}race_key"][target_idx] = race_key_array[race_idx]
+                            result_data[f"{TrainerStatistics.JP_PREFIX}直近{i}レースキー_SED"][target_idx] = race_key_array[race_idx]
         
         result_df = pd.DataFrame(result_data, index=result_index)
         return result_df
@@ -299,6 +322,7 @@ class TrainerStatistics:
             )
         
         # race_keyと馬番を含めて必要なカラムを選択
+        prefix_jp = TrainerStatistics.JP_PREFIX
         if len(merged) > 0:
             result = merged[[col for col in merged.columns if col in [group_col, time_col, f"{prefix_jp}勝率", f"{prefix_jp}連対率", f"{prefix_jp}平均着順", f"{prefix_jp}出走回数", "race_key", "馬番"]]]
         else:
@@ -309,25 +333,15 @@ class TrainerStatistics:
 
     @staticmethod
     def _extract_recent_races(
-        stats_df: pd.DataFrame, target_df: pd.DataFrame, group_col: str, time_col: str, num_races: int = 3, prefix: str = "trainer", schema: Dict = None
+        stats_df: pd.DataFrame, target_df: pd.DataFrame, group_col: str, time_col: str, num_races: int = 3, prefix: str = "trainer"
     ) -> pd.DataFrame:
         """各レースのstart_datetimeより前のデータから直近Nレースの詳細情報を抽出（未来情報を完全に除外）。"""
-        # スキーマからmerge_keysを取得
-        if schema is None: raise ValueError("スキーマが提供されていません。")
-        if "joinKeys" not in schema: raise ValueError("スキーマにjoinKeysが定義されていません。スキーマファイルを確認してください。")
-        merge_keys = schema["joinKeys"]
-        target_original_index = target_df.index
+        merge_keys = TrainerStatistics.MERGE_KEYS
         available_cols = TrainerStatistics._get_available_recent_race_columns(stats_df)
-        if not available_cols:
-            raise ValueError("stats_dfに必要なカラムが存在しません。")
+        if not available_cols: raise ValueError("stats_dfに必要なカラムが存在しません。")
         
-        stats_df_subset = pd.DataFrame({
-            col: stats_df[col].values for col in [group_col, time_col] + available_cols
-        })
-        target_df_subset = pd.DataFrame({
-            group_col: target_df[group_col].values,
-            time_col: target_df[time_col].values,
-        }, index=target_df.index)
+        stats_df_subset = pd.DataFrame({col: stats_df[col].values for col in [group_col, time_col] + available_cols})
+        target_df_subset = pd.DataFrame({group_col: target_df[group_col].values, time_col: target_df[time_col].values}, index=target_df.index)
         
         grouped_stats = stats_df_subset.groupby(group_col, sort=False)
         target_groups = set(target_df_subset[group_col].unique())
@@ -335,21 +349,26 @@ class TrainerStatistics:
         valid_groups = [g for g in target_groups if g in grouped_stats.groups and g in grouped_targets.groups]
         
         prefix_jp = {"horse": "馬", "jockey": "騎手", "trainer": "調教師"}.get(prefix)
-        if not prefix_jp:
-            raise ValueError(f"未知のprefix: {prefix}")
+        if not prefix_jp: raise ValueError(f"未知のprefix: {prefix}")
         
-        if len(valid_groups) == 0:
-            result_cols = [group_col, time_col] + [
-                f"{prefix_jp}直近{i}{jp_col}"
-                for i in range(1, num_races + 1)
-                for jp_col in available_cols
-            ] + [
-                f"{prefix_jp}直近{i}race_key"
-                for i in range(1, num_races + 1)
-            ]
-            return pd.DataFrame(index=target_original_index, columns=result_cols)
+        # 結果カラムの定義
+        result_cols = [group_col, time_col] + [
+            f"{prefix_jp}直近{i}{jp_col}"
+            for i in range(1, num_races + 1)
+            for jp_col in available_cols
+        ] + [
+            f"{prefix_jp}直近{i}レースキー_SED"
+            for i in range(1, num_races + 1)
+        ]
         
         # シーケンシャル処理でメモリ使用量を削減
+        if len(valid_groups) == 0:
+            # 過去レースがない場合は、race_keyと馬番だけを持つ空のDataFrameを返す
+            result_df = pd.DataFrame(index=target_df.index, columns=merge_keys)
+            if isinstance(result_df.index, pd.MultiIndex): result_df = result_df.reset_index()
+            del stats_df_subset, target_df_subset, grouped_stats, grouped_targets
+            return result_df
+        
         results = []
         with tqdm(total=len(valid_groups), desc=f"{prefix}直近レース抽出", leave=True, unit="groups") as pbar:
             for group_value in valid_groups:
@@ -358,30 +377,20 @@ class TrainerStatistics:
                 result_df = TrainerStatistics._process_group_recent_races(
                     group_value, group_stats, group_targets, group_col, time_col, num_races, prefix
                 )
-                if len(result_df) > 0:
-                    results.append(result_df)
+                if len(result_df) > 0: results.append(result_df)
                 pbar.update(1)
         
-        result_df = pd.concat([df for df in results if len(df) > 0]) if results else pd.DataFrame()
-        
-        # result_dfのインデックスはtarget_df_subsetのインデックス（target_original_index）と一致しているため、reindexは不要
-        if len(result_df) == 0:
-            result_cols = [group_col, time_col] + [
-                f"{prefix_jp}直近{i}{jp_col}"
-                for i in range(1, num_races + 1)
-                for jp_col in available_cols
-            ] + [
-                f"{prefix_jp}直近{i}race_key"
-                for i in range(1, num_races + 1)
-            ]
-            result_df = pd.DataFrame(index=target_original_index, columns=result_cols)
-        
-        # インデックスがMultiIndexの場合、race_keyと馬番をカラムに追加
-        if isinstance(result_df.index, pd.MultiIndex) and result_df.index.names == ["race_key", "馬番"]:
-            result_df = result_df.reset_index()
-        elif isinstance(result_df.index, pd.MultiIndex):
-            # MultiIndexだが名前が異なる場合、reset_indexで追加
-            result_df = result_df.reset_index()
-        
+        result_df = pd.concat([df for df in results if len(df) > 0]) if results else pd.DataFrame(index=target_df.index, columns=merge_keys)
+        # target_df.indexがMultiIndexの場合、result_dfもMultiIndexに統一してからreset_index
+        if isinstance(target_df.index, pd.MultiIndex):
+            if not isinstance(result_df.index, pd.MultiIndex):
+                # pd.concatの結果がMultiIndexでない場合、target_df.indexを使ってreindex
+                result_df = result_df.reindex(target_df.index)
+            # MultiIndexの場合はreset_indexでrace_keyと馬番をカラムに追加
+            if isinstance(result_df.index, pd.MultiIndex):
+                result_df = result_df.reset_index()
+        # race_keyと馬番がカラムとして存在することを確認
+        if not all(col in result_df.columns for col in merge_keys):
+            raise ValueError(f"result_dfに{merge_keys}がカラムとして存在しません。columns: {result_df.columns.tolist()}, index type: {type(result_df.index)}, index names: {result_df.index.names if hasattr(result_df.index, 'names') else 'N/A'}")
         del stats_df_subset, target_df_subset, grouped_stats, grouped_targets
         return result_df

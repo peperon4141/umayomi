@@ -1,5 +1,6 @@
 {
   "description": "学習用データのスキーマ定義（特徴量のみ定義、ターゲット変数は別途定義）",
+  "identifierColumns": ["race_key", "馬番"],
   "columns": [
     {"name": "age", "jrdb_name": null, "data_types": ["KYI"], "type": "numeric", "is_computed": true, "description": "計算フィールド: age"},
     {"name": "course_length", "jrdb_name": "距離", "data_types": ["BAC"], "type": "numeric", "is_computed": false, "description": "距離から抽出（特徴量名: course_length）"},

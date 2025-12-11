@@ -1,28 +1,36 @@
 """データ型を最適化してメモリ使用量と計算速度を向上させる（float64→float32, int64→int32）"""
 
 import gc
-from typing import List
+from typing import List, TYPE_CHECKING
 
 import pandas as pd
+
+if TYPE_CHECKING:
+    from src.utils.schema_loader import Schema
 
 class DtypeOptimizer:
     """データ型を最適化するクラス（staticメソッドのみ）"""
 
     @staticmethod
-    def _get_categorical_features(training_schema: dict) -> List[dict]:
+    def _get_categorical_features(training_schema: "Schema") -> List[dict]:
         """カテゴリカル特徴量の定義を取得"""
-        if "columns" not in training_schema: raise ValueError("training_schemaにcolumnsが定義されていません。スキーマファイルを確認してください。")
+        from src.utils.schema_loader import Column
         categorical = []
-        for col in training_schema["columns"]:
-            if "type" not in col: raise ValueError("スキーマのカラム定義にtypeが含まれていません。スキーマファイルを確認してください。")
-            if col["type"] == "categorical":
+        columns = training_schema.columns
+        for col in columns:
+            if isinstance(col, Column):
+                col_type, feature_name = col.type, col.name
+            else:
+                if "type" not in col: raise ValueError("スキーマのカラム定義にtypeが含まれていません。スキーマファイルを確認してください。")
+                col_type = col["type"]
                 if "name" not in col: raise ValueError("カテゴリカル特徴量の定義にnameが含まれていません。スキーマファイルを確認してください。")
                 feature_name = col["name"]
+            if col_type == "categorical":
                 categorical.append({"name": feature_name})
         return categorical
 
     @staticmethod
-    def optimize(df: pd.DataFrame, training_schema: dict) -> pd.DataFrame:
+    def optimize(df: pd.DataFrame, training_schema: "Schema") -> pd.DataFrame:
         """
         データ型を最適化
         

@@ -1,9 +1,12 @@
 """カテゴリカル特徴量（場コード、天候、馬場状態など）を数値にエンコーディングする"""
 
-from typing import Dict
+from typing import Dict, TYPE_CHECKING
 
 import pandas as pd
 from sklearn import preprocessing
+
+if TYPE_CHECKING:
+    from src.utils.schema_loader import Schema
 
 class LabelEncoder:
     """カテゴリカル特徴量をラベルエンコーディングするクラス（staticメソッドのみ）"""
@@ -12,7 +15,7 @@ class LabelEncoder:
     _label_encoders: Dict[str, preprocessing.LabelEncoder] = {}
 
     @staticmethod
-    def encode(df: pd.DataFrame, training_schema: dict, category_mappings: Dict[str, dict]) -> pd.DataFrame:
+    def encode(df: pd.DataFrame, training_schema: "Schema", category_mappings: Dict[str, dict]) -> pd.DataFrame:
         """
         カテゴリカル特徴量をラベルエンコーディング
         
@@ -80,16 +83,23 @@ class LabelEncoder:
             gc.collect()
 
     @staticmethod
-    def _get_categorical_features(training_schema: dict, category_mappings: Dict[str, dict]) -> list[dict]:
+    def _get_categorical_features(training_schema: "Schema", category_mappings: Dict[str, dict]) -> list[dict]:
         """カテゴリカル特徴量の定義を取得"""
+        from src.utils.schema_loader import Column
         categorical = []
-        for col in training_schema.get("columns", []):
-            if col.get("type") == "categorical":
+        columns = training_schema.columns
+        for col in columns:
+            if isinstance(col, Column):
+                col_type, feature_name = col.type, col.name
+                category_mapping_name = getattr(col, "category_mapping_name", None)
+            else:
+                col_type = col.get("type")
                 feature_name = col.get("name")
+                category_mapping_name = col.get("category_mapping_name")
+            if col_type == "categorical":
                 if not feature_name:
                     continue
                 cat_def = {"name": feature_name}
-                category_mapping_name = col.get("category_mapping_name")
                 if category_mapping_name and category_mapping_name in category_mappings:
                     cat_data = category_mappings[category_mapping_name]
                     cat_type = cat_data.get("type")

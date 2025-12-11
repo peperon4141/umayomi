@@ -1,14 +1,17 @@
 """馬の過去成績統計を計算するクラス"""
 
-from typing import Dict
-
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
+from src.utils.schema_loader import Schema
+
 
 class HorseStatistics:
     """馬の過去成績統計を計算するクラス"""
+    
+    # 結合キー
+    MERGE_KEYS = ["race_key", "馬番"]
     
     # グループ化カラム
     GROUP_COLUMN = "血統登録番号"
@@ -19,23 +22,15 @@ class HorseStatistics:
     JP_PREFIX = "馬"
 
     @staticmethod
-    def calculate(stats_df: pd.DataFrame, target_df: pd.DataFrame, schema: Dict) -> pd.DataFrame:
+    def calculate(stats_df: pd.DataFrame, target_df: pd.DataFrame, schema: Schema) -> pd.DataFrame:
         """馬の過去成績統計特徴量を追加。各レースのstart_datetimeより前のデータのみを使用（未来情報を除外）。"""
-        if HorseStatistics.GROUP_COLUMN not in target_df.columns:
-            return target_df
-
-        # race_keyと馬番のMultiIndexは_02_ステップで設定済み
-        target_df_indexed = target_df
-
-        target_df_sorted = target_df_indexed.sort_values(by=[HorseStatistics.GROUP_COLUMN, HorseStatistics.TIME_COLUMN])
+        target_df_sorted = target_df.sort_values(by=[HorseStatistics.GROUP_COLUMN, HorseStatistics.TIME_COLUMN])
 
         horse_stats = HorseStatistics._calculate_time_series_stats(
-            stats_df, target_df_sorted, HorseStatistics.GROUP_COLUMN, HorseStatistics.TIME_COLUMN, HorseStatistics.PREFIX, schema
+            stats_df, target_df_sorted, HorseStatistics.GROUP_COLUMN, HorseStatistics.TIME_COLUMN, HorseStatistics.PREFIX
         )
         
-        # スキーマからmerge_keysを取得
-        if "joinKeys" not in schema: raise ValueError("スキーマにjoinKeysが定義されていません。スキーマファイルを確認してください。")
-        merge_keys = schema["joinKeys"]
+        merge_keys = HorseStatistics.MERGE_KEYS
 
         # race_keyと馬番をキーとしてmerge（dropnaでインデックスが変わる可能性があるため）
         target_df_merged = target_df_sorted.reset_index()
@@ -56,10 +51,15 @@ class HorseStatistics:
         )
 
         # 使用済みのDataFrameを削除
-        del target_df_sorted, horse_stats, target_df_indexed
+        del target_df_sorted, horse_stats
 
         # _03_feature_extractor.pyでmergeする際にrace_keyと馬番をカラムとして使用するため、reset_indexが必要
-        return target_df_merged.reset_index()
+        result_df = target_df_merged.reset_index()
+        
+        # スキーマ検証
+        schema.validate(result_df)
+        
+        return result_df
 
     @staticmethod
     def _process_group_time_series_stats(
@@ -109,12 +109,10 @@ class HorseStatistics:
 
     @staticmethod
     def _calculate_time_series_stats(
-        stats_df: pd.DataFrame, target_df: pd.DataFrame, group_col: str, time_col: str, prefix: str, schema: Dict
+        stats_df: pd.DataFrame, target_df: pd.DataFrame, group_col: str, time_col: str, prefix: str
     ) -> pd.DataFrame:
         """各レースのstart_datetimeより前のデータのみを使って統計量を計算（未来情報を完全に除外）。"""
-        # スキーマからmerge_keysを取得
-        if "joinKeys" not in schema: raise ValueError("スキーマにjoinKeysが定義されていません。スキーマファイルを確認してください。")
-        merge_keys = schema["joinKeys"]
+        merge_keys = HorseStatistics.MERGE_KEYS
         # race_keyと馬番のMultiIndexを使用
         target_original_index = target_df.index
         stats_sorted = stats_df.sort_values(by=[group_col, time_col])

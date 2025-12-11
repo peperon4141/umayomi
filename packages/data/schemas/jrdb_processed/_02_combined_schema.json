@@ -1,7 +1,6 @@
 {
   "description": "結合済みJRDBデータのスキーマ定義",
-  "baseDataType": "KYI",
-  "targetDataTypes": ["BAC", "SED", "UKC", "TYB"],
+  "identifierColumns": ["race_key", "馬番"],
   "columns": [
     {"name": "場コード", "source": "KYI", "type": "integer", "description": "場コード"},
     {"name": "年", "source": "KYI", "type": "integer", "description": "年"},
@@ -236,6 +235,7 @@
     {"name": "オッズ印", "source": "TYB", "type": "string", "description": "オッズ印"},
     {"name": "パドック印", "source": "TYB", "type": "string", "description": "パドック印"},
     {"name": "直前総合印", "source": "TYB", "type": "string", "description": "直前総合印"},
-    {"name": "race_key", "source": "computed", "type": "string", "description": "レースキー（計算フィールド）"}
+    {"name": "race_key", "source": "computed", "type": "string", "description": "レースキー（計算フィールド）"},
+    {"name": "start_datetime", "source": "computed", "type": "integer", "description": "レース開始日時（YYYYMMDDHHMM形式、race_keyから計算）"}
   ]
 }

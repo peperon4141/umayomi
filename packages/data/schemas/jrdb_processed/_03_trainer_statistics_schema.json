@@ -1,8 +1,9 @@
 {
   "description": "調教師統計モジュールの出力スキーマ定義",
   "module": "_03_05_trainer_statistics",
+  "identifierColumns": ["race_key", "馬番"],
   "joinKeys": ["race_key", "馬番"],
-  "outputColumns": [
+  "columns": [
     {"name": "race_key", "type": "string", "description": "マージキー：レース識別子", "use_for_training": false},
     {"name": "馬番", "type": "integer", "description": "マージキー：馬番", "use_for_training": false},
     {"name": "調教師勝率", "type": "numeric", "description": "過去の1着率（start_datetimeより前のデータのみ使用）", "use_for_training": true},
@@ -12,14 +13,26 @@
     {"name": "調教師直近1着順", "type": "numeric", "description": "直近1走目の着順（start_datetimeより前のデータのみ使用、SEDデータから取得）", "use_for_training": true},
     {"name": "調教師直近1タイム", "type": "numeric", "description": "直近1走目のタイム（start_datetimeより前のデータのみ使用、SEDデータから取得）", "use_for_training": true},
     {"name": "調教師直近1馬場状態", "type": "numeric", "description": "直近1走目の馬場状態（start_datetimeより前のデータのみ使用、SEDデータから取得）", "use_for_training": true},
-    {"name": "調教師直近1race_key", "type": "string", "description": "直近1走目のrace_key（リーク検証用）", "use_for_training": false},
+    {"name": "調教師直近1R", "type": "numeric", "description": "直近1走目のR（start_datetimeより前のデータのみ使用、SEDデータから取得）", "use_for_training": true},
+    {"name": "調教師直近1距離", "type": "numeric", "description": "直近1走目の距離（start_datetimeより前のデータのみ使用、SEDデータから取得）", "use_for_training": true},
+    {"name": "調教師直近1芝ダ障害コード", "type": "numeric", "description": "直近1走目の芝ダ障害コード（start_datetimeより前のデータのみ使用、SEDデータから取得）", "use_for_training": true},
+    {"name": "調教師直近1頭数", "type": "numeric", "description": "直近1走目の頭数（start_datetimeより前のデータのみ使用、SEDデータから取得）", "use_for_training": true},
+    {"name": "調教師直近1レースキー_SED", "type": "string", "description": "直近1走目のrace_key（リーク検証用）", "use_for_training": false},
     {"name": "調教師直近2着順", "type": "numeric", "description": "直近2走目の着順（start_datetimeより前のデータのみ使用、SEDデータから取得）", "use_for_training": true},
     {"name": "調教師直近2タイム", "type": "numeric", "description": "直近2走目のタイム（start_datetimeより前のデータのみ使用、SEDデータから取得）", "use_for_training": true},
     {"name": "調教師直近2馬場状態", "type": "numeric", "description": "直近2走目の馬場状態（start_datetimeより前のデータのみ使用、SEDデータから取得）", "use_for_training": true},
-    {"name": "調教師直近2race_key", "type": "string", "description": "直近2走目のrace_key（リーク検証用）", "use_for_training": false},
+    {"name": "調教師直近2R", "type": "numeric", "description": "直近2走目のR（start_datetimeより前のデータのみ使用、SEDデータから取得）", "use_for_training": true},
+    {"name": "調教師直近2距離", "type": "numeric", "description": "直近2走目の距離（start_datetimeより前のデータのみ使用、SEDデータから取得）", "use_for_training": true},
+    {"name": "調教師直近2芝ダ障害コード", "type": "numeric", "description": "直近2走目の芝ダ障害コード（start_datetimeより前のデータのみ使用、SEDデータから取得）", "use_for_training": true},
+    {"name": "調教師直近2頭数", "type": "numeric", "description": "直近2走目の頭数（start_datetimeより前のデータのみ使用、SEDデータから取得）", "use_for_training": true},
+    {"name": "調教師直近2レースキー_SED", "type": "string", "description": "直近2走目のrace_key（リーク検証用）", "use_for_training": false},
     {"name": "調教師直近3着順", "type": "numeric", "description": "直近3走目の着順（start_datetimeより前のデータのみ使用、SEDデータから取得）", "use_for_training": true},
     {"name": "調教師直近3タイム", "type": "numeric", "description": "直近3走目のタイム（start_datetimeより前のデータのみ使用、SEDデータから取得）", "use_for_training": true},
     {"name": "調教師直近3馬場状態", "type": "numeric", "description": "直近3走目の馬場状態（start_datetimeより前のデータのみ使用、SEDデータから取得）", "use_for_training": true},
-    {"name": "調教師直近3race_key", "type": "string", "description": "直近3走目のrace_key（リーク検証用）", "use_for_training": false}
+    {"name": "調教師直近3R", "type": "numeric", "description": "直近3走目のR（start_datetimeより前のデータのみ使用、SEDデータから取得）", "use_for_training": true},
+    {"name": "調教師直近3距離", "type": "numeric", "description": "直近3走目の距離（start_datetimeより前のデータのみ使用、SEDデータから取得）", "use_for_training": true},
+    {"name": "調教師直近3芝ダ障害コード", "type": "numeric", "description": "直近3走目の芝ダ障害コード（start_datetimeより前のデータのみ使用、SEDデータから取得）", "use_for_training": true},
+    {"name": "調教師直近3頭数", "type": "numeric", "description": "直近3走目の頭数（start_datetimeより前のデータのみ使用、SEDデータから取得）", "use_for_training": true},
+    {"name": "調教師直近3レースキー_SED", "type": "string", "description": "直近3走目のrace_key（リーク検証用）", "use_for_training": false}
   ]
 }

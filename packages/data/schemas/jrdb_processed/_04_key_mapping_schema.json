@@ -1,5 +1,6 @@
 {
   "description": "キー変換処理用スキーマ（日本語キー→英語キー変換、数値型変換）",
+  "identifierColumns": ["race_key", "馬番"],
   "columns": [
     {"name": "場コード", "feature_name": "place", "type": "integer"},
     {"name": "回", "feature_name": "round", "type": "integer"},
