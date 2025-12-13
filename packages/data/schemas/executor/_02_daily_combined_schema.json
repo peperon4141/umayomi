@@ -1,0 +1,27 @@
+{
+  "description": "日次データ結合後のスキーマ定義（SEDデータを除外）",
+  "identifierColumns": ["race_key", "馬番"],
+  "columns": [
+    {"name": "場コード", "source": "KYI", "type": "integer", "description": "場コード"},
+    {"name": "年", "source": "KYI", "type": "integer", "description": "年"},
+    {"name": "回", "source": "KYI", "type": "integer", "description": "回"},
+    {"name": "日", "source": "KYI", "type": "string", "description": "16進数(数字 or 小文字アルファベット)"},
+    {"name": "R", "source": "KYI", "type": "integer", "description": "Ｒ"},
+    {"name": "馬番", "source": "KYI", "type": "integer", "description": "馬番"},
+    {"name": "血統登録番号", "source": "KYI", "type": "string", "description": "血統登録番号"},
+    {"name": "馬名", "source": "KYI", "type": "string", "description": "全角１８文字"},
+    {"name": "騎手名", "source": "KYI", "type": "string", "description": "全角６文字"},
+    {"name": "調教師名", "source": "KYI", "type": "string", "description": "全角６文字"},
+    {"name": "年月日", "source": "BAC", "type": "integer", "description": "YYYYMMDD"},
+    {"name": "発走時間", "source": "BAC", "type": "string", "description": "HHMM"},
+    {"name": "距離", "source": "BAC", "type": "integer", "description": "距離"},
+    {"name": "芝ダ障害コード", "source": "BAC", "type": "integer", "description": "1:芝, 2:ダート, 3:障害"},
+    {"name": "頭数", "source": "BAC", "type": "integer", "description": "頭数"},
+    {"name": "生年月日", "source": "UKC", "type": "integer", "description": "YYYYMMDD"},
+    {"name": "馬体重", "source": "TYB", "type": "integer", "description": "データ無:スペース"},
+    {"name": "馬体重増減", "source": "TYB", "type": "string", "description": "符号+数字２桁、データ無:スペース"},
+    {"name": "race_key", "source": "computed", "type": "string", "description": "レースキー（計算フィールド）"},
+    {"name": "start_datetime", "source": "computed", "type": "integer", "description": "レース開始日時（YYYYMMDDHHMM形式、race_keyから計算）"}
+  ]
+}
+

@@ -1,0 +1,56 @@
+{
+  "description": "予測結果のスキーマ定義（JSON出力形式、各馬1行）",
+  "outputFormat": {
+    "date": {
+      "type": "string",
+      "description": "予測対象日付（YYYY-MM-DD形式）",
+      "required": true
+    },
+    "predictions": {
+      "type": "array",
+      "description": "各馬の予測結果（各馬1行、race_keyとpredicted_rankでソート済み）",
+      "items": {
+        "type": "object",
+        "properties": {
+          "race_key": {
+            "type": "string",
+            "description": "レースキー（YYYYMMDD_場コード_回_日_R形式）",
+            "required": true
+          },
+          "horse_number": {
+            "type": "integer",
+            "description": "馬番",
+            "required": true
+          },
+          "horse_name": {
+            "type": "string",
+            "description": "馬名",
+            "required": true
+          },
+          "jockey_name": {
+            "type": "string",
+            "description": "騎手名",
+            "required": true
+          },
+          "trainer_name": {
+            "type": "string",
+            "description": "調教師名",
+            "required": true
+          },
+          "predicted_score": {
+            "type": "number",
+            "description": "予測スコア（LightGBMの出力）",
+            "required": true
+          },
+          "predicted_rank": {
+            "type": "integer",
+            "description": "予測順位（1から開始）",
+            "required": true
+          }
+        },
+        "required": ["race_key", "horse_number", "horse_name", "jockey_name", "trainer_name", "predicted_score", "predicted_rank"]
+      }
+    }
+  }
+}
+

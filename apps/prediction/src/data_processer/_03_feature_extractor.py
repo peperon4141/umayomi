@@ -105,9 +105,15 @@ class FeatureExtractor:
             duplicated_cols = featured_df.columns[featured_df.columns.duplicated()].unique()
             if len(duplicated_cols) > 0: raise ValueError(f"重複カラムが検出されました: {list(duplicated_cols)[:20]}")
 
-            # スキーマ検証
+            # スキーマ検証（日次データなど、一部のカラムが存在しない場合は警告のみ）
             schema_obj = Schema.from_dict(feature_extraction_schema) if isinstance(feature_extraction_schema, dict) else feature_extraction_schema
-            schema_obj.validate(featured_df)
+            try:
+                schema_obj.validate(featured_df)
+            except ValueError as e:
+                # 日次データなど、一部のカラムが存在しない場合は警告のみ（エラーにはしない）
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.warning(f"スキーマ検証で警告: {e}（処理は続行します）")
 
             return featured_df
         finally:

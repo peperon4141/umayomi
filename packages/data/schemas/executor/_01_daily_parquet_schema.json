@@ -1,0 +1,29 @@
+{
+  "description": "日次LZH→Parquet変換後のスキーマ定義（各データタイプのParquetファイルの構造）",
+  "dataTypes": {
+    "BAC": {
+      "description": "番組データ（BAC）のParquetファイル構造",
+      "requiredColumns": ["場コード", "年", "回", "日", "R", "年月日", "発走時間", "距離", "芝ダ障害コード", "頭数"]
+    },
+    "KYI": {
+      "description": "競走馬データ（KYI）のParquetファイル構造",
+      "requiredColumns": ["場コード", "年", "回", "日", "R", "馬番", "血統登録番号", "馬名", "騎手コード", "調教師コード"]
+    },
+    "UKC": {
+      "description": "馬基本データ（UKC）のParquetファイル構造",
+      "requiredColumns": ["血統登録番号", "生年月日"]
+    },
+    "TYB": {
+      "description": "直前情報データ（TYB）のParquetファイル構造",
+      "requiredColumns": ["場コード", "年", "回", "日", "R", "馬番", "馬体重", "馬体重増減"]
+    }
+  },
+  "commonColumns": {
+    "race_key": {
+      "description": "レースキー（YYYYMMDD_場コード_回_日_R形式）",
+      "type": "string",
+      "required": true
+    }
+  }
+}
+

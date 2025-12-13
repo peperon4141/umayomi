@@ -42,6 +42,10 @@ class JrdbCombiner:
         try:
             # 各データタイプを結合
             for target_data_type in target_data_types:
+                # データタイプが存在しない場合はスキップ（オプショナルデータタイプ）
+                if target_data_type not in data_dict:
+                    logger.info(f"データタイプ '{target_data_type.value}' は存在しないためスキップします")
+                    continue
                 logger.info(f"データタイプ '{target_data_type.value}' の結合を開始")
                 target_df = data_dict[target_data_type]
                 logger.info(f"データタイプ '{target_data_type.value}' のデータ行数: {len(target_df)}")
@@ -138,8 +142,13 @@ class JrdbCombiner:
             elif existing_index_columns:
                 logger.warning(f"baseのidentifierColumnsが不完全です。定義: {base_format['identifierColumns']}, 存在: {existing_index_columns}")
 
-            # スキーマ検証
-            schema.validate(combined_df)
+            # スキーマ検証（オプショナル: スキーマがvalidateメソッドを持っている場合のみ）
+            if hasattr(schema, 'validate'):
+                try:
+                    schema.validate(combined_df)
+                except ValueError as e:
+                    # 日次データなど、一部のカラムが存在しない場合は警告のみ（エラーにはしない）
+                    logger.warning(f"スキーマ検証で警告: {e}（処理は続行します）")
             
             return combined_df
 

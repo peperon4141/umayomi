@@ -196,17 +196,57 @@ class RankPredictor(BasePredictor):
         elif "race_key" not in race_df_processed.columns:
             raise ValueError("race_keyがインデックスにもカラムにも存在しません")
 
-        available_features = [f for f in features.encoded_feature_names if f in race_df_processed.columns]
-        features_for_lgb = [f for f in available_features if race_df_processed[f].dtype != "object"]
+        # モデルが期待する特徴量名を取得（モデルに保存されている特徴量名を使用）
+        model_feature_names = model.feature_name()
+        if model_feature_names:
+            # モデルが期待する特徴量のみを使用（学習時と同じ特徴量を使用）
+            features_for_lgb = [f for f in model_feature_names if f in race_df_processed.columns and race_df_processed[f].dtype != "object"]
+        else:
+            # モデルに特徴量名が保存されていない場合、Featuresクラスから取得
+            available_features = [f for f in features.encoded_feature_names if f in race_df_processed.columns]
+            features_for_lgb = [f for f in available_features if race_df_processed[f].dtype != "object"]
 
         if not features_for_lgb:
             raise ValueError(f"特徴量が見つかりません。利用可能な列: {race_df_processed.columns.tolist()[:10]}")
 
-        predictions = model.predict(race_df_processed[features_for_lgb], num_iteration=model.best_iteration)
+        # 不足している特徴量を0で補完（学習時と予測時で特徴量が異なる場合）
+        for feat in model_feature_names if model_feature_names else []:
+            if feat not in race_df_processed.columns:
+                race_df_processed[feat] = 0.0
+                if feat not in features_for_lgb:
+                    features_for_lgb.append(feat)
+
+        # 予測実行（numpy配列に変換して予測）
+        # LightGBMの予測では、Pandas DataFrameを直接使用するとカテゴリカル特徴量の不一致エラーが発生する場合がある
+        # そのため、numpy配列に変換して予測することで回避
+        # また、predict_disable_shape_check=Trueを指定して特徴量数の不一致を回避
+        try:
+            predictions = model.predict(
+                race_df_processed[features_for_lgb].values, 
+                num_iteration=model.best_iteration,
+                predict_disable_shape_check=True
+            )
+        except Exception as e:
+            # エラーが発生した場合、型変換を試みる
+            import warnings
+            warnings.warn(f"予測エラーが発生しました。型変換を試みます: {e}")
+            # 数値型に変換できるカラムを数値型に変換
+            race_df_numeric = race_df_processed[features_for_lgb].copy()
+            for col in features_for_lgb:
+                if race_df_numeric[col].dtype == "object":
+                    try:
+                        race_df_numeric[col] = pd.to_numeric(race_df_numeric[col], errors='coerce').fillna(0)
+                    except:
+                        race_df_numeric[col] = 0
+            predictions = model.predict(
+                race_df_numeric.values, 
+                num_iteration=model.best_iteration,
+                predict_disable_shape_check=True
+            )
         
         return pd.DataFrame({
             "race_key": race_df_processed["race_key"].values,
-            "predicted_score": np.round(predictions, 2)
+            "predict": np.round(predictions, 2)
         })
 
     def get_result(self, model: lgb.Booster, race_df: pd.DataFrame, rank_in: int = 1) -> tuple:

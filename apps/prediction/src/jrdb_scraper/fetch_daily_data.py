@@ -49,8 +49,14 @@ def fetch_single_data_type(
         sourceUrl = generate_jrdb_data_file_url(actualDataType, dateObj)
         lzhBuffer = download_jrdb_file(sourceUrl)
         fileName = f'{actualDataType}{dateStrJRDB}'
-        parquetFilePath = outputPath / f'{fileName}.parquet'
         
+        # LZHファイルも保存（PredictionExecutorで使用するため）
+        lzhFilePath = outputPath / f'{fileName}.lzh'
+        with open(lzhFilePath, 'wb') as f:
+            f.write(lzhBuffer)
+        
+        # Parquetファイルも保存
+        parquetFilePath = outputPath / f'{fileName}.parquet'
         _, records = convert_lzh_to_parquet(lzhBuffer, actualDataType, year, parquetFilePath)
         
         if len(records) == 0:
@@ -60,7 +66,8 @@ def fetch_single_data_type(
             'dataType': actualDataType,
             'date': dateStr,
             'recordCount': len(records),
-            'outputPath': str(parquetFilePath)
+            'lzhPath': str(lzhFilePath),
+            'parquetPath': str(parquetFilePath)
         })
         
         return {
@@ -69,6 +76,7 @@ def fetch_single_data_type(
             'success': True,
             'recordCount': len(records),
             'outputPath': str(parquetFilePath),
+            'lzhPath': str(lzhFilePath),
             'fileName': fileName
         }
     except Exception as error:
