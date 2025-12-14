@@ -1,0 +1,4469 @@
+{
+  "date": "2025-12-14",
+  "predictions": [
+    {
+      "race_key": "20251214_06_05_4_01",
+      "horse_number": 6,
+      "horse_name": "ベアゴーフォー",
+      "jockey_name": "松岡正海",
+      "trainer_name": "杉浦宏昭",
+      "predicted_score": -0.32,
+      "predicted_rank": 1
+    },
+    {
+      "race_key": "20251214_06_05_4_01",
+      "horse_number": 3,
+      "horse_name": "オンマイビート",
+      "jockey_name": "落合玄太",
+      "trainer_name": "松山将樹",
+      "predicted_score": -0.59,
+      "predicted_rank": 2
+    },
+    {
+      "race_key": "20251214_06_05_4_01",
+      "horse_number": 4,
+      "horse_name": "オダイ",
+      "jockey_name": "野中悠太郎",
+      "trainer_name": "根本康広",
+      "predicted_score": -0.63,
+      "predicted_rank": 3
+    },
+    {
+      "race_key": "20251214_06_05_4_01",
+      "horse_number": 2,
+      "horse_name": "トウシンライオット",
+      "jockey_name": "小林美駒",
+      "trainer_name": "尾形和幸",
+      "predicted_score": -0.64,
+      "predicted_rank": 4
+    },
+    {
+      "race_key": "20251214_06_05_4_01",
+      "horse_number": 5,
+      "horse_name": "ドングラミ",
+      "jockey_name": "小林脩斗",
+      "trainer_name": "本間忍",
+      "predicted_score": -0.73,
+      "predicted_rank": 5
+    },
+    {
+      "race_key": "20251214_06_05_4_01",
+      "horse_number": 1,
+      "horse_name": "ホワイトナイル",
+      "jockey_name": "木幡巧也",
+      "trainer_name": "牧光二",
+      "predicted_score": -0.75,
+      "predicted_rank": 6
+    },
+    {
+      "race_key": "20251214_06_05_4_01",
+      "horse_number": 14,
+      "horse_name": "ヴェネチアンキング",
+      "jockey_name": "丹内祐次",
+      "trainer_name": "伊藤圭三",
+      "predicted_score": -0.84,
+      "predicted_rank": 7
+    },
+    {
+      "race_key": "20251214_06_05_4_01",
+      "horse_number": 13,
+      "horse_name": "ガルディーノ",
+      "jockey_name": "佐々木大輔",
+      "trainer_name": "新開幸一",
+      "predicted_score": -1.01,
+      "predicted_rank": 8
+    },
+    {
+      "race_key": "20251214_06_05_4_01",
+      "horse_number": 7,
+      "horse_name": "チャンピオンホース",
+      "jockey_name": "荻野極",
+      "trainer_name": "尾形和幸",
+      "predicted_score": -1.09,
+      "predicted_rank": 9
+    },
+    {
+      "race_key": "20251214_06_05_4_01",
+      "horse_number": 8,
+      "horse_name": "マインセーラ",
+      "jockey_name": "柴田大知",
+      "trainer_name": "的場均",
+      "predicted_score": -1.1,
+      "predicted_rank": 10
+    },
+    {
+      "race_key": "20251214_06_05_4_01",
+      "horse_number": 11,
+      "horse_name": "クラウンプレゼンタ",
+      "jockey_name": "内田博幸",
+      "trainer_name": "天間昭一",
+      "predicted_score": -1.2,
+      "predicted_rank": 11
+    },
+    {
+      "race_key": "20251214_06_05_4_01",
+      "horse_number": 9,
+      "horse_name": "フクノエルデ",
+      "jockey_name": "江田照男",
+      "trainer_name": "田中剛",
+      "predicted_score": -1.3,
+      "predicted_rank": 12
+    },
+    {
+      "race_key": "20251214_06_05_4_01",
+      "horse_number": 10,
+      "horse_name": "ヘイスティハート",
+      "jockey_name": "石川裕紀人",
+      "trainer_name": "小笠倫弘",
+      "predicted_score": -1.37,
+      "predicted_rank": 13
+    },
+    {
+      "race_key": "20251214_06_05_4_01",
+      "horse_number": 16,
+      "horse_name": "ジュニアスウィート",
+      "jockey_name": "原優介",
+      "trainer_name": "小手川準",
+      "predicted_score": -1.53,
+      "predicted_rank": 14
+    },
+    {
+      "race_key": "20251214_06_05_4_01",
+      "horse_number": 12,
+      "horse_name": "ラムールデュヴォン",
+      "jockey_name": "遠藤汰月",
+      "trainer_name": "堀内岳志",
+      "predicted_score": -1.66,
+      "predicted_rank": 15
+    },
+    {
+      "race_key": "20251214_06_05_4_01",
+      "horse_number": 15,
+      "horse_name": "カセノソレイユ",
+      "jockey_name": "舟山瑠泉",
+      "trainer_name": "鈴木伸尋",
+      "predicted_score": -1.75,
+      "predicted_rank": 16
+    },
+    {
+      "race_key": "20251214_06_05_4_02",
+      "horse_number": 3,
+      "horse_name": "カシノプロスペリテ",
+      "jockey_name": "原田和真",
+      "trainer_name": "蛯名利弘",
+      "predicted_score": -0.17,
+      "predicted_rank": 1
+    },
+    {
+      "race_key": "20251214_06_05_4_02",
+      "horse_number": 4,
+      "horse_name": "シンデレラリバティ",
+      "jockey_name": "長岡禎仁",
+      "trainer_name": "蛯名利弘",
+      "predicted_score": -0.57,
+      "predicted_rank": 2
+    },
+    {
+      "race_key": "20251214_06_05_4_02",
+      "horse_number": 8,
+      "horse_name": "ワディアルリヤハ",
+      "jockey_name": "戸崎圭太",
+      "trainer_name": "田村康仁",
+      "predicted_score": -0.59,
+      "predicted_rank": 3
+    },
+    {
+      "race_key": "20251214_06_05_4_02",
+      "horse_number": 1,
+      "horse_name": "パトリシア",
+      "jockey_name": "佐藤翔馬",
+      "trainer_name": "杉浦宏昭",
+      "predicted_score": -0.72,
+      "predicted_rank": 4
+    },
+    {
+      "race_key": "20251214_06_05_4_02",
+      "horse_number": 6,
+      "horse_name": "ツルノマイハシ",
+      "jockey_name": "岩田望来",
+      "trainer_name": "杉浦宏昭",
+      "predicted_score": -0.73,
+      "predicted_rank": 5
+    },
+    {
+      "race_key": "20251214_06_05_4_02",
+      "horse_number": 5,
+      "horse_name": "モーニングダリア",
+      "jockey_name": "水沼元輝",
+      "trainer_name": "土田稔",
+      "predicted_score": -0.75,
+      "predicted_rank": 6
+    },
+    {
+      "race_key": "20251214_06_05_4_02",
+      "horse_number": 12,
+      "horse_name": "ジャスフォール",
+      "jockey_name": "佐々木大輔",
+      "trainer_name": "上原佑紀",
+      "predicted_score": -0.85,
+      "predicted_rank": 7
+    },
+    {
+      "race_key": "20251214_06_05_4_02",
+      "horse_number": 14,
+      "horse_name": "ニルマーネル",
+      "jockey_name": "吉田豊",
+      "trainer_name": "小島茂之",
+      "predicted_score": -0.85,
+      "predicted_rank": 7
+    },
+    {
+      "race_key": "20251214_06_05_4_02",
+      "horse_number": 2,
+      "horse_name": "ディサイドオンミー",
+      "jockey_name": "遠藤汰月",
+      "trainer_name": "堀内岳志",
+      "predicted_score": -1.1,
+      "predicted_rank": 9
+    },
+    {
+      "race_key": "20251214_06_05_4_02",
+      "horse_number": 9,
+      "horse_name": "ノブピースオブラブ",
+      "jockey_name": "Ｍ．デムーロ",
+      "trainer_name": "小島茂之",
+      "predicted_score": -1.14,
+      "predicted_rank": 10
+    },
+    {
+      "race_key": "20251214_06_05_4_02",
+      "horse_number": 10,
+      "horse_name": "ムーンシェイド",
+      "jockey_name": "木幡巧也",
+      "trainer_name": "牧光二",
+      "predicted_score": -1.14,
+      "predicted_rank": 10
+    },
+    {
+      "race_key": "20251214_06_05_4_02",
+      "horse_number": 16,
+      "horse_name": "グランフォワイエ",
+      "jockey_name": "石田拓郎",
+      "trainer_name": "矢野英一",
+      "predicted_score": -1.14,
+      "predicted_rank": 10
+    },
+    {
+      "race_key": "20251214_06_05_4_02",
+      "horse_number": 11,
+      "horse_name": "エンカウンターベイ",
+      "jockey_name": "横山琉人",
+      "trainer_name": "田中剛",
+      "predicted_score": -1.18,
+      "predicted_rank": 13
+    },
+    {
+      "race_key": "20251214_06_05_4_02",
+      "horse_number": 7,
+      "horse_name": "アリアス",
+      "jockey_name": "菅原明良",
+      "trainer_name": "高柳瑞樹",
+      "predicted_score": -1.24,
+      "predicted_rank": 14
+    },
+    {
+      "race_key": "20251214_06_05_4_02",
+      "horse_number": 15,
+      "horse_name": "ヘリオドール",
+      "jockey_name": "吉田隼人",
+      "trainer_name": "和田雄二",
+      "predicted_score": -1.3,
+      "predicted_rank": 15
+    },
+    {
+      "race_key": "20251214_06_05_4_02",
+      "horse_number": 13,
+      "horse_name": "セイウンプーパ",
+      "jockey_name": "柴田善臣",
+      "trainer_name": "奥平雅士",
+      "predicted_score": -1.4,
+      "predicted_rank": 16
+    },
+    {
+      "race_key": "20251214_06_05_4_03",
+      "horse_number": 6,
+      "horse_name": "セイウンヤオヨロズ",
+      "jockey_name": "野中悠太郎",
+      "trainer_name": "上原博之",
+      "predicted_score": -0.31,
+      "predicted_rank": 1
+    },
+    {
+      "race_key": "20251214_06_05_4_03",
+      "horse_number": 2,
+      "horse_name": "アイアムアッパレ",
+      "jockey_name": "柴田善臣",
+      "trainer_name": "奥平雅士",
+      "predicted_score": -0.56,
+      "predicted_rank": 2
+    },
+    {
+      "race_key": "20251214_06_05_4_03",
+      "horse_number": 4,
+      "horse_name": "ピュアエンブレム",
+      "jockey_name": "戸崎圭太",
+      "trainer_name": "小手川準",
+      "predicted_score": -0.57,
+      "predicted_rank": 3
+    },
+    {
+      "race_key": "20251214_06_05_4_03",
+      "horse_number": 3,
+      "horse_name": "コスモラムバック",
+      "jockey_name": "武藤雅",
+      "trainer_name": "水野貴広",
+      "predicted_score": -0.59,
+      "predicted_rank": 4
+    },
+    {
+      "race_key": "20251214_06_05_4_03",
+      "horse_number": 1,
+      "horse_name": "ラッキースウィッチ",
+      "jockey_name": "団野大成",
+      "trainer_name": "蛯名正義",
+      "predicted_score": -0.72,
+      "predicted_rank": 5
+    },
+    {
+      "race_key": "20251214_06_05_4_03",
+      "horse_number": 9,
+      "horse_name": "ラージアンサンブル",
+      "jockey_name": "岩田望来",
+      "trainer_name": "武井亮",
+      "predicted_score": -0.87,
+      "predicted_rank": 6
+    },
+    {
+      "race_key": "20251214_06_05_4_03",
+      "horse_number": 5,
+      "horse_name": "ニシノヒノトリ",
+      "jockey_name": "菅原明良",
+      "trainer_name": "手塚貴久",
+      "predicted_score": -0.88,
+      "predicted_rank": 7
+    },
+    {
+      "race_key": "20251214_06_05_4_03",
+      "horse_number": 8,
+      "horse_name": "ジャストマイウェイ",
+      "jockey_name": "荻野極",
+      "trainer_name": "国枝栄",
+      "predicted_score": -0.93,
+      "predicted_rank": 8
+    },
+    {
+      "race_key": "20251214_06_05_4_03",
+      "horse_number": 7,
+      "horse_name": "カリドーラ",
+      "jockey_name": "佐々木大輔",
+      "trainer_name": "田村康仁",
+      "predicted_score": -0.96,
+      "predicted_rank": 9
+    },
+    {
+      "race_key": "20251214_06_05_4_03",
+      "horse_number": 11,
+      "horse_name": "セキテイリノ",
+      "jockey_name": "江田照男",
+      "trainer_name": "田中剛",
+      "predicted_score": -0.99,
+      "predicted_rank": 10
+    },
+    {
+      "race_key": "20251214_06_05_4_03",
+      "horse_number": 17,
+      "horse_name": "エクストラダーク",
+      "jockey_name": "吉田隼人",
+      "trainer_name": "和田雄二",
+      "predicted_score": -0.99,
+      "predicted_rank": 10
+    },
+    {
+      "race_key": "20251214_06_05_4_03",
+      "horse_number": 10,
+      "horse_name": "ジャケットポケット",
+      "jockey_name": "石川裕紀人",
+      "trainer_name": "奥村武",
+      "predicted_score": -1.09,
+      "predicted_rank": 12
+    },
+    {
+      "race_key": "20251214_06_05_4_03",
+      "horse_number": 12,
+      "horse_name": "ゴールデンダガー",
+      "jockey_name": "鮫島克駿",
+      "trainer_name": "中舘英二",
+      "predicted_score": -1.25,
+      "predicted_rank": 13
+    },
+    {
+      "race_key": "20251214_06_05_4_03",
+      "horse_number": 13,
+      "horse_name": "マイネルグレート",
+      "jockey_name": "丹内祐次",
+      "trainer_name": "鹿戸雄一",
+      "predicted_score": -1.25,
+      "predicted_rank": 13
+    },
+    {
+      "race_key": "20251214_06_05_4_03",
+      "horse_number": 14,
+      "horse_name": "マイネルモンテュス",
+      "jockey_name": "柴田大知",
+      "trainer_name": "和田勇介",
+      "predicted_score": -1.25,
+      "predicted_rank": 13
+    },
+    {
+      "race_key": "20251214_06_05_4_03",
+      "horse_number": 18,
+      "horse_name": "スカーレットジーン",
+      "jockey_name": "木幡巧也",
+      "trainer_name": "水野貴広",
+      "predicted_score": -1.3,
+      "predicted_rank": 16
+    },
+    {
+      "race_key": "20251214_06_05_4_03",
+      "horse_number": 16,
+      "horse_name": "ロイヤルヤマト",
+      "jockey_name": "佐藤翔馬",
+      "trainer_name": "伊藤圭三",
+      "predicted_score": -1.37,
+      "predicted_rank": 17
+    },
+    {
+      "race_key": "20251214_06_05_4_03",
+      "horse_number": 15,
+      "horse_name": "カシノスパーク",
+      "jockey_name": "小林美駒",
+      "trainer_name": "天間昭一",
+      "predicted_score": -1.39,
+      "predicted_rank": 18
+    },
+    {
+      "race_key": "20251214_06_05_4_04",
+      "horse_number": 2,
+      "horse_name": "デザートスター",
+      "jockey_name": "小牧加矢太",
+      "trainer_name": "笹田和秀",
+      "predicted_score": 0.18,
+      "predicted_rank": 1
+    },
+    {
+      "race_key": "20251214_06_05_4_04",
+      "horse_number": 4,
+      "horse_name": "シュバルツガイスト",
+      "jockey_name": "伴啓太",
+      "trainer_name": "国枝栄",
+      "predicted_score": 0.12,
+      "predicted_rank": 2
+    },
+    {
+      "race_key": "20251214_06_05_4_04",
+      "horse_number": 5,
+      "horse_name": "ストラクチャー",
+      "jockey_name": "草野太郎",
+      "trainer_name": "和田正一郎",
+      "predicted_score": 0.07,
+      "predicted_rank": 3
+    },
+    {
+      "race_key": "20251214_06_05_4_04",
+      "horse_number": 1,
+      "horse_name": "マテンロウノカゼ",
+      "jockey_name": "森一馬",
+      "trainer_name": "昆貢",
+      "predicted_score": -0.02,
+      "predicted_rank": 4
+    },
+    {
+      "race_key": "20251214_06_05_4_04",
+      "horse_number": 7,
+      "horse_name": "ゴールデンスロープ",
+      "jockey_name": "大江原圭",
+      "trainer_name": "小笠倫弘",
+      "predicted_score": -0.19,
+      "predicted_rank": 5
+    },
+    {
+      "race_key": "20251214_06_05_4_04",
+      "horse_number": 8,
+      "horse_name": "アドアプローズ",
+      "jockey_name": "上野翔",
+      "trainer_name": "小手川準",
+      "predicted_score": -0.28,
+      "predicted_rank": 6
+    },
+    {
+      "race_key": "20251214_06_05_4_04",
+      "horse_number": 14,
+      "horse_name": "タガノバルコス",
+      "jockey_name": "高田潤",
+      "trainer_name": "秋山真一郎",
+      "predicted_score": -0.4,
+      "predicted_rank": 7
+    },
+    {
+      "race_key": "20251214_06_05_4_04",
+      "horse_number": 10,
+      "horse_name": "クラウングスタフ",
+      "jockey_name": "中村将之",
+      "trainer_name": "水野貴広",
+      "predicted_score": -0.52,
+      "predicted_rank": 8
+    },
+    {
+      "race_key": "20251214_06_05_4_04",
+      "horse_number": 11,
+      "horse_name": "リードアクトレス",
+      "jockey_name": "小野寺祐太",
+      "trainer_name": "安達昭夫",
+      "predicted_score": -0.55,
+      "predicted_rank": 9
+    },
+    {
+      "race_key": "20251214_06_05_4_04",
+      "horse_number": 9,
+      "horse_name": "ゴールデンステップ",
+      "jockey_name": "金子光希",
+      "trainer_name": "和田勇介",
+      "predicted_score": -0.58,
+      "predicted_rank": 10
+    },
+    {
+      "race_key": "20251214_06_05_4_04",
+      "horse_number": 3,
+      "horse_name": "ピコイチ",
+      "jockey_name": "坂口智康",
+      "trainer_name": "尾形和幸",
+      "predicted_score": -0.63,
+      "predicted_rank": 11
+    },
+    {
+      "race_key": "20251214_06_05_4_04",
+      "horse_number": 6,
+      "horse_name": "アバットゥータ",
+      "jockey_name": "井上敏樹",
+      "trainer_name": "中竹和也",
+      "predicted_score": -0.75,
+      "predicted_rank": 12
+    },
+    {
+      "race_key": "20251214_06_05_4_04",
+      "horse_number": 13,
+      "horse_name": "トリップトゥムーン",
+      "jockey_name": "石神深一",
+      "trainer_name": "粕谷昌央",
+      "predicted_score": -0.81,
+      "predicted_rank": 13
+    },
+    {
+      "race_key": "20251214_06_05_4_04",
+      "horse_number": 12,
+      "horse_name": "デスティネ",
+      "jockey_name": "江田勇亮",
+      "trainer_name": "萱野浩二",
+      "predicted_score": -1.26,
+      "predicted_rank": 14
+    },
+    {
+      "race_key": "20251214_06_05_4_05",
+      "horse_number": 4,
+      "horse_name": "ショウナンカルメラ",
+      "jockey_name": "柴田善臣",
+      "trainer_name": "大竹正博",
+      "predicted_score": -0.57,
+      "predicted_rank": 1
+    },
+    {
+      "race_key": "20251214_06_05_4_05",
+      "horse_number": 3,
+      "horse_name": "コスモエレジー",
+      "jockey_name": "丹内祐次",
+      "trainer_name": "鈴木慎太郎",
+      "predicted_score": -0.64,
+      "predicted_rank": 2
+    },
+    {
+      "race_key": "20251214_06_05_4_05",
+      "horse_number": 1,
+      "horse_name": "ジーティーウブラブ",
+      "jockey_name": "佐藤翔馬",
+      "trainer_name": "伊藤圭三",
+      "predicted_score": -0.72,
+      "predicted_rank": 3
+    },
+    {
+      "race_key": "20251214_06_05_4_05",
+      "horse_number": 5,
+      "horse_name": "ジーティーシンドウ",
+      "jockey_name": "菅原明良",
+      "trainer_name": "栗田徹",
+      "predicted_score": -0.88,
+      "predicted_rank": 4
+    },
+    {
+      "race_key": "20251214_06_05_4_05",
+      "horse_number": 7,
+      "horse_name": "モラール",
+      "jockey_name": "内田博幸",
+      "trainer_name": "鈴木慎太郎",
+      "predicted_score": -1.04,
+      "predicted_rank": 5
+    },
+    {
+      "race_key": "20251214_06_05_4_05",
+      "horse_number": 2,
+      "horse_name": "プレシャスノワール",
+      "jockey_name": "遠藤汰月",
+      "trainer_name": "村田一誠",
+      "predicted_score": -1.1,
+      "predicted_rank": 6
+    },
+    {
+      "race_key": "20251214_06_05_4_05",
+      "horse_number": 8,
+      "horse_name": "エメラルドテソーロ",
+      "jockey_name": "木幡巧也",
+      "trainer_name": "牧光二",
+      "predicted_score": -1.1,
+      "predicted_rank": 6
+    },
+    {
+      "race_key": "20251214_06_05_4_05",
+      "horse_number": 11,
+      "horse_name": "キコリータ",
+      "jockey_name": "石田拓郎",
+      "trainer_name": "田中勝春",
+      "predicted_score": -1.16,
+      "predicted_rank": 8
+    },
+    {
+      "race_key": "20251214_06_05_4_05",
+      "horse_number": 6,
+      "horse_name": "クォンタムビット",
+      "jockey_name": "舟山瑠泉",
+      "trainer_name": "萩原清",
+      "predicted_score": -1.17,
+      "predicted_rank": 9
+    },
+    {
+      "race_key": "20251214_06_05_4_05",
+      "horse_number": 9,
+      "horse_name": "ベッラモレーン",
+      "jockey_name": "石橋脩",
+      "trainer_name": "矢野英一",
+      "predicted_score": -1.21,
+      "predicted_rank": 10
+    },
+    {
+      "race_key": "20251214_06_05_4_05",
+      "horse_number": 12,
+      "horse_name": "ランウェイミューズ",
+      "jockey_name": "戸崎圭太",
+      "trainer_name": "竹内正洋",
+      "predicted_score": -1.25,
+      "predicted_rank": 11
+    },
+    {
+      "race_key": "20251214_06_05_4_05",
+      "horse_number": 13,
+      "horse_name": "スーパーハイウェイ",
+      "jockey_name": "佐々木大輔",
+      "trainer_name": "伊藤大士",
+      "predicted_score": -1.25,
+      "predicted_rank": 11
+    },
+    {
+      "race_key": "20251214_06_05_4_05",
+      "horse_number": 14,
+      "horse_name": "コスモシグルン",
+      "jockey_name": "柴田大知",
+      "trainer_name": "畠山吉宏",
+      "predicted_score": -1.25,
+      "predicted_rank": 11
+    },
+    {
+      "race_key": "20251214_06_05_4_05",
+      "horse_number": 15,
+      "horse_name": "ノーブルアスール",
+      "jockey_name": "武藤雅",
+      "trainer_name": "武藤善則",
+      "predicted_score": -1.3,
+      "predicted_rank": 14
+    },
+    {
+      "race_key": "20251214_06_05_4_05",
+      "horse_number": 10,
+      "horse_name": "コスモペンタス",
+      "jockey_name": "原優介",
+      "trainer_name": "西田雄一郎",
+      "predicted_score": -1.37,
+      "predicted_rank": 15
+    },
+    {
+      "race_key": "20251214_06_05_4_05",
+      "horse_number": 16,
+      "horse_name": "フォーアライター",
+      "jockey_name": "小林美駒",
+      "trainer_name": "矢嶋大樹",
+      "predicted_score": -1.44,
+      "predicted_rank": 16
+    },
+    {
+      "race_key": "20251214_06_05_4_06",
+      "horse_number": 4,
+      "horse_name": "ノリキング",
+      "jockey_name": "佐々木大輔",
+      "trainer_name": "伊藤大士",
+      "predicted_score": -0.57,
+      "predicted_rank": 1
+    },
+    {
+      "race_key": "20251214_06_05_4_06",
+      "horse_number": 3,
+      "horse_name": "ステラゲイル",
+      "jockey_name": "丸田恭介",
+      "trainer_name": "石栗龍彦",
+      "predicted_score": -0.59,
+      "predicted_rank": 2
+    },
+    {
+      "race_key": "20251214_06_05_4_06",
+      "horse_number": 2,
+      "horse_name": "ケイアイギルス",
+      "jockey_name": "野中悠太郎",
+      "trainer_name": "小島茂之",
+      "predicted_score": -0.63,
+      "predicted_rank": 3
+    },
+    {
+      "race_key": "20251214_06_05_4_06",
+      "horse_number": 6,
+      "horse_name": "バル",
+      "jockey_name": "柴田大知",
+      "trainer_name": "武市康男",
+      "predicted_score": -0.73,
+      "predicted_rank": 4
+    },
+    {
+      "race_key": "20251214_06_05_4_06",
+      "horse_number": 5,
+      "horse_name": "マーマレードスカイ",
+      "jockey_name": "松岡正海",
+      "trainer_name": "堀内岳志",
+      "predicted_score": -0.81,
+      "predicted_rank": 5
+    },
+    {
+      "race_key": "20251214_06_05_4_06",
+      "horse_number": 1,
+      "horse_name": "プラチナムディスク",
+      "jockey_name": "横山琉人",
+      "trainer_name": "小笠倫弘",
+      "predicted_score": -0.82,
+      "predicted_rank": 6
+    },
+    {
+      "race_key": "20251214_06_05_4_06",
+      "horse_number": 7,
+      "horse_name": "セキテイロックス",
+      "jockey_name": "内田博幸",
+      "trainer_name": "嘉藤貴行",
+      "predicted_score": -1.04,
+      "predicted_rank": 7
+    },
+    {
+      "race_key": "20251214_06_05_4_06",
+      "horse_number": 10,
+      "horse_name": "フローラルアーチ",
+      "jockey_name": "武藤雅",
+      "trainer_name": "武藤善則",
+      "predicted_score": -1.14,
+      "predicted_rank": 8
+    },
+    {
+      "race_key": "20251214_06_05_4_06",
+      "horse_number": 8,
+      "horse_name": "ディル",
+      "jockey_name": "木幡育也",
+      "trainer_name": "高橋文雅",
+      "predicted_score": -1.17,
+      "predicted_rank": 9
+    },
+    {
+      "race_key": "20251214_06_05_4_06",
+      "horse_number": 11,
+      "horse_name": "ガーディアンスター",
+      "jockey_name": "佐藤翔馬",
+      "trainer_name": "武藤善則",
+      "predicted_score": -1.18,
+      "predicted_rank": 10
+    },
+    {
+      "race_key": "20251214_06_05_4_06",
+      "horse_number": 9,
+      "horse_name": "ルクスポップスター",
+      "jockey_name": "団野大成",
+      "trainer_name": "西園翔太",
+      "predicted_score": -1.21,
+      "predicted_rank": 11
+    },
+    {
+      "race_key": "20251214_06_05_4_06",
+      "horse_number": 12,
+      "horse_name": "コウジハラ",
+      "jockey_name": "長岡禎仁",
+      "trainer_name": "西田雄一郎",
+      "predicted_score": -1.25,
+      "predicted_rank": 12
+    },
+    {
+      "race_key": "20251214_06_05_4_06",
+      "horse_number": 14,
+      "horse_name": "ダズルオーロラ",
+      "jockey_name": "岩部純二",
+      "trainer_name": "伊藤伸一",
+      "predicted_score": -1.25,
+      "predicted_rank": 12
+    },
+    {
+      "race_key": "20251214_06_05_4_06",
+      "horse_number": 16,
+      "horse_name": "ゼファーテソーロ",
+      "jockey_name": "丹内祐次",
+      "trainer_name": "栗田徹",
+      "predicted_score": -1.3,
+      "predicted_rank": 14
+    },
+    {
+      "race_key": "20251214_06_05_4_06",
+      "horse_number": 13,
+      "horse_name": "アシャカルッカ",
+      "jockey_name": "小林美駒",
+      "trainer_name": "鈴木伸尋",
+      "predicted_score": -1.39,
+      "predicted_rank": 15
+    },
+    {
+      "race_key": "20251214_06_05_4_06",
+      "horse_number": 15,
+      "horse_name": "グリュイエール",
+      "jockey_name": "舟山瑠泉",
+      "trainer_name": "前川恭子",
+      "predicted_score": -1.7,
+      "predicted_rank": 16
+    },
+    {
+      "race_key": "20251214_06_05_4_07",
+      "horse_number": 3,
+      "horse_name": "マーゴットサンズ",
+      "jockey_name": "木幡巧也",
+      "trainer_name": "伊坂重信",
+      "predicted_score": -0.14,
+      "predicted_rank": 1
+    },
+    {
+      "race_key": "20251214_06_05_4_07",
+      "horse_number": 4,
+      "horse_name": "ロミオ",
+      "jockey_name": "荻野極",
+      "trainer_name": "上原佑紀",
+      "predicted_score": -0.15,
+      "predicted_rank": 2
+    },
+    {
+      "race_key": "20251214_06_05_4_07",
+      "horse_number": 2,
+      "horse_name": "ショーリバース",
+      "jockey_name": "小林美駒",
+      "trainer_name": "鈴木伸尋",
+      "predicted_score": -0.21,
+      "predicted_rank": 3
+    },
+    {
+      "race_key": "20251214_06_05_4_07",
+      "horse_number": 1,
+      "horse_name": "ファイアマン",
+      "jockey_name": "戸崎圭太",
+      "trainer_name": "上原博之",
+      "predicted_score": -0.25,
+      "predicted_rank": 4
+    },
+    {
+      "race_key": "20251214_06_05_4_07",
+      "horse_number": 6,
+      "horse_name": "ダンツシタン",
+      "jockey_name": "団野大成",
+      "trainer_name": "本田優",
+      "predicted_score": -0.28,
+      "predicted_rank": 5
+    },
+    {
+      "race_key": "20251214_06_05_4_07",
+      "horse_number": 5,
+      "horse_name": "オトシダマ",
+      "jockey_name": "伊藤工真",
+      "trainer_name": "金成貴史",
+      "predicted_score": -0.29,
+      "predicted_rank": 6
+    },
+    {
+      "race_key": "20251214_06_05_4_07",
+      "horse_number": 7,
+      "horse_name": "シルバーレシオ",
+      "jockey_name": "岩田望来",
+      "trainer_name": "野中賢二",
+      "predicted_score": -0.65,
+      "predicted_rank": 7
+    },
+    {
+      "race_key": "20251214_06_05_4_07",
+      "horse_number": 8,
+      "horse_name": "テンカムテキ",
+      "jockey_name": "横山琉人",
+      "trainer_name": "林徹",
+      "predicted_score": -0.65,
+      "predicted_rank": 7
+    },
+    {
+      "race_key": "20251214_06_05_4_07",
+      "horse_number": 11,
+      "horse_name": "サンデーパーティー",
+      "jockey_name": "Ｍ．デムーロ",
+      "trainer_name": "相沢郁",
+      "predicted_score": -0.69,
+      "predicted_rank": 9
+    },
+    {
+      "race_key": "20251214_06_05_4_07",
+      "horse_number": 10,
+      "horse_name": "ケイアイアギト",
+      "jockey_name": "佐々木大輔",
+      "trainer_name": "加藤征弘",
+      "predicted_score": -0.72,
+      "predicted_rank": 10
+    },
+    {
+      "race_key": "20251214_06_05_4_07",
+      "horse_number": 15,
+      "horse_name": "ナリノシャーウッド",
+      "jockey_name": "丹内祐次",
+      "trainer_name": "田村康仁",
+      "predicted_score": -0.98,
+      "predicted_rank": 11
+    },
+    {
+      "race_key": "20251214_06_05_4_07",
+      "horse_number": 16,
+      "horse_name": "タガノアバンドーネ",
+      "jockey_name": "鮫島克駿",
+      "trainer_name": "角田晃一",
+      "predicted_score": -0.99,
+      "predicted_rank": 12
+    },
+    {
+      "race_key": "20251214_06_05_4_07",
+      "horse_number": 13,
+      "horse_name": "ハイライトニング",
+      "jockey_name": "吉田豊",
+      "trainer_name": "嘉藤貴行",
+      "predicted_score": -1.0,
+      "predicted_rank": 13
+    },
+    {
+      "race_key": "20251214_06_05_4_07",
+      "horse_number": 14,
+      "horse_name": "デールエルバハリ",
+      "jockey_name": "落合玄太",
+      "trainer_name": "杉山佳明",
+      "predicted_score": -1.0,
+      "predicted_rank": 13
+    },
+    {
+      "race_key": "20251214_06_05_4_07",
+      "horse_number": 12,
+      "horse_name": "ニャンタロウ",
+      "jockey_name": "石橋脩",
+      "trainer_name": "武市康男",
+      "predicted_score": -1.06,
+      "predicted_rank": 15
+    },
+    {
+      "race_key": "20251214_06_05_4_07",
+      "horse_number": 9,
+      "horse_name": "チャーリー",
+      "jockey_name": "菅原明良",
+      "trainer_name": "国枝栄",
+      "predicted_score": -1.15,
+      "predicted_rank": 16
+    },
+    {
+      "race_key": "20251214_06_05_4_08",
+      "horse_number": 2,
+      "horse_name": "ムーランブルー",
+      "jockey_name": "佐々木大輔",
+      "trainer_name": "久保田貴士",
+      "predicted_score": 0.48,
+      "predicted_rank": 1
+    },
+    {
+      "race_key": "20251214_06_05_4_08",
+      "horse_number": 4,
+      "horse_name": "オウケンシルヴァー",
+      "jockey_name": "木幡育也",
+      "trainer_name": "松永康利",
+      "predicted_score": 0.36,
+      "predicted_rank": 2
+    },
+    {
+      "race_key": "20251214_06_05_4_08",
+      "horse_number": 1,
+      "horse_name": "オールデュスヴラン",
+      "jockey_name": "内田博幸",
+      "trainer_name": "西村真幸",
+      "predicted_score": 0.2,
+      "predicted_rank": 3
+    },
+    {
+      "race_key": "20251214_06_05_4_08",
+      "horse_number": 7,
+      "horse_name": "ダカラフェスティヴ",
+      "jockey_name": "戸崎圭太",
+      "trainer_name": "奥平雅士",
+      "predicted_score": 0.04,
+      "predicted_rank": 4
+    },
+    {
+      "race_key": "20251214_06_05_4_08",
+      "horse_number": 6,
+      "horse_name": "ダブルメッセージ",
+      "jockey_name": "石川裕紀人",
+      "trainer_name": "和田正一郎",
+      "predicted_score": -0.03,
+      "predicted_rank": 5
+    },
+    {
+      "race_key": "20251214_06_05_4_08",
+      "horse_number": 3,
+      "horse_name": "タマモトリノ",
+      "jockey_name": "菅原明良",
+      "trainer_name": "辻哲英",
+      "predicted_score": -0.21,
+      "predicted_rank": 6
+    },
+    {
+      "race_key": "20251214_06_05_4_08",
+      "horse_number": 11,
+      "horse_name": "スマートクオーレ",
+      "jockey_name": "柴田大知",
+      "trainer_name": "粕谷昌央",
+      "predicted_score": -0.3,
+      "predicted_rank": 7
+    },
+    {
+      "race_key": "20251214_06_05_4_08",
+      "horse_number": 10,
+      "horse_name": "チンプンカンプン",
+      "jockey_name": "小林脩斗",
+      "trainer_name": "奥平雅士",
+      "predicted_score": -0.33,
+      "predicted_rank": 8
+    },
+    {
+      "race_key": "20251214_06_05_4_08",
+      "horse_number": 12,
+      "horse_name": "キャストロププ",
+      "jockey_name": "丹内祐次",
+      "trainer_name": "尾形和幸",
+      "predicted_score": -0.33,
+      "predicted_rank": 8
+    },
+    {
+      "race_key": "20251214_06_05_4_08",
+      "horse_number": 5,
+      "horse_name": "タイキインドラ",
+      "jockey_name": "荻野極",
+      "trainer_name": "大竹正博",
+      "predicted_score": -0.35,
+      "predicted_rank": 10
+    },
+    {
+      "race_key": "20251214_06_05_4_08",
+      "horse_number": 13,
+      "horse_name": "カイトヴィント",
+      "jockey_name": "遠藤汰月",
+      "trainer_name": "和田雄二",
+      "predicted_score": -0.72,
+      "predicted_rank": 11
+    },
+    {
+      "race_key": "20251214_06_05_4_08",
+      "horse_number": 8,
+      "horse_name": "クールシェルタ",
+      "jockey_name": "舟山瑠泉",
+      "trainer_name": "高橋文雅",
+      "predicted_score": -0.81,
+      "predicted_rank": 12
+    },
+    {
+      "race_key": "20251214_06_05_4_08",
+      "horse_number": 9,
+      "horse_name": "マウントバーノン",
+      "jockey_name": "木幡巧也",
+      "trainer_name": "戸田博文",
+      "predicted_score": -0.87,
+      "predicted_rank": 13
+    },
+    {
+      "race_key": "20251214_06_05_4_08",
+      "horse_number": 14,
+      "horse_name": "ステイアンビシャス",
+      "jockey_name": "松岡正海",
+      "trainer_name": "堀内岳志",
+      "predicted_score": -1.14,
+      "predicted_rank": 14
+    },
+    {
+      "race_key": "20251214_06_05_4_09",
+      "horse_number": 3,
+      "horse_name": "ダンツファイター",
+      "jockey_name": "佐々木大輔",
+      "trainer_name": "蛯名正義",
+      "predicted_score": 0.5,
+      "predicted_rank": 1
+    },
+    {
+      "race_key": "20251214_06_05_4_09",
+      "horse_number": 1,
+      "horse_name": "バセリーナ",
+      "jockey_name": "石橋脩",
+      "trainer_name": "松山将樹",
+      "predicted_score": 0.36,
+      "predicted_rank": 2
+    },
+    {
+      "race_key": "20251214_06_05_4_09",
+      "horse_number": 5,
+      "horse_name": "ナムララジベラ",
+      "jockey_name": "小林脩斗",
+      "trainer_name": "石栗龍彦",
+      "predicted_score": 0.33,
+      "predicted_rank": 3
+    },
+    {
+      "race_key": "20251214_06_05_4_09",
+      "horse_number": 2,
+      "horse_name": "ワザモノ",
+      "jockey_name": "団野大成",
+      "trainer_name": "尾関知人",
+      "predicted_score": 0.32,
+      "predicted_rank": 4
+    },
+    {
+      "race_key": "20251214_06_05_4_09",
+      "horse_number": 6,
+      "horse_name": "ヤマニンアドホック",
+      "jockey_name": "石川裕紀人",
+      "trainer_name": "辻哲英",
+      "predicted_score": 0.27,
+      "predicted_rank": 5
+    },
+    {
+      "race_key": "20251214_06_05_4_09",
+      "horse_number": 4,
+      "horse_name": "ヤマニンガラッシア",
+      "jockey_name": "菅原明良",
+      "trainer_name": "辻哲英",
+      "predicted_score": 0.26,
+      "predicted_rank": 6
+    },
+    {
+      "race_key": "20251214_06_05_4_09",
+      "horse_number": 7,
+      "horse_name": "タッチアンドムーブ",
+      "jockey_name": "荻野極",
+      "trainer_name": "栗田徹",
+      "predicted_score": -0.07,
+      "predicted_rank": 7
+    },
+    {
+      "race_key": "20251214_06_05_4_09",
+      "horse_number": 8,
+      "horse_name": "ソルトブリーズ",
+      "jockey_name": "松岡正海",
+      "trainer_name": "田中剛",
+      "predicted_score": -0.23,
+      "predicted_rank": 8
+    },
+    {
+      "race_key": "20251214_06_05_4_09",
+      "horse_number": 10,
+      "horse_name": "ドゥカート",
+      "jockey_name": "戸崎圭太",
+      "trainer_name": "宮田敬介",
+      "predicted_score": -0.33,
+      "predicted_rank": 9
+    },
+    {
+      "race_key": "20251214_06_05_4_09",
+      "horse_number": 12,
+      "horse_name": "イガッチ",
+      "jockey_name": "Ｍ．デムーロ",
+      "trainer_name": "笹田和秀",
+      "predicted_score": -0.39,
+      "predicted_rank": 10
+    },
+    {
+      "race_key": "20251214_06_05_4_09",
+      "horse_number": 11,
+      "horse_name": "フナデ",
+      "jockey_name": "丹内祐次",
+      "trainer_name": "嘉藤貴行",
+      "predicted_score": -0.41,
+      "predicted_rank": 11
+    },
+    {
+      "race_key": "20251214_06_05_4_09",
+      "horse_number": 9,
+      "horse_name": "レディーミコノス",
+      "jockey_name": "岩田望来",
+      "trainer_name": "寺島良",
+      "predicted_score": -0.72,
+      "predicted_rank": 12
+    },
+    {
+      "race_key": "20251214_06_05_4_10",
+      "horse_number": 4,
+      "horse_name": "シェットランド",
+      "jockey_name": "吉田隼人",
+      "trainer_name": "久保田貴士",
+      "predicted_score": 0.39,
+      "predicted_rank": 1
+    },
+    {
+      "race_key": "20251214_06_05_4_10",
+      "horse_number": 2,
+      "horse_name": "ショウナンライシン",
+      "jockey_name": "柴田善臣",
+      "trainer_name": "大竹正博",
+      "predicted_score": 0.31,
+      "predicted_rank": 2
+    },
+    {
+      "race_key": "20251214_06_05_4_10",
+      "horse_number": 6,
+      "horse_name": "ブレイクフォース",
+      "jockey_name": "吉田豊",
+      "trainer_name": "中舘英二",
+      "predicted_score": 0.25,
+      "predicted_rank": 3
+    },
+    {
+      "race_key": "20251214_06_05_4_10",
+      "horse_number": 3,
+      "horse_name": "タガノエスコート",
+      "jockey_name": "北村宏司",
+      "trainer_name": "小林真也",
+      "predicted_score": 0.16,
+      "predicted_rank": 4
+    },
+    {
+      "race_key": "20251214_06_05_4_10",
+      "horse_number": 5,
+      "horse_name": "メイショウフンジン",
+      "jockey_name": "石橋脩",
+      "trainer_name": "西園正都",
+      "predicted_score": 0.15,
+      "predicted_rank": 5
+    },
+    {
+      "race_key": "20251214_06_05_4_10",
+      "horse_number": 1,
+      "horse_name": "ダンテバローズ",
+      "jockey_name": "丹内祐次",
+      "trainer_name": "上村洋行",
+      "predicted_score": 0.01,
+      "predicted_rank": 6
+    },
+    {
+      "race_key": "20251214_06_05_4_10",
+      "horse_number": 8,
+      "horse_name": "テーオーパスワード",
+      "jockey_name": "戸崎圭太",
+      "trainer_name": "高柳大輔",
+      "predicted_score": -0.13,
+      "predicted_rank": 7
+    },
+    {
+      "race_key": "20251214_06_05_4_10",
+      "horse_number": 9,
+      "horse_name": "ラタフォレスト",
+      "jockey_name": "鮫島克駿",
+      "trainer_name": "加藤征弘",
+      "predicted_score": -0.26,
+      "predicted_rank": 8
+    },
+    {
+      "race_key": "20251214_06_05_4_10",
+      "horse_number": 11,
+      "horse_name": "アクションプラン",
+      "jockey_name": "内田博幸",
+      "trainer_name": "池上昌和",
+      "predicted_score": -0.3,
+      "predicted_rank": 9
+    },
+    {
+      "race_key": "20251214_06_05_4_10",
+      "horse_number": 10,
+      "horse_name": "ポッドロゴ",
+      "jockey_name": "長岡禎仁",
+      "trainer_name": "西園正都",
+      "predicted_score": -0.36,
+      "predicted_rank": 10
+    },
+    {
+      "race_key": "20251214_06_05_4_10",
+      "horse_number": 7,
+      "horse_name": "ゴールデンシロップ",
+      "jockey_name": "原優介",
+      "trainer_name": "鈴木慎太郎",
+      "predicted_score": -0.41,
+      "predicted_rank": 11
+    },
+    {
+      "race_key": "20251214_06_05_4_10",
+      "horse_number": 14,
+      "horse_name": "ブライアンセンス",
+      "jockey_name": "岩田望来",
+      "trainer_name": "斎藤誠",
+      "predicted_score": -0.41,
+      "predicted_rank": 11
+    },
+    {
+      "race_key": "20251214_06_05_4_10",
+      "horse_number": 16,
+      "horse_name": "コンクシェル",
+      "jockey_name": "横山琉人",
+      "trainer_name": "清水久詞",
+      "predicted_score": -0.59,
+      "predicted_rank": 13
+    },
+    {
+      "race_key": "20251214_06_05_4_10",
+      "horse_number": 12,
+      "horse_name": "ミッキーヌチバナ",
+      "jockey_name": "Ｍ．デムーロ",
+      "trainer_name": "高橋亮",
+      "predicted_score": -0.6,
+      "predicted_rank": 14
+    },
+    {
+      "race_key": "20251214_06_05_4_10",
+      "horse_number": 15,
+      "horse_name": "ヴァルツァーシャル",
+      "jockey_name": "菅原明良",
+      "trainer_name": "高木登",
+      "predicted_score": -0.71,
+      "predicted_rank": 15
+    },
+    {
+      "race_key": "20251214_06_05_4_10",
+      "horse_number": 13,
+      "horse_name": "スマートアイ",
+      "jockey_name": "舟山瑠泉",
+      "trainer_name": "寺島良",
+      "predicted_score": -0.92,
+      "predicted_rank": 16
+    },
+    {
+      "race_key": "20251214_06_05_4_11",
+      "horse_number": 4,
+      "horse_name": "テーオーエルビス",
+      "jockey_name": "鮫島克駿",
+      "trainer_name": "高柳大輔",
+      "predicted_score": 0.42,
+      "predicted_rank": 1
+    },
+    {
+      "race_key": "20251214_06_05_4_11",
+      "horse_number": 3,
+      "horse_name": "スターペスカオリ",
+      "jockey_name": "長岡禎仁",
+      "trainer_name": "石橋守",
+      "predicted_score": 0.35,
+      "predicted_rank": 2
+    },
+    {
+      "race_key": "20251214_06_05_4_11",
+      "horse_number": 2,
+      "horse_name": "エートラックス",
+      "jockey_name": "内田博幸",
+      "trainer_name": "宮本博",
+      "predicted_score": 0.32,
+      "predicted_rank": 3
+    },
+    {
+      "race_key": "20251214_06_05_4_11",
+      "horse_number": 6,
+      "horse_name": "ポッドベイダー",
+      "jockey_name": "荻野極",
+      "trainer_name": "上原佑紀",
+      "predicted_score": 0.25,
+      "predicted_rank": 4
+    },
+    {
+      "race_key": "20251214_06_05_4_11",
+      "horse_number": 5,
+      "horse_name": "サンライズアムール",
+      "jockey_name": "北村宏司",
+      "trainer_name": "小林真也",
+      "predicted_score": -0.02,
+      "predicted_rank": 5
+    },
+    {
+      "race_key": "20251214_06_05_4_11",
+      "horse_number": 1,
+      "horse_name": "ドンアミティエ",
+      "jockey_name": "丹内祐次",
+      "trainer_name": "今野貞一",
+      "predicted_score": -0.06,
+      "predicted_rank": 6
+    },
+    {
+      "race_key": "20251214_06_05_4_11",
+      "horse_number": 7,
+      "horse_name": "キャンディドライヴ",
+      "jockey_name": "落合玄太",
+      "trainer_name": "小野望",
+      "predicted_score": -0.06,
+      "predicted_rank": 6
+    },
+    {
+      "race_key": "20251214_06_05_4_11",
+      "horse_number": 8,
+      "horse_name": "クロジシジョー",
+      "jockey_name": "戸崎圭太",
+      "trainer_name": "岡田稲男",
+      "predicted_score": -0.24,
+      "predicted_rank": 8
+    },
+    {
+      "race_key": "20251214_06_05_4_11",
+      "horse_number": 9,
+      "horse_name": "ガビーズシスター",
+      "jockey_name": "吉田隼人",
+      "trainer_name": "森一誠",
+      "predicted_score": -0.32,
+      "predicted_rank": 9
+    },
+    {
+      "race_key": "20251214_06_05_4_11",
+      "horse_number": 10,
+      "horse_name": "タガノミスト",
+      "jockey_name": "佐々木大輔",
+      "trainer_name": "渡辺薫彦",
+      "predicted_score": -0.32,
+      "predicted_rank": 9
+    },
+    {
+      "race_key": "20251214_06_05_4_11",
+      "horse_number": 16,
+      "horse_name": "ヤマニンチェルキ",
+      "jockey_name": "岩田望来",
+      "trainer_name": "中村直也",
+      "predicted_score": -0.36,
+      "predicted_rank": 11
+    },
+    {
+      "race_key": "20251214_06_05_4_11",
+      "horse_number": 11,
+      "horse_name": "チカッパ",
+      "jockey_name": "横山典弘",
+      "trainer_name": "中竹和也",
+      "predicted_score": -0.42,
+      "predicted_rank": 12
+    },
+    {
+      "race_key": "20251214_06_05_4_11",
+      "horse_number": 15,
+      "horse_name": "ニットウバジル",
+      "jockey_name": "吉田豊",
+      "trainer_name": "高橋文雅",
+      "predicted_score": -0.42,
+      "predicted_rank": 12
+    },
+    {
+      "race_key": "20251214_06_05_4_11",
+      "horse_number": 13,
+      "horse_name": "エコロアゼル",
+      "jockey_name": "団野大成",
+      "trainer_name": "森秀行",
+      "predicted_score": -0.48,
+      "predicted_rank": 14
+    },
+    {
+      "race_key": "20251214_06_05_4_11",
+      "horse_number": 12,
+      "horse_name": "カルチャーデイ",
+      "jockey_name": "柴田善臣",
+      "trainer_name": "四位洋文",
+      "predicted_score": -0.77,
+      "predicted_rank": 15
+    },
+    {
+      "race_key": "20251214_06_05_4_11",
+      "horse_number": 14,
+      "horse_name": "ジャスパーゴールド",
+      "jockey_name": "菅原明良",
+      "trainer_name": "森秀行",
+      "predicted_score": -0.77,
+      "predicted_rank": 15
+    },
+    {
+      "race_key": "20251214_06_05_4_12",
+      "horse_number": 3,
+      "horse_name": "アクイローネ",
+      "jockey_name": "佐々木大輔",
+      "trainer_name": "小野次郎",
+      "predicted_score": 0.5,
+      "predicted_rank": 1
+    },
+    {
+      "race_key": "20251214_06_05_4_12",
+      "horse_number": 6,
+      "horse_name": "ベストシーン",
+      "jockey_name": "岩田望来",
+      "trainer_name": "手塚貴久",
+      "predicted_score": 0.45,
+      "predicted_rank": 2
+    },
+    {
+      "race_key": "20251214_06_05_4_12",
+      "horse_number": 5,
+      "horse_name": "キアラメンテ",
+      "jockey_name": "荻野極",
+      "trainer_name": "鹿戸雄一",
+      "predicted_score": 0.41,
+      "predicted_rank": 3
+    },
+    {
+      "race_key": "20251214_06_05_4_12",
+      "horse_number": 4,
+      "horse_name": "ラファヴォリット",
+      "jockey_name": "北村宏司",
+      "trainer_name": "黒岩陽一",
+      "predicted_score": 0.37,
+      "predicted_rank": 4
+    },
+    {
+      "race_key": "20251214_06_05_4_12",
+      "horse_number": 1,
+      "horse_name": "サクラアドリア",
+      "jockey_name": "横山典弘",
+      "trainer_name": "尾関知人",
+      "predicted_score": 0.3,
+      "predicted_rank": 5
+    },
+    {
+      "race_key": "20251214_06_05_4_12",
+      "horse_number": 2,
+      "horse_name": "ケイツールピア",
+      "jockey_name": "石田拓郎",
+      "trainer_name": "蛯名利弘",
+      "predicted_score": 0.26,
+      "predicted_rank": 6
+    },
+    {
+      "race_key": "20251214_06_05_4_12",
+      "horse_number": 8,
+      "horse_name": "スワローシチー",
+      "jockey_name": "戸崎圭太",
+      "trainer_name": "相沢郁",
+      "predicted_score": -0.1,
+      "predicted_rank": 7
+    },
+    {
+      "race_key": "20251214_06_05_4_12",
+      "horse_number": 7,
+      "horse_name": "マジカルワード",
+      "jockey_name": "柴田善臣",
+      "trainer_name": "大竹正博",
+      "predicted_score": -0.18,
+      "predicted_rank": 8
+    },
+    {
+      "race_key": "20251214_06_05_4_12",
+      "horse_number": 9,
+      "horse_name": "フォートポータル",
+      "jockey_name": "柴田大知",
+      "trainer_name": "粕谷昌央",
+      "predicted_score": -0.36,
+      "predicted_rank": 9
+    },
+    {
+      "race_key": "20251214_06_05_4_12",
+      "horse_number": 10,
+      "horse_name": "イゾレエオリア",
+      "jockey_name": "杉原誠人",
+      "trainer_name": "伊藤大士",
+      "predicted_score": -0.42,
+      "predicted_rank": 10
+    },
+    {
+      "race_key": "20251214_06_05_4_12",
+      "horse_number": 11,
+      "horse_name": "マイネルゼウス",
+      "jockey_name": "丹内祐次",
+      "trainer_name": "奥村武",
+      "predicted_score": -0.44,
+      "predicted_rank": 11
+    },
+    {
+      "race_key": "20251214_06_05_4_12",
+      "horse_number": 13,
+      "horse_name": "パストラーレ",
+      "jockey_name": "丸田恭介",
+      "trainer_name": "武市康男",
+      "predicted_score": -0.44,
+      "predicted_rank": 11
+    },
+    {
+      "race_key": "20251214_06_05_4_12",
+      "horse_number": 14,
+      "horse_name": "ハニードレス",
+      "jockey_name": "木幡巧也",
+      "trainer_name": "牧光二",
+      "predicted_score": -0.45,
+      "predicted_rank": 13
+    },
+    {
+      "race_key": "20251214_06_05_4_12",
+      "horse_number": 16,
+      "horse_name": "コスモイシュタル",
+      "jockey_name": "松岡正海",
+      "trainer_name": "深山雅史",
+      "predicted_score": -0.53,
+      "predicted_rank": 14
+    },
+    {
+      "race_key": "20251214_06_05_4_12",
+      "horse_number": 15,
+      "horse_name": "ケイツークローン",
+      "jockey_name": "原優介",
+      "trainer_name": "清水英克",
+      "predicted_score": -0.66,
+      "predicted_rank": 15
+    },
+    {
+      "race_key": "20251214_06_05_4_12",
+      "horse_number": 12,
+      "horse_name": "ウィンターベル",
+      "jockey_name": "舟山瑠泉",
+      "trainer_name": "木村哲也",
+      "predicted_score": -0.78,
+      "predicted_rank": 16
+    },
+    {
+      "race_key": "20251214_07_05_4_01",
+      "horse_number": 3,
+      "horse_name": "ブルーメサンライズ",
+      "jockey_name": "富田暁",
+      "trainer_name": "石坂公一",
+      "predicted_score": -0.08,
+      "predicted_rank": 1
+    },
+    {
+      "race_key": "20251214_07_05_4_01",
+      "horse_number": 6,
+      "horse_name": "セレーノ",
+      "jockey_name": "永島まなみ",
+      "trainer_name": "高橋亮",
+      "predicted_score": -0.17,
+      "predicted_rank": 2
+    },
+    {
+      "race_key": "20251214_07_05_4_01",
+      "horse_number": 2,
+      "horse_name": "オーケートムボーイ",
+      "jockey_name": "斎藤新",
+      "trainer_name": "奥村豊",
+      "predicted_score": -0.2,
+      "predicted_rank": 3
+    },
+    {
+      "race_key": "20251214_07_05_4_01",
+      "horse_number": 5,
+      "horse_name": "アクシュラ",
+      "jockey_name": "小沢大仁",
+      "trainer_name": "橋口慎介",
+      "predicted_score": -0.27,
+      "predicted_rank": 4
+    },
+    {
+      "race_key": "20251214_07_05_4_01",
+      "horse_number": 4,
+      "horse_name": "スウィープシャルム",
+      "jockey_name": "荻野琢真",
+      "trainer_name": "前川恭子",
+      "predicted_score": -0.41,
+      "predicted_rank": 5
+    },
+    {
+      "race_key": "20251214_07_05_4_01",
+      "horse_number": 7,
+      "horse_name": "マカロンブルー",
+      "jockey_name": "今村聖奈",
+      "trainer_name": "佐藤悠太",
+      "predicted_score": -0.48,
+      "predicted_rank": 6
+    },
+    {
+      "race_key": "20251214_07_05_4_01",
+      "horse_number": 12,
+      "horse_name": "アイビーミャーオ",
+      "jockey_name": "松本大輝",
+      "trainer_name": "小林真也",
+      "predicted_score": -0.85,
+      "predicted_rank": 7
+    },
+    {
+      "race_key": "20251214_07_05_4_01",
+      "horse_number": 11,
+      "horse_name": "スマートコーラル",
+      "jockey_name": "藤懸貴志",
+      "trainer_name": "石坂公一",
+      "predicted_score": -0.97,
+      "predicted_rank": 8
+    },
+    {
+      "race_key": "20251214_07_05_4_01",
+      "horse_number": 1,
+      "horse_name": "エアトベーレ",
+      "jockey_name": "嶋田純次",
+      "trainer_name": "手塚貴久",
+      "predicted_score": -0.98,
+      "predicted_rank": 9
+    },
+    {
+      "race_key": "20251214_07_05_4_01",
+      "horse_number": 13,
+      "horse_name": "クイーンズドリーム",
+      "jockey_name": "小崎綾也",
+      "trainer_name": "大久保龍志",
+      "predicted_score": -1.06,
+      "predicted_rank": 10
+    },
+    {
+      "race_key": "20251214_07_05_4_01",
+      "horse_number": 8,
+      "horse_name": "アンファール",
+      "jockey_name": "黛弘人",
+      "trainer_name": "和田雄二",
+      "predicted_score": -1.1,
+      "predicted_rank": 11
+    },
+    {
+      "race_key": "20251214_07_05_4_01",
+      "horse_number": 9,
+      "horse_name": "ホールドミーワンス",
+      "jockey_name": "菊沢一樹",
+      "trainer_name": "西園翔太",
+      "predicted_score": -1.34,
+      "predicted_rank": 12
+    },
+    {
+      "race_key": "20251214_07_05_4_01",
+      "horse_number": 10,
+      "horse_name": "ジューンレイヴン",
+      "jockey_name": "加藤祥太",
+      "trainer_name": "小椋研介",
+      "predicted_score": -1.36,
+      "predicted_rank": 13
+    },
+    {
+      "race_key": "20251214_07_05_4_01",
+      "horse_number": 14,
+      "horse_name": "ミヤムーブメント",
+      "jockey_name": "上里直汰",
+      "trainer_name": "緒方努",
+      "predicted_score": -1.42,
+      "predicted_rank": 14
+    },
+    {
+      "race_key": "20251214_07_05_4_02",
+      "horse_number": 3,
+      "horse_name": "リフラ",
+      "jockey_name": "亀田温心",
+      "trainer_name": "西村真幸",
+      "predicted_score": -0.1,
+      "predicted_rank": 1
+    },
+    {
+      "race_key": "20251214_07_05_4_02",
+      "horse_number": 2,
+      "horse_name": "パータリプトラ",
+      "jockey_name": "石神深道",
+      "trainer_name": "武井亮",
+      "predicted_score": -0.15,
+      "predicted_rank": 2
+    },
+    {
+      "race_key": "20251214_07_05_4_02",
+      "horse_number": 1,
+      "horse_name": "ユイノカタリベ",
+      "jockey_name": "木幡初也",
+      "trainer_name": "竹内正洋",
+      "predicted_score": -0.26,
+      "predicted_rank": 3
+    },
+    {
+      "race_key": "20251214_07_05_4_02",
+      "horse_number": 4,
+      "horse_name": "セイウンリメンバー",
+      "jockey_name": "長浜鴻緒",
+      "trainer_name": "千葉直人",
+      "predicted_score": -0.57,
+      "predicted_rank": 4
+    },
+    {
+      "race_key": "20251214_07_05_4_02",
+      "horse_number": 6,
+      "horse_name": "キャッチアシーフ",
+      "jockey_name": "斎藤新",
+      "trainer_name": "佐藤悠太",
+      "predicted_score": -0.62,
+      "predicted_rank": 5
+    },
+    {
+      "race_key": "20251214_07_05_4_02",
+      "horse_number": 11,
+      "horse_name": "ザキノフレンズ",
+      "jockey_name": "富田暁",
+      "trainer_name": "東田明士",
+      "predicted_score": -0.67,
+      "predicted_rank": 6
+    },
+    {
+      "race_key": "20251214_07_05_4_02",
+      "horse_number": 10,
+      "horse_name": "オメガヒストリー",
+      "jockey_name": "国分優作",
+      "trainer_name": "安田翔伍",
+      "predicted_score": -0.78,
+      "predicted_rank": 7
+    },
+    {
+      "race_key": "20251214_07_05_4_02",
+      "horse_number": 13,
+      "horse_name": "ロイヤルスパイア",
+      "jockey_name": "松本大輝",
+      "trainer_name": "栗田徹",
+      "predicted_score": -0.84,
+      "predicted_rank": 8
+    },
+    {
+      "race_key": "20251214_07_05_4_02",
+      "horse_number": 5,
+      "horse_name": "クラシオン",
+      "jockey_name": "菊沢一樹",
+      "trainer_name": "菊沢隆徳",
+      "predicted_score": -0.86,
+      "predicted_rank": 9
+    },
+    {
+      "race_key": "20251214_07_05_4_02",
+      "horse_number": 7,
+      "horse_name": "シュヴァルツシルト",
+      "jockey_name": "丸山元気",
+      "trainer_name": "田島俊明",
+      "predicted_score": -1.02,
+      "predicted_rank": 10
+    },
+    {
+      "race_key": "20251214_07_05_4_02",
+      "horse_number": 8,
+      "horse_name": "ブルーミーティア",
+      "jockey_name": "上里直汰",
+      "trainer_name": "鈴木伸尋",
+      "predicted_score": -1.17,
+      "predicted_rank": 11
+    },
+    {
+      "race_key": "20251214_07_05_4_02",
+      "horse_number": 9,
+      "horse_name": "ムソウテンセイ",
+      "jockey_name": "和田陽希",
+      "trainer_name": "鈴木孝志",
+      "predicted_score": -1.33,
+      "predicted_rank": 12
+    },
+    {
+      "race_key": "20251214_07_05_4_02",
+      "horse_number": 12,
+      "horse_name": "マイネルトレマーズ",
+      "jockey_name": "小沢大仁",
+      "trainer_name": "手塚貴久",
+      "predicted_score": -1.44,
+      "predicted_rank": 13
+    },
+    {
+      "race_key": "20251214_07_05_4_03",
+      "horse_number": 4,
+      "horse_name": "ミルトライディーン",
+      "jockey_name": "柴田裕一郎",
+      "trainer_name": "中竹和也",
+      "predicted_score": 0.6,
+      "predicted_rank": 1
+    },
+    {
+      "race_key": "20251214_07_05_4_03",
+      "horse_number": 6,
+      "horse_name": "シルフズミスチーフ",
+      "jockey_name": "今村聖奈",
+      "trainer_name": "池江泰寿",
+      "predicted_score": 0.42,
+      "predicted_rank": 2
+    },
+    {
+      "race_key": "20251214_07_05_4_03",
+      "horse_number": 5,
+      "horse_name": "アースミューズ",
+      "jockey_name": "長浜鴻緒",
+      "trainer_name": "粕谷昌央",
+      "predicted_score": 0.41,
+      "predicted_rank": 3
+    },
+    {
+      "race_key": "20251214_07_05_4_03",
+      "horse_number": 1,
+      "horse_name": "サノノアメリカン",
+      "jockey_name": "石神深道",
+      "trainer_name": "天間昭一",
+      "predicted_score": 0.19,
+      "predicted_rank": 4
+    },
+    {
+      "race_key": "20251214_07_05_4_03",
+      "horse_number": 3,
+      "horse_name": "シュードタキライト",
+      "jockey_name": "鷲頭虎太",
+      "trainer_name": "菊川正達",
+      "predicted_score": 0.05,
+      "predicted_rank": 5
+    },
+    {
+      "race_key": "20251214_07_05_4_03",
+      "horse_number": 7,
+      "horse_name": "ツーピース",
+      "jockey_name": "国分優作",
+      "trainer_name": "河嶋宏樹",
+      "predicted_score": 0.05,
+      "predicted_rank": 5
+    },
+    {
+      "race_key": "20251214_07_05_4_03",
+      "horse_number": 8,
+      "horse_name": "ワールドシリーズ",
+      "jockey_name": "小沢大仁",
+      "trainer_name": "秋山真一郎",
+      "predicted_score": -0.21,
+      "predicted_rank": 7
+    },
+    {
+      "race_key": "20251214_07_05_4_03",
+      "horse_number": 2,
+      "horse_name": "ドラゴンテイラー",
+      "jockey_name": "和田陽希",
+      "trainer_name": "藤原英昭",
+      "predicted_score": -0.23,
+      "predicted_rank": 8
+    },
+    {
+      "race_key": "20251214_07_05_4_03",
+      "horse_number": 9,
+      "horse_name": "イノキ",
+      "jockey_name": "丸山元気",
+      "trainer_name": "岩戸孝樹",
+      "predicted_score": -0.33,
+      "predicted_rank": 9
+    },
+    {
+      "race_key": "20251214_07_05_4_03",
+      "horse_number": 12,
+      "horse_name": "スカイブルー",
+      "jockey_name": "小崎綾也",
+      "trainer_name": "佐藤悠太",
+      "predicted_score": -0.35,
+      "predicted_rank": 10
+    },
+    {
+      "race_key": "20251214_07_05_4_03",
+      "horse_number": 16,
+      "horse_name": "メイショウホウセン",
+      "jockey_name": "河原田菜々",
+      "trainer_name": "千田輝彦",
+      "predicted_score": -0.37,
+      "predicted_rank": 11
+    },
+    {
+      "race_key": "20251214_07_05_4_03",
+      "horse_number": 11,
+      "horse_name": "ワンウェイトゥヘル",
+      "jockey_name": "永島まなみ",
+      "trainer_name": "中村直也",
+      "predicted_score": -0.41,
+      "predicted_rank": 12
+    },
+    {
+      "race_key": "20251214_07_05_4_03",
+      "horse_number": 13,
+      "horse_name": "インディゴアスール",
+      "jockey_name": "藤懸貴志",
+      "trainer_name": "鈴木孝志",
+      "predicted_score": -0.45,
+      "predicted_rank": 13
+    },
+    {
+      "race_key": "20251214_07_05_4_03",
+      "horse_number": 14,
+      "horse_name": "ウィングコマンダー",
+      "jockey_name": "菊沢一樹",
+      "trainer_name": "松永康利",
+      "predicted_score": -0.73,
+      "predicted_rank": 14
+    },
+    {
+      "race_key": "20251214_07_05_4_03",
+      "horse_number": 15,
+      "horse_name": "カジカライズ",
+      "jockey_name": "大久保友雅",
+      "trainer_name": "久保田貴士",
+      "predicted_score": -0.8,
+      "predicted_rank": 15
+    },
+    {
+      "race_key": "20251214_07_05_4_03",
+      "horse_number": 10,
+      "horse_name": "アップフルーク",
+      "jockey_name": "上里直汰",
+      "trainer_name": "松山将樹",
+      "predicted_score": -0.99,
+      "predicted_rank": 16
+    },
+    {
+      "race_key": "20251214_07_05_4_04",
+      "horse_number": 2,
+      "horse_name": "マーゴットガイア",
+      "jockey_name": "小崎綾也",
+      "trainer_name": "石坂公一",
+      "predicted_score": -0.12,
+      "predicted_rank": 1
+    },
+    {
+      "race_key": "20251214_07_05_4_04",
+      "horse_number": 6,
+      "horse_name": "ノーブルホライズン",
+      "jockey_name": "木幡初也",
+      "trainer_name": "粕谷昌央",
+      "predicted_score": -0.23,
+      "predicted_rank": 2
+    },
+    {
+      "race_key": "20251214_07_05_4_04",
+      "horse_number": 5,
+      "horse_name": "オオツカ",
+      "jockey_name": "松本大輝",
+      "trainer_name": "大久保龍志",
+      "predicted_score": -0.28,
+      "predicted_rank": 3
+    },
+    {
+      "race_key": "20251214_07_05_4_04",
+      "horse_number": 4,
+      "horse_name": "コスモエーヴィヒ",
+      "jockey_name": "石神深道",
+      "trainer_name": "伊藤大士",
+      "predicted_score": -0.72,
+      "predicted_rank": 4
+    },
+    {
+      "race_key": "20251214_07_05_4_04",
+      "horse_number": 1,
+      "horse_name": "ワールドブレイヴ",
+      "jockey_name": "丸山元気",
+      "trainer_name": "宮田敬介",
+      "predicted_score": -0.78,
+      "predicted_rank": 5
+    },
+    {
+      "race_key": "20251214_07_05_4_04",
+      "horse_number": 8,
+      "horse_name": "ノンブルドール",
+      "jockey_name": "亀田温心",
+      "trainer_name": "西園翔太",
+      "predicted_score": -0.8,
+      "predicted_rank": 6
+    },
+    {
+      "race_key": "20251214_07_05_4_04",
+      "horse_number": 7,
+      "horse_name": "アイスアイスベイビ",
+      "jockey_name": "菊沢一樹",
+      "trainer_name": "岩戸孝樹",
+      "predicted_score": -0.85,
+      "predicted_rank": 7
+    },
+    {
+      "race_key": "20251214_07_05_4_04",
+      "horse_number": 9,
+      "horse_name": "グレーヌドジョワ",
+      "jockey_name": "富田暁",
+      "trainer_name": "今野貞一",
+      "predicted_score": -0.87,
+      "predicted_rank": 8
+    },
+    {
+      "race_key": "20251214_07_05_4_04",
+      "horse_number": 10,
+      "horse_name": "マチュ",
+      "jockey_name": "河原田菜々",
+      "trainer_name": "谷潔",
+      "predicted_score": -0.87,
+      "predicted_rank": 8
+    },
+    {
+      "race_key": "20251214_07_05_4_04",
+      "horse_number": 11,
+      "horse_name": "カイキアス",
+      "jockey_name": "長浜鴻緒",
+      "trainer_name": "松永幹夫",
+      "predicted_score": -0.92,
+      "predicted_rank": 10
+    },
+    {
+      "race_key": "20251214_07_05_4_04",
+      "horse_number": 12,
+      "horse_name": "ロザーンジュ",
+      "jockey_name": "今村聖奈",
+      "trainer_name": "寺島良",
+      "predicted_score": -0.99,
+      "predicted_rank": 11
+    },
+    {
+      "race_key": "20251214_07_05_4_04",
+      "horse_number": 3,
+      "horse_name": "マイネルアルゴー",
+      "jockey_name": "和田陽希",
+      "trainer_name": "清水英克",
+      "predicted_score": -1.14,
+      "predicted_rank": 12
+    },
+    {
+      "race_key": "20251214_07_05_4_04",
+      "horse_number": 13,
+      "horse_name": "サトノトリニティ",
+      "jockey_name": "小沢大仁",
+      "trainer_name": "池江泰寿",
+      "predicted_score": -1.44,
+      "predicted_rank": 13
+    },
+    {
+      "race_key": "20251214_07_05_4_05",
+      "horse_number": 1,
+      "horse_name": "オルビスケリー",
+      "jockey_name": "小崎綾也",
+      "trainer_name": "東田明士",
+      "predicted_score": -0.5,
+      "predicted_rank": 1
+    },
+    {
+      "race_key": "20251214_07_05_4_05",
+      "horse_number": 4,
+      "horse_name": "ウルフ",
+      "jockey_name": "松本大輝",
+      "trainer_name": "渡辺薫彦",
+      "predicted_score": -0.57,
+      "predicted_rank": 2
+    },
+    {
+      "race_key": "20251214_07_05_4_05",
+      "horse_number": 3,
+      "horse_name": "トコトコクマチ",
+      "jockey_name": "国分恭介",
+      "trainer_name": "岡田稲男",
+      "predicted_score": -0.58,
+      "predicted_rank": 3
+    },
+    {
+      "race_key": "20251214_07_05_4_05",
+      "horse_number": 2,
+      "horse_name": "ヒロノフウジン",
+      "jockey_name": "川端海翼",
+      "trainer_name": "宮本博",
+      "predicted_score": -0.63,
+      "predicted_rank": 4
+    },
+    {
+      "race_key": "20251214_07_05_4_05",
+      "horse_number": 7,
+      "horse_name": "ミニュイ",
+      "jockey_name": "黛弘人",
+      "trainer_name": "秋山真一郎",
+      "predicted_score": -0.73,
+      "predicted_rank": 5
+    },
+    {
+      "race_key": "20251214_07_05_4_05",
+      "horse_number": 6,
+      "horse_name": "テイエムテンジン",
+      "jockey_name": "国分優作",
+      "trainer_name": "小椋研介",
+      "predicted_score": -0.79,
+      "predicted_rank": 6
+    },
+    {
+      "race_key": "20251214_07_05_4_05",
+      "horse_number": 5,
+      "horse_name": "フィサブロス",
+      "jockey_name": "斎藤新",
+      "trainer_name": "橋口慎介",
+      "predicted_score": -0.86,
+      "predicted_rank": 7
+    },
+    {
+      "race_key": "20251214_07_05_4_05",
+      "horse_number": 9,
+      "horse_name": "フウリンカザン",
+      "jockey_name": "中井裕二",
+      "trainer_name": "前川恭子",
+      "predicted_score": -1.05,
+      "predicted_rank": 8
+    },
+    {
+      "race_key": "20251214_07_05_4_05",
+      "horse_number": 8,
+      "horse_name": "タイムトゥパーティ",
+      "jockey_name": "今村聖奈",
+      "trainer_name": "茶木太樹",
+      "predicted_score": -1.1,
+      "predicted_rank": 9
+    },
+    {
+      "race_key": "20251214_07_05_4_05",
+      "horse_number": 10,
+      "horse_name": "ベルソテイラ",
+      "jockey_name": "富田暁",
+      "trainer_name": "西村真幸",
+      "predicted_score": -1.14,
+      "predicted_rank": 10
+    },
+    {
+      "race_key": "20251214_07_05_4_05",
+      "horse_number": 11,
+      "horse_name": "トーセンブリラーレ",
+      "jockey_name": "長浜鴻緒",
+      "trainer_name": "小笠倫弘",
+      "predicted_score": -1.2,
+      "predicted_rank": 11
+    },
+    {
+      "race_key": "20251214_07_05_4_05",
+      "horse_number": 13,
+      "horse_name": "テーオーモナーク",
+      "jockey_name": "小沢大仁",
+      "trainer_name": "奥村豊",
+      "predicted_score": -1.44,
+      "predicted_rank": 12
+    },
+    {
+      "race_key": "20251214_07_05_4_05",
+      "horse_number": 12,
+      "horse_name": "テクノラッシュ",
+      "jockey_name": "和田陽希",
+      "trainer_name": "宮本博",
+      "predicted_score": -1.75,
+      "predicted_rank": 13
+    },
+    {
+      "race_key": "20251214_07_05_4_06",
+      "horse_number": 4,
+      "horse_name": "マーゴットレジーナ",
+      "jockey_name": "永島まなみ",
+      "trainer_name": "小林真也",
+      "predicted_score": 0.52,
+      "predicted_rank": 1
+    },
+    {
+      "race_key": "20251214_07_05_4_06",
+      "horse_number": 6,
+      "horse_name": "モルティフレーバー",
+      "jockey_name": "小沢大仁",
+      "trainer_name": "清水久詞",
+      "predicted_score": 0.22,
+      "predicted_rank": 2
+    },
+    {
+      "race_key": "20251214_07_05_4_06",
+      "horse_number": 1,
+      "horse_name": "コスモチプリア",
+      "jockey_name": "石神深道",
+      "trainer_name": "松永康利",
+      "predicted_score": 0.05,
+      "predicted_rank": 3
+    },
+    {
+      "race_key": "20251214_07_05_4_06",
+      "horse_number": 5,
+      "horse_name": "サツキスマイル",
+      "jockey_name": "古川奈穂",
+      "trainer_name": "石栗龍彦",
+      "predicted_score": -0.01,
+      "predicted_rank": 4
+    },
+    {
+      "race_key": "20251214_07_05_4_06",
+      "horse_number": 3,
+      "horse_name": "メイショウピリカ",
+      "jockey_name": "和田陽希",
+      "trainer_name": "本田優",
+      "predicted_score": -0.07,
+      "predicted_rank": 5
+    },
+    {
+      "race_key": "20251214_07_05_4_06",
+      "horse_number": 2,
+      "horse_name": "ヒルノレーダン",
+      "jockey_name": "丸山元気",
+      "trainer_name": "昆貢",
+      "predicted_score": -0.13,
+      "predicted_rank": 6
+    },
+    {
+      "race_key": "20251214_07_05_4_06",
+      "horse_number": 7,
+      "horse_name": "ペプロス",
+      "jockey_name": "菊沢一樹",
+      "trainer_name": "矢野英一",
+      "predicted_score": -0.21,
+      "predicted_rank": 7
+    },
+    {
+      "race_key": "20251214_07_05_4_06",
+      "horse_number": 10,
+      "horse_name": "エンスエーニョ",
+      "jockey_name": "亀田温心",
+      "trainer_name": "佐藤悠太",
+      "predicted_score": -0.22,
+      "predicted_rank": 8
+    },
+    {
+      "race_key": "20251214_07_05_4_06",
+      "horse_number": 8,
+      "horse_name": "エレガンシア",
+      "jockey_name": "鷲頭虎太",
+      "trainer_name": "高柳大輔",
+      "predicted_score": -0.24,
+      "predicted_rank": 9
+    },
+    {
+      "race_key": "20251214_07_05_4_06",
+      "horse_number": 17,
+      "horse_name": "サウンドサンライズ",
+      "jockey_name": "斎藤新",
+      "trainer_name": "東田明士",
+      "predicted_score": -0.26,
+      "predicted_rank": 10
+    },
+    {
+      "race_key": "20251214_07_05_4_06",
+      "horse_number": 12,
+      "horse_name": "ホウオウペトリュス",
+      "jockey_name": "富田暁",
+      "trainer_name": "須貝尚介",
+      "predicted_score": -0.38,
+      "predicted_rank": 11
+    },
+    {
+      "race_key": "20251214_07_05_4_06",
+      "horse_number": 13,
+      "horse_name": "リヴァイデント",
+      "jockey_name": "柴田裕一郎",
+      "trainer_name": "秋山真一郎",
+      "predicted_score": -0.38,
+      "predicted_rank": 11
+    },
+    {
+      "race_key": "20251214_07_05_4_06",
+      "horse_number": 14,
+      "horse_name": "ニシノコマチムスメ",
+      "jockey_name": "長浜鴻緒",
+      "trainer_name": "松山将樹",
+      "predicted_score": -0.45,
+      "predicted_rank": 13
+    },
+    {
+      "race_key": "20251214_07_05_4_06",
+      "horse_number": 16,
+      "horse_name": "カポレイラ",
+      "jockey_name": "上里直汰",
+      "trainer_name": "中舘英二",
+      "predicted_score": -0.62,
+      "predicted_rank": 14
+    },
+    {
+      "race_key": "20251214_07_05_4_06",
+      "horse_number": 11,
+      "horse_name": "テンミラクルスター",
+      "jockey_name": "今村聖奈",
+      "trainer_name": "辻哲英",
+      "predicted_score": -0.69,
+      "predicted_rank": 15
+    },
+    {
+      "race_key": "20251214_07_05_4_06",
+      "horse_number": 9,
+      "horse_name": "ワイドリューレント",
+      "jockey_name": "城戸義政",
+      "trainer_name": "奥村豊",
+      "predicted_score": -1.02,
+      "predicted_rank": 16
+    },
+    {
+      "race_key": "20251214_07_05_4_06",
+      "horse_number": 18,
+      "horse_name": "フィオレストラーダ",
+      "jockey_name": "泉谷楓真",
+      "trainer_name": "杉山晴紀",
+      "predicted_score": -1.08,
+      "predicted_rank": 17
+    },
+    {
+      "race_key": "20251214_07_05_4_06",
+      "horse_number": 15,
+      "horse_name": "デルマジュテーム",
+      "jockey_name": "的場勇人",
+      "trainer_name": "的場均",
+      "predicted_score": -1.22,
+      "predicted_rank": 18
+    },
+    {
+      "race_key": "20251214_07_05_4_07",
+      "horse_number": 4,
+      "horse_name": "テーオーノーベル",
+      "jockey_name": "柴田裕一郎",
+      "trainer_name": "岡田稲男",
+      "predicted_score": 0.53,
+      "predicted_rank": 1
+    },
+    {
+      "race_key": "20251214_07_05_4_07",
+      "horse_number": 3,
+      "horse_name": "ハギノカノア",
+      "jockey_name": "大久保友雅",
+      "trainer_name": "秋山真一郎",
+      "predicted_score": 0.5,
+      "predicted_rank": 2
+    },
+    {
+      "race_key": "20251214_07_05_4_07",
+      "horse_number": 6,
+      "horse_name": "キュードス",
+      "jockey_name": "永島まなみ",
+      "trainer_name": "荒川義之",
+      "predicted_score": 0.43,
+      "predicted_rank": 3
+    },
+    {
+      "race_key": "20251214_07_05_4_07",
+      "horse_number": 5,
+      "horse_name": "ルグランシャリオ",
+      "jockey_name": "河原田菜々",
+      "trainer_name": "石栗龍彦",
+      "predicted_score": 0.38,
+      "predicted_rank": 4
+    },
+    {
+      "race_key": "20251214_07_05_4_07",
+      "horse_number": 1,
+      "horse_name": "チギリ",
+      "jockey_name": "石神深道",
+      "trainer_name": "鹿戸雄一",
+      "predicted_score": 0.12,
+      "predicted_rank": 5
+    },
+    {
+      "race_key": "20251214_07_05_4_07",
+      "horse_number": 7,
+      "horse_name": "ヒサエノオモカゲ",
+      "jockey_name": "長浜鴻緒",
+      "trainer_name": "千葉直人",
+      "predicted_score": -0.09,
+      "predicted_rank": 6
+    },
+    {
+      "race_key": "20251214_07_05_4_07",
+      "horse_number": 8,
+      "horse_name": "リュミナーズ",
+      "jockey_name": "亀田温心",
+      "trainer_name": "堀内岳志",
+      "predicted_score": -0.17,
+      "predicted_rank": 7
+    },
+    {
+      "race_key": "20251214_07_05_4_07",
+      "horse_number": 9,
+      "horse_name": "ラルガメンテ",
+      "jockey_name": "斎藤新",
+      "trainer_name": "尾関知人",
+      "predicted_score": -0.43,
+      "predicted_rank": 8
+    },
+    {
+      "race_key": "20251214_07_05_4_07",
+      "horse_number": 10,
+      "horse_name": "シゲルオトヒメ",
+      "jockey_name": "古川奈穂",
+      "trainer_name": "谷潔",
+      "predicted_score": -0.46,
+      "predicted_rank": 9
+    },
+    {
+      "race_key": "20251214_07_05_4_07",
+      "horse_number": 14,
+      "horse_name": "ウインドワンピース",
+      "jockey_name": "川端海翼",
+      "trainer_name": "新開幸一",
+      "predicted_score": -0.66,
+      "predicted_rank": 10
+    },
+    {
+      "race_key": "20251214_07_05_4_07",
+      "horse_number": 2,
+      "horse_name": "メイショウハリソン",
+      "jockey_name": "小沢大仁",
+      "trainer_name": "石橋守",
+      "predicted_score": -0.7,
+      "predicted_rank": 11
+    },
+    {
+      "race_key": "20251214_07_05_4_07",
+      "horse_number": 11,
+      "horse_name": "リアルペガサス",
+      "jockey_name": "和田陽希",
+      "trainer_name": "大橋勇樹",
+      "predicted_score": -0.82,
+      "predicted_rank": 12
+    },
+    {
+      "race_key": "20251214_07_05_4_07",
+      "horse_number": 12,
+      "horse_name": "コウジョリョウゾク",
+      "jockey_name": "橋木太希",
+      "trainer_name": "牧田和弥",
+      "predicted_score": -1.0,
+      "predicted_rank": 13
+    },
+    {
+      "race_key": "20251214_07_05_4_07",
+      "horse_number": 15,
+      "horse_name": "ロストボール",
+      "jockey_name": "上里直汰",
+      "trainer_name": "加藤和宏",
+      "predicted_score": -1.11,
+      "predicted_rank": 14
+    },
+    {
+      "race_key": "20251214_07_05_4_07",
+      "horse_number": 13,
+      "horse_name": "トーアケルキラ",
+      "jockey_name": "鷲頭虎太",
+      "trainer_name": "辻哲英",
+      "predicted_score": -1.13,
+      "predicted_rank": 15
+    },
+    {
+      "race_key": "20251214_07_05_4_08",
+      "horse_number": 3,
+      "horse_name": "ケイアイワイラーパ",
+      "jockey_name": "亀田温心",
+      "trainer_name": "野中賢二",
+      "predicted_score": 0.5,
+      "predicted_rank": 1
+    },
+    {
+      "race_key": "20251214_07_05_4_08",
+      "horse_number": 6,
+      "horse_name": "バルミラクル",
+      "jockey_name": "鮫島良太",
+      "trainer_name": "河嶋宏樹",
+      "predicted_score": 0.47,
+      "predicted_rank": 2
+    },
+    {
+      "race_key": "20251214_07_05_4_08",
+      "horse_number": 2,
+      "horse_name": "ダイオジェナイト",
+      "jockey_name": "丸山元気",
+      "trainer_name": "稲垣幸雄",
+      "predicted_score": 0.33,
+      "predicted_rank": 3
+    },
+    {
+      "race_key": "20251214_07_05_4_08",
+      "horse_number": 1,
+      "horse_name": "ランドブレイブ",
+      "jockey_name": "国分恭介",
+      "trainer_name": "安達昭夫",
+      "predicted_score": 0.32,
+      "predicted_rank": 4
+    },
+    {
+      "race_key": "20251214_07_05_4_08",
+      "horse_number": 5,
+      "horse_name": "フレイムジョーカー",
+      "jockey_name": "小崎綾也",
+      "trainer_name": "岩戸孝樹",
+      "predicted_score": 0.25,
+      "predicted_rank": 5
+    },
+    {
+      "race_key": "20251214_07_05_4_08",
+      "horse_number": 4,
+      "horse_name": "ラウダブル",
+      "jockey_name": "小沢大仁",
+      "trainer_name": "池江泰寿",
+      "predicted_score": 0.01,
+      "predicted_rank": 6
+    },
+    {
+      "race_key": "20251214_07_05_4_08",
+      "horse_number": 8,
+      "horse_name": "メイショウサトノヒ",
+      "jockey_name": "松本大輝",
+      "trainer_name": "長谷川浩大",
+      "predicted_score": -0.09,
+      "predicted_rank": 7
+    },
+    {
+      "race_key": "20251214_07_05_4_08",
+      "horse_number": 9,
+      "horse_name": "エンドレスロード",
+      "jockey_name": "古川奈穂",
+      "trainer_name": "高橋一哉",
+      "predicted_score": -0.36,
+      "predicted_rank": 8
+    },
+    {
+      "race_key": "20251214_07_05_4_08",
+      "horse_number": 14,
+      "horse_name": "バーケンティン",
+      "jockey_name": "富田暁",
+      "trainer_name": "平田修",
+      "predicted_score": -0.38,
+      "predicted_rank": 9
+    },
+    {
+      "race_key": "20251214_07_05_4_08",
+      "horse_number": 16,
+      "horse_name": "キョウエイカンセ",
+      "jockey_name": "長浜鴻緒",
+      "trainer_name": "萱野浩二",
+      "predicted_score": -0.39,
+      "predicted_rank": 10
+    },
+    {
+      "race_key": "20251214_07_05_4_08",
+      "horse_number": 7,
+      "horse_name": "ソードマスター",
+      "jockey_name": "斎藤新",
+      "trainer_name": "斎藤誠",
+      "predicted_score": -0.41,
+      "predicted_rank": 11
+    },
+    {
+      "race_key": "20251214_07_05_4_08",
+      "horse_number": 13,
+      "horse_name": "メイケイレイン",
+      "jockey_name": "柴田裕一郎",
+      "trainer_name": "中竹和也",
+      "predicted_score": -0.43,
+      "predicted_rank": 12
+    },
+    {
+      "race_key": "20251214_07_05_4_08",
+      "horse_number": 12,
+      "horse_name": "シュレン",
+      "jockey_name": "菊沢一樹",
+      "trainer_name": "千葉直人",
+      "predicted_score": -0.52,
+      "predicted_rank": 13
+    },
+    {
+      "race_key": "20251214_07_05_4_08",
+      "horse_number": 10,
+      "horse_name": "カルフ",
+      "jockey_name": "嶋田純次",
+      "trainer_name": "大和田成",
+      "predicted_score": -0.56,
+      "predicted_rank": 14
+    },
+    {
+      "race_key": "20251214_07_05_4_08",
+      "horse_number": 15,
+      "horse_name": "スーパーバイザー",
+      "jockey_name": "上里直汰",
+      "trainer_name": "菊沢隆徳",
+      "predicted_score": -0.86,
+      "predicted_rank": 15
+    },
+    {
+      "race_key": "20251214_07_05_4_08",
+      "horse_number": 11,
+      "horse_name": "オレノアイバ",
+      "jockey_name": "橋木太希",
+      "trainer_name": "高橋康之",
+      "predicted_score": -1.12,
+      "predicted_rank": 16
+    },
+    {
+      "race_key": "20251214_07_05_4_09",
+      "horse_number": 4,
+      "horse_name": "ブラーブデシジョン",
+      "jockey_name": "長浜鴻緒",
+      "trainer_name": "牧光二",
+      "predicted_score": 0.53,
+      "predicted_rank": 1
+    },
+    {
+      "race_key": "20251214_07_05_4_09",
+      "horse_number": 6,
+      "horse_name": "エテルノレガーメ",
+      "jockey_name": "国分恭介",
+      "trainer_name": "野中賢二",
+      "predicted_score": 0.43,
+      "predicted_rank": 2
+    },
+    {
+      "race_key": "20251214_07_05_4_09",
+      "horse_number": 5,
+      "horse_name": "レッドボブ",
+      "jockey_name": "亀田温心",
+      "trainer_name": "田中克典",
+      "predicted_score": 0.38,
+      "predicted_rank": 3
+    },
+    {
+      "race_key": "20251214_07_05_4_09",
+      "horse_number": 1,
+      "horse_name": "ララマルシュドロワ",
+      "jockey_name": "国分優作",
+      "trainer_name": "坂口智康",
+      "predicted_score": 0.18,
+      "predicted_rank": 4
+    },
+    {
+      "race_key": "20251214_07_05_4_09",
+      "horse_number": 3,
+      "horse_name": "スコーピオンイメル",
+      "jockey_name": "小崎綾也",
+      "trainer_name": "武英智",
+      "predicted_score": -0.14,
+      "predicted_rank": 5
+    },
+    {
+      "race_key": "20251214_07_05_4_09",
+      "horse_number": 2,
+      "horse_name": "レッドシュトラール",
+      "jockey_name": "丸山元気",
+      "trainer_name": "宮田敬介",
+      "predicted_score": -0.18,
+      "predicted_rank": 6
+    },
+    {
+      "race_key": "20251214_07_05_4_09",
+      "horse_number": 7,
+      "horse_name": "モーメントキャッチ",
+      "jockey_name": "菊沢一樹",
+      "trainer_name": "松山将樹",
+      "predicted_score": -0.23,
+      "predicted_rank": 7
+    },
+    {
+      "race_key": "20251214_07_05_4_09",
+      "horse_number": 10,
+      "horse_name": "タリスマン",
+      "jockey_name": "黛弘人",
+      "trainer_name": "金成貴史",
+      "predicted_score": -0.26,
+      "predicted_rank": 8
+    },
+    {
+      "race_key": "20251214_07_05_4_09",
+      "horse_number": 11,
+      "horse_name": "ゼットエイト",
+      "jockey_name": "富田暁",
+      "trainer_name": "宮地貴稔",
+      "predicted_score": -0.47,
+      "predicted_rank": 9
+    },
+    {
+      "race_key": "20251214_07_05_4_09",
+      "horse_number": 9,
+      "horse_name": "ケイアイアルタイル",
+      "jockey_name": "藤懸貴志",
+      "trainer_name": "梅田智之",
+      "predicted_score": -0.48,
+      "predicted_rank": 10
+    },
+    {
+      "race_key": "20251214_07_05_4_09",
+      "horse_number": 12,
+      "horse_name": "ジェロニモス",
+      "jockey_name": "小沢大仁",
+      "trainer_name": "中村直也",
+      "predicted_score": -0.73,
+      "predicted_rank": 11
+    },
+    {
+      "race_key": "20251214_07_05_4_09",
+      "horse_number": 8,
+      "horse_name": "ノアヴィヴァーチェ",
+      "jockey_name": "菅原隆一",
+      "trainer_name": "鈴木慎太郎",
+      "predicted_score": -0.87,
+      "predicted_rank": 12
+    },
+    {
+      "race_key": "20251214_07_05_4_10",
+      "horse_number": 4,
+      "horse_name": "オルトパラティウム",
+      "jockey_name": "松本大輝",
+      "trainer_name": "安田翔伍",
+      "predicted_score": 0.39,
+      "predicted_rank": 1
+    },
+    {
+      "race_key": "20251214_07_05_4_10",
+      "horse_number": 3,
+      "horse_name": "ジェットブレード",
+      "jockey_name": "菊沢一樹",
+      "trainer_name": "青木孝文",
+      "predicted_score": 0.3,
+      "predicted_rank": 2
+    },
+    {
+      "race_key": "20251214_07_05_4_10",
+      "horse_number": 6,
+      "horse_name": "レイヤードレッド",
+      "jockey_name": "嶋田純次",
+      "trainer_name": "手塚貴久",
+      "predicted_score": 0.3,
+      "predicted_rank": 2
+    },
+    {
+      "race_key": "20251214_07_05_4_10",
+      "horse_number": 5,
+      "horse_name": "バルナバ",
+      "jockey_name": "斎藤新",
+      "trainer_name": "浜田多実雄",
+      "predicted_score": 0.25,
+      "predicted_rank": 4
+    },
+    {
+      "race_key": "20251214_07_05_4_10",
+      "horse_number": 2,
+      "horse_name": "サイモンルモンド",
+      "jockey_name": "長浜鴻緒",
+      "trainer_name": "根本康広",
+      "predicted_score": 0.22,
+      "predicted_rank": 5
+    },
+    {
+      "race_key": "20251214_07_05_4_10",
+      "horse_number": 1,
+      "horse_name": "マイネルシーマー",
+      "jockey_name": "小崎綾也",
+      "trainer_name": "青木孝文",
+      "predicted_score": 0.12,
+      "predicted_rank": 6
+    },
+    {
+      "race_key": "20251214_07_05_4_10",
+      "horse_number": 10,
+      "horse_name": "バンフィエルド",
+      "jockey_name": "国分恭介",
+      "trainer_name": "緒方努",
+      "predicted_score": -0.47,
+      "predicted_rank": 7
+    },
+    {
+      "race_key": "20251214_07_05_4_10",
+      "horse_number": 7,
+      "horse_name": "ダノンジョーカー",
+      "jockey_name": "小沢大仁",
+      "trainer_name": "中内田充正",
+      "predicted_score": -0.81,
+      "predicted_rank": 8
+    },
+    {
+      "race_key": "20251214_07_05_4_10",
+      "horse_number": 9,
+      "horse_name": "イーサンアイ",
+      "jockey_name": "鮫島良太",
+      "trainer_name": "河嶋宏樹",
+      "predicted_score": -1.21,
+      "predicted_rank": 9
+    },
+    {
+      "race_key": "20251214_07_05_4_10",
+      "horse_number": 8,
+      "horse_name": "ビッグデイメイク",
+      "jockey_name": "石神深道",
+      "trainer_name": "和田雄二",
+      "predicted_score": -1.39,
+      "predicted_rank": 10
+    },
+    {
+      "race_key": "20251214_07_05_4_11",
+      "horse_number": 3,
+      "horse_name": "ブラックケリー",
+      "jockey_name": "富田暁",
+      "trainer_name": "長谷川浩大",
+      "predicted_score": 0.63,
+      "predicted_rank": 1
+    },
+    {
+      "race_key": "20251214_07_05_4_11",
+      "horse_number": 4,
+      "horse_name": "ベイビーキッス",
+      "jockey_name": "菊沢一樹",
+      "trainer_name": "青木孝文",
+      "predicted_score": 0.45,
+      "predicted_rank": 2
+    },
+    {
+      "race_key": "20251214_07_05_4_11",
+      "horse_number": 5,
+      "horse_name": "キャプテンシー",
+      "jockey_name": "亀田温心",
+      "trainer_name": "松永幹夫",
+      "predicted_score": 0.38,
+      "predicted_rank": 3
+    },
+    {
+      "race_key": "20251214_07_05_4_11",
+      "horse_number": 2,
+      "horse_name": "エコロマーズ",
+      "jockey_name": "小沢大仁",
+      "trainer_name": "牧浦充徳",
+      "predicted_score": 0.26,
+      "predicted_rank": 4
+    },
+    {
+      "race_key": "20251214_07_05_4_11",
+      "horse_number": 1,
+      "horse_name": "ロードトレイル",
+      "jockey_name": "長浜鴻緒",
+      "trainer_name": "藤岡健一",
+      "predicted_score": 0.18,
+      "predicted_rank": 5
+    },
+    {
+      "race_key": "20251214_07_05_4_11",
+      "horse_number": 6,
+      "horse_name": "ダークエクリプス",
+      "jockey_name": "荻野琢真",
+      "trainer_name": "今野貞一",
+      "predicted_score": 0.1,
+      "predicted_rank": 6
+    },
+    {
+      "race_key": "20251214_07_05_4_11",
+      "horse_number": 7,
+      "horse_name": "モズナナスター",
+      "jockey_name": "丸山元気",
+      "trainer_name": "矢作芳人",
+      "predicted_score": 0.05,
+      "predicted_rank": 7
+    },
+    {
+      "race_key": "20251214_07_05_4_11",
+      "horse_number": 8,
+      "horse_name": "サウスバンク",
+      "jockey_name": "小崎綾也",
+      "trainer_name": "吉岡辰弥",
+      "predicted_score": -0.15,
+      "predicted_rank": 8
+    },
+    {
+      "race_key": "20251214_07_05_4_11",
+      "horse_number": 9,
+      "horse_name": "ジャスリー",
+      "jockey_name": "松本大輝",
+      "trainer_name": "田島俊明",
+      "predicted_score": -0.49,
+      "predicted_rank": 9
+    },
+    {
+      "race_key": "20251214_07_05_4_11",
+      "horse_number": 10,
+      "horse_name": "オソレ",
+      "jockey_name": "藤懸貴志",
+      "trainer_name": "小崎憲",
+      "predicted_score": -1.06,
+      "predicted_rank": 10
+    },
+    {
+      "race_key": "20251214_07_05_4_12",
+      "horse_number": 3,
+      "horse_name": "ウインベアトリス",
+      "jockey_name": "石神深道",
+      "trainer_name": "深山雅史",
+      "predicted_score": 0.44,
+      "predicted_rank": 1
+    },
+    {
+      "race_key": "20251214_07_05_4_12",
+      "horse_number": 5,
+      "horse_name": "レッドレナート",
+      "jockey_name": "嶋田純次",
+      "trainer_name": "手塚貴久",
+      "predicted_score": 0.3,
+      "predicted_rank": 2
+    },
+    {
+      "race_key": "20251214_07_05_4_12",
+      "horse_number": 6,
+      "horse_name": "スナークピカソ",
+      "jockey_name": "斎藤新",
+      "trainer_name": "高橋一哉",
+      "predicted_score": 0.25,
+      "predicted_rank": 3
+    },
+    {
+      "race_key": "20251214_07_05_4_12",
+      "horse_number": 1,
+      "horse_name": "フォーカルフラワー",
+      "jockey_name": "松本大輝",
+      "trainer_name": "国枝栄",
+      "predicted_score": 0.2,
+      "predicted_rank": 4
+    },
+    {
+      "race_key": "20251214_07_05_4_12",
+      "horse_number": 2,
+      "horse_name": "エナジーショット",
+      "jockey_name": "長浜鴻緒",
+      "trainer_name": "矢嶋大樹",
+      "predicted_score": -0.11,
+      "predicted_rank": 5
+    },
+    {
+      "race_key": "20251214_07_05_4_12",
+      "horse_number": 7,
+      "horse_name": "ニシノインヴィクタ",
+      "jockey_name": "菊沢一樹",
+      "trainer_name": "本間忍",
+      "predicted_score": -0.14,
+      "predicted_rank": 6
+    },
+    {
+      "race_key": "20251214_07_05_4_12",
+      "horse_number": 8,
+      "horse_name": "イリスアスール",
+      "jockey_name": "柴田裕一郎",
+      "trainer_name": "角田晃一",
+      "predicted_score": -0.2,
+      "predicted_rank": 7
+    },
+    {
+      "race_key": "20251214_07_05_4_12",
+      "horse_number": 4,
+      "horse_name": "カントゥータ",
+      "jockey_name": "上里直汰",
+      "trainer_name": "佐藤吉勝",
+      "predicted_score": -0.25,
+      "predicted_rank": 8
+    },
+    {
+      "race_key": "20251214_07_05_4_12",
+      "horse_number": 10,
+      "horse_name": "ストレイトアスク",
+      "jockey_name": "河原田菜々",
+      "trainer_name": "藤原英昭",
+      "predicted_score": -0.29,
+      "predicted_rank": 9
+    },
+    {
+      "race_key": "20251214_07_05_4_12",
+      "horse_number": 16,
+      "horse_name": "カイトグート",
+      "jockey_name": "丸山元気",
+      "trainer_name": "和田雄二",
+      "predicted_score": -0.32,
+      "predicted_rank": 10
+    },
+    {
+      "race_key": "20251214_07_05_4_12",
+      "horse_number": 9,
+      "horse_name": "シャインバオバブ",
+      "jockey_name": "黛弘人",
+      "trainer_name": "本田優",
+      "predicted_score": -0.33,
+      "predicted_rank": 11
+    },
+    {
+      "race_key": "20251214_07_05_4_12",
+      "horse_number": 11,
+      "horse_name": "タイキバルドル",
+      "jockey_name": "鮫島良太",
+      "trainer_name": "勢司和浩",
+      "predicted_score": -0.36,
+      "predicted_rank": 12
+    },
+    {
+      "race_key": "20251214_07_05_4_12",
+      "horse_number": 12,
+      "horse_name": "キタノクニカラ",
+      "jockey_name": "古川奈穂",
+      "trainer_name": "小島茂之",
+      "predicted_score": -0.38,
+      "predicted_rank": 13
+    },
+    {
+      "race_key": "20251214_07_05_4_12",
+      "horse_number": 14,
+      "horse_name": "ゴールドブレス",
+      "jockey_name": "国分恭介",
+      "trainer_name": "西園翔太",
+      "predicted_score": -0.45,
+      "predicted_rank": 14
+    },
+    {
+      "race_key": "20251214_07_05_4_12",
+      "horse_number": 15,
+      "horse_name": "ドライグ",
+      "jockey_name": "鷲頭虎太",
+      "trainer_name": "大根田裕之",
+      "predicted_score": -0.57,
+      "predicted_rank": 15
+    },
+    {
+      "race_key": "20251214_07_05_4_12",
+      "horse_number": 13,
+      "horse_name": "カウンティフェア",
+      "jockey_name": "永島まなみ",
+      "trainer_name": "高野友和",
+      "predicted_score": -1.07,
+      "predicted_rank": 16
+    },
+    {
+      "race_key": "20251214_09_05_4_01",
+      "horse_number": 6,
+      "horse_name": "レッドブライトン",
+      "jockey_name": "松山弘平",
+      "trainer_name": "奥村豊",
+      "predicted_score": -0.1,
+      "predicted_rank": 1
+    },
+    {
+      "race_key": "20251214_09_05_4_01",
+      "horse_number": 3,
+      "horse_name": "クレマチス",
+      "jockey_name": "高杉吏麒",
+      "trainer_name": "杉山佳明",
+      "predicted_score": -0.21,
+      "predicted_rank": 2
+    },
+    {
+      "race_key": "20251214_09_05_4_01",
+      "horse_number": 5,
+      "horse_name": "ディアギレフ",
+      "jockey_name": "渡辺竜也",
+      "trainer_name": "中村直也",
+      "predicted_score": -0.25,
+      "predicted_rank": 3
+    },
+    {
+      "race_key": "20251214_09_05_4_01",
+      "horse_number": 2,
+      "horse_name": "ノービレ",
+      "jockey_name": "西村淳也",
+      "trainer_name": "小椋研介",
+      "predicted_score": -0.57,
+      "predicted_rank": 4
+    },
+    {
+      "race_key": "20251214_09_05_4_01",
+      "horse_number": 4,
+      "horse_name": "タケルフォーカス",
+      "jockey_name": "津村明秀",
+      "trainer_name": "四位洋文",
+      "predicted_score": -0.7,
+      "predicted_rank": 5
+    },
+    {
+      "race_key": "20251214_09_05_4_01",
+      "horse_number": 1,
+      "horse_name": "ショウナンサフィラ",
+      "jockey_name": "北村友一",
+      "trainer_name": "高橋義忠",
+      "predicted_score": -0.75,
+      "predicted_rank": 6
+    },
+    {
+      "race_key": "20251214_09_05_4_01",
+      "horse_number": 10,
+      "horse_name": "サンライズケヴィン",
+      "jockey_name": "池添謙一",
+      "trainer_name": "平田修",
+      "predicted_score": -0.95,
+      "predicted_rank": 7
+    },
+    {
+      "race_key": "20251214_09_05_4_01",
+      "horse_number": 11,
+      "horse_name": "メイショウナナシロ",
+      "jockey_name": "田口貫太",
+      "trainer_name": "石橋守",
+      "predicted_score": -1.05,
+      "predicted_rank": 8
+    },
+    {
+      "race_key": "20251214_09_05_4_01",
+      "horse_number": 8,
+      "horse_name": "サリー",
+      "jockey_name": "森田誠也",
+      "trainer_name": "前川恭子",
+      "predicted_score": -1.12,
+      "predicted_rank": 9
+    },
+    {
+      "race_key": "20251214_09_05_4_01",
+      "horse_number": 9,
+      "horse_name": "キボウホー",
+      "jockey_name": "武豊",
+      "trainer_name": "松永幹夫",
+      "predicted_score": -1.3,
+      "predicted_rank": 10
+    },
+    {
+      "race_key": "20251214_09_05_4_01",
+      "horse_number": 7,
+      "horse_name": "アメジストロード",
+      "jockey_name": "田山旺佑",
+      "trainer_name": "新谷功一",
+      "predicted_score": -1.44,
+      "predicted_rank": 11
+    },
+    {
+      "race_key": "20251214_09_05_4_02",
+      "horse_number": 4,
+      "horse_name": "ココラッシー",
+      "jockey_name": "渡辺竜也",
+      "trainer_name": "西園翔太",
+      "predicted_score": -0.06,
+      "predicted_rank": 1
+    },
+    {
+      "race_key": "20251214_09_05_4_02",
+      "horse_number": 5,
+      "horse_name": "ビナハイバン",
+      "jockey_name": "西塚洸二",
+      "trainer_name": "中尾秀正",
+      "predicted_score": -0.3,
+      "predicted_rank": 2
+    },
+    {
+      "race_key": "20251214_09_05_4_02",
+      "horse_number": 3,
+      "horse_name": "ショウナンアワード",
+      "jockey_name": "池添謙一",
+      "trainer_name": "東田明士",
+      "predicted_score": -0.33,
+      "predicted_rank": 3
+    },
+    {
+      "race_key": "20251214_09_05_4_02",
+      "horse_number": 7,
+      "horse_name": "ジーティーピカソ",
+      "jockey_name": "西村淳也",
+      "trainer_name": "宮地貴稔",
+      "predicted_score": -0.59,
+      "predicted_rank": 4
+    },
+    {
+      "race_key": "20251214_09_05_4_02",
+      "horse_number": 9,
+      "horse_name": "バトルアックス",
+      "jockey_name": "坂井瑠星",
+      "trainer_name": "今野貞一",
+      "predicted_score": -0.72,
+      "predicted_rank": 5
+    },
+    {
+      "race_key": "20251214_09_05_4_02",
+      "horse_number": 2,
+      "horse_name": "モズタイシソウシ",
+      "jockey_name": "田山旺佑",
+      "trainer_name": "平田修",
+      "predicted_score": -0.73,
+      "predicted_rank": 6
+    },
+    {
+      "race_key": "20251214_09_05_4_02",
+      "horse_number": 11,
+      "horse_name": "ビーチェマーレ",
+      "jockey_name": "武豊",
+      "trainer_name": "友道康夫",
+      "predicted_score": -0.8,
+      "predicted_rank": 7
+    },
+    {
+      "race_key": "20251214_09_05_4_02",
+      "horse_number": 6,
+      "horse_name": "フィアレスウィル",
+      "jockey_name": "津村明秀",
+      "trainer_name": "高橋義忠",
+      "predicted_score": -0.88,
+      "predicted_rank": 8
+    },
+    {
+      "race_key": "20251214_09_05_4_02",
+      "horse_number": 1,
+      "horse_name": "ウイントッペン",
+      "jockey_name": "田口貫太",
+      "trainer_name": "西園正都",
+      "predicted_score": -0.91,
+      "predicted_rank": 9
+    },
+    {
+      "race_key": "20251214_09_05_4_02",
+      "horse_number": 14,
+      "horse_name": "アミラル",
+      "jockey_name": "高杉吏麒",
+      "trainer_name": "渡辺薫彦",
+      "predicted_score": -0.99,
+      "predicted_rank": 10
+    },
+    {
+      "race_key": "20251214_09_05_4_02",
+      "horse_number": 16,
+      "horse_name": "セルシャーム",
+      "jockey_name": "菱田裕二",
+      "trainer_name": "野中賢二",
+      "predicted_score": -1.08,
+      "predicted_rank": 11
+    },
+    {
+      "race_key": "20251214_09_05_4_02",
+      "horse_number": 15,
+      "horse_name": "カナタコナタ",
+      "jockey_name": "松山弘平",
+      "trainer_name": "高橋一哉",
+      "predicted_score": -1.14,
+      "predicted_rank": 12
+    },
+    {
+      "race_key": "20251214_09_05_4_02",
+      "horse_number": 8,
+      "horse_name": "キングケープ",
+      "jockey_name": "酒井学",
+      "trainer_name": "大橋勇樹",
+      "predicted_score": -1.17,
+      "predicted_rank": 13
+    },
+    {
+      "race_key": "20251214_09_05_4_02",
+      "horse_number": 13,
+      "horse_name": "ジャーナーリア",
+      "jockey_name": "和田竜二",
+      "trainer_name": "本田優",
+      "predicted_score": -1.34,
+      "predicted_rank": 14
+    },
+    {
+      "race_key": "20251214_09_05_4_02",
+      "horse_number": 10,
+      "horse_name": "ブルースプレイヤー",
+      "jockey_name": "森田誠也",
+      "trainer_name": "高橋亮",
+      "predicted_score": -1.44,
+      "predicted_rank": 15
+    },
+    {
+      "race_key": "20251214_09_05_4_02",
+      "horse_number": 12,
+      "horse_name": "ルクスドリーム",
+      "jockey_name": "吉村誠之助",
+      "trainer_name": "小崎憲",
+      "predicted_score": -1.48,
+      "predicted_rank": 16
+    },
+    {
+      "race_key": "20251214_09_05_4_03",
+      "horse_number": 2,
+      "horse_name": "アクティングエリア",
+      "jockey_name": "和田竜二",
+      "trainer_name": "天間昭一",
+      "predicted_score": -0.11,
+      "predicted_rank": 1
+    },
+    {
+      "race_key": "20251214_09_05_4_03",
+      "horse_number": 6,
+      "horse_name": "テーオーアルアイン",
+      "jockey_name": "松山弘平",
+      "trainer_name": "奥村豊",
+      "predicted_score": -0.25,
+      "predicted_rank": 2
+    },
+    {
+      "race_key": "20251214_09_05_4_03",
+      "horse_number": 1,
+      "horse_name": "ミエノクラウン",
+      "jockey_name": "西塚洸二",
+      "trainer_name": "高橋亮",
+      "predicted_score": -0.31,
+      "predicted_rank": 3
+    },
+    {
+      "race_key": "20251214_09_05_4_03",
+      "horse_number": 4,
+      "horse_name": "シャドウクライ",
+      "jockey_name": "北村友一",
+      "trainer_name": "杉山佳明",
+      "predicted_score": -0.59,
+      "predicted_rank": 4
+    },
+    {
+      "race_key": "20251214_09_05_4_03",
+      "horse_number": 3,
+      "horse_name": "サトノビダーヤ",
+      "jockey_name": "酒井学",
+      "trainer_name": "高橋康之",
+      "predicted_score": -0.65,
+      "predicted_rank": 5
+    },
+    {
+      "race_key": "20251214_09_05_4_03",
+      "horse_number": 8,
+      "horse_name": "サーブルディアマン",
+      "jockey_name": "西村淳也",
+      "trainer_name": "坂口智康",
+      "predicted_score": -0.74,
+      "predicted_rank": 6
+    },
+    {
+      "race_key": "20251214_09_05_4_03",
+      "horse_number": 5,
+      "horse_name": "イノリ",
+      "jockey_name": "Ｆ．ジェルー",
+      "trainer_name": "高橋康之",
+      "predicted_score": -0.81,
+      "predicted_rank": 7
+    },
+    {
+      "race_key": "20251214_09_05_4_03",
+      "horse_number": 10,
+      "horse_name": "ヒメヒオウギ",
+      "jockey_name": "古川吉洋",
+      "trainer_name": "中竹和也",
+      "predicted_score": -0.99,
+      "predicted_rank": 8
+    },
+    {
+      "race_key": "20251214_09_05_4_03",
+      "horse_number": 11,
+      "horse_name": "インナーヴォイス",
+      "jockey_name": "吉村誠之助",
+      "trainer_name": "清水久詞",
+      "predicted_score": -1.05,
+      "predicted_rank": 9
+    },
+    {
+      "race_key": "20251214_09_05_4_03",
+      "horse_number": 7,
+      "horse_name": "ラップトップ",
+      "jockey_name": "田山旺佑",
+      "trainer_name": "小栗実",
+      "predicted_score": -1.2,
+      "predicted_rank": 10
+    },
+    {
+      "race_key": "20251214_09_05_4_03",
+      "horse_number": 9,
+      "horse_name": "ブライトエアリー",
+      "jockey_name": "津村明秀",
+      "trainer_name": "相沢郁",
+      "predicted_score": -1.43,
+      "predicted_rank": 11
+    },
+    {
+      "race_key": "20251214_09_05_4_04",
+      "horse_number": 4,
+      "horse_name": "ゼフィルス",
+      "jockey_name": "松山弘平",
+      "trainer_name": "橋口慎介",
+      "predicted_score": -0.57,
+      "predicted_rank": 1
+    },
+    {
+      "race_key": "20251214_09_05_4_04",
+      "horse_number": 3,
+      "horse_name": "アカウフリューゲル",
+      "jockey_name": "吉村誠之助",
+      "trainer_name": "清水久詞",
+      "predicted_score": -0.65,
+      "predicted_rank": 2
+    },
+    {
+      "race_key": "20251214_09_05_4_04",
+      "horse_number": 5,
+      "horse_name": "メカニックバレエ",
+      "jockey_name": "高杉吏麒",
+      "trainer_name": "中村直也",
+      "predicted_score": -0.8,
+      "predicted_rank": 3
+    },
+    {
+      "race_key": "20251214_09_05_4_04",
+      "horse_number": 6,
+      "horse_name": "ギフテッドスペック",
+      "jockey_name": "秋山稔樹",
+      "trainer_name": "小椋研介",
+      "predicted_score": -0.81,
+      "predicted_rank": 4
+    },
+    {
+      "race_key": "20251214_09_05_4_04",
+      "horse_number": 1,
+      "horse_name": "ノーブルマドンナ",
+      "jockey_name": "松若風馬",
+      "trainer_name": "藤野健太",
+      "predicted_score": -0.88,
+      "predicted_rank": 5
+    },
+    {
+      "race_key": "20251214_09_05_4_04",
+      "horse_number": 8,
+      "horse_name": "レジーナテンペスタ",
+      "jockey_name": "横山武史",
+      "trainer_name": "前川恭子",
+      "predicted_score": -0.97,
+      "predicted_rank": 6
+    },
+    {
+      "race_key": "20251214_09_05_4_04",
+      "horse_number": 7,
+      "horse_name": "ララディアーブル",
+      "jockey_name": "和田竜二",
+      "trainer_name": "松下武士",
+      "predicted_score": -1.04,
+      "predicted_rank": 7
+    },
+    {
+      "race_key": "20251214_09_05_4_04",
+      "horse_number": 2,
+      "horse_name": "テイエムスティール",
+      "jockey_name": "田山旺佑",
+      "trainer_name": "高橋一哉",
+      "predicted_score": -1.1,
+      "predicted_rank": 8
+    },
+    {
+      "race_key": "20251214_09_05_4_04",
+      "horse_number": 9,
+      "horse_name": "サトノロザリー",
+      "jockey_name": "川田将雅",
+      "trainer_name": "斉藤崇史",
+      "predicted_score": -1.14,
+      "predicted_rank": 9
+    },
+    {
+      "race_key": "20251214_09_05_4_04",
+      "horse_number": 11,
+      "horse_name": "モヴシエラ",
+      "jockey_name": "坂井瑠星",
+      "trainer_name": "新谷功一",
+      "predicted_score": -1.17,
+      "predicted_rank": 10
+    },
+    {
+      "race_key": "20251214_09_05_4_04",
+      "horse_number": 10,
+      "horse_name": "センリョウヤクシャ",
+      "jockey_name": "酒井学",
+      "trainer_name": "中尾秀正",
+      "predicted_score": -1.26,
+      "predicted_rank": 11
+    },
+    {
+      "race_key": "20251214_09_05_4_05",
+      "horse_number": 1,
+      "horse_name": "ジェラルリスト",
+      "jockey_name": "坂井瑠星",
+      "trainer_name": "井上智史",
+      "predicted_score": -0.47,
+      "predicted_rank": 1
+    },
+    {
+      "race_key": "20251214_09_05_4_05",
+      "horse_number": 2,
+      "horse_name": "エドウィンナルコ",
+      "jockey_name": "松山弘平",
+      "trainer_name": "西村真幸",
+      "predicted_score": -0.56,
+      "predicted_rank": 2
+    },
+    {
+      "race_key": "20251214_09_05_4_05",
+      "horse_number": 3,
+      "horse_name": "ページターナー",
+      "jockey_name": "川田将雅",
+      "trainer_name": "中内田充正",
+      "predicted_score": -0.6,
+      "predicted_rank": 3
+    },
+    {
+      "race_key": "20251214_09_05_4_05",
+      "horse_number": 4,
+      "horse_name": "ブラックシャリマー",
+      "jockey_name": "西村淳也",
+      "trainer_name": "杉山晴紀",
+      "predicted_score": -0.64,
+      "predicted_rank": 4
+    },
+    {
+      "race_key": "20251214_09_05_4_05",
+      "horse_number": 6,
+      "horse_name": "レグラヴィエール",
+      "jockey_name": "和田竜二",
+      "trainer_name": "浜田多実雄",
+      "predicted_score": -0.75,
+      "predicted_rank": 5
+    },
+    {
+      "race_key": "20251214_09_05_4_05",
+      "horse_number": 5,
+      "horse_name": "ダノンステート",
+      "jockey_name": "高杉吏麒",
+      "trainer_name": "千田輝彦",
+      "predicted_score": -0.8,
+      "predicted_rank": 6
+    },
+    {
+      "race_key": "20251214_09_05_4_06",
+      "horse_number": 4,
+      "horse_name": "テーオーナタリー",
+      "jockey_name": "西村淳也",
+      "trainer_name": "梅田智之",
+      "predicted_score": -0.1,
+      "predicted_rank": 1
+    },
+    {
+      "race_key": "20251214_09_05_4_06",
+      "horse_number": 2,
+      "horse_name": "カネコメブライト",
+      "jockey_name": "和田竜二",
+      "trainer_name": "中尾秀正",
+      "predicted_score": -0.13,
+      "predicted_rank": 2
+    },
+    {
+      "race_key": "20251214_09_05_4_06",
+      "horse_number": 6,
+      "horse_name": "キンダープンシュ",
+      "jockey_name": "坂井瑠星",
+      "trainer_name": "大久保龍志",
+      "predicted_score": -0.13,
+      "predicted_rank": 2
+    },
+    {
+      "race_key": "20251214_09_05_4_06",
+      "horse_number": 1,
+      "horse_name": "モンサンゴールデン",
+      "jockey_name": "松山弘平",
+      "trainer_name": "中竹和也",
+      "predicted_score": -0.33,
+      "predicted_rank": 4
+    },
+    {
+      "race_key": "20251214_09_05_4_06",
+      "horse_number": 3,
+      "horse_name": "エイシンディアマン",
+      "jockey_name": "松若風馬",
+      "trainer_name": "中尾秀正",
+      "predicted_score": -0.65,
+      "predicted_rank": 5
+    },
+    {
+      "race_key": "20251214_09_05_4_06",
+      "horse_number": 7,
+      "horse_name": "テーオーグレーザー",
+      "jockey_name": "高杉吏麒",
+      "trainer_name": "藤岡健一",
+      "predicted_score": -0.8,
+      "predicted_rank": 6
+    },
+    {
+      "race_key": "20251214_09_05_4_06",
+      "horse_number": 5,
+      "horse_name": "シラヌイ",
+      "jockey_name": "吉村誠之助",
+      "trainer_name": "高橋亮",
+      "predicted_score": -0.82,
+      "predicted_rank": 7
+    },
+    {
+      "race_key": "20251214_09_05_4_07",
+      "horse_number": 3,
+      "horse_name": "マハナ",
+      "jockey_name": "坂井瑠星",
+      "trainer_name": "井上智史",
+      "predicted_score": 0.55,
+      "predicted_rank": 1
+    },
+    {
+      "race_key": "20251214_09_05_4_07",
+      "horse_number": 4,
+      "horse_name": "アイブリンク",
+      "jockey_name": "松山弘平",
+      "trainer_name": "大久保龍志",
+      "predicted_score": 0.53,
+      "predicted_rank": 2
+    },
+    {
+      "race_key": "20251214_09_05_4_07",
+      "horse_number": 5,
+      "horse_name": "オーケーエンジェル",
+      "jockey_name": "武豊",
+      "trainer_name": "笹田和秀",
+      "predicted_score": 0.37,
+      "predicted_rank": 3
+    },
+    {
+      "race_key": "20251214_09_05_4_07",
+      "horse_number": 6,
+      "horse_name": "コンテナライン",
+      "jockey_name": "松若風馬",
+      "trainer_name": "高柳大輔",
+      "predicted_score": 0.31,
+      "predicted_rank": 4
+    },
+    {
+      "race_key": "20251214_09_05_4_07",
+      "horse_number": 1,
+      "horse_name": "ミヤジテン",
+      "jockey_name": "秋山稔樹",
+      "trainer_name": "南田美知雄",
+      "predicted_score": -0.14,
+      "predicted_rank": 5
+    },
+    {
+      "race_key": "20251214_09_05_4_07",
+      "horse_number": 7,
+      "horse_name": "パシフィックハイ",
+      "jockey_name": "吉村誠之助",
+      "trainer_name": "杉山佳明",
+      "predicted_score": -0.19,
+      "predicted_rank": 6
+    },
+    {
+      "race_key": "20251214_09_05_4_07",
+      "horse_number": 2,
+      "horse_name": "ニホンピロマリンバ",
+      "jockey_name": "田山旺佑",
+      "trainer_name": "安達昭夫",
+      "predicted_score": -0.2,
+      "predicted_rank": 7
+    },
+    {
+      "race_key": "20251214_09_05_4_07",
+      "horse_number": 10,
+      "horse_name": "エコロカレン",
+      "jockey_name": "酒井学",
+      "trainer_name": "秋山真一郎",
+      "predicted_score": -0.25,
+      "predicted_rank": 8
+    },
+    {
+      "race_key": "20251214_09_05_4_07",
+      "horse_number": 11,
+      "horse_name": "ラテライト",
+      "jockey_name": "菱田裕二",
+      "trainer_name": "松下武士",
+      "predicted_score": -0.32,
+      "predicted_rank": 9
+    },
+    {
+      "race_key": "20251214_09_05_4_07",
+      "horse_number": 9,
+      "horse_name": "イフリーティア",
+      "jockey_name": "西村淳也",
+      "trainer_name": "茶木太樹",
+      "predicted_score": -0.33,
+      "predicted_rank": 10
+    },
+    {
+      "race_key": "20251214_09_05_4_07",
+      "horse_number": 12,
+      "horse_name": "アロマフェリス",
+      "jockey_name": "横山武史",
+      "trainer_name": "辻野泰之",
+      "predicted_score": -0.67,
+      "predicted_rank": 11
+    },
+    {
+      "race_key": "20251214_09_05_4_07",
+      "horse_number": 8,
+      "horse_name": "ヒラリーステップ",
+      "jockey_name": "森田誠也",
+      "trainer_name": "天間昭一",
+      "predicted_score": -0.85,
+      "predicted_rank": 12
+    },
+    {
+      "race_key": "20251214_09_05_4_08",
+      "horse_number": 2,
+      "horse_name": "フォルティーナ",
+      "jockey_name": "太宰啓介",
+      "trainer_name": "石橋守",
+      "predicted_score": 0.49,
+      "predicted_rank": 1
+    },
+    {
+      "race_key": "20251214_09_05_4_08",
+      "horse_number": 3,
+      "horse_name": "ヨシノヤッタルデー",
+      "jockey_name": "池添謙一",
+      "trainer_name": "中竹和也",
+      "predicted_score": 0.46,
+      "predicted_rank": 2
+    },
+    {
+      "race_key": "20251214_09_05_4_08",
+      "horse_number": 1,
+      "horse_name": "スリーピース",
+      "jockey_name": "横山武史",
+      "trainer_name": "武井亮",
+      "predicted_score": 0.32,
+      "predicted_rank": 3
+    },
+    {
+      "race_key": "20251214_09_05_4_08",
+      "horse_number": 7,
+      "horse_name": "クーデール",
+      "jockey_name": "吉村誠之助",
+      "trainer_name": "坂口智康",
+      "predicted_score": -0.1,
+      "predicted_rank": 4
+    },
+    {
+      "race_key": "20251214_09_05_4_08",
+      "horse_number": 4,
+      "horse_name": "ディーエスショウマ",
+      "jockey_name": "Ｆ．ジェルー",
+      "trainer_name": "橋口慎介",
+      "predicted_score": -0.2,
+      "predicted_rank": 5
+    },
+    {
+      "race_key": "20251214_09_05_4_08",
+      "horse_number": 10,
+      "horse_name": "フィドルファドル",
+      "jockey_name": "坂井瑠星",
+      "trainer_name": "矢作芳人",
+      "predicted_score": -0.2,
+      "predicted_rank": 5
+    },
+    {
+      "race_key": "20251214_09_05_4_08",
+      "horse_number": 8,
+      "horse_name": "スペシャルナンバー",
+      "jockey_name": "西村淳也",
+      "trainer_name": "西村真幸",
+      "predicted_score": -0.21,
+      "predicted_rank": 7
+    },
+    {
+      "race_key": "20251214_09_05_4_08",
+      "horse_number": 11,
+      "horse_name": "ゼンノツキヨミ",
+      "jockey_name": "高杉吏麒",
+      "trainer_name": "秋山真一郎",
+      "predicted_score": -0.23,
+      "predicted_rank": 8
+    },
+    {
+      "race_key": "20251214_09_05_4_08",
+      "horse_number": 9,
+      "horse_name": "ディキシーガンナー",
+      "jockey_name": "川田将雅",
+      "trainer_name": "中内田充正",
+      "predicted_score": -0.24,
+      "predicted_rank": 9
+    },
+    {
+      "race_key": "20251214_09_05_4_08",
+      "horse_number": 5,
+      "horse_name": "フェリ",
+      "jockey_name": "田山旺佑",
+      "trainer_name": "佐々木晶三",
+      "predicted_score": -0.37,
+      "predicted_rank": 10
+    },
+    {
+      "race_key": "20251214_09_05_4_08",
+      "horse_number": 6,
+      "horse_name": "プロテア",
+      "jockey_name": "森田誠也",
+      "trainer_name": "宮本博",
+      "predicted_score": -0.42,
+      "predicted_rank": 11
+    },
+    {
+      "race_key": "20251214_09_05_4_09",
+      "horse_number": 4,
+      "horse_name": "エコロディノス",
+      "jockey_name": "池添謙一",
+      "trainer_name": "大久保龍志",
+      "predicted_score": 0.41,
+      "predicted_rank": 1
+    },
+    {
+      "race_key": "20251214_09_05_4_09",
+      "horse_number": 3,
+      "horse_name": "イケイケドンドン",
+      "jockey_name": "吉村誠之助",
+      "trainer_name": "松山将樹",
+      "predicted_score": 0.39,
+      "predicted_rank": 2
+    },
+    {
+      "race_key": "20251214_09_05_4_09",
+      "horse_number": 2,
+      "horse_name": "フェミナフォルテ",
+      "jockey_name": "岩田康誠",
+      "trainer_name": "小島茂之",
+      "predicted_score": 0.36,
+      "predicted_rank": 3
+    },
+    {
+      "race_key": "20251214_09_05_4_09",
+      "horse_number": 6,
+      "horse_name": "タガノデュード",
+      "jockey_name": "古川吉洋",
+      "trainer_name": "宮徹",
+      "predicted_score": 0.32,
+      "predicted_rank": 4
+    },
+    {
+      "race_key": "20251214_09_05_4_09",
+      "horse_number": 1,
+      "horse_name": "オールセインツ",
+      "jockey_name": "坂井瑠星",
+      "trainer_name": "友道康夫",
+      "predicted_score": 0.22,
+      "predicted_rank": 5
+    },
+    {
+      "race_key": "20251214_09_05_4_09",
+      "horse_number": 7,
+      "horse_name": "ハギノアルデバラン",
+      "jockey_name": "川田将雅",
+      "trainer_name": "佐藤悠太",
+      "predicted_score": 0.19,
+      "predicted_rank": 6
+    },
+    {
+      "race_key": "20251214_09_05_4_09",
+      "horse_number": 5,
+      "horse_name": "メイショウゲキリン",
+      "jockey_name": "西塚洸二",
+      "trainer_name": "笹田和秀",
+      "predicted_score": 0.14,
+      "predicted_rank": 7
+    },
+    {
+      "race_key": "20251214_09_05_4_09",
+      "horse_number": 8,
+      "horse_name": "ヒロノラメール",
+      "jockey_name": "西村淳也",
+      "trainer_name": "宮地貴稔",
+      "predicted_score": -0.13,
+      "predicted_rank": 8
+    },
+    {
+      "race_key": "20251214_09_05_4_09",
+      "horse_number": 12,
+      "horse_name": "レミージュ",
+      "jockey_name": "北村友一",
+      "trainer_name": "井上智史",
+      "predicted_score": -0.33,
+      "predicted_rank": 9
+    },
+    {
+      "race_key": "20251214_09_05_4_09",
+      "horse_number": 15,
+      "horse_name": "ガジュノリ",
+      "jockey_name": "横山武史",
+      "trainer_name": "尾形和幸",
+      "predicted_score": -0.39,
+      "predicted_rank": 10
+    },
+    {
+      "race_key": "20251214_09_05_4_09",
+      "horse_number": 10,
+      "horse_name": "ミッキーゴールド",
+      "jockey_name": "松山弘平",
+      "trainer_name": "池江泰寿",
+      "predicted_score": -0.47,
+      "predicted_rank": 11
+    },
+    {
+      "race_key": "20251214_09_05_4_09",
+      "horse_number": 11,
+      "horse_name": "エイカイマッケンロ",
+      "jockey_name": "高杉吏麒",
+      "trainer_name": "藤原英昭",
+      "predicted_score": -0.48,
+      "predicted_rank": 12
+    },
+    {
+      "race_key": "20251214_09_05_4_09",
+      "horse_number": 9,
+      "horse_name": "コスモフロイデ",
+      "jockey_name": "田口貫太",
+      "trainer_name": "天間昭一",
+      "predicted_score": -0.59,
+      "predicted_rank": 13
+    },
+    {
+      "race_key": "20251214_09_05_4_09",
+      "horse_number": 13,
+      "horse_name": "ミアステラ",
+      "jockey_name": "秋山稔樹",
+      "trainer_name": "大根田裕之",
+      "predicted_score": -0.66,
+      "predicted_rank": 14
+    },
+    {
+      "race_key": "20251214_09_05_4_09",
+      "horse_number": 14,
+      "horse_name": "ダノンフロイデ",
+      "jockey_name": "津村明秀",
+      "trainer_name": "坂口智康",
+      "predicted_score": -0.71,
+      "predicted_rank": 15
+    },
+    {
+      "race_key": "20251214_09_05_4_10",
+      "horse_number": 4,
+      "horse_name": "ルージュアベリア",
+      "jockey_name": "坂井瑠星",
+      "trainer_name": "加藤士津八",
+      "predicted_score": 0.39,
+      "predicted_rank": 1
+    },
+    {
+      "race_key": "20251214_09_05_4_10",
+      "horse_number": 3,
+      "horse_name": "ヨリノサファイヤ",
+      "jockey_name": "酒井学",
+      "trainer_name": "根本康広",
+      "predicted_score": 0.26,
+      "predicted_rank": 2
+    },
+    {
+      "race_key": "20251214_09_05_4_10",
+      "horse_number": 5,
+      "horse_name": "サイモンブーケ",
+      "jockey_name": "西塚洸二",
+      "trainer_name": "梅田智之",
+      "predicted_score": 0.23,
+      "predicted_rank": 3
+    },
+    {
+      "race_key": "20251214_09_05_4_10",
+      "horse_number": 6,
+      "horse_name": "メイショウミカワ",
+      "jockey_name": "太宰啓介",
+      "trainer_name": "千田輝彦",
+      "predicted_score": 0.11,
+      "predicted_rank": 4
+    },
+    {
+      "race_key": "20251214_09_05_4_10",
+      "horse_number": 1,
+      "horse_name": "キュールエフウジン",
+      "jockey_name": "松若風馬",
+      "trainer_name": "中尾秀正",
+      "predicted_score": -0.05,
+      "predicted_rank": 5
+    },
+    {
+      "race_key": "20251214_09_05_4_10",
+      "horse_number": 2,
+      "horse_name": "テスティモーネ",
+      "jockey_name": "古川吉洋",
+      "trainer_name": "大根田裕之",
+      "predicted_score": -0.18,
+      "predicted_rank": 6
+    },
+    {
+      "race_key": "20251214_09_05_4_10",
+      "horse_number": 7,
+      "horse_name": "コスモジンバック",
+      "jockey_name": "津村明秀",
+      "trainer_name": "相沢郁",
+      "predicted_score": -0.26,
+      "predicted_rank": 7
+    },
+    {
+      "race_key": "20251214_09_05_4_10",
+      "horse_number": 8,
+      "horse_name": "レッドプロフェシー",
+      "jockey_name": "田口貫太",
+      "trainer_name": "大久保龍志",
+      "predicted_score": -0.32,
+      "predicted_rank": 8
+    },
+    {
+      "race_key": "20251214_09_05_4_10",
+      "horse_number": 10,
+      "horse_name": "ジャスパーグレイト",
+      "jockey_name": "川田将雅",
+      "trainer_name": "森秀行",
+      "predicted_score": -0.39,
+      "predicted_rank": 9
+    },
+    {
+      "race_key": "20251214_09_05_4_10",
+      "horse_number": 11,
+      "horse_name": "ノットイナフ",
+      "jockey_name": "和田竜二",
+      "trainer_name": "浜田多実雄",
+      "predicted_score": -0.4,
+      "predicted_rank": 10
+    },
+    {
+      "race_key": "20251214_09_05_4_10",
+      "horse_number": 16,
+      "horse_name": "リューデスハイム",
+      "jockey_name": "西村淳也",
+      "trainer_name": "牧田和弥",
+      "predicted_score": -0.42,
+      "predicted_rank": 11
+    },
+    {
+      "race_key": "20251214_09_05_4_10",
+      "horse_number": 9,
+      "horse_name": "シャルクハフト",
+      "jockey_name": "吉村誠之助",
+      "trainer_name": "清水久詞",
+      "predicted_score": -0.54,
+      "predicted_rank": 12
+    },
+    {
+      "race_key": "20251214_09_05_4_10",
+      "horse_number": 12,
+      "horse_name": "ワンパット",
+      "jockey_name": "菱田裕二",
+      "trainer_name": "高橋亮",
+      "predicted_score": -0.55,
+      "predicted_rank": 13
+    },
+    {
+      "race_key": "20251214_09_05_4_10",
+      "horse_number": 13,
+      "horse_name": "ロードプレジール",
+      "jockey_name": "高杉吏麒",
+      "trainer_name": "佐藤悠太",
+      "predicted_score": -0.61,
+      "predicted_rank": 14
+    },
+    {
+      "race_key": "20251214_09_05_4_10",
+      "horse_number": 14,
+      "horse_name": "ゲンパチムサシ",
+      "jockey_name": "北村友一",
+      "trainer_name": "佐々木晶三",
+      "predicted_score": -0.63,
+      "predicted_rank": 15
+    },
+    {
+      "race_key": "20251214_09_05_4_10",
+      "horse_number": 15,
+      "horse_name": "ロードマゼラン",
+      "jockey_name": "渡辺竜也",
+      "trainer_name": "奥村豊",
+      "predicted_score": -0.74,
+      "predicted_rank": 16
+    },
+    {
+      "race_key": "20251214_09_05_4_11",
+      "horse_number": 6,
+      "horse_name": "アルバンヌ",
+      "jockey_name": "坂井瑠星",
+      "trainer_name": "田中博康",
+      "predicted_score": -0.19,
+      "predicted_rank": 1
+    },
+    {
+      "race_key": "20251214_09_05_4_11",
+      "horse_number": 4,
+      "horse_name": "アランカール",
+      "jockey_name": "北村友一",
+      "trainer_name": "斉藤崇史",
+      "predicted_score": -0.26,
+      "predicted_rank": 2
+    },
+    {
+      "race_key": "20251214_09_05_4_11",
+      "horse_number": 2,
+      "horse_name": "レディーゴール",
+      "jockey_name": "松若風馬",
+      "trainer_name": "池添学",
+      "predicted_score": -0.27,
+      "predicted_rank": 3
+    },
+    {
+      "race_key": "20251214_09_05_4_11",
+      "horse_number": 5,
+      "horse_name": "ギャラボーグ",
+      "jockey_name": "川田将雅",
+      "trainer_name": "杉山晴紀",
+      "predicted_score": -0.3,
+      "predicted_rank": 4
+    },
+    {
+      "race_key": "20251214_09_05_4_11",
+      "horse_number": 3,
+      "horse_name": "ミツカネベネラ",
+      "jockey_name": "津村明秀",
+      "trainer_name": "鈴木伸尋",
+      "predicted_score": -0.36,
+      "predicted_rank": 5
+    },
+    {
+      "race_key": "20251214_09_05_4_11",
+      "horse_number": 7,
+      "horse_name": "マーゴットラヴミー",
+      "jockey_name": "武豊",
+      "trainer_name": "小林真也",
+      "predicted_score": -0.63,
+      "predicted_rank": 6
+    },
+    {
+      "race_key": "20251214_09_05_4_11",
+      "horse_number": 8,
+      "horse_name": "ヒズマスターピース",
+      "jockey_name": "藤岡佑介",
+      "trainer_name": "国枝栄",
+      "predicted_score": -0.69,
+      "predicted_rank": 7
+    },
+    {
+      "race_key": "20251214_09_05_4_11",
+      "horse_number": 10,
+      "horse_name": "イヌボウノウタゴエ",
+      "jockey_name": "酒井学",
+      "trainer_name": "西田雄一郎",
+      "predicted_score": -0.81,
+      "predicted_rank": 8
+    },
+    {
+      "race_key": "20251214_09_05_4_11",
+      "horse_number": 11,
+      "horse_name": "スウィートハピネス",
+      "jockey_name": "高杉吏麒",
+      "trainer_name": "北出成人",
+      "predicted_score": -0.86,
+      "predicted_rank": 9
+    },
+    {
+      "race_key": "20251214_09_05_4_11",
+      "horse_number": 17,
+      "horse_name": "タイセイボーグ",
+      "jockey_name": "西村淳也",
+      "trainer_name": "松下武士",
+      "predicted_score": -0.88,
+      "predicted_rank": 10
+    },
+    {
+      "race_key": "20251214_09_05_4_11",
+      "horse_number": 12,
+      "horse_name": "メイプルハッピー",
+      "jockey_name": "岩田康誠",
+      "trainer_name": "北出成人",
+      "predicted_score": -0.97,
+      "predicted_rank": 11
+    },
+    {
+      "race_key": "20251214_09_05_4_11",
+      "horse_number": 15,
+      "horse_name": "ラスティングスノー",
+      "jockey_name": "菱田裕二",
+      "trainer_name": "池上昌和",
+      "predicted_score": -0.97,
+      "predicted_rank": 11
+    },
+    {
+      "race_key": "20251214_09_05_4_11",
+      "horse_number": 9,
+      "horse_name": "スターアニス",
+      "jockey_name": "松山弘平",
+      "trainer_name": "高野友和",
+      "predicted_score": -1.04,
+      "predicted_rank": 13
+    },
+    {
+      "race_key": "20251214_09_05_4_11",
+      "horse_number": 14,
+      "horse_name": "スタニングレディ",
+      "jockey_name": "和田竜二",
+      "trainer_name": "高木登",
+      "predicted_score": -1.09,
+      "predicted_rank": 14
+    },
+    {
+      "race_key": "20251214_09_05_4_11",
+      "horse_number": 13,
+      "horse_name": "フロムレイブン",
+      "jockey_name": "吉村誠之助",
+      "trainer_name": "坂口智康",
+      "predicted_score": -1.11,
+      "predicted_rank": 15
+    },
+    {
+      "race_key": "20251214_09_05_4_11",
+      "horse_number": 18,
+      "horse_name": "ショウナンカリス",
+      "jockey_name": "池添謙一",
+      "trainer_name": "加藤士津八",
+      "predicted_score": -1.13,
+      "predicted_rank": 16
+    },
+    {
+      "race_key": "20251214_09_05_4_11",
+      "horse_number": 1,
+      "horse_name": "アンヘリータス",
+      "jockey_name": "Ｆ．ジェルー",
+      "trainer_name": "吉村圭司",
+      "predicted_score": -1.25,
+      "predicted_rank": 17
+    },
+    {
+      "race_key": "20251214_09_05_4_11",
+      "horse_number": 16,
+      "horse_name": "ローズカリス",
+      "jockey_name": "田口貫太",
+      "trainer_name": "大橋勇樹",
+      "predicted_score": -1.56,
+      "predicted_rank": 18
+    },
+    {
+      "race_key": "20251214_09_05_4_12",
+      "horse_number": 2,
+      "horse_name": "ブライティアダイヤ",
+      "jockey_name": "岩田康誠",
+      "trainer_name": "稲垣幸雄",
+      "predicted_score": 0.48,
+      "predicted_rank": 1
+    },
+    {
+      "race_key": "20251214_09_05_4_12",
+      "horse_number": 4,
+      "horse_name": "トーホウガレオン",
+      "jockey_name": "田口貫太",
+      "trainer_name": "谷潔",
+      "predicted_score": 0.41,
+      "predicted_rank": 2
+    },
+    {
+      "race_key": "20251214_09_05_4_12",
+      "horse_number": 6,
+      "horse_name": "テラステラ",
+      "jockey_name": "坂井瑠星",
+      "trainer_name": "矢作芳人",
+      "predicted_score": 0.36,
+      "predicted_rank": 3
+    },
+    {
+      "race_key": "20251214_09_05_4_12",
+      "horse_number": 3,
+      "horse_name": "マルカオペラ",
+      "jockey_name": "津村明秀",
+      "trainer_name": "浜田多実雄",
+      "predicted_score": 0.31,
+      "predicted_rank": 4
+    },
+    {
+      "race_key": "20251214_09_05_4_12",
+      "horse_number": 1,
+      "horse_name": "ダノンキラウェア",
+      "jockey_name": "川田将雅",
+      "trainer_name": "中内田充正",
+      "predicted_score": 0.28,
+      "predicted_rank": 5
+    },
+    {
+      "race_key": "20251214_09_05_4_12",
+      "horse_number": 8,
+      "horse_name": "ネーヴェフレスカ",
+      "jockey_name": "北村友一",
+      "trainer_name": "石坂公一",
+      "predicted_score": -0.0,
+      "predicted_rank": 6
+    },
+    {
+      "race_key": "20251214_09_05_4_12",
+      "horse_number": 7,
+      "horse_name": "ウォータークラーク",
+      "jockey_name": "武豊",
+      "trainer_name": "石橋守",
+      "predicted_score": -0.1,
+      "predicted_rank": 7
+    },
+    {
+      "race_key": "20251214_09_05_4_12",
+      "horse_number": 9,
+      "horse_name": "ルクスジニア",
+      "jockey_name": "池添謙一",
+      "trainer_name": "平田修",
+      "predicted_score": -0.25,
+      "predicted_rank": 8
+    },
+    {
+      "race_key": "20251214_09_05_4_12",
+      "horse_number": 5,
+      "horse_name": "シホノペルフェット",
+      "jockey_name": "Ｆ．ジェルー",
+      "trainer_name": "寺島良",
+      "predicted_score": -0.45,
+      "predicted_rank": 9
+    },
+    {
+      "race_key": "20251214_09_05_4_12",
+      "horse_number": 10,
+      "horse_name": "プチプラージュ",
+      "jockey_name": "渡辺竜也",
+      "trainer_name": "笹野博司",
+      "predicted_score": -1.19,
+      "predicted_rank": 10
+    }
+  ]
+}

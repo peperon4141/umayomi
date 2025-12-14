@@ -11,9 +11,33 @@ sys.path.insert(0, str(base_path / "apps" / "prediction"))
 from src.executor.prediction_executor import PredictionExecutor
 
 if __name__ == "__main__":
-    # 今日の日付を取得
-    today = datetime.now()
-    date_str = today.strftime("%Y-%m-%d")
+    # コマンドライン引数から日付とJSONインデントを取得
+    import sys
+    import argparse
+    
+    parser = argparse.ArgumentParser(description='日次データの予測を実行')
+    parser.add_argument('date', nargs='?', help='予測対象日付（YYYY-MM-DD形式、省略時は今日）')
+    parser.add_argument('--json-indent', type=int, default=2, 
+                       help='JSON出力のインデント（None=1行、2=2スペース、4=4スペースなど、デフォルト: 2）')
+    parser.add_argument('--json-compact', action='store_true',
+                       help='JSONを1行で出力（--json-indentより優先）')
+    
+    args = parser.parse_args()
+    
+    if args.date:
+        date_str = args.date
+        try:
+            datetime.strptime(date_str, "%Y-%m-%d")
+        except ValueError:
+            print(f"エラー: 日付形式が正しくありません。YYYY-MM-DD形式で指定してください。例: 2025-12-13")
+            exit(1)
+        date_obj = datetime.strptime(date_str, "%Y-%m-%d")
+    else:
+        date_obj = datetime.now()
+        date_str = date_obj.strftime("%Y-%m-%d")
+    
+    # JSONインデントの決定
+    json_indent = None if args.json_compact else args.json_indent
     
     # パス設定
     parquet_base_path = base_path / "apps" / "prediction" / "cache" / "jrdb" / "parquet"
@@ -28,7 +52,7 @@ if __name__ == "__main__":
     print(f"  出力先: {output_path}")
     
     # データの存在確認
-    daily_folder = base_path / "data" / "daily" / f"{today.month:02d}" / f"{today.day:02d}"
+    daily_folder = base_path / "data" / "daily" / f"{date_obj.month:02d}" / f"{date_obj.day:02d}"
     if not daily_folder.exists():
         print(f"\n警告: 日次データフォルダが見つかりません: {daily_folder}")
         print("データ取得が必要です。")
@@ -43,6 +67,7 @@ if __name__ == "__main__":
             base_path=base_path,
             parquet_base_path=parquet_base_path,
             output_path=output_path,
+            json_indent=json_indent,
         )
         
         print(f"\n予測実行が完了しました！")

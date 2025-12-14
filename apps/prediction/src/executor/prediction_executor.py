@@ -33,6 +33,7 @@ class PredictionExecutor:
         base_path: Path,
         parquet_base_path: Path,
         output_path: Optional[str] = None,
+        json_indent: Optional[int] = 2,
     ) -> pd.DataFrame:
         """
         日次データの予測を実行するメインメソッド
@@ -87,7 +88,7 @@ class PredictionExecutor:
         # 8. JSON形式で保存
         if output_path:
             PredictionExecutor._save_results_to_json(
-                results_df, date_str, output_path
+                results_df, date_str, output_path, json_indent=json_indent
             )
         
         return results_df
@@ -463,14 +464,16 @@ class PredictionExecutor:
         results_df: pd.DataFrame,
         date_str: str,
         output_path: str,
+        json_indent: Optional[int] = 2,
     ) -> None:
         """
-        予測結果をJSON Lines形式で保存（各馬1行、JSON Lines形式）
+        予測結果をJSON形式で保存（通常のJSON配列形式）
         
         Args:
             results_df: 予測結果のDataFrame
             date_str: 日付文字列
             output_path: 出力先パス
+            json_indent: JSONのインデント（None=1行、2=2スペース、4=4スペースなど）
         """
         # 予測順位でソート
         results_df_sorted = results_df.sort_values(["race_key", "predicted_rank"])
@@ -478,24 +481,35 @@ class PredictionExecutor:
         output_path_obj = Path(output_path)
         output_path_obj.parent.mkdir(parents=True, exist_ok=True)
         
-        # JSON Lines形式で保存（各予測結果を1行で出力）
+        # 予測結果を配列として構築
+        predictions = []
+        for _, row in results_df_sorted.iterrows():
+            # horse_numberがNaNの場合はスキップ
+            horse_number = row.get("horse_number")
+            if pd.isna(horse_number):
+                continue
+            
+            prediction = {
+                "race_key": str(row.get("race_key", "")),
+                "horse_number": int(horse_number),
+                "horse_name": str(row.get("horse_name", "")),
+                "jockey_name": str(row.get("jockey_name", "")),
+                "trainer_name": str(row.get("trainer_name", "")),
+                "predicted_score": float(row.get("predict", row.get("predicted_score", 0.0))),
+                "predicted_rank": int(row.get("predicted_rank", 0)),
+            }
+            predictions.append(prediction)
+        
+        # JSON形式で保存（dateとpredictionsを含む）
+        output_data = {
+            "date": date_str,
+            "predictions": predictions
+        }
+        
+        # JSONの出力形式を制御
+        # indent=None: 1行で出力（コンパクト形式）
+        # indent=2: 2スペースでインデント（読みやすい形式）
+        # indent=4: 4スペースでインデント
         with open(output_path_obj, "w", encoding="utf-8") as f:
-            for _, row in results_df_sorted.iterrows():
-                # horse_numberがNaNの場合はスキップ
-                horse_number = row.get("horse_number")
-                if pd.isna(horse_number):
-                    continue
-                
-                prediction = {
-                    "date": date_str,
-                    "race_key": str(row.get("race_key", "")),
-                    "horse_number": int(horse_number),
-                    "horse_name": str(row.get("horse_name", "")),
-                    "jockey_name": str(row.get("jockey_name", "")),
-                    "trainer_name": str(row.get("trainer_name", "")),
-                    "predicted_score": float(row.get("predict", row.get("predicted_score", 0.0))),
-                    "predicted_rank": int(row.get("predicted_rank", 0)),
-                }
-                # 各予測結果を1行のJSONとして出力
-                f.write(json.dumps(prediction, ensure_ascii=False) + "\n")
+            json.dump(output_data, f, ensure_ascii=False, indent=json_indent)
 
