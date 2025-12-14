@@ -113,15 +113,6 @@ const sidebarOpen = ref(false)
 // サイドバーメニュー
 const sidebarMenuItems = computed(() => [
   {
-    label: 'レース一覧',
-    icon: 'pi pi-list',
-    command: () => {
-      navigateTo(RouteName.RACE_LIST_IN_YEAR, { year: getCurrentYear() })
-      sidebarOpen.value = false
-    },
-    class: isActiveRoute('/races') ? 'bg-primary-50 text-primary' : ''
-  },
-  {
     label: 'レースリスト',
     icon: 'pi pi-calendar',
     command: () => {

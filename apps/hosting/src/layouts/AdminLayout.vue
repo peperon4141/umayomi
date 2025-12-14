@@ -90,15 +90,14 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { useAuth } from '@/composables/useAuth'
-import { useNavigation } from '@/composables/useNavigation'
-import { RouteName, getCurrentYear } from '@/router/routeCalculator'
 import Button from 'primevue/button'
 import Avatar from 'primevue/avatar'
 import Menu from 'primevue/menu'
 
+const router = useRouter()
 const { user, signOut } = useAuth()
-const { navigateTo } = useNavigation()
 const userMenuRef = ref()
 const sidebarOpen = ref(false)
 
@@ -157,13 +156,13 @@ const emit = defineEmits<{
 }>()
 
 const goToMainApp = () => {
-  navigateTo(RouteName.RACE_LIST_IN_YEAR, { year: getCurrentYear() })
+  router.push('/race-list')
 }
 
 const handleLogout = async () => {
   try {
     await signOut()
-    navigateTo(RouteName.HOME)
+    router.push('/')
   } catch (error) {
     console.error('Logout failed:', error)
   }

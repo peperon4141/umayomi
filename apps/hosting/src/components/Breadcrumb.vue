@@ -9,8 +9,7 @@ import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { 
   RouteName, 
-  generateRoute, 
-  getCurrentYear
+  generateRoute
 } from '@/router/routeCalculator'
 import Breadcrumb from 'primevue/breadcrumb'
 
@@ -42,27 +41,7 @@ const breadcrumbItems = computed(() => {
   
   // レース関連の階層構造に対応
   if (route.path.startsWith('/races')) {
-    items.push({ label: 'レース一覧', url: generateRoute(RouteName.RACE_LIST_IN_YEAR, { year: getCurrentYear() }) })
-    
-    // 年
-    if (route.params.year) {
-      const year = route.params.year as string
-      items.push({ 
-        label: `${year}年`, 
-        url: generateRoute(RouteName.RACE_LIST_IN_YEAR, { year: parseInt(year) })
-      })
-    }
-    
-    // 月
-    if (route.params.month) {
-      const year = route.params.year as string
-      const month = route.params.month as string
-      const monthNames = ['', '1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月']
-      items.push({ 
-        label: monthNames[parseInt(month)], 
-        url: generateRoute(RouteName.RACE_LIST_IN_MONTH, { year: parseInt(year), month: parseInt(month) })
-      })
-    }
+    items.push({ label: 'レースリスト', url: '/race-list' })
     
     // 日
     if (route.params.day) {
@@ -108,21 +87,8 @@ const breadcrumbItems = computed(() => {
     const dateInfo = parseDateFromRaceId(raceId)
     
     if (dateInfo) {
-      // レース一覧
-      items.push({ label: 'レース一覧', url: generateRoute(RouteName.RACE_LIST_IN_YEAR, { year: getCurrentYear() }) })
-      
-      // 年
-      items.push({ 
-        label: `${dateInfo.year}年`, 
-        url: generateRoute(RouteName.RACE_LIST_IN_YEAR, { year: dateInfo.year })
-      })
-      
-      // 月
-      const monthNames = ['', '1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月']
-      items.push({ 
-        label: monthNames[dateInfo.month], 
-        url: generateRoute(RouteName.RACE_LIST_IN_MONTH, { year: dateInfo.year, month: dateInfo.month })
-      })
+      // レースリスト
+      items.push({ label: 'レースリスト', url: '/race-list' })
       
       // レース詳細
       items.push({ 

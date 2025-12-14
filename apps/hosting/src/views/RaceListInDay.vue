@@ -307,10 +307,17 @@ const selectRace = (race: Race) => {
     return
   }
   
+  // race_keyを使用（race.idがrace_keyになっている）
+  const raceKey = race.race_key || race.id
+  if (!raceKey) {
+    console.error('race_keyが見つかりません', race)
+    return
+  }
+  
   // 後方互換性のため、racecourseまたはvenueを確認
   const venue = (race as any).racecourse || (race as any).venue || '東京'
   const venueId = convertVenueToId(venue)
-  navigateTo(RouteName.RACE_DETAIL, { year, month, placeId: venueId, raceId: race.id })
+  navigateTo(RouteName.RACE_DETAIL, { year, month, placeId: venueId, raceId: raceKey })
 }
 
 

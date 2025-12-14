@@ -160,20 +160,21 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { useNavigation } from '@/composables/useNavigation'
 import { doc, getDoc, Timestamp } from 'firebase/firestore'
 import { db } from '@/config/firebase'
 import AppLayout from '@/layouts/AppLayout.vue'
 import type { Race } from '../../../shared/race'
-import { RouteName } from '@/router/routeCalculator'
 import { usePrediction } from '@/composables/usePrediction'
 import { generateRaceKey } from '@/utils/raceKeyGenerator'
 
-const { getParam, navigateTo } = useNavigation()
+const router = useRouter()
+const { getParam } = useNavigation()
 const { getPredictionsByDate, getPredictionsByRaceKey } = usePrediction()
 
 const navigateToRaceList = () => {
-  navigateTo(RouteName.RACE_LIST_IN_YEAR, { year: new Date().getFullYear() })
+  router.push('/race-list')
 }
 
 const raceDetail = ref<Race | null>(null)
@@ -276,17 +277,20 @@ const getGradeSeverity = (grade: string | undefined) => {
 
 
 
-const fetchRaceDetail = async (raceId: string) => {
+const fetchRaceDetail = async (raceKey: string) => {
   loading.value = true
   error.value = null
   
   try {
-    const raceDoc = await getDoc(doc(db, 'races', raceId))
+    // race_keyをドキュメントIDとして使用
+    const raceDoc = await getDoc(doc(db, 'races', raceKey))
     
     if (raceDoc.exists()) {
+      const data = raceDoc.data()
       raceDetail.value = {
         id: raceDoc.id,
-        ...raceDoc.data()
+        race_key: raceDoc.id, // ドキュメントIDがrace_key
+        ...data
       } as Race
       
       // レース詳細取得後、予測結果を読み込む
@@ -304,9 +308,9 @@ const fetchRaceDetail = async (raceId: string) => {
 }
 
 onMounted(() => {
-  const raceId = getParam('raceId')
-  if (raceId) {
-    fetchRaceDetail(raceId)
+  const raceKey = getParam('raceId') // パラメータ名はraceIdだが、値はrace_key
+  if (raceKey) {
+    fetchRaceDetail(raceKey)
   } else {
     navigateToRaceList()
   }

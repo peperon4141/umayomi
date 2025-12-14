@@ -1,5 +1,6 @@
 import { getFirestore } from 'firebase-admin/firestore'
 import { logger } from 'firebase-functions'
+import { generateRaceKey } from './raceKeyGenerator'
 
 // // Firestoreインスタンスをキャッシュ
 // let dbInstance: FirebaseFirestore.Firestore | null = null
@@ -51,13 +52,25 @@ export async function saveRacesToFirestore(races: any[]): Promise<number> {
     races.forEach(race => {
       // venueをracecourseにマッピング（後方互換性のため両方を確認）
       const venue = race.venue || race.racecourse
-      const raceId = `${race.date.toISOString().split('T')[0]}_${venue}_${race.raceNumber}`
-      const docRef = db.collection('races').doc(raceId)
+      const racecourse = venue
+      
+      // race_keyを生成
+      const race_key = generateRaceKey({
+        date: race.date,
+        racecourse,
+        raceNumber: race.raceNumber,
+        round: race.round,
+        day: race.day
+      })
+      
+      // race_keyをドキュメントIDとして使用
+      const docRef = db.collection('races').doc(race_key)
       
       const raceData = {
         ...race,
+        race_key, // race_keyをフィールドとしても保存
         // venueをracecourseに統一
-        racecourse: venue,
+        racecourse,
         venue: undefined, // 古いフィールドを削除
         date: race.date,
         scrapedAt: race.scrapedAt,
@@ -68,7 +81,6 @@ export async function saveRacesToFirestore(races: any[]): Promise<number> {
       // undefinedフィールドを削除
       Object.keys(raceData).forEach(key => {
         if (raceData[key] === undefined) delete raceData[key]
-        
       })
       
       batch.set(docRef, raceData)

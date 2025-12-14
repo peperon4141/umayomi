@@ -10,6 +10,7 @@ export interface RaceResult {
 export interface Race {
   id: string
   raceId: string
+  race_key: string  // 場コード_年_回_日_R 形式（JRDB仕様に準拠）
   date: Date
   racecourse: string
   raceNumber: number

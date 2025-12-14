@@ -17,7 +17,7 @@ export function useRace() {
   const loading = ref(false)
   const error = ref<string | null>(null)
 
-  // レースを取得（日付範囲を動的に設定）
+  // レースを取得（race_keyベース）
   const fetchRaces = async (startDate?: Date, endDate?: Date, filters?: RaceFilters) => {
     loading.value = true
     error.value = null
@@ -28,10 +28,24 @@ export function useRace() {
       defaultStartDate.setFullYear(defaultStartDate.getFullYear() - 1)
       const defaultEndDate = endDate || new Date()
 
+      // race_keyの形式: 場コード_年_回_日_R
+      // 年の下2桁で範囲を指定
+      const startYear = defaultStartDate.getFullYear() % 100
+      const endYear = defaultEndDate.getFullYear() % 100
+      const startYearStr = String(startYear).padStart(2, '0')
+      const endYearStr = String(endYear).padStart(2, '0')
+      
+      // race_keyは文字列なので、範囲クエリを使用
+      // 開始: 00_年_0_0_00（最小の場コード、最小の年、最小の回・日・R）
+      // 終了: 99_年_9_9_99（最大の場コード、最大の年、最大の回・日・R）
+      // 注意: 年が異なる場合は複数クエリが必要だが、簡易的に範囲クエリを使用
+      const startRaceKey = `00_${startYearStr}_0_0_00`
+      const endRaceKey = `99_${endYearStr}_9_9_99`
+
       const constraints: QueryConstraint[] = [
-        where('date', '>=', Timestamp.fromDate(defaultStartDate)),
-        where('date', '<=', Timestamp.fromDate(defaultEndDate)),
-        orderBy('date', 'desc')
+        where('race_key', '>=', startRaceKey),
+        where('race_key', '<=', endRaceKey),
+        orderBy('race_key', 'desc')
       ]
 
       // フィルター条件を追加
@@ -48,10 +62,14 @@ export function useRace() {
       const q = query(collection(db, 'races'), ...constraints)
       const snapshot = await getDocs(q)
       
-      races.value = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      } as Race))
+      races.value = snapshot.docs.map(doc => {
+        const data = doc.data()
+        return {
+          id: doc.id,
+          race_key: doc.id, // ドキュメントIDがrace_key
+          ...data
+        } as Race
+      })
 
     } catch (err: any) {
       error.value = err.message

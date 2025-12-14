@@ -1,5 +1,5 @@
 /**
- * JRAレースデータからrace_keyを生成するユーティリティ
+ * JRAレースデータからrace_keyを生成するユーティリティ（Functions用）
  */
 
 /**
@@ -73,7 +73,8 @@ export function yearToJRDBFormat(year: number | null | undefined): string {
  */
 export function generateRaceKey(race: {
   date: Date | any
-  racecourse: string
+  racecourse?: string
+  venue?: string
   raceNumber: number
   round?: number | null
   day?: string | number | null
@@ -83,19 +84,20 @@ export function generateRaceKey(race: {
   const year = date.getFullYear()
   const yearStr = yearToJRDBFormat(year) // 年の下2桁
   
-  // 場コード
-  const placeCode = venueToPlaceCode(race.racecourse)
+  // 場コード（venueまたはracecourseから取得）
+  const venue = race.venue || race.racecourse || '東京'
+  const placeCode = venueToPlaceCode(venue)
   
   // 開催回数（デフォルト: 1）
   const round = roundToJRDBFormat(race.round)
   
   // 日目（デフォルト: 1、16進数形式）
-  const day = dayToJRDBFormat(race.day)
+  const dayStr = dayToJRDBFormat(race.day)
   
   // レース番号（2桁）
   const raceNumber = raceNumberToJRDBFormat(race.raceNumber)
   
   // race_keyを生成: 場コード_年_回_日_R（JRDB仕様に準拠）
-  return `${placeCode}_${yearStr}_${round}_${day}_${raceNumber}`
+  return `${placeCode}_${yearStr}_${round}_${dayStr}_${raceNumber}`
 }
 
