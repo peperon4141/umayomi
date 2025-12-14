@@ -22,6 +22,8 @@ export interface Race {
   startTime?: Date | string | any
   results?: RaceResult[]
   scrapedAt: Date
+  round?: number | null  // 開催回数（第○回）
+  day?: string | null     // 日目（1, 2, 3, ..., a, b, cなど）
 }
 
 export interface RaceFilters {

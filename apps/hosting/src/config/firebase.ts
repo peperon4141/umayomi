@@ -13,6 +13,7 @@ import {
 } from 'firebase/auth';
 import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
 import { getFunctions, connectFunctionsEmulator } from 'firebase/functions';
+import { getStorage, connectStorageEmulator } from 'firebase/storage';
 
 // Firebase設定（エミュレーター用の設定）
 const firebaseConfig = {
@@ -31,10 +32,11 @@ console.log('🔍 Firebase設定:', firebaseConfig);
 // Firebaseアプリを初期化
 const app = initializeApp(firebaseConfig);
 
-// AuthとFirestoreのインスタンスを取得
+// Auth、Firestore、Storage、Functionsのインスタンスを取得
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const functions = getFunctions(app);
+export const storage = getStorage(app);
 
 // エミュレーター使用フラグでエミュレーターに接続
 if (import.meta.env.VITE_USE_FIREBASE_EMULATOR === 'true' || import.meta.env.DEV) {
@@ -50,6 +52,10 @@ if (import.meta.env.VITE_USE_FIREBASE_EMULATOR === 'true' || import.meta.env.DEV
     // Functionsエミュレーターに接続
     connectFunctionsEmulator(functions, '127.0.0.1', 5101);
     console.log('✅ Functionsエミュレーターに接続: 127.0.0.1:5101');
+
+    // Storageエミュレーターに接続
+    connectStorageEmulator(storage, '127.0.0.1', 9198);
+    console.log('✅ Storageエミュレーターに接続: 127.0.0.1:9198');
   } catch (error) {
     console.warn('⚠️ エミュレーター接続エラー（既に接続済みの可能性）:', error);
   }

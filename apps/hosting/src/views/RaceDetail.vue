@@ -3,10 +3,18 @@
     <!-- ページヘッダー -->
     <div v-if="raceDetail" class="mb-2">
       <h1 class="text-3xl font-bold text-gray-900">{{ raceDetail.raceNumber }}R {{ raceDetail.raceName }}</h1>
-      <p class="text-gray-600 mt-1">{{ raceDetail.racecourse }} - {{ formatDate(raceDetail.date) }}</p>
+      <p class="text-gray-600 mt-1">
+        {{ raceDetail.racecourse }} - {{ formatDate(raceDetail.date) }}
+        <span v-if="raceDetail.round || raceDetail.day" class="ml-2">
+          <span v-if="raceDetail.round">第{{ raceDetail.round }}回</span>
+          <span v-if="raceDetail.day">{{ formatDay(raceDetail.day) }}日目</span>
+        </span>
+      </p>
       
       <!-- レース情報タグ -->
       <div class="flex flex-wrap gap-2 mt-3">
+        <Chip v-if="raceDetail.round" :label="`第${raceDetail.round}回`" severity="info" />
+        <Chip v-if="raceDetail.day" :label="`${formatDay(raceDetail.day)}日目`" severity="info" />
         <Chip :label="raceDetail.distance ? `${raceDetail.distance}m` : '距離未定'" severity="info" />
         <Chip :label="raceDetail.surface || 'コース未定'" severity="secondary" />
         <Chip :label="raceDetail.weather || '天候未定'" severity="success" />
@@ -45,6 +53,57 @@
 
     <!-- レース詳細 -->
     <div v-else-if="raceDetail" class="max-w-7xl mx-auto px-2 sm:px-4">
+      <!-- 予測結果 -->
+      <Card v-if="racePredictions.length > 0" class="mb-4">
+        <template #header>
+          <div class="p-3">
+            <h3 class="text-xl font-bold">予測結果</h3>
+            <p class="text-gray-600">{{ racePredictions.length }}頭</p>
+          </div>
+        </template>
+        <template #content>
+          <div class="p-3">
+            <DataTable
+              :value="racePredictions"
+              :paginator="false"
+              :rows="20"
+              class="p-datatable-sm"
+            >
+              <Column field="predicted_rank" header="予測順位" :sortable="true" style="width: 80px">
+                <template #body="{ data }">
+                  <Chip :label="data.predicted_rank" :severity="data.predicted_rank <= 3 ? 'success' : 'secondary'" />
+                </template>
+              </Column>
+              <Column field="horse_number" header="馬番" :sortable="true" style="width: 60px">
+                <template #body="{ data }">
+                  <Chip :label="data.horse_number" severity="info" />
+                </template>
+              </Column>
+              <Column field="horse_name" header="馬名" :sortable="true">
+                <template #body="{ data }">
+                  <div class="font-medium">{{ data.horse_name }}</div>
+                </template>
+              </Column>
+              <Column field="jockey_name" header="騎手" :sortable="true">
+                <template #body="{ data }">
+                  <div class="font-medium">{{ data.jockey_name }}</div>
+                </template>
+              </Column>
+              <Column field="trainer_name" header="調教師" :sortable="true">
+                <template #body="{ data }">
+                  <div class="font-medium">{{ data.trainer_name }}</div>
+                </template>
+              </Column>
+              <Column field="predicted_score" header="予測スコア" :sortable="true" style="width: 100px">
+                <template #body="{ data }">
+                  <div class="text-center font-medium">{{ data.predicted_score.toFixed(2) }}</div>
+                </template>
+              </Column>
+            </DataTable>
+          </div>
+        </template>
+      </Card>
+      
       <!-- レース結果 -->
       <Card>
             <template #header>
@@ -100,15 +159,18 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useNavigation } from '@/composables/useNavigation'
 import { doc, getDoc, Timestamp } from 'firebase/firestore'
 import { db } from '@/config/firebase'
 import AppLayout from '@/layouts/AppLayout.vue'
 import type { Race } from '../../../shared/race'
 import { RouteName } from '@/router/routeCalculator'
+import { usePrediction } from '@/composables/usePrediction'
+import { generateRaceKey } from '@/utils/raceKeyGenerator'
 
 const { getParam, navigateTo } = useNavigation()
+const { getPredictionsByDate, getPredictionsByRaceKey } = usePrediction()
 
 const navigateToRaceList = () => {
   navigateTo(RouteName.RACE_LIST_IN_YEAR, { year: new Date().getFullYear() })
@@ -117,6 +179,52 @@ const navigateToRaceList = () => {
 const raceDetail = ref<Race | null>(null)
 const loading = ref(false)
 const error = ref<string | null>(null)
+const predictionsLoading = ref(false)
+const predictionsData = ref<any>(null)
+
+// レースキーを生成（raceDetailから）
+const raceKey = computed(() => {
+  if (!raceDetail.value) return null
+  
+  // 日付をDate型に変換
+  const date = raceDetail.value.date instanceof Timestamp 
+    ? raceDetail.value.date.toDate() 
+    : raceDetail.value.date instanceof Date
+    ? raceDetail.value.date
+    : new Date(raceDetail.value.date)
+  
+  return generateRaceKey({
+    date,
+    racecourse: raceDetail.value.racecourse,
+    raceNumber: raceDetail.value.raceNumber,
+    round: raceDetail.value.round,
+    day: raceDetail.value.day
+  })
+})
+
+// 予測結果を取得
+const racePredictions = computed(() => {
+  if (!raceKey.value || !predictionsData.value) return []
+  return getPredictionsByRaceKey(raceKey.value)
+})
+
+// 予測結果を読み込む
+const loadPredictions = async () => {
+  if (!raceDetail.value) return
+  
+  predictionsLoading.value = true
+  try {
+    const date = raceDetail.value.date instanceof Timestamp 
+      ? raceDetail.value.date.toDate() 
+      : raceDetail.value.date
+    const dateStr = date.toISOString().split('T')[0]
+    predictionsData.value = await getPredictionsByDate(dateStr)
+  } catch (err: any) {
+    console.error('予測結果の取得エラー:', err)
+  } finally {
+    predictionsLoading.value = false
+  }
+}
 
 // 日付フォーマット関数
 const formatDate = (date: any) => {
@@ -130,6 +238,13 @@ const formatDate = (date: any) => {
     console.error('日付フォーマットエラー:', error)
     return '日付エラー'
   }
+}
+
+// 日目フォーマット関数（1, 2, 3, ..., a, b, cなど）
+const formatDay = (day: string | number | null | undefined): string => {
+  if (!day) return ''
+  if (typeof day === 'number') return day.toString()
+  return day.toString()
 }
 
 
@@ -173,6 +288,9 @@ const fetchRaceDetail = async (raceId: string) => {
         id: raceDoc.id,
         ...raceDoc.data()
       } as Race
+      
+      // レース詳細取得後、予測結果を読み込む
+      await loadPredictions()
     } else {
       error.value = 'レースが見つかりません'
       navigateToRaceList()

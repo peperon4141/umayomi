@@ -16,4 +16,6 @@ torch
 ruff
 pytest
 psutil
+firebase-admin
+google-cloud-storage
 

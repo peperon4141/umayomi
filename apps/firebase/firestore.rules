@@ -25,6 +25,12 @@ service cloud.firestore {
       allow write: if false; // Cloud Functionsからの書き込みはAdmin SDKで実行（セキュリティルールをバイパス）
     }
     
+    // 予測結果（predictionsコレクション）：認証済みユーザーは読み取り可能、Cloud Functionsからのみ書き込み可能
+    match /predictions/{predictionId} {
+      allow read: if request.auth != null;
+      allow write: if false; // Cloud FunctionsまたはAdmin SDKからのみ書き込み可能
+    }
+    
     // その他のドキュメントは認証済みユーザーのみ読み取り可能
     match /{document=**} {
       allow read: if request.auth != null;

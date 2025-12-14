@@ -8,6 +8,7 @@ import {
   handleScrapeJRACalendarWithRaceResults
 } from './jra_scraper/handlers'
 import { handleFetchJRDBDailyData, handleFetchJRDBAnnualData } from './jrdb_scraper/handlers'
+import { handleRunDailyPrediction } from './prediction/handlers'
 
 // 開発環境の場合、.envファイルを読み込む
 const isDevelopment = process.env.NODE_ENV === 'development' || 
@@ -126,5 +127,25 @@ export const fetchJRDBDailyData = onRequest(
 export const fetchJRDBAnnualData = onRequest(
   { timeoutSeconds: 600, memory: '2GiB', region: 'asia-northeast1', cors: true },
   handleFetchJRDBAnnualData
+)
+
+/**
+ * Pythonスクリプトを実行してdailyデータを取得・分析・Firestoreに保存するCloud Function
+ * 
+ * 必須パラメータ（query）:
+ * - modelStoragePath: Firebase Storage内のモデルパス（例: models/rank_model_202512111031_v1.txt）
+ * 
+ * オプショナルパラメータ（query）:
+ * - date: 予測対象日付（YYYY-MM-DD形式、省略時は今日）
+ * - useEmulator: Firebaseエミュレーターを使用するか（true/false、省略時はfalse）
+ * 
+ * 例: 
+ * - 今日の予測: https://.../runDailyPrediction?modelStoragePath=models/rank_model_202512111031_v1.txt
+ * - 指定日の予測: https://.../runDailyPrediction?modelStoragePath=models/rank_model_202512111031_v1.txt&date=2025-12-14
+ * - エミュレーター使用: https://.../runDailyPrediction?modelStoragePath=models/rank_model_202512111031_v1.txt&useEmulator=true
+ */
+export const runDailyPrediction = onRequest(
+  { timeoutSeconds: 600, memory: '2GiB', region: 'asia-northeast1', cors: true },
+  handleRunDailyPrediction
 )
 

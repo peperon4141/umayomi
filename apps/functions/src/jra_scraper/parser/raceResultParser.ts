@@ -26,6 +26,8 @@ export function parseJRARaceResult(html: string, year: number, month: number, da
             distance: race.distance,
             surface: race.surface,
             startTime: parseStartTime(year, month, day, race.startTime),
+            round: race.round || null,
+            day: race.day || null,
             scrapedAt: new Date(Date.UTC(new Date().getFullYear(), new Date().getMonth(), new Date().getDate(), 0, 0, 0, 0))
           }
           races.push(raceData)
@@ -57,6 +59,9 @@ export function parseJRARaceResult(html: string, year: number, month: number, da
 export function extractRaceInfo($: cheerio.CheerioAPI): any[] {
   const races: any[] = []
 
+  // ページ全体から開催回数と日目を抽出（ページヘッダーなどから）
+  const roundAndDay = extractRoundAndDay($)
+
   // 東京競馬場のレース情報を抽出
   $('#rcA tbody tr').each((_, element) => {
     const $row = $(element)
@@ -75,7 +80,9 @@ export function extractRaceInfo($: cheerio.CheerioAPI): any[] {
         venue: '東京',
         distance,
         surface,
-        startTime
+        startTime,
+        round: roundAndDay.round,
+        day: roundAndDay.day
       })
     
   })
@@ -98,12 +105,35 @@ export function extractRaceInfo($: cheerio.CheerioAPI): any[] {
         venue: '京都',
         distance,
         surface,
-        startTime
+        startTime,
+        round: roundAndDay.round,
+        day: roundAndDay.day
       })
     
   })
 
   return races
+}
+
+/**
+ * ページから開催回数と日目を抽出
+ */
+function extractRoundAndDay($: cheerio.CheerioAPI): { round: number | null, day: string | null } {
+  // ページタイトルやヘッダーから「第○回 ○日目」の形式を抽出
+  const pageText = $('body').text()
+  
+  // 「第○回」のパターンを検索
+  const roundMatch = pageText.match(/第(\d+)回/)
+  const round = roundMatch ? parseInt(roundMatch[1]) : null
+  
+  // 「○日目」のパターンを検索（1日目、2日目、...、a日目、b日目など）
+  const dayMatch = pageText.match(/(\d+|[a-z])日目/)
+  let day: string | null = null
+  if (dayMatch) {
+    day = dayMatch[1].toLowerCase()
+  }
+  
+  return { round, day }
 }
 
 /**

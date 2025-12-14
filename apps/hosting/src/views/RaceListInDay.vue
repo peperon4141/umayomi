@@ -88,6 +88,8 @@
                     <div class="space-y-1">
                       <div class="font-semibold text-surface-900">{{ race.raceName }}</div>
                       <div class="text-sm text-surface-600">
+                        <span v-if="race.round">第{{ race.round }}回 </span>
+                        <span v-if="race.day">{{ formatDay(race.day) }}日目 </span>
                         <span v-if="race.grade">{{ race.grade }} / </span>
                         <span v-if="race.distance">{{ formatDistance(race.distance) }} / </span>
                         <span>{{ race.surface || 'コース未定' }}</span>
@@ -153,6 +155,13 @@ const racesByVenue = computed(() => {
 const formatDistance = (distance: number | null | undefined): string => {
   if (!distance) return '距離未定'
   return `${distance.toLocaleString()}m`
+}
+
+// 日目フォーマット関数（1, 2, 3, ..., a, b, cなど）
+const formatDay = (day: string | number | null | undefined): string => {
+  if (!day) return ''
+  if (typeof day === 'number') return day.toString()
+  return day.toString()
 }
 
 // 発走時刻をフォーマット
