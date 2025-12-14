@@ -120,6 +120,15 @@ const sidebarMenuItems = computed(() => [
       sidebarOpen.value = false
     },
     class: isActiveRoute('/races') ? 'bg-primary-50 text-primary' : ''
+  },
+  {
+    label: 'レースリスト',
+    icon: 'pi pi-calendar',
+    command: () => {
+      router.push('/race-list')
+      sidebarOpen.value = false
+    },
+    class: isActiveRoute('/race-list') ? 'bg-primary-50 text-primary' : ''
   }
 ])
 

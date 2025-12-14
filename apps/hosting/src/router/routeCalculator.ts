@@ -16,6 +16,7 @@ export enum RouteName {
   RACE_DETAIL_DIRECT = 'RaceDetailDirect',
   
   // レース関連（階層構造）
+  RACE_LIST = 'RaceList',
   RACE_LIST_IN_YEAR = 'RaceListInYear',
   RACE_LIST_IN_MONTH = 'RaceListInMonth',
   RACE_LIST_IN_DAY = 'RaceListInDay',
@@ -48,6 +49,7 @@ const ROUTE_PATTERNS = {
   [RouteName.HOME]: () => '/',
   [RouteName.ADMIN_DASHBOARD]: () => '/admin',
   [RouteName.RACES]: () => '/races',
+  [RouteName.RACE_LIST]: () => '/race-list',
   [RouteName.RACE_DETAIL_DIRECT]: (options: RouteOptions) => `/race/${options.raceId}`,
   [RouteName.RACE_LIST_IN_YEAR]: (options: RouteOptions) => `/races/year/${options.year}`,
   [RouteName.RACE_LIST_IN_MONTH]: (options: RouteOptions) => `/races/year/${options.year}/month/${options.month}`,

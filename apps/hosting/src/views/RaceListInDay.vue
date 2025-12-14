@@ -44,78 +44,79 @@
       </div>
     </div>
 
-    <!-- レース一覧（競馬場ごとにグループ化、横並び配置） -->
+    <!-- レース一覧（競馬場ごとにグループ化、DataTable Expansion機能使用） -->
     <div v-else class="max-w-7xl mx-auto px-2 sm:px-4">
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
-        <!-- 競馬場ごとのセクション -->
-        <div 
-          v-for="(venueRaces, venue) in racesByVenue" 
-          :key="venue"
-          class="bg-surface-0 rounded-lg shadow-sm overflow-hidden"
-        >
-          <!-- 競馬場ヘッダー -->
-          <div class="bg-green-700 text-surface-0 px-3 py-2">
-            <h2 class="text-lg font-bold">{{ venue }}</h2>
+      <DataTable
+        :value="venueGroups"
+        v-model:expandedRows="expandedRows"
+        dataKey="venue"
+        :scrollable="true"
+        scrollHeight="600px"
+        class="p-datatable-sm"
+      >
+        <Column :expander="true" style="width: 3rem" />
+        <Column field="venue" header="競馬場" :sortable="true">
+          <template #body="{ data }">
+            <div class="font-semibold text-lg">{{ data.venue }}</div>
+          </template>
+        </Column>
+        <Column field="raceCount" header="レース数" :sortable="true" style="width: 100px">
+          <template #body="{ data }">
+            <Chip :label="`${data.raceCount}レース`" severity="info" />
+          </template>
+        </Column>
+        <template #expansion="slotProps">
+          <div class="p-4">
+            <DataTable
+              :value="slotProps.data.races"
+              :paginator="false"
+              class="p-datatable-sm"
+            >
+              <Column field="raceNumber" header="レース番号" :sortable="true" style="width: 80px">
+                <template #body="{ data }">
+                  <Chip :label="String(data.raceNumber)" severity="info" />
+                </template>
+              </Column>
+              <Column field="raceName" header="レース名" :sortable="true">
+                <template #body="{ data }">
+                  <div class="font-semibold">{{ data.raceName }}</div>
+                  <div class="text-sm text-surface-600 mt-1">
+                    <span v-if="data.round">第{{ data.round }}回 </span>
+                    <span v-if="data.day">{{ formatDay(data.day) }}日目 </span>
+                    <span v-if="data.grade">{{ data.grade }} / </span>
+                    <span v-if="data.distance">{{ formatDistance(data.distance) }} / </span>
+                    <span>{{ data.surface || 'コース未定' }}</span>
+                  </div>
+                </template>
+              </Column>
+              <Column field="startTime" header="発走時刻" :sortable="true" style="width: 100px">
+                <template #body="{ data }">
+                  <span v-if="data.startTime" class="font-medium">
+                    {{ formatStartTime(data.startTime) }}
+                  </span>
+                  <span v-else class="text-surface-400">未定</span>
+                </template>
+              </Column>
+              <Column header="アクション" :exportable="false" style="width: 100px">
+                <template #body="{ data }">
+                  <Button
+                    label="詳細"
+                    icon="pi pi-arrow-right"
+                    size="small"
+                    @click="selectRace(data)"
+                  />
+                </template>
+              </Column>
+            </DataTable>
           </div>
-          
-          <!-- レーステーブル -->
-          <div class="overflow-x-auto">
-            <table class="w-full border-collapse">
-              <thead>
-                <tr class="bg-green-800 text-surface-0">
-                  <th class="p-2 text-left font-semibold border-r border-green-900">レース<br>番号</th>
-                  <th class="p-2 text-left font-semibold border-r border-green-900">レース名・条件</th>
-                  <th class="p-2 text-left font-semibold">発走時刻</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr 
-                  v-for="race in venueRaces" 
-                  :key="race.id"
-                  class="border-b border-surface-200 hover:bg-surface-50 cursor-pointer transition-colors"
-                  @click="selectRace(race)"
-                >
-                  <!-- レース番号 -->
-                  <td class="p-2 bg-green-50 border-r border-surface-200">
-                    <div class="text-center">
-                      <div class="text-lg font-bold text-green-800">{{ race.raceNumber }}</div>
-                      <div class="text-xs text-green-600">レース</div>
-                    </div>
-                  </td>
-                  
-                  <!-- レース名・条件 -->
-                  <td class="p-2 border-r border-surface-200">
-                    <div class="space-y-1">
-                      <div class="font-semibold text-surface-900">{{ race.raceName }}</div>
-                      <div class="text-sm text-surface-600">
-                        <span v-if="race.round">第{{ race.round }}回 </span>
-                        <span v-if="race.day">{{ formatDay(race.day) }}日目 </span>
-                        <span v-if="race.grade">{{ race.grade }} / </span>
-                        <span v-if="race.distance">{{ formatDistance(race.distance) }} / </span>
-                        <span>{{ race.surface || 'コース未定' }}</span>
-                      </div>
-                    </div>
-                  </td>
-                  
-                  <!-- 発走時刻 -->
-                  <td class="p-2 text-center">
-                    <span v-if="race.startTime" class="font-medium text-surface-900">
-                      {{ formatStartTime(race.startTime) }}
-                    </span>
-                    <span v-else class="text-surface-400">未定</span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
+        </template>
+      </DataTable>
     </div>
   </AppLayout>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useNavigation } from '@/composables/useNavigation'
 import { useRace } from '@/composables/useRace'
 import AppLayout from '@/layouts/AppLayout.vue'
@@ -124,14 +125,21 @@ import { convertVenueToId } from '@/router/routeCalculator'
 import { getVenueNameFromId } from '@/entity'
 import { RouteName } from '@/router/routeCalculator'
 
+interface VenueRaceGroup {
+  venue: string
+  races: Race[]
+  raceCount: number
+}
+
 const { navigateTo, navigateTo404, getParams, getQuery } = useNavigation()
 const { races, loading, error, fetchOctoberRaces } = useRace()
 
 const dayRaces = ref<Race[]>([])
 const dayName = ref('')
+const expandedRows = ref<VenueRaceGroup[]>([])
 
-// 競馬場ごとにレースをグループ化
-const racesByVenue = computed(() => {
+// 競馬場ごとにレースをグループ化（DataTable用）
+const venueGroups = computed<VenueRaceGroup[]>(() => {
   const grouped: { [key: string]: Race[] } = {}
   
   dayRaces.value.forEach(race => {
@@ -148,7 +156,12 @@ const racesByVenue = computed(() => {
     grouped[venue].sort((a, b) => (a.raceNumber || 0) - (b.raceNumber || 0))
   })
   
-  return grouped
+  // VenueRaceGroup形式に変換
+  return Object.keys(grouped).map(venue => ({
+    venue,
+    races: grouped[venue],
+    raceCount: grouped[venue].length
+  }))
 })
 
 // 距離をフォーマット
@@ -332,5 +345,13 @@ onMounted(async () => {
     // placeIdがない場合は、その日の全競馬場のレース一覧を表示
     await loadDayRaces(year, month, day)
   }
+  
 })
+
+// 競馬場グループが変更されたら、すべて展開する
+watch(venueGroups, (newGroups) => {
+  if (newGroups.length > 0 && expandedRows.value.length === 0) {
+    expandedRows.value = [...newGroups]
+  }
+}, { immediate: true })
 </script>

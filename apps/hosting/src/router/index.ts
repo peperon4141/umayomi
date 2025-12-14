@@ -1,6 +1,7 @@
 import { RouteRecordRaw } from 'vue-router'
 import Home from '../views/Home.vue'
 import AdminDashboard from '../views/AdminDashboard.vue'
+import RaceListView from '../views/RaceListView.vue'
 import RaceListInYear from '../views/RaceListInYear.vue'
 import RaceListInMonth from '../views/RaceListInMonth.vue'
 import RaceList from '../views/RaceList.vue'
@@ -16,6 +17,9 @@ import {
 const routes: RouteRecordRaw[] = [
   { path: '/', name: RouteName.HOME, component: Home },
   { path: '/admin', name: RouteName.ADMIN_DASHBOARD, component: AdminDashboard, meta: { requiresAuth: true, requiresAdmin: true } },
+  
+  // レースリストページ
+  { path: '/race-list', name: RouteName.RACE_LIST, component: RaceListView, meta: { requiresAuth: true } },
   
   // レース詳細ページ（直接アクセス用）
   { path: '/race/:raceId', name: RouteName.RACE_DETAIL_DIRECT, component: RaceDetail, meta: { requiresAuth: true } },
