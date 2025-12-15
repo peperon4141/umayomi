@@ -50,8 +50,6 @@
         :value="venueGroups"
         v-model:expandedRows="expandedRows"
         dataKey="venue"
-        :scrollable="true"
-        scrollHeight="600px"
         class="p-datatable-sm"
       >
         <Column :expander="true" style="width: 3rem" />
@@ -132,7 +130,7 @@ interface VenueRaceGroup {
 }
 
 const { navigateTo, navigateTo404, getParams, getQuery } = useNavigation()
-const { races, loading, error, fetchOctoberRaces } = useRace()
+const { races, loading, error, fetchRaces } = useRace()
 
 const dayRaces = ref<Race[]>([])
 const dayName = ref('')
@@ -235,7 +233,11 @@ const getJRAUrlForDay = (): string => {
 // その日のレースデータを取得
 const loadDayRaces = async (year: number, month: number, day: number) => {
   try {
-    await fetchOctoberRaces()
+    // 指定された日付の範囲でデータを取得
+    const startDate = new Date(year, month - 1, day, 0, 0, 0, 0)
+    const endDate = new Date(year, month - 1, day, 23, 59, 59, 999)
+    
+    await fetchRaces(startDate, endDate)
     
     // 指定された日付のレースをフィルタリング
     const filteredRaces = races.value.filter(race => {
@@ -260,14 +262,18 @@ const loadDayRaces = async (year: number, month: number, day: number) => {
 // その日の特定競馬場のレースデータを取得
 const loadDayRacesByPlace = async (year: number, month: number, day: number, placeId: string) => {
   try {
-    await fetchOctoberRaces()
+    // 指定された日付の範囲でデータを取得
+    const startDate = new Date(year, month - 1, day, 0, 0, 0, 0)
+    const endDate = new Date(year, month - 1, day, 23, 59, 59, 999)
+    
+    await fetchRaces(startDate, endDate)
     
     // 指定された日付と競馬場のレースをフィルタリング
     const filteredRaces = races.value.filter(race => {
       const raceDate = race.date instanceof Date ? race.date : (race.date as any).toDate()
       // 後方互換性のため、racecourseまたはvenueを確認
-  const venue = (race as any).racecourse || (race as any).venue || '東京'
-  const venueId = convertVenueToId(venue)
+      const venue = (race as any).racecourse || (race as any).venue || '東京'
+      const venueId = convertVenueToId(venue)
       return raceDate.getFullYear() === year && 
              raceDate.getMonth() === month - 1 && 
              raceDate.getDate() === day &&

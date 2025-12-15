@@ -1,4 +1,55 @@
 {
-  "indexes": [],
+  "indexes": [
+    {
+      "collectionGroup": "races",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "year", "order": "ASCENDING" },
+        { "fieldPath": "race_key", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "races",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "date", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "races",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "year", "order": "ASCENDING" },
+        { "fieldPath": "date", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "races",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "year", "order": "ASCENDING" },
+        { "fieldPath": "racecourse", "order": "ASCENDING" },
+        { "fieldPath": "race_key", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "races",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "year", "order": "ASCENDING" },
+        { "fieldPath": "grade", "order": "ASCENDING" },
+        { "fieldPath": "race_key", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "races",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "year", "order": "ASCENDING" },
+        { "fieldPath": "surface", "order": "ASCENDING" },
+        { "fieldPath": "race_key", "order": "DESCENDING" }
+      ]
+    }
+  ],
   "fieldOverrides": []
 }

@@ -12,6 +12,8 @@ export interface Race {
   raceId: string
   race_key: string  // 場コード_年_回_日_R 形式（JRDB仕様に準拠）
   date: Date
+  year?: number     // 年（クエリ用）
+  month?: number    // 月（クエリ用）
   racecourse: string
   raceNumber: number
   raceName: string

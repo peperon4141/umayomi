@@ -9,6 +9,7 @@ import {
 } from './jra_scraper/handlers'
 import { handleFetchJRDBDailyData, handleFetchJRDBAnnualData } from './jrdb_scraper/handlers'
 import { handleRunDailyPrediction } from './prediction/handlers'
+import { addYearMonthToRaces } from './utils/addYearMonthToRaces'
 
 // 開発環境の場合、.envファイルを読み込む
 const isDevelopment = process.env.NODE_ENV === 'development' || 
@@ -147,5 +148,27 @@ export const fetchJRDBAnnualData = onRequest(
 export const runDailyPrediction = onRequest(
   { timeoutSeconds: 600, memory: '2GiB', region: 'asia-northeast1', cors: true },
   handleRunDailyPrediction
+)
+
+/**
+ * 既存のracesコレクションのドキュメントにyearとmonthフィールドを追加するCloud Function
+ */
+export const addYearMonthToRacesCollection = onRequest(
+  { timeoutSeconds: 600, memory: '1GiB', region: 'asia-northeast1', cors: true },
+  async (request, response) => {
+    try {
+      await addYearMonthToRaces()
+      response.status(200).send({
+        success: true,
+        message: 'yearとmonthフィールドの追加が完了しました'
+      })
+    } catch (error: any) {
+      logger.error('yearとmonthフィールドの追加に失敗しました', { error })
+      response.status(500).send({
+        success: false,
+        error: error.message
+      })
+    }
+  }
 )
 

@@ -12,18 +12,32 @@ import {
   generateRoute
 } from '@/router/routeCalculator'
 import Breadcrumb from 'primevue/breadcrumb'
+import { placeCodeToVenue } from '../../../shared/venue'
 
 const route = useRoute()
 
-// URLから年と月をパースする関数
-const parseDateFromRaceId = (raceId: string) => {
-  // raceIdの形式: "2025-10-19_東京_9"
-  const match = raceId.match(/^(\d{4})-(\d{1,2})-(\d{1,2})_/)
-  if (match) {
+// race_keyから情報を抽出する関数
+// race_key形式: 場コード_年_回_日_R（例: "07_25_1_1_15"）
+const parseRaceKey = (raceKey: string) => {
+  const parts = raceKey.split('_')
+  if (parts.length >= 5) {
+    const placeCode = parts[0]
+    const year2Digit = parseInt(parts[1])
+    const round = parts[2]
+    const day = parts[3]
+    const raceNumber = parts[4]
+    
+    // 2桁の年を4桁に変換（2000年代を想定）
+    const year = 2000 + year2Digit
+    
     return {
-      year: parseInt(match[1]),
-      month: parseInt(match[2]),
-      day: parseInt(match[3])
+      year,
+      month: null, // race_keyからは月が取得できない
+      day: parseInt(day),
+      round: parseInt(round),
+      raceNumber: parseInt(raceNumber),
+      placeCode,
+      placeName: placeCodeToVenue(placeCode)
     }
   }
   return null
@@ -39,67 +53,45 @@ const pathDisplayMap: Record<string, string> = {
 const breadcrumbItems = computed(() => {
   const items: any[] = []
   
-  // レース関連の階層構造に対応
-  if (route.path.startsWith('/races')) {
+  // レースリストページ
+  if (route.path === '/race-list') {
     items.push({ label: 'レースリスト', url: '/race-list' })
+  }
+  // 日付詳細ページ
+  else if (route.path.startsWith('/races/year/') && route.params.day) {
+    const year = route.params.year as string
+    const month = route.params.month as string
+    const day = route.params.day as string
     
-    // 日
-    if (route.params.day) {
-      const year = route.params.year as string
-      const month = route.params.month as string
-      const day = route.params.day as string
-      items.push({ 
-        label: `${day}日`, 
-        url: generateRoute(RouteName.RACE_LIST_IN_DAY, {
-          year: parseInt(year),
-          month: parseInt(month),
-          day: parseInt(day)
-        })
+    items.push({ label: 'レースリスト', url: '/race-list' })
+    items.push({ 
+      label: `${year}年${month}月${day}日`, 
+      url: generateRoute(RouteName.RACE_LIST_IN_DAY, {
+        year: parseInt(year),
+        month: parseInt(month),
+        day: parseInt(day)
       })
-    }
-    
-    // 競馬場
-    if (route.params.placeId) {
-      const year = route.params.year as string
-      const month = route.params.month as string
-      const placeId = route.params.placeId as string
-      items.push({ 
-        label: `競馬場: ${placeId}`, 
-        url: generateRoute(RouteName.RACE_LIST_IN_PLACE, { year: parseInt(year), month: parseInt(month), placeId })
-      })
-    }
-    
-    // レース
-    if (route.params.raceId) {
-      const year = route.params.year as string
-      const month = route.params.month as string
-      const placeId = route.params.placeId as string
-      const raceId = route.params.raceId as string
-      items.push({ 
-        label: `レース: ${raceId}`, 
-        url: generateRoute(RouteName.RACE_DETAIL, { year: parseInt(year), month: parseInt(month), placeId, raceId })
-      })
-    }
-  } 
+    })
+  }
   // 直接レース詳細ページ
   else if (route.path.startsWith('/race/')) {
-    const raceId = route.params.raceId as string
-    const dateInfo = parseDateFromRaceId(raceId)
+    const raceKey = route.params.raceId as string
+    const raceInfo = parseRaceKey(raceKey)
     
-    if (dateInfo) {
-      // レースリスト
-      items.push({ label: 'レースリスト', url: '/race-list' })
-      
-      // レース詳細
+    // レースリスト
+    items.push({ label: 'レースリスト', url: '/race-list' })
+    
+    if (raceInfo) {
+      // レース詳細（競馬場名とレース番号を表示）
       items.push({ 
-        label: 'レース詳細', 
-        url: generateRoute(RouteName.RACE_DETAIL_DIRECT, { raceId })
+        label: `${raceInfo.placeName} - ${raceInfo.raceNumber}R`, 
+        url: generateRoute(RouteName.RACE_DETAIL_DIRECT, { raceId: raceKey })
       })
     } else {
-      // パースできない場合は従来通り
+      // パースできない場合はrace_keyをそのまま表示
       items.push({ 
-        label: 'レース詳細', 
-        url: generateRoute(RouteName.RACE_DETAIL_DIRECT, { raceId })
+        label: `レース: ${raceKey}`, 
+        url: generateRoute(RouteName.RACE_DETAIL_DIRECT, { raceId: raceKey })
       })
     }
   }

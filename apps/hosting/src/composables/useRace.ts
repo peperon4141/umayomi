@@ -17,36 +17,44 @@ export function useRace() {
   const loading = ref(false)
   const error = ref<string | null>(null)
 
-  // レースを取得（race_keyベース）
+  // レースを取得（yearフィールドベース）
   const fetchRaces = async (startDate?: Date, endDate?: Date, filters?: RaceFilters) => {
     loading.value = true
     error.value = null
 
     try {
-      // デフォルトの日付範囲（過去1年）
+      // デフォルトは現在の年
       const defaultStartDate = startDate || new Date()
-      defaultStartDate.setFullYear(defaultStartDate.getFullYear() - 1)
       const defaultEndDate = endDate || new Date()
-
-      // race_keyの形式: 場コード_年_回_日_R
-      // 年の下2桁で範囲を指定
-      const startYear = defaultStartDate.getFullYear() % 100
-      const endYear = defaultEndDate.getFullYear() % 100
-      const startYearStr = String(startYear).padStart(2, '0')
-      const endYearStr = String(endYear).padStart(2, '0')
       
-      // race_keyは文字列なので、範囲クエリを使用
-      // 開始: 00_年_0_0_00（最小の場コード、最小の年、最小の回・日・R）
-      // 終了: 99_年_9_9_99（最大の場コード、最大の年、最大の回・日・R）
-      // 注意: 年が異なる場合は複数クエリが必要だが、簡易的に範囲クエリを使用
-      const startRaceKey = `00_${startYearStr}_0_0_00`
-      const endRaceKey = `99_${endYearStr}_9_9_99`
+      const startYear = defaultStartDate.getFullYear()
+      const endYear = defaultEndDate.getFullYear()
+      
+      // 現在の年をデフォルトでクエリ条件に含める
+      const currentYear = new Date().getFullYear()
+      const targetYear = startYear === endYear ? startYear : currentYear
 
-      const constraints: QueryConstraint[] = [
-        where('race_key', '>=', startRaceKey),
-        where('race_key', '<=', endRaceKey),
-        orderBy('race_key', 'desc')
-      ]
+      const constraints: QueryConstraint[] = []
+
+      // 日付範囲が指定されている場合は、dateフィールドでフィルタリング（yearフィールドが存在しないデータにも対応）
+      if (startDate && endDate) {
+        const startTimestamp = Timestamp.fromDate(startDate)
+        const endTimestamp = Timestamp.fromDate(endDate)
+        constraints.push(where('date', '>=', startTimestamp))
+        constraints.push(where('date', '<=', endTimestamp))
+      } else {
+        // 日付範囲が指定されていない場合は、yearフィールドでフィルタリング
+        constraints.push(where('year', '==', targetYear))
+      }
+
+      // ソート条件を追加
+      if (startDate && endDate) {
+        // 日付範囲指定時はdateフィールドでソート
+        constraints.push(orderBy('date', 'asc'))
+      } else {
+        // 日付範囲未指定時はrace_keyでソート
+        constraints.push(orderBy('race_key', 'desc'))
+      }
 
       // フィルター条件を追加
       if (filters?.racecourse) {
@@ -59,6 +67,7 @@ export function useRace() {
         constraints.push(where('surface', '==', filters.surface))
       }
 
+      // 単一のracesコレクションから取得
       const q = query(collection(db, 'races'), ...constraints)
       const snapshot = await getDocs(q)
       

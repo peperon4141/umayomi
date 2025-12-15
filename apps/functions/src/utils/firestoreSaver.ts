@@ -63,7 +63,31 @@ export async function saveRacesToFirestore(races: any[]): Promise<number> {
         day: race.day
       })
       
-      // race_keyをドキュメントIDとして使用
+      // 日付から年と月を取得
+      let year: number
+      let month: number
+      
+      if (race.date instanceof Date) {
+        year = race.date.getFullYear()
+        month = race.date.getMonth() + 1
+      } else if (race.date && typeof race.date === 'object' && 'toDate' in race.date) {
+        // Firestore Timestamp
+        const date = race.date.toDate()
+        year = date.getFullYear()
+        month = date.getMonth() + 1
+      } else if (race.date && typeof race.date === 'object' && 'seconds' in race.date) {
+        // Firestore Timestamp形式
+        const date = new Date(race.date.seconds * 1000)
+        year = date.getFullYear()
+        month = date.getMonth() + 1
+      } else {
+        // デフォルトは現在の年・月
+        const now = new Date()
+        year = now.getFullYear()
+        month = now.getMonth() + 1
+      }
+      
+      // 単一のracesコレクションに保存
       const docRef = db.collection('races').doc(race_key)
       
       const raceData = {
@@ -72,6 +96,8 @@ export async function saveRacesToFirestore(races: any[]): Promise<number> {
         // venueをracecourseに統一
         racecourse,
         venue: undefined, // 古いフィールドを削除
+        year,  // 年フィールドを追加
+        month, // 月フィールドを追加
         date: race.date,
         scrapedAt: race.scrapedAt,
         createdAt: new Date(),
@@ -87,6 +113,7 @@ export async function saveRacesToFirestore(races: any[]): Promise<number> {
     })
     
     await batch.commit()
+    
     logger.info('Races saved to Firestore successfully', { 
       savedCount: races.length,
       collection: 'races'
