@@ -6,13 +6,13 @@ export class RaceDetailPage {
 
   constructor(page: Page) {
     this.page = page
-    // ページが正しく読み込まれていることを検証
-    expect(new globalThis.URL(page.url()).pathname).toMatch(/\/race\/[a-zA-Z0-9]+/)
+    // ページが正しく読み込まれていることを検証（race_key形式: 場コード_年_回_日_R）
+    expect(new globalThis.URL(page.url()).pathname).toMatch(/\/race\/[a-zA-Z0-9_]+/)
   }
 
   // 静的メソッドでページ移動を簡潔に
-  static async visit(page: Page, raceId: string): Promise<RaceDetailPage> {
-    await page.goto(`/race/${raceId}`)
+  static async visit(page: Page, raceKey: string): Promise<RaceDetailPage> {
+    await page.goto(`/race/${raceKey}`)
     return new RaceDetailPage(page)
   }
 

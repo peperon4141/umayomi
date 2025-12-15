@@ -56,7 +56,7 @@ export class HomePage {
     await this.passwordInput.fill(password)
     await this.emailLoginButton.click()
     
-    await this.page.waitForURL(/\/races\/year\/\d{4}/, { timeout: 15000 })
+    await this.page.waitForURL('/race-list', { timeout: 15000 })
     return new DashboardPage(this.page)
   }
 
@@ -72,7 +72,7 @@ export class HomePage {
     
     // 実際のGoogle認証はポップアップで行われるため、E2Eテストでは完了を待てない
     // テストではスキップするか、モックを使用する
-    await this.page.waitForURL(/\/races\/year\/\d{4}/, { timeout: 15000 }).catch(() => {
+    await this.page.waitForURL('/race-list', { timeout: 15000 }).catch(() => {
       // Google認証が完了しない場合はタイムアウト
     })
     

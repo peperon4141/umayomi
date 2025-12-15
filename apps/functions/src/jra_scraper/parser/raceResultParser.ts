@@ -129,9 +129,7 @@ function extractRoundAndDay($: cheerio.CheerioAPI): { round: number | null, day:
   // 「○日目」のパターンを検索（1日目、2日目、...、a日目、b日目など）
   const dayMatch = pageText.match(/(\d+|[a-z])日目/)
   let day: string | null = null
-  if (dayMatch) {
-    day = dayMatch[1].toLowerCase()
-  }
+  if (dayMatch) day = dayMatch[1].toLowerCase()
   
   return { round, day }
 }

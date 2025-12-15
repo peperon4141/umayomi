@@ -96,15 +96,12 @@
 import { ref, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuth } from '@/composables/useAuth'
-import { useNavigation } from '@/composables/useNavigation'
 import ProfileDialog from '@/components/ProfileDialog.vue'
 import Breadcrumb from '@/components/Breadcrumb.vue'
-import { RouteName, getCurrentYear } from '@/router/routeCalculator'
 
 const router = useRouter()
 const route = useRoute()
 const { user, isAdmin, signOut } = useAuth()
-const { navigateTo } = useNavigation()
 const userMenuRef = ref()
 const showProfileDialog = ref(false)
 const sidebarOpen = ref(false)

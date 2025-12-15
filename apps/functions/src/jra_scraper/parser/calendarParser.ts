@@ -113,7 +113,7 @@ export function parseRaceElement($: cheerio.CheerioAPI, element: cheerio.Cheerio
     if (!date) return null
 
     // カレンダーページから開催回数と日目を抽出（可能な場合）
-    const roundAndDay = extractRoundAndDayFromCalendar($, element)
+    const roundAndDay = extractRoundAndDayFromCalendar($)
     
     return {
       raceNumber: index + 1,
@@ -212,7 +212,7 @@ function extractDateFromParent($: cheerio.CheerioAPI, element: cheerio.Cheerio<a
 /**
  * カレンダーページから開催回数と日目を抽出（可能な場合）
  */
-function extractRoundAndDayFromCalendar($: cheerio.CheerioAPI, element: cheerio.Cheerio<any>): { round: number | null, day: string | null } {
+function extractRoundAndDayFromCalendar($: cheerio.CheerioAPI): { round: number | null, day: string | null } {
   // カレンダーページ全体から開催回数と日目を抽出
   const pageText = $('body').text()
   
@@ -223,9 +223,7 @@ function extractRoundAndDayFromCalendar($: cheerio.CheerioAPI, element: cheerio.
   // 「○日目」のパターンを検索（1日目、2日目、...、a日目、b日目など）
   const dayMatch = pageText.match(/(\d+|[a-z])日目/)
   let day: string | null = null
-  if (dayMatch) {
-    day = dayMatch[1].toLowerCase()
-  }
+  if (dayMatch) day = dayMatch[1].toLowerCase()
   
   return { round, day }
 }

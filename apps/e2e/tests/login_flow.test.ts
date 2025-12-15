@@ -45,7 +45,7 @@ test.describe('ログインフロー', () => {
     
     const currentUrl = new URL(page.url())
     const isHomePage = currentUrl.pathname === '/'
-    const isRedirected = /\/races\/year\/\d{4}/.test(currentUrl.pathname)
+    const isRedirected = currentUrl.pathname === '/race-list'
     
     expect(isHomePage || isRedirected).toBe(true)
     
@@ -70,14 +70,14 @@ test.describe('ログインフロー', () => {
     await homePage.loginWithEmailAndPassword('test@example.com', 'password123')
     
     // レースページに遷移することを確認
-    await expect(page).toHaveURL(/\/races\/year\/\d{4}/)
+    await expect(page).toHaveURL('/race-list')
     // ローディングが終わるまで待つ
     await page.waitForSelector('.pi-spin', { state: 'hidden', timeout: 15000 }).catch(() => {
       // ローディングインジケーターが見つからない場合はスキップ
     })
     // レース一覧ページの要素が表示されることを確認
     await page.waitForSelector('h1.text-2xl', { timeout: 15000 })
-    await expect(page.locator('h1.text-2xl')).toContainText('競馬レース一覧')
+    await expect(page.locator('h1.text-2xl')).toContainText('レースリスト')
   })
 
   test.skip('Googleログインでログインしたらレースページに自動遷移する', async ({ page }) => {
@@ -89,14 +89,14 @@ test.describe('ログインフロー', () => {
     await homePage.loginWithGoogle()
     
     // レースページに遷移することを確認
-    await expect(page).toHaveURL(/\/races\/year\/\d{4}/)
+    await expect(page).toHaveURL('/race-list')
     // ローディングが終わるまで待つ
     await page.waitForSelector('.pi-spin', { state: 'hidden', timeout: 15000 }).catch(() => {
       // ローディングインジケーターが見つからない場合はスキップ
     })
     // レース一覧ページの要素が表示されることを確認
     await page.waitForSelector('h1.text-2xl', { timeout: 15000 })
-    await expect(page.locator('h1.text-2xl')).toContainText('競馬レース一覧')
+    await expect(page.locator('h1.text-2xl')).toContainText('レースリスト')
   })
 
   test.skip('メール認証でログイン後、リロードしたらまた同じページにアクセスできる', async ({ page }) => {
@@ -130,7 +130,7 @@ test.describe('ログインフロー', () => {
     const dashboardPage: DashboardPage = await homePage.loginWithEmailAndPassword('test@example.com', 'password123')
     
     // レースページに遷移することを確認
-    await expect(page).toHaveURL(/\/races\/year\/\d{4}/)
+    await expect(page).toHaveURL('/race-list')
     
     // ログアウト
     await dashboardPage.logout()
@@ -166,7 +166,7 @@ test.describe('ログインフロー', () => {
     await homePage.loginWithEmailAndPassword('test@example.com', 'password123')
     
     // レースページに遷移することを確認
-    await expect(page).toHaveURL(/\/races\/year\/\d{4}/)
+    await expect(page).toHaveURL('/race-list')
     
     // 管理画面にアクセス
     await page.goto('/admin')
@@ -208,7 +208,7 @@ test.describe('ログインフロー', () => {
     const dashboardPage: DashboardPage = await homePage.loginWithGoogle()
     
     // レースページに遷移することを確認
-    await expect(page).toHaveURL(/\/races\/year\/\d{4}/)
+    await expect(page).toHaveURL('/race-list')
     
     // ログアウト
     await dashboardPage.logout()
@@ -244,7 +244,7 @@ test.describe('ログインフロー', () => {
     await homePage.loginWithGoogle()
     
     // レースページに遷移することを確認
-    await expect(page).toHaveURL(/\/races\/year\/\d{4}/)
+    await expect(page).toHaveURL('/race-list')
     
     // 管理画面にアクセス
     await page.goto('/admin')

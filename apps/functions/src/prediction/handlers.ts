@@ -78,9 +78,7 @@ export async function handleRunDailyPrediction(request: any, response: any): Pro
       maxBuffer: 10 * 1024 * 1024 // 10MB
     })
 
-    if (stderr) {
-      logger.warn('Python script stderr', { stderr })
-    }
+    if (stderr) logger.warn('Python script stderr', { stderr })
 
     logger.info('Python script completed', { stdout })
 

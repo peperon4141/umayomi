@@ -55,12 +55,12 @@
         class="p-datatable-sm"
       >
         <Column :expander="true" style="width: 3rem" />
-        <Column field="venue" header="競馬場" :sortable="true">
+        <Column field="venue" header="競馬場" :sortable="false">
           <template #body="{ data }">
             <div class="font-semibold text-lg">{{ data.venue }}</div>
           </template>
         </Column>
-        <Column field="raceCount" header="レース数" :sortable="true" style="width: 100px">
+        <Column field="raceCount" header="レース数" :sortable="false" style="width: 100px">
           <template #body="{ data }">
             <Chip :label="`${data.raceCount}レース`" severity="info" />
           </template>
@@ -72,12 +72,12 @@
               :paginator="false"
               class="p-datatable-sm"
             >
-              <Column field="raceNumber" header="レース番号" :sortable="true" style="width: 80px">
+              <Column field="raceNumber" header="レース番号" :sortable="false" style="width: 80px">
                 <template #body="{ data }">
                   <Chip :label="String(data.raceNumber)" severity="info" />
                 </template>
               </Column>
-              <Column field="raceName" header="レース名" :sortable="true">
+              <Column field="raceName" header="レース名" :sortable="false">
                 <template #body="{ data }">
                   <div class="font-semibold">{{ data.raceName }}</div>
                   <div class="text-sm text-surface-600 mt-1">
@@ -89,7 +89,7 @@
                   </div>
                 </template>
               </Column>
-              <Column field="startTime" header="発走時刻" :sortable="true" style="width: 100px">
+              <Column field="startTime" header="発走時刻" :sortable="false" style="width: 100px">
                 <template #body="{ data }">
                   <span v-if="data.startTime" class="font-medium">
                     {{ formatStartTime(data.startTime) }}

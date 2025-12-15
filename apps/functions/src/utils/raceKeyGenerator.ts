@@ -28,9 +28,7 @@ export function dayToJRDBFormat(day: string | number | null | undefined): string
   if (!day) return '1' // デフォルトは1日目
   
   // 数値の場合はそのまま文字列に変換
-  if (typeof day === 'number') {
-    return day.toString()
-  }
+  if (typeof day === 'number') return day.toString()
   
   // 文字列の場合は小文字に変換（a, b, cなど）
   return day.toString().toLowerCase()
