@@ -133,8 +133,11 @@ const processRaceData = () => {
   const dateMap = new Map<string, Race[]>()
 
   races.value.forEach(race => {
-    const date = race.date instanceof Timestamp ? race.date.toDate() : race.date
-    const dateKey = formatDateKey(date)
+    const raceDateValue = race.raceDate || (race as any).date
+    const raceDate = raceDateValue instanceof Timestamp 
+      ? raceDateValue.toDate() 
+      : raceDateValue
+    const dateKey = formatDateKey(raceDate)
 
     if (!dateMap.has(dateKey)) {
       dateMap.set(dateKey, [])

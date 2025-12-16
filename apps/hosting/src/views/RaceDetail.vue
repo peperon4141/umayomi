@@ -4,22 +4,40 @@
     <div v-if="raceDetail" class="mb-2">
       <h1 class="text-3xl font-bold text-gray-900">{{ raceDetail.raceNumber }}R {{ raceDetail.raceName }}</h1>
       <p class="text-gray-600 mt-1">
-        {{ raceDetail.racecourse }} - {{ formatDate(raceDetail.date) }}
-        <span v-if="raceDetail.round || raceDetail.day" class="ml-2">
+        {{ raceDetail.racecourse }} - {{ formatDate(raceDetail.raceDate || (raceDetail as any).date) }}
+        <span v-if="raceDetail.round" class="ml-2">
           <span v-if="raceDetail.round">第{{ raceDetail.round }}回</span>
-          <span v-if="raceDetail.day">{{ formatDay(raceDetail.day) }}日目</span>
         </span>
       </p>
+      <div v-if="raceKey" class="mt-2">
+        <Chip :label="`race_key: ${raceKey}`" severity="secondary" class="font-mono text-xs" />
+      </div>
       
       <!-- レース情報タグ -->
       <div class="flex flex-wrap gap-2 mt-3">
         <Chip v-if="raceDetail.round" :label="`第${raceDetail.round}回`" severity="info" />
-        <Chip v-if="raceDetail.day" :label="`${formatDay(raceDetail.day)}日目`" severity="info" />
         <Chip :label="raceDetail.distance ? `${raceDetail.distance}m` : '距離未定'" severity="info" />
         <Chip :label="raceDetail.surface || 'コース未定'" severity="secondary" />
         <Chip :label="raceDetail.weather || '天候未定'" severity="success" />
         <Chip :label="raceDetail.trackCondition || '馬場未定'" severity="warning" />
         <Chip v-if="raceDetail.grade" :label="raceDetail.grade" :severity="getGradeSeverity(raceDetail.grade)" />
+      </div>
+      
+      <!-- JRDBデータ取得ボタン -->
+      <div class="mt-4">
+        <Button
+          label="JRDBデータ取得"
+          icon="pi pi-download"
+          :loading="jrdbLoading"
+          @click="fetchJRDBData"
+          :disabled="!raceDetail"
+        />
+        <Message v-if="jrdbError" severity="error" :closable="false" class="mt-2">
+          {{ jrdbError }}
+        </Message>
+        <Message v-if="jrdbSuccess" severity="success" :closable="true" class="mt-2" @close="jrdbSuccess = null">
+          {{ jrdbSuccess }}
+        </Message>
       </div>
     </div>
 
@@ -168,6 +186,8 @@ import AppLayout from '@/layouts/AppLayout.vue'
 import type { Race } from '../../../shared/race'
 import { usePrediction } from '@/composables/usePrediction'
 import { generateRaceKey } from '@/utils/raceKeyGenerator'
+import { getFunctionUrl } from '@/utils/functionUrl'
+import { getAuth } from 'firebase/auth'
 
 const router = useRouter()
 const { getParam } = useNavigation()
@@ -182,24 +202,28 @@ const loading = ref(false)
 const error = ref<string | null>(null)
 const predictionsLoading = ref(false)
 const predictionsData = ref<any>(null)
+const jrdbLoading = ref(false)
+const jrdbError = ref<string | null>(null)
+const jrdbSuccess = ref<string | null>(null)
 
 // レースキーを生成（raceDetailから）
 const raceKey = computed(() => {
   if (!raceDetail.value) return null
   
   // 日付をDate型に変換
-  const date = raceDetail.value.date instanceof Timestamp 
-    ? raceDetail.value.date.toDate() 
-    : raceDetail.value.date instanceof Date
-    ? raceDetail.value.date
-    : new Date(raceDetail.value.date)
+  const raceDateValue = raceDetail.value.raceDate || (raceDetail.value as any).date
+  const date = raceDateValue instanceof Timestamp 
+    ? raceDateValue.toDate() 
+    : raceDateValue instanceof Date
+    ? raceDateValue
+    : new Date(raceDateValue)
   
   return generateRaceKey({
-    date,
+    raceDate: date,
+    date: date, // 後方互換性のため
     racecourse: raceDetail.value.racecourse,
     raceNumber: raceDetail.value.raceNumber,
-    round: raceDetail.value.round,
-    day: raceDetail.value.day
+    round: raceDetail.value.round
   })
 })
 
@@ -215,9 +239,10 @@ const loadPredictions = async () => {
   
   predictionsLoading.value = true
   try {
-    const date = raceDetail.value.date instanceof Timestamp 
-      ? raceDetail.value.date.toDate() 
-      : raceDetail.value.date
+    const raceDateValue = raceDetail.value.raceDate || (raceDetail.value as any).date
+    const date = raceDateValue instanceof Timestamp 
+      ? raceDateValue.toDate() 
+      : raceDateValue
     const dateStr = date.toISOString().split('T')[0]
     predictionsData.value = await getPredictionsByDate(dateStr)
   } catch (err: any) {
@@ -240,14 +265,6 @@ const formatDate = (date: any) => {
     return '日付エラー'
   }
 }
-
-// 日目フォーマット関数（1, 2, 3, ..., a, b, cなど）
-const formatDay = (day: string | number | null | undefined): string => {
-  if (!day) return ''
-  if (typeof day === 'number') return day.toString()
-  return day.toString()
-}
-
 
 const getGradeSeverity = (grade: string | undefined) => {
   if (!grade) return 'contrast'
@@ -304,6 +321,66 @@ const fetchRaceDetail = async (raceKey: string) => {
     console.error('レース詳細取得エラー:', err)
   } finally {
     loading.value = false
+  }
+}
+
+// JRDBデータを取得
+const fetchJRDBData = async () => {
+  if (!raceDetail.value) return
+  
+  jrdbLoading.value = true
+  jrdbError.value = null
+  jrdbSuccess.value = null
+  
+  try {
+    // 日付を取得
+    const raceDateValue = raceDetail.value.raceDate || (raceDetail.value as any).date
+    const date = raceDateValue instanceof Timestamp 
+      ? raceDateValue.toDate() 
+      : raceDateValue instanceof Date
+      ? raceDateValue
+      : new Date(raceDateValue)
+    
+    const dateStr = date.toISOString().split('T')[0]
+    
+    // 認証トークンを取得
+    const auth = getAuth()
+    const user = auth.currentUser
+    if (!user) {
+      throw new Error('ログインが必要です')
+    }
+    
+    const token = await user.getIdToken()
+    
+    // Cloud Functionを呼び出し
+    const functionUrl = getFunctionUrl('fetchJRDBDailyDataOnly')
+    const url = new URL(functionUrl)
+    url.searchParams.set('date', dateStr)
+    
+    const response = await fetch(url.toString(), {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
+      throw new Error(errorData.error || `HTTP error! status: ${response.status}`)
+    }
+    
+    const result = await response.json()
+    
+    if (result.success) {
+      jrdbSuccess.value = `JRDBデータの取得が完了しました。${result.resultSummary?.successCount || 0}件のデータタイプを取得しました。`
+    } else {
+      throw new Error(result.error || 'データ取得に失敗しました')
+    }
+  } catch (err: any) {
+    jrdbError.value = err.message || 'JRDBデータの取得に失敗しました'
+    console.error('JRDBデータ取得エラー:', err)
+  } finally {
+    jrdbLoading.value = false
   }
 }
 

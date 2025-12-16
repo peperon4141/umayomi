@@ -76,10 +76,12 @@ const raceDays = computed(() => {
   const grouped: { [key: string]: { id: string, date: string, venue: string, races: Race[] } } = {}
   
   races.value.forEach((race: Race) => {
-    const raceDate = race.date instanceof Date ? race.date : (race.date as any).toDate()
-    const year = raceDate.getFullYear()
-    const month = raceDate.getMonth() + 1
-    const day = raceDate.getDate()
+    const raceDateValue = (race.raceDate || (race as any).date) instanceof Date 
+      ? (race.raceDate || (race as any).date) 
+      : ((race.raceDate || (race as any).date) as any).toDate()
+    const year = raceDateValue.getFullYear()
+    const month = raceDateValue.getMonth() + 1
+    const day = raceDateValue.getDate()
     
     const dayId = `${year}-${month}-${day}`
     const dateStr = `${year}年${month}月${day}日`

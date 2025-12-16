@@ -80,19 +80,29 @@
                   <div class="font-semibold">{{ data.raceName }}</div>
                   <div class="text-sm text-surface-600 mt-1">
                     <span v-if="data.round">第{{ data.round }}回 </span>
-                    <span v-if="data.day">{{ formatDay(data.day) }}日目 </span>
                     <span v-if="data.grade">{{ data.grade }} / </span>
                     <span v-if="data.distance">{{ formatDistance(data.distance) }} / </span>
                     <span>{{ data.surface || 'コース未定' }}</span>
                   </div>
                 </template>
               </Column>
-              <Column field="startTime" header="発走時刻" :sortable="false" style="width: 100px">
+              <Column field="raceStartTime" header="発走時刻" :sortable="false" style="width: 100px">
                 <template #body="{ data }">
-                  <span v-if="data.startTime" class="font-medium">
-                    {{ formatStartTime(data.startTime) }}
+                  <span v-if="data.raceStartTime" class="font-medium">
+                    {{ formatStartTime(data.raceStartTime) }}
                   </span>
                   <span v-else class="text-surface-400">未定</span>
+                </template>
+              </Column>
+              <Column field="race_key" header="race_key" :sortable="false" style="width: 180px">
+                <template #body="{ data }">
+                  <Chip 
+                    v-if="data.race_key" 
+                    :label="data.race_key" 
+                    severity="secondary" 
+                    class="font-mono text-xs" 
+                  />
+                  <span v-else class="text-surface-400 text-xs">未設定</span>
                 </template>
               </Column>
               <Column header="アクション" :exportable="false" style="width: 100px">
@@ -122,6 +132,7 @@ import type { Race } from '../../../shared/race'
 import { convertVenueToId } from '@/router/routeCalculator'
 import { getVenueNameFromId } from '@/entity'
 import { RouteName } from '@/router/routeCalculator'
+import { Timestamp } from 'firebase/firestore'
 
 interface VenueRaceGroup {
   venue: string
@@ -130,11 +141,13 @@ interface VenueRaceGroup {
 }
 
 const { navigateTo, navigateTo404, getParams, getQuery } = useNavigation()
-const { races, loading, error, fetchRaces } = useRace()
+const { races, fetchRaces } = useRace()
 
 const dayRaces = ref<Race[]>([])
 const dayName = ref('')
 const expandedRows = ref<VenueRaceGroup[]>([])
+const loading = ref(false)
+const error = ref<string | null>(null)
 
 // 競馬場ごとにレースをグループ化（DataTable用）
 const venueGroups = computed<VenueRaceGroup[]>(() => {
@@ -168,12 +181,6 @@ const formatDistance = (distance: number | null | undefined): string => {
   return `${distance.toLocaleString()}m`
 }
 
-// 日目フォーマット関数（1, 2, 3, ..., a, b, cなど）
-const formatDay = (day: string | number | null | undefined): string => {
-  if (!day) return ''
-  if (typeof day === 'number') return day.toString()
-  return day.toString()
-}
 
 // 発走時刻をフォーマット
 const formatStartTime = (startTime: any): string => {
@@ -233,29 +240,68 @@ const getJRAUrlForDay = (): string => {
 // その日のレースデータを取得
 const loadDayRaces = async (year: number, month: number, day: number) => {
   try {
-    // 指定された日付の範囲でデータを取得
-    const startDate = new Date(year, month - 1, day, 0, 0, 0, 0)
-    const endDate = new Date(year, month - 1, day, 23, 59, 59, 999)
+    loading.value = true
+    error.value = null
+    
+    // 指定された日付の範囲でデータを取得（UTC時刻で指定）
+    // 日本時間（JST）で指定された日付をUTCに変換
+    // JST = UTC + 9時間なので、UTCでは前日の15:00から当日の14:59:59まで
+    const startDate = new Date(Date.UTC(year, month - 1, day, 0, 0, 0, 0))
+    const endDate = new Date(Date.UTC(year, month - 1, day, 23, 59, 59, 999))
     
     await fetchRaces(startDate, endDate)
     
-    // 指定された日付のレースをフィルタリング
+    // Firestoreのクエリで既にフィルタリングされているが、
+    // タイムゾーンの問題を考慮して、再度フィルタリング
     const filteredRaces = races.value.filter(race => {
-      const raceDate = race.date instanceof Date ? race.date : (race.date as any).toDate()
-      return raceDate.getFullYear() === year && 
-             raceDate.getMonth() === month - 1 && 
-             raceDate.getDate() === day
+      // raceDateがTimestampの場合はtoDate()を使用、Dateの場合はそのまま使用
+      let raceDateValue: Date
+      if (race.raceDate instanceof Timestamp) {
+        raceDateValue = race.raceDate.toDate()
+      } else if (race.raceDate instanceof Date) {
+        raceDateValue = race.raceDate
+      } else if (race.raceDate && typeof race.raceDate === 'object' && 'toDate' in race.raceDate) {
+        raceDateValue = (race.raceDate as any).toDate()
+      } else if (race.raceDate && typeof race.raceDate === 'object' && 'seconds' in race.raceDate) {
+        raceDateValue = new Date((race.raceDate as any).seconds * 1000)
+      } else {
+        // 後方互換性のため、dateフィールドも確認
+        const dateValue = (race as any).date
+        if (dateValue instanceof Timestamp) {
+          raceDateValue = dateValue.toDate()
+        } else if (dateValue instanceof Date) {
+          raceDateValue = dateValue
+        } else if (dateValue && typeof dateValue === 'object' && 'toDate' in dateValue) {
+          raceDateValue = dateValue.toDate()
+        } else if (dateValue && typeof dateValue === 'object' && 'seconds' in dateValue) {
+          raceDateValue = new Date(dateValue.seconds * 1000)
+        } else {
+          return false // 日付が取得できない場合は除外
+        }
+      }
+      
+      // 日付を比較（年、月、日のみ）
+      return raceDateValue.getUTCFullYear() === year && 
+             raceDateValue.getUTCMonth() === month - 1 && 
+             raceDateValue.getUTCDate() === day
     })
+    
+    console.log('取得したレース数:', races.value.length, 'フィルタリング後:', filteredRaces.length)
     
     if (filteredRaces.length > 0) {
       dayName.value = `${year}年${month}月${day}日`
       dayRaces.value = filteredRaces
     } else {
-      navigateTo404()
+      // データがない場合でも、エラーではなく空の状態を表示
+      dayName.value = `${year}年${month}月${day}日`
+      dayRaces.value = []
     }
   } catch (err) {
     console.error('レースデータの取得に失敗しました:', err)
-    navigateTo404()
+    error.value = err instanceof Error ? err.message : 'レースデータの取得に失敗しました'
+    dayRaces.value = []
+  } finally {
+    loading.value = false
   }
 }
 
@@ -270,13 +316,15 @@ const loadDayRacesByPlace = async (year: number, month: number, day: number, pla
     
     // 指定された日付と競馬場のレースをフィルタリング
     const filteredRaces = races.value.filter(race => {
-      const raceDate = race.date instanceof Date ? race.date : (race.date as any).toDate()
+      const raceDateValue = (race.raceDate || (race as any).date) instanceof Date 
+        ? (race.raceDate || (race as any).date) 
+        : ((race.raceDate || (race as any).date) as any).toDate()
       // 後方互換性のため、racecourseまたはvenueを確認
       const venue = (race as any).racecourse || (race as any).venue || '東京'
       const venueId = convertVenueToId(venue)
-      return raceDate.getFullYear() === year && 
-             raceDate.getMonth() === month - 1 && 
-             raceDate.getDate() === day &&
+      return raceDateValue.getFullYear() === year && 
+             raceDateValue.getMonth() === month - 1 && 
+             raceDateValue.getDate() === day &&
              venueId === placeId
     })
     

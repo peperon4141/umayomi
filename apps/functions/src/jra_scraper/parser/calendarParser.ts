@@ -21,8 +21,14 @@ export function parseJRACalendar(html: string, year: number, month: number): any
           const raceData = parseRaceElement($, element, index, year, month)
           if (raceData) races.push(raceData)
           
-        } catch (error) {
-          logger.warn('Failed to parse race element', { index, error })
+        } catch (error: any) {
+          // roundがnullの場合のエラーは、fallbackを禁止するため、再スローする
+          const errorMessage = error?.message || String(error) || ''
+          if (errorMessage.includes('Failed to extract round from JRA calendar page')) {
+            logger.error('Failed to extract round from calendar page', { index, error, errorMessage })
+            throw error
+          }
+          logger.warn('Failed to parse race element', { index, error, errorMessage })
         }
       })
     } else {
@@ -112,19 +118,30 @@ export function parseRaceElement($: cheerio.CheerioAPI, element: cheerio.Cheerio
     const date = extractDateFromParent($, element, year, month)
     if (!date) return null
 
-    // カレンダーページから開催回数と日目を抽出（可能な場合）
-    const roundAndDay = extractRoundAndDayFromCalendar($)
+    // カレンダーページから開催回数を抽出（必須）
+    const round = extractRoundFromCalendar($)
+    
+    // roundがnullの場合はエラーを投げる（fallbackを禁止）
+    if (round == null) {
+      const pageTitle = $('title').text()
+      const pageText = $('body').text().substring(0, 1000)
+      throw new Error(
+        `Failed to extract round from JRA calendar page. ` +
+        `pageTitle: ${pageTitle}, ` +
+        `pageText sample: ${pageText.substring(0, 200)}. ` +
+        `Please check the HTML structure and update extractRoundFromCalendar function.`
+      )
+    }
     
     return {
       raceNumber: index + 1,
       raceName,
       grade,
       venue,
-      date,
+      raceDate: date,
       year,
       month,
-      round: roundAndDay.round,
-      day: roundAndDay.day,
+      round: round,
       // カレンダーページには距離データがないため、デフォルト値を設定
       distance: null,
       surface: null,
@@ -132,8 +149,14 @@ export function parseRaceElement($: cheerio.CheerioAPI, element: cheerio.Cheerio
       trackCondition: null,
       scrapedAt: new Date(Date.UTC(new Date().getFullYear(), new Date().getMonth(), new Date().getDate(), 0, 0, 0, 0))
     }
-  } catch (error) {
-    logger.warn('Failed to parse race element', { error })
+  } catch (error: any) {
+    // roundがnullの場合のエラーは、fallbackを禁止するため、再スローする
+    const errorMessage = error?.message || String(error) || ''
+    if (errorMessage.includes('Failed to extract round from JRA calendar page')) {
+      logger.error('Failed to extract round from calendar page in parseRaceElement', { error, errorMessage })
+      throw error
+    }
+    logger.warn('Failed to parse race element', { error, errorMessage })
     return null
   }
 }
@@ -210,21 +233,38 @@ function extractDateFromParent($: cheerio.CheerioAPI, element: cheerio.Cheerio<a
 }
 
 /**
- * カレンダーページから開催回数と日目を抽出（可能な場合）
+ * カレンダーページから開催回数を抽出（可能な場合）
  */
-function extractRoundAndDayFromCalendar($: cheerio.CheerioAPI): { round: number | null, day: string | null } {
-  // カレンダーページ全体から開催回数と日目を抽出
-  const pageText = $('body').text()
+function extractRoundFromCalendar($: cheerio.CheerioAPI): number | null {
+  // カレンダーページ全体から開催回数を抽出
+  // より具体的なセレクタを使用
+  let pageText = ''
+  
+  // ヘッダー部分を優先的に検索
+  const headerSelectors = [
+    'h1', 'h2', 'h3',
+    '.header', '.title', '.page-title',
+    '.month_title', '.kaisai_title'
+  ]
+  
+  for (const selector of headerSelectors) {
+    const headerText = $(selector).text()
+    if (headerText) {
+      pageText += headerText + ' '
+    }
+  }
+  
+  // ヘッダーから取得できなかった場合はbody全体から検索
+  if (!pageText) {
+    pageText = $('body').text()
+  }
   
   // 「第○回」のパターンを検索
   const roundMatch = pageText.match(/第(\d+)回/)
   const round = roundMatch ? parseInt(roundMatch[1]) : null
   
-  // 「○日目」のパターンを検索（1日目、2日目、...、a日目、b日目など）
-  const dayMatch = pageText.match(/(\d+|[a-z])日目/)
-  let day: string | null = null
-  if (dayMatch) day = dayMatch[1].toLowerCase()
+  logger.info('Extracted round from calendar', { round, pageTextSample: pageText.substring(0, 200) })
   
-  return { round, day }
+  return round
 }
 

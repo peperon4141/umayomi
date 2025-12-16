@@ -9,6 +9,7 @@ import {
 } from './jra_scraper/handlers'
 import { handleFetchJRDBDailyData, handleFetchJRDBAnnualData } from './jrdb_scraper/handlers'
 import { handleRunDailyPrediction } from './prediction/handlers'
+import { handleFetchJRDBDailyDataOnly } from './jrdb_scraper/handlers_fetch_only'
 import { addYearMonthToRaces } from './utils/addYearMonthToRaces'
 
 // 開発環境の場合、.envファイルを読み込む
@@ -148,6 +149,22 @@ export const fetchJRDBAnnualData = onRequest(
 export const runDailyPrediction = onRequest(
   { timeoutSeconds: 600, memory: '2GiB', region: 'asia-northeast1', cors: true },
   handleRunDailyPrediction
+)
+
+/**
+ * Pythonスクリプトを実行してJRDBからdailyデータを取得するCloud Function（データ取得のみ）
+ * 
+ * 必須パラメータ（query）:
+ * - date: 日付（YYYY-MM-DD形式）または
+ * - year, month, day: 年月日
+ * 
+ * 例: 
+ * - 日付指定: https://.../fetchJRDBDailyDataOnly?date=2025-11-30
+ * - 年月日指定: https://.../fetchJRDBDailyDataOnly?year=2025&month=11&day=30
+ */
+export const fetchJRDBDailyDataOnly = onRequest(
+  { timeoutSeconds: 600, memory: '2GiB', region: 'asia-northeast1', cors: true },
+  handleFetchJRDBDailyDataOnly
 )
 
 /**

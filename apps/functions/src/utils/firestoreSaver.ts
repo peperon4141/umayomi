@@ -49,42 +49,129 @@ export async function saveRacesToFirestore(races: any[]): Promise<number> {
     const db = getFirestore()
     const batch = db.batch()
     
-    races.forEach(race => {
+    // race_keyの重複をチェック
+    const raceKeyCounts: { [key: string]: number } = {}
+    const duplicateRaceKeys: string[] = []
+    
+    races.forEach((race, index) => {
       // venueをracecourseにマッピング（後方互換性のため両方を確認）
       const venue = race.venue || race.racecourse
+      if (!venue) {
+        throw new Error(
+          `venue or racecourse is required but both were null or undefined. ` +
+          `race index: ${index}, raceNumber: ${race.raceNumber}, round: ${race.round}`
+        )
+      }
       const racecourse = venue
       
       // race_keyを生成
+      const raceDate = race.raceDate || race.date // 後方互換性のため
+      if (!raceDate) {
+        throw new Error(
+          `raceDate or date is required but both were null or undefined. ` +
+          `race index: ${index}, venue: ${venue}, raceNumber: ${race.raceNumber}, round: ${race.round}`
+        )
+      }
       const race_key = generateRaceKey({
-        date: race.date,
+        date: raceDate,
         racecourse,
         raceNumber: race.raceNumber,
-        round: race.round,
-        day: race.day
+        round: race.round
       })
+      
+      // 重複チェック（最初の重複時に詳細ログを出力）
+      const count = (raceKeyCounts[race_key] || 0) + 1
+      raceKeyCounts[race_key] = count
+      
+      if (count === 2) {
+        // 最初の重複を検出した時点で詳細ログを出力
+        const existingRace = races.find((r, i) => {
+          if (i >= index) return false
+          const existingKey = generateRaceKey({
+            date: r.raceDate || r.date,
+            racecourse: r.venue || r.racecourse,
+            raceNumber: r.raceNumber,
+            round: r.round
+          })
+          return existingKey === race_key
+        })
+        
+        if (existingRace) {
+          const existingVenue = existingRace.venue || existingRace.racecourse
+          const existingDate = existingRace.raceDate || existingRace.date
+          const currentVenue = race.venue || race.racecourse
+          const currentDate = race.raceDate || race.date
+          
+          logger.warn('Duplicate race_key detected - first occurrence', {
+            race_key,
+            existingRace: {
+              raceDate: existingDate,
+              venue: existingVenue,
+              raceNumber: existingRace.raceNumber,
+              round: existingRace.round
+            },
+            currentRace: {
+              raceDate: currentDate,
+              venue: currentVenue,
+              raceNumber: race.raceNumber,
+              round: race.round
+            }
+          })
+        }
+      }
+      
+      if (count > 1 && !duplicateRaceKeys.includes(race_key)) {
+        duplicateRaceKeys.push(race_key)
+      }
       
       // 日付から年と月を取得
       let year: number
       let month: number
       
-      if (race.date instanceof Date) {
-        year = race.date.getFullYear()
-        month = race.date.getMonth() + 1
-      } else if (race.date && typeof race.date === 'object' && 'toDate' in race.date) {
+      if (raceDate instanceof Date) {
+        year = raceDate.getFullYear()
+        month = raceDate.getMonth() + 1
+      } else if (raceDate && typeof raceDate === 'object' && 'toDate' in raceDate) {
         // Firestore Timestamp
-        const date = race.date.toDate()
+        const date = raceDate.toDate()
         year = date.getFullYear()
         month = date.getMonth() + 1
-      } else if (race.date && typeof race.date === 'object' && 'seconds' in race.date) {
+      } else if (raceDate && typeof raceDate === 'object' && 'seconds' in raceDate) {
         // Firestore Timestamp形式
-        const date = new Date(race.date.seconds * 1000)
+        const date = new Date(raceDate.seconds * 1000)
+        if (isNaN(date.getTime())) {
+          throw new Error(
+            `Invalid Firestore Timestamp: ${JSON.stringify(raceDate)}. ` +
+            `race index: ${index}, venue: ${venue}, raceNumber: ${race.raceNumber}, round: ${race.round}`
+          )
+        }
         year = date.getFullYear()
         month = date.getMonth() + 1
       } else {
-        // デフォルトは現在の年・月
-        const now = new Date()
-        year = now.getFullYear()
-        month = now.getMonth() + 1
+        // Dateオブジェクトに変換を試みる
+        const date = new Date(raceDate)
+        if (isNaN(date.getTime())) {
+          throw new Error(
+            `Invalid date value: ${raceDate}. ` +
+            `race index: ${index}, venue: ${venue}, raceNumber: ${race.raceNumber}, round: ${race.round}`
+          )
+        }
+        year = date.getFullYear()
+        month = date.getMonth() + 1
+      }
+      
+      // 年と月の妥当性チェック
+      if (!year || year < 1900 || year > 2100) {
+        throw new Error(
+          `Invalid year: ${year}. Year must be between 1900 and 2100. ` +
+          `race index: ${index}, venue: ${venue}, raceNumber: ${race.raceNumber}, round: ${race.round}`
+        )
+      }
+      if (!month || month < 1 || month > 12) {
+        throw new Error(
+          `Invalid month: ${month}. Month must be between 1 and 12. ` +
+          `race index: ${index}, venue: ${venue}, raceNumber: ${race.raceNumber}, round: ${race.round}`
+        )
       }
       
       // 単一のracesコレクションに保存
@@ -98,7 +185,8 @@ export async function saveRacesToFirestore(races: any[]): Promise<number> {
         venue: undefined, // 古いフィールドを削除
         year,  // 年フィールドを追加
         month, // 月フィールドを追加
-        date: race.date,
+        raceDate: raceDate, // raceDateに統一
+        date: undefined, // 古いフィールドを削除
         scrapedAt: race.scrapedAt,
         createdAt: new Date(),
         updatedAt: new Date()
@@ -112,14 +200,26 @@ export async function saveRacesToFirestore(races: any[]): Promise<number> {
       batch.set(docRef, raceData)
     })
     
+    // 重複がある場合は警告を出力
+    if (duplicateRaceKeys.length > 0) {
+      logger.warn('Duplicate race_keys detected', {
+        duplicateCount: duplicateRaceKeys.length,
+        duplicateKeys: duplicateRaceKeys,
+        totalRaces: races.length,
+        uniqueRaceKeys: Object.keys(raceKeyCounts).length
+      })
+    }
+    
     await batch.commit()
     
     logger.info('Races saved to Firestore successfully', { 
       savedCount: races.length,
+      uniqueRaceKeys: Object.keys(raceKeyCounts).length,
+      duplicateRaceKeys: duplicateRaceKeys.length,
       collection: 'races'
     })
     
-    return races.length
+    return Object.keys(raceKeyCounts).length // 重複を考慮してユニークなrace_keyの数を返す
     
   } catch (error) {
     logger.error('Failed to save races to Firestore', { error })

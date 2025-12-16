@@ -44,7 +44,7 @@ describe('parseJRARaceResult', () => {
       if (expectedRace) {
         expect(race.distance).toBe(expectedRace.distance)
         expect(race.surface).toBe(expectedRace.surface)
-                expect(new Date(race.startTime).toISOString()).toBe(new Date(expectedRace.startTime).toISOString())
+                expect(new Date(race.raceStartTime).toISOString()).toBe(new Date(expectedRace.raceStartTime).toISOString())
       }
     })
   })
@@ -72,6 +72,40 @@ describe('extractRaceInfo', () => {
              race.raceName.includes('スワンステークス'))
 
     expect(hasRaceName).toBe(true)
+  })
+
+  it('roundがnullの場合はエラーを投げる（fallbackを禁止）', () => {
+    // round情報が含まれていないHTML（第○回のパターンがない）
+    const html = `
+      <html>
+        <head><title>開催日程 2025年11月1日（土曜）　競馬番組　JRA</title></head>
+        <body>
+          <div id="rcA">
+            <table>
+              <tbody>
+                <tr>
+                  <th class="num">レース1</th>
+                  <td class="name">
+                    <p class="stakes"><strong>テストレース</strong></p>
+                    <p class="race_cond">
+                      <span class="dist">1600</span>
+                      <span class="type">芝</span>
+                    </p>
+                  </td>
+                  <td class="time">9時50分</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </body>
+      </html>
+    `
+    const $ = cheerio.load(html)
+    
+    // roundがnullの場合、エラーが投げられることを確認
+    expect(() => {
+      extractRaceInfo($)
+    }).toThrow(/Failed to extract round from JRA HTML/)
   })
 })
 

@@ -12,7 +12,7 @@
       "collectionGroup": "races",
       "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "date", "order": "ASCENDING" }
+        { "fieldPath": "raceDate", "order": "ASCENDING" }
       ]
     },
     {
@@ -20,7 +20,7 @@
       "queryScope": "COLLECTION",
       "fields": [
         { "fieldPath": "year", "order": "ASCENDING" },
-        { "fieldPath": "date", "order": "ASCENDING" }
+        { "fieldPath": "raceDate", "order": "ASCENDING" }
       ]
     },
     {

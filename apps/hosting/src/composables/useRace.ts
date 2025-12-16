@@ -36,12 +36,21 @@ export function useRace() {
 
       const constraints: QueryConstraint[] = []
 
-      // 日付範囲が指定されている場合は、dateフィールドでフィルタリング（yearフィールドが存在しないデータにも対応）
+      // 日付範囲が指定されている場合は、raceDateフィールドでフィルタリング
+      // yearフィールドも併用してクエリを最適化
       if (startDate && endDate) {
         const startTimestamp = Timestamp.fromDate(startDate)
         const endTimestamp = Timestamp.fromDate(endDate)
-        constraints.push(where('date', '>=', startTimestamp))
-        constraints.push(where('date', '<=', endTimestamp))
+        const startYear = startDate.getFullYear()
+        const endYear = endDate.getFullYear()
+        
+        // yearフィールドが存在する場合は、yearフィールドでもフィルタリングしてクエリを最適化
+        if (startYear === endYear) {
+          constraints.push(where('year', '==', startYear))
+        }
+        
+        constraints.push(where('raceDate', '>=', startTimestamp))
+        constraints.push(where('raceDate', '<=', endTimestamp))
       } else {
         // 日付範囲が指定されていない場合は、yearフィールドでフィルタリング
         constraints.push(where('year', '==', targetYear))
@@ -49,8 +58,8 @@ export function useRace() {
 
       // ソート条件を追加
       if (startDate && endDate) {
-        // 日付範囲指定時はdateフィールドでソート
-        constraints.push(orderBy('date', 'asc'))
+        // 日付範囲指定時はraceDateフィールドでソート
+        constraints.push(orderBy('raceDate', 'asc'))
       } else {
         // 日付範囲未指定時はrace_keyでソート
         constraints.push(orderBy('race_key', 'desc'))
@@ -111,9 +120,9 @@ export function useRace() {
     const grouped: { [key: string]: Race[] } = {}
     
     races.value.forEach((race: Race) => {
-      // race.dateがTimestampの場合はtoDate()を使用、Dateの場合はそのまま使用
-      const date = race.date instanceof Timestamp ? race.date.toDate() : race.date
-      const dateStr = date.toLocaleDateString('ja-JP')
+      // race.raceDateがTimestampの場合はtoDate()を使用、Dateの場合はそのまま使用
+      const raceDate = race.raceDate instanceof Timestamp ? race.raceDate.toDate() : race.raceDate
+      const dateStr = raceDate.toLocaleDateString('ja-JP')
       if (!grouped[dateStr]) {
         grouped[dateStr] = []
       }

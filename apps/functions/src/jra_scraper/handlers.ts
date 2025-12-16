@@ -69,12 +69,21 @@ export async function handleScrapeJRACalendarWithRaceResults(request: any, respo
         const day = raceDate.getUTCDate()
         const raceResultUrl = generateJRARaceResultUrl(targetYear, targetMonth, day)
         logger.info('Fetching race results for date', { date: dateKey, day, url: raceResultUrl })
+        // #region agent log
+        fetch('http://127.0.0.1:7243/ingest/fcefbb62-f3cd-4a1a-a659-1e87ee5897f4',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'handlers.ts:69',message:'Fetching race results',data:{dateKey,day,targetYear,targetMonth,url:raceResultUrl},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'ALL'})}).catch(()=>{});
+        // #endregion
         
         const raceResultHtml = await fetchJRAHtmlWithPlaywright(raceResultUrl)
+        // #region agent log
+        fetch('http://127.0.0.1:7243/ingest/fcefbb62-f3cd-4a1a-a659-1e87ee5897f4',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'handlers.ts:73',message:'HTML fetched',data:{dateKey,htmlLength:raceResultHtml.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'ALL'})}).catch(()=>{});
+        // #endregion
         const raceResults = parseJRARaceResult(raceResultHtml, targetYear, targetMonth, day)
         
         allRaceResults.push(...raceResults)
         logger.info('Race results fetched for date', { date: dateKey, count: raceResults.length })
+        // #region agent log
+        fetch('http://127.0.0.1:7243/ingest/fcefbb62-f3cd-4a1a-a659-1e87ee5897f4',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'handlers.ts:77',message:'Race results parsed',data:{dateKey,raceResultsCount:raceResults.length,venues:raceResults.map((r:any)=>r.venue)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'ALL'})}).catch(()=>{});
+        // #endregion
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error'
         const errorStack = error instanceof Error ? error.stack : undefined

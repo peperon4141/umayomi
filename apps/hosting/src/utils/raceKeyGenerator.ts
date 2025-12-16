@@ -72,14 +72,15 @@ export function yearToJRDBFormat(year: number | null | undefined): string {
  * 形式: 場コード_年_回_日_R
  */
 export function generateRaceKey(race: {
-  date: Date | any
+  raceDate?: Date | any
+  date?: Date | any  // 後方互換性のため
   racecourse: string
   raceNumber: number
   round?: number | null
-  day?: string | number | null
 }): string {
-  // 日付から年を取得
-  const date = race.date instanceof Date ? race.date : new Date(race.date)
+  // 日付から年を取得（raceDateを優先、後方互換性のためdateも確認）
+  const dateValue = race.raceDate || race.date
+  const date = dateValue instanceof Date ? dateValue : new Date(dateValue)
   const year = date.getFullYear()
   const yearStr = yearToJRDBFormat(year) // 年の下2桁
   
@@ -89,8 +90,8 @@ export function generateRaceKey(race: {
   // 開催回数（デフォルト: 1）
   const round = roundToJRDBFormat(race.round)
   
-  // 日目（デフォルト: 1、16進数形式）
-  const day = dayToJRDBFormat(race.day)
+  // 日目（デフォルト: 1、raceDateからは取得できないため常に'1'を使用）
+  const day = '1'
   
   // レース番号（2桁）
   const raceNumber = raceNumberToJRDBFormat(race.raceNumber)

@@ -56,8 +56,15 @@ describe('scrapeJRACalendarWithRaceResults', () => {
     // モックデータの準備
     const calendarHtmlPath = join(__dirname, '../mock/jra/keiba_calendar2025_oct.html')
     const raceResultHtmlPath = join(__dirname, '../mock/jra/keiba_calendar2025_2025_10_1013.html')
-    const mockCalendarHtml = readFileSync(calendarHtmlPath, 'utf-8')
+    let mockCalendarHtml = readFileSync(calendarHtmlPath, 'utf-8')
     const mockRaceResultHtml = readFileSync(raceResultHtmlPath, 'utf-8')
+    
+    // テスト用にround情報を追加（第4回を追加）
+    // extractRoundFromCalendarがround情報を見つけられるように、タイトルに追加
+    mockCalendarHtml = mockCalendarHtml.replace(
+      '<title>レーシングカレンダー　2025年10月　JRA</title>',
+      '<title>レーシングカレンダー　2025年10月　JRA</title><h1>第4回</h1>'
+    )
 
     // HTMLフェッチャーをモック設定
     vi.mocked(htmlFetcherModule.fetchJRAHtmlWithPlaywright)

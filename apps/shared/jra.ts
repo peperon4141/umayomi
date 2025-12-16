@@ -7,16 +7,16 @@ export interface JRARaceData {
   surface: string
   weather: string
   trackCondition: string
-  startTime: string
+  raceStartTime: string
   description: string
   prize: number
   venue: string
-  date: Date
+  raceDate: Date
   scrapedAt: Date
 }
 
 export interface JRARaceDay {
-  date: string
+  raceDate: string
   venue: string
   races: JRARaceData[]
 }

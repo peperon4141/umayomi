@@ -18,6 +18,7 @@
     "deploy:dry-run": "pnpm run build && firebase deploy --config ../firebase.json --only functions --dry-run",
     "test:scraping": "tsx scripts/testJraScraping.ts",
     "test:scraping:firestore": "tsx scripts/testJraScrapingWithFirestore.ts",
+    "test:scraping:november": "tsx scripts/testJraScrapingNovember.ts",
     "lint": "eslint . --ext .js,.ts",
     "lint:fix": "eslint . --ext .js,.ts --fix"
   },

@@ -5,6 +5,18 @@ service cloud.firestore {
     match /races/{raceId} {
       allow read: if request.auth != null;
       allow write: if false; // Cloud Functionsからのみ書き込み可能
+      
+      // JRDBデータサブコレクション：認証済みユーザーのみ読み取り可能
+      match /jrdb_data/{dataType} {
+        allow read: if request.auth != null;
+        allow write: if false; // Cloud Functionsからのみ書き込み可能
+        
+        // JRDBデータレコードサブコレクション
+        match /records/{recordId} {
+          allow read: if request.auth != null;
+          allow write: if false; // Cloud Functionsからのみ書き込み可能
+        }
+      }
     }
     
     // ユーザープロフィール：本人のみ読み書き可能
