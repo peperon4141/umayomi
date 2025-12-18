@@ -125,10 +125,10 @@ class JrdbCombiner:
                 # 結合処理後は定期的にガベージコレクションを実行（メモリ使用量を抑制）
                 gc.collect()
 
-            # 結合完了後にstart_datetimeを計算（race_keyが存在する場合、インデックス設定前）
-            if "race_key" in combined_df.columns and "start_datetime" not in combined_df.columns:
+            # 結合完了後にstart_datetimeを計算（年月日/発走時間から算出、race_keyからの導出は禁止）
+            if "start_datetime" not in combined_df.columns:
                 logger.info("start_datetimeを計算中...")
-                combined_df["start_datetime"] = FeatureConverter.get_datetime_from_race_key_vectorized(combined_df["race_key"])
+                combined_df = FeatureConverter.add_start_datetime_to_df(combined_df)
                 logger.info("start_datetimeの計算完了")
 
             # baseのidentifierColumnsをMultiIndexに設定

@@ -29,8 +29,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { Timestamp } from 'firebase/firestore'
 import { useRace } from '@/composables/useRace'
-import { useNavigation } from '@/composables/useNavigation'
-import { RouteName } from '@/router/routeCalculator'
+// navigateは現状未使用（サイドバーは一覧表示のみ）
 import type { Race } from '../../../shared/race'
 
 interface RaceDateItem {
@@ -45,8 +44,6 @@ interface RaceDateItem {
 }
 
 const { races, fetchRaces } = useRace()
-const { navigateTo } = useNavigation()
-
 const raceDateItems = ref<RaceDateItem[]>([])
 
 // 日付をYYYYMMDD形式に変換（race_keyの拡張形式の日付部分と同じ形式）
@@ -139,14 +136,10 @@ const getRowClass = (data: RaceDateItem) => {
   return ''
 }
 
-// 行クリック時の処理
-const onRowClick = (event: any) => {
-  const item = event.data as RaceDateItem
-  navigateTo(RouteName.RACE_LIST_IN_DAY, {
-    year: item.year,
-    month: item.month,
-    day: item.day
-  })
+// 行クリック時の処理（日付詳細ページは削除されたため、何もしない）
+const onRowClick = () => {
+  // 日付詳細ページは削除されたため、クリック時は何もしない
+  // 必要に応じて、レースリストページに遷移するなどの処理を追加可能
 }
 
 // データを読み込む

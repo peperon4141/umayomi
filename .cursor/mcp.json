@@ -1,13 +1,14 @@
 {
   "mcpServers": {
-    "jupyter": {
-      "command": "uvx",
-      "args": ["jupyter-mcp-server@latest"],
-      "env": {
-        "JUPYTER_URL": "http://127.0.0.1:8888",
-        "ALLOW_IMG_OUTPUT": "true"
-      }
+    "umayomi-firebase": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "firebase-tools@latest",
+        "experimental:mcp",
+        "__dir",
+        "apps/firebase"
+      ]
     }
   }
 }
-

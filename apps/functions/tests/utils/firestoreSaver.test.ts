@@ -17,19 +17,14 @@ const mockDb = {
   batch: vi.fn().mockReturnValue(mockBatch)
 }
 
-vi.mock('firebase-admin/firestore', () => {
-  return {
+vi.mock('firebase-admin/firestore', () => ({
     getFirestore: vi.fn(() => mockDb)
-  }
-})
+  }))
 
-vi.mock('../../src/utils/raceKeyGenerator', () => {
-  return {
+vi.mock('../../src/utils/raceKeyGenerator', () => ({
     generateRaceKey: vi.fn((race: any) => {
       // roundがnullまたはundefinedの場合はエラーを投げる（fallbackを禁止）
-      if (race.round == null) {
-        throw new Error(`round is required but was null or undefined. raceDate: ${race.raceDate}, venue: ${race.venue || race.racecourse}, raceNumber: ${race.raceNumber}. Please ensure extractRound function correctly extracts round from JRA HTML.`)
-      }
+      if (race.round == null) throw new Error(`round is required but was null or undefined. raceDate: ${race.raceDate}, venue: ${race.venue || race.racecourse}, raceNumber: ${race.raceNumber}. Please ensure extractRound function correctly extracts round from JRA HTML.`)
       
       // 簡単なrace_keyを生成
       const venue = race.venue || race.racecourse || '05'
@@ -39,8 +34,7 @@ vi.mock('../../src/utils/raceKeyGenerator', () => {
       const raceNumber = String(race.raceNumber || 1).padStart(2, '0')
       return `${venue}_${year}_${round}_${day}_${raceNumber}`
     })
-  }
-})
+  }))
 
 // モックの後にインポート
 import { saveRacesToFirestore } from '../../src/utils/firestoreSaver'

@@ -18,10 +18,10 @@ export class DashboardPage {
   }
 
   // レース詳細ページに移動
-  async goToRaceDetail(raceKey: string): Promise<RaceDetailPage> {
+  async goToRaceDetail(year: number, raceKey: string): Promise<RaceDetailPage> {
     // DataTableの行をクリック（race_keyに基づく）
     await this.page.click(`tr[data-race-key="${raceKey}"]`)
-    await this.page.waitForURL(/\/race\/[a-zA-Z0-9_]+/)
+    await this.page.waitForURL(new RegExp(`/race/year/${year}/race/[a-zA-Z0-9_]+`))
     return new RaceDetailPage(this.page)
   }
 

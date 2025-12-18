@@ -1,0 +1,16 @@
+{
+  "description": "JRDBパドック観察データ用の場コードマッピング（1桁コード）",
+  "version": "1.0.0",
+  "note": "JRDBパドック観察データ（TYB等）で使用される1桁のパドックコード。参考: http://www.jrdb.com/program/jrdb_code.txt の「場のコード」セクション",
+  "source": "http://www.jrdb.com/program/jrdb_code.txt",
+  "mapping": {
+    "1": { "venue_name": "東京", "venue_name_en": "Tokyo", "jrdb_data_file_code": "05" },
+    "2": { "venue_name": "中山", "venue_name_en": "Nakayama", "jrdb_data_file_code": "06" },
+    "3": { "venue_name": "京都", "venue_name_en": "Kyoto", "jrdb_data_file_code": "08" },
+    "4": { "venue_name": "阪神", "venue_name_en": "Hanshin", "jrdb_data_file_code": "09" },
+    "5": { "venue_name": "新潟", "venue_name_en": "Niigata", "jrdb_data_file_code": "04" },
+    "6": { "venue_name": "小倉", "venue_name_en": "Kokura", "jrdb_data_file_code": "10" },
+    "7": { "venue_name": "ば", "venue_name_en": "Ba", "jrdb_data_file_code": null, "note": "パドックコードのみに存在する特殊コード" }
+  }
+}
+

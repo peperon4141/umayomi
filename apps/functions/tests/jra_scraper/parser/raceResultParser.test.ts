@@ -78,7 +78,7 @@ describe('extractRaceInfo', () => {
     // round情報が含まれていないHTML（第○回のパターンがない）
     const html = `
       <html>
-        <head><title>開催日程 2025年11月1日（土曜）　競馬番組　JRA</title></head>
+        <head><title>開催日程 2025年11月1日（土曜） 競馬番組 JRA</title></head>
         <body>
           <div id="rcA">
             <table>

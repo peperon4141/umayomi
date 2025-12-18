@@ -3,9 +3,9 @@
     <div v-if="loading" class="text-center py-2">
       <i class="pi pi-spin pi-spinner text-surface-500"></i>
     </div>
-    <div v-else-if="error || localError" class="text-sm text-red-600 px-2 py-1">
+    <Message v-else-if="error || localError" severity="error" :closable="false" class="m-2">
       {{ error || localError }}
-    </div>
+    </Message>
     <div v-else-if="predictionDateItems.length === 0" class="text-sm text-surface-500 px-2 py-1">
       予測結果がありません
     </div>
@@ -38,8 +38,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
 import { usePrediction, type PredictionDocument } from '@/composables/usePrediction'
-import { useNavigation } from '@/composables/useNavigation'
-import { RouteName } from '@/router/routeCalculator'
+// navigateは現状未使用（サイドバーは一覧表示のみ）
 
 interface PredictionDateItem {
   dateKey: string  // "2025-11-30" (YYYY-MM-DD)
@@ -53,8 +52,6 @@ interface PredictionDateItem {
 }
 
 const { loading, error, getRecentPredictions } = usePrediction()
-const { navigateTo } = useNavigation()
-
 const predictionDocuments = ref<PredictionDocument[]>([])
 const predictionDateItems = ref<PredictionDateItem[]>([])
 const localError = ref<string | null>(null)
@@ -144,14 +141,10 @@ const getRowClass = (data: PredictionDateItem) => {
   return ''
 }
 
-// 行クリック時の処理
-const onRowClick = (event: any) => {
-  const item = event.data as PredictionDateItem
-  navigateTo(RouteName.RACE_LIST_IN_DAY, {
-    year: item.year,
-    month: item.month,
-    day: item.day
-  })
+// 行クリック時の処理（日付詳細ページは削除されたため、何もしない）
+const onRowClick = () => {
+  // 日付詳細ページは削除されたため、クリック時は何もしない
+  // 必要に応じて、レースリストページに遷移するなどの処理を追加可能
 }
 
 // データを読み込む

@@ -1,23 +1,22 @@
 /**
  * Firestoreのracesコレクションのすべてのドキュメントを削除するスクリプト
+ *
+ * 使い方（エミュレータ例）:
+ *   FIRESTORE_EMULATOR_HOST=127.0.0.1:8180 GCLOUD_PROJECT=umayomi-fbb2b \
+ *   pnpm -F functions tsx scripts/delete_races_collection.ts
  */
 import { getFirestore } from 'firebase-admin/firestore'
 import { initializeApp } from 'firebase-admin/app'
 
-// Firebase Admin SDKを初期化
-const isDevelopment = process.env.NODE_ENV === 'development' || 
-                     process.env.FUNCTIONS_EMULATOR === 'true' ||
-                     process.env.MODE === 'development' ||
-                     !process.env.GCLOUD_PROJECT
-
-if (isDevelopment) {
-  process.env.FIRESTORE_EMULATOR_HOST = '127.0.0.1:8180'
-  process.env.GCLOUD_PROJECT = process.env.GCLOUD_PROJECT || 'demo-project'
-  console.log('エミュレーターを使用します', {
-    FIRESTORE_EMULATOR_HOST: process.env.FIRESTORE_EMULATOR_HOST,
-    GCLOUD_PROJECT: process.env.GCLOUD_PROJECT
-  })
+const requireEnv = (name: string): string => {
+  const value = process.env[name]
+  if (!value) throw new Error(`${name} is required (no fallback).`)
+  return value
 }
+
+// 誤ったプロジェクトを削除しないため、必須環境変数を明示チェック（fallback禁止）
+requireEnv('FIRESTORE_EMULATOR_HOST')
+requireEnv('GCLOUD_PROJECT')
 
 initializeApp()
 

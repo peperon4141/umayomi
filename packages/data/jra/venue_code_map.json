@@ -1,0 +1,18 @@
+{
+  "description": "JRA競馬場名とJRDB場コードのマッピング",
+  "version": "1.0.0",
+  "note": "JRAスクレイパーで取得した競馬場名をJRDBデータファイルの場コード（2桁）に変換するためのマッピング",
+  "mapping": {
+    "札幌": { "jra_name": "札幌", "jrdb_code": "01", "jrdb_paddock_code": null },
+    "函館": { "jra_name": "函館", "jrdb_code": "02", "jrdb_paddock_code": null },
+    "福島": { "jra_name": "福島", "jrdb_code": "03", "jrdb_paddock_code": null },
+    "新潟": { "jra_name": "新潟", "jrdb_code": "04", "jrdb_paddock_code": "5" },
+    "東京": { "jra_name": "東京", "jrdb_code": "05", "jrdb_paddock_code": "1" },
+    "中山": { "jra_name": "中山", "jrdb_code": "06", "jrdb_paddock_code": "2" },
+    "中京": { "jra_name": "中京", "jrdb_code": "07", "jrdb_paddock_code": null },
+    "京都": { "jra_name": "京都", "jrdb_code": "08", "jrdb_paddock_code": "3" },
+    "阪神": { "jra_name": "阪神", "jrdb_code": "09", "jrdb_paddock_code": "4" },
+    "小倉": { "jra_name": "小倉", "jrdb_code": "10", "jrdb_paddock_code": "6" }
+  }
+}
+

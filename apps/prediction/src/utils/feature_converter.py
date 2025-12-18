@@ -118,7 +118,13 @@ class FeatureConverter:
         year_col: Optional[str] = None,
         ymd_fallback_col: Optional[str] = None,
     ) -> tuple[pd.Series, pd.Series, pd.Series]:
-        """DataFrameから年月日を抽出（ベクトル化版）"""
+        """
+        DataFrameから年月日を抽出（ベクトル化版）
+
+        注意:
+        - race_key生成ではYYYYMMDDが必須のため、年月日が取得できない行が存在する場合は例外で早期失敗する
+        - year_colだけから年月日を補完するようなfallbackは行わない（問題の隠蔽を防ぐ）
+        """
         if ymd_fallback_col and ymd_fallback_col in df.columns:
             ymd_str = df[ymd_fallback_col].apply(FeatureConverter.safe_ymd)
             mask_fallback = ymd_str.str.len() == 8
@@ -133,9 +139,22 @@ class FeatureConverter:
             ymd_str_primary = pd.Series("", index=df.index)
             mask_primary = pd.Series(False, index=df.index)
 
-        year = pd.Series(2024, index=df.index, dtype="int64")
-        month = pd.Series(1, index=df.index, dtype="int64")
-        day = pd.Series(1, index=df.index, dtype="int64")
+        mask_any = mask_primary | mask_fallback
+        if not mask_any.all():
+            missing_count = int((~mask_any).sum())
+            sample_idx = df.index[~mask_any][:10].tolist()
+            sample_year = None
+            if year_col and year_col in df.columns:
+                sample_year = df.loc[df.index[~mask_any][:10], year_col].tolist()
+            raise ValueError(
+                f"年月日(YYYYMMDD)を抽出できない行があります: missing={missing_count}, "
+                f"ymd_col={ymd_col}, ymd_fallback_col={ymd_fallback_col}, year_col={year_col}, "
+                f"sample_index={sample_idx}, sample_year={sample_year}"
+            )
+
+        year = pd.Series(0, index=df.index, dtype="int64")
+        month = pd.Series(0, index=df.index, dtype="int64")
+        day = pd.Series(0, index=df.index, dtype="int64")
 
         if mask_primary.any():
             year.loc[mask_primary] = ymd_str_primary.loc[mask_primary].str[:4].astype(int)
@@ -149,14 +168,6 @@ class FeatureConverter:
                 month.loc[mask_fallback_only] = ymd_str.loc[mask_fallback_only].str[4:6].astype(int)
                 day.loc[mask_fallback_only] = ymd_str.loc[mask_fallback_only].str[6:8].astype(int)
 
-        if year_col and year_col in df.columns:
-            mask_no_date = ~mask_primary & ~mask_fallback
-            if mask_no_date.any():
-                year_vals = df.loc[mask_no_date, year_col].apply(FeatureConverter.safe_int)
-                year.loc[mask_no_date] = year_vals.apply(
-                    lambda y: y + 2000 if y < 100 else y if y > 0 else 2024
-                )
-
         return year, month, day
 
     @staticmethod
@@ -165,14 +176,20 @@ class FeatureConverter:
         # 必要なカラムのみを抽出してメモリ使用量を削減
         required_cols = FeatureConverter.RACE_KEY_REQUIRED_COLUMNS + ["年月日"]
         bac_df_subset = bac_df[required_cols].copy()
+        if bac_df_subset[FeatureConverter.RACE_KEY_REQUIRED_COLUMNS].isna().any().any():
+            missing_cols = [
+                c for c in FeatureConverter.RACE_KEY_REQUIRED_COLUMNS
+                if bac_df_subset[c].isna().any()
+            ]
+            raise ValueError(f"BACデータにrace_key必須カラムの欠損があります: {missing_cols}")
         bac_df_subset["key"] = (
-            bac_df_subset["場コード"].fillna(0).astype(int).astype(str).str.zfill(2)
+            bac_df_subset["場コード"].astype(int).astype(str).str.zfill(2)
             + "_"
-            + bac_df_subset["回"].fillna(1).astype(int).astype(str).str.zfill(2)
+            + bac_df_subset["回"].astype(int).astype(str)  # 回はzfillしない（仕様: 1桁）
             + "_"
-            + bac_df_subset["日"].fillna("1").astype(str).str.lower()
+            + bac_df_subset["日"].astype(str).str.lower()
             + "_"
-            + bac_df_subset["R"].fillna(1).astype(int).astype(str).str.zfill(2)
+            + bac_df_subset["R"].astype(int).astype(str).str.zfill(2)
         )
         bac_df_subset["ymd"] = bac_df_subset["年月日"].apply(FeatureConverter.safe_ymd)
         bac_df_filtered = bac_df_subset[bac_df_subset["ymd"].str.len() == 8]
@@ -195,14 +212,20 @@ class FeatureConverter:
         # 必要なカラムのみを抽出してメモリ使用量を削減
         required_cols = FeatureConverter.RACE_KEY_REQUIRED_COLUMNS + ["年月日"]
         bac_df_subset = bac_df[required_cols].copy()
+        if bac_df_subset[FeatureConverter.RACE_KEY_REQUIRED_COLUMNS].isna().any().any():
+            missing_cols = [
+                c for c in FeatureConverter.RACE_KEY_REQUIRED_COLUMNS
+                if bac_df_subset[c].isna().any()
+            ]
+            raise ValueError(f"BACデータにrace_key必須カラムの欠損があります: {missing_cols}")
         bac_df_subset["key"] = (
-            bac_df_subset["場コード"].fillna(0).astype(int).astype(str).str.zfill(2)
+            bac_df_subset["場コード"].astype(int).astype(str).str.zfill(2)
             + "_"
-            + bac_df_subset["回"].fillna(1).astype(int).astype(str).str.zfill(2)
+            + bac_df_subset["回"].astype(int).astype(str)  # 回はzfillしない（仕様: 1桁）
             + "_"
-            + bac_df_subset["日"].fillna("1").astype(str).str.lower()
+            + bac_df_subset["日"].astype(str).str.lower()
             + "_"
-            + bac_df_subset["R"].fillna(1).astype(int).astype(str).str.zfill(2)
+            + bac_df_subset["R"].astype(int).astype(str).str.zfill(2)
         )
         bac_df_subset["ymd"] = bac_df_subset["年月日"].apply(FeatureConverter.safe_ymd)
         bac_df_filtered = bac_df_subset[bac_df_subset["ymd"].str.len() == 8]
@@ -211,26 +234,27 @@ class FeatureConverter:
 
     @staticmethod
     def generate_race_key_vectorized(
-        year: pd.Series,
-        month: pd.Series,
-        day: pd.Series,
         place_code: pd.Series,
         kaisai_round: pd.Series,
         kaisai_day: pd.Series,
         race_number: pd.Series,
     ) -> pd.Series:
-        """race_keyを生成（ベクトル化版）"""
-        date_str = (
-            year.astype(str).str.zfill(4)
-            + month.astype(str).str.zfill(2)
-            + day.astype(str).str.zfill(2)
-        )
-        place_code_str = place_code.fillna(0).astype(int).astype(str).str.zfill(2)
-        round_str = kaisai_round.fillna(1).astype(int).astype(str).str.zfill(2)
-        day_str = kaisai_day.fillna("1").astype(str).str.lower()
-        race_str = race_number.fillna(1).astype(int).astype(str).str.zfill(2)
+        """race_key（JRDB原典キー: 場コード_回_日目_R）を生成（ベクトル化版）"""
+        if place_code.isna().any() or kaisai_round.isna().any() or kaisai_day.isna().any() or race_number.isna().any():
+            raise ValueError(
+                "race_key生成に必要な値が欠損しています: "
+                f"place_code_na={int(place_code.isna().sum())}, "
+                f"kaisai_round_na={int(kaisai_round.isna().sum())}, "
+                f"kaisai_day_na={int(kaisai_day.isna().sum())}, "
+                f"race_number_na={int(race_number.isna().sum())}"
+            )
+        place_code_str = place_code.astype(int).astype(str).str.zfill(2)
+        # 回は数値のまま（zfillしない）
+        round_str = kaisai_round.astype(int).astype(str)
+        day_str = kaisai_day.astype(str).str.lower()
+        race_str = race_number.astype(int).astype(str).str.zfill(2)
 
-        return date_str + "_" + place_code_str + "_" + round_str + "_" + day_str + "_" + race_str
+        return place_code_str + "_" + round_str + "_" + day_str + "_" + race_str
 
     @staticmethod
     def add_race_key_to_df(
@@ -244,14 +268,18 @@ class FeatureConverter:
         try:
             if use_bac_date and bac_df is not None:
                 bac_mapping_df = FeatureConverter.create_bac_date_mapping_for_merge(bac_df)
+                required = ["場コード", "回", "日", "R"]
+                missing_values = [c for c in required if c not in df.columns or df[c].isna().any()]
+                if missing_values:
+                    raise ValueError(f"race_key生成に必要な値が欠損しています: {missing_values}")
                 df["key"] = (
-                    df["場コード"].fillna(0).astype(int).astype(str).str.zfill(2)
+                    df["場コード"].astype(int).astype(str).str.zfill(2)
                     + "_"
-                    + df["回"].fillna(1).astype(int).astype(str).str.zfill(2)
+                    + df["回"].astype(int).astype(str)  # 回はzfillしない（仕様: 1桁）
                     + "_"
-                    + df["日"].fillna("1").astype(str).str.lower()
+                    + df["日"].astype(str).str.lower()
                     + "_"
-                    + df["R"].fillna(1).astype(int).astype(str).str.zfill(2)
+                    + df["R"].astype(int).astype(str).str.zfill(2)
                 )
                 df = df.merge(bac_mapping_df, on="key", how="left", suffixes=("", "_bac"))
                 year, month, day = FeatureConverter.extract_ymd_from_df_vectorized(
@@ -263,8 +291,13 @@ class FeatureConverter:
                     df, ymd_col="年月日", year_col="年"
                 )
 
+            # 年月日を明示的に保持（race_keyに日付を含めない運用のため）
+            df["年月日"] = (
+                year.astype(int) * 10000 + month.astype(int) * 100 + day.astype(int)
+            ).astype(int)
+
             df["race_key"] = FeatureConverter.generate_race_key_vectorized(
-                year, month, day, df["場コード"], df["回"], df["日"], df["R"]
+                df["場コード"], df["回"], df["日"], df["R"]
             )
 
             return df
@@ -278,24 +311,12 @@ class FeatureConverter:
     @staticmethod
     def get_datetime_from_race_key(race_key: str) -> int:
         """race_keyからstart_datetimeを取得（単一値用）"""
-        if not race_key or not isinstance(race_key, str):
-            return 0
-        try:
-            date_str = race_key.split("_")[0]
-            if len(date_str) == 8:
-                return int(date_str) * 10000
-        except Exception:
-            pass
-        return 0
+        raise ValueError("race_keyからstart_datetimeは導出できません（race_keyは場コード_回_日目_Rで日付を含まないため）。年月日/発走時間から算出してください。")
 
     @staticmethod
     def get_datetime_from_race_key_vectorized(race_key_series: pd.Series) -> pd.Series:
         """race_keyからstart_datetimeを取得（ベクトル化版）"""
-        date_str = race_key_series.astype(str).str.split("_").str[0]
-        mask = date_str.str.len() == 8
-        result = pd.Series(0, index=race_key_series.index, dtype="int64")
-        result.loc[mask] = date_str[mask].astype(int) * 10000
-        return result
+        raise ValueError("race_keyからstart_datetimeは導出できません（race_keyは場コード_回_日目_Rで日付を含まないため）。年月日/発走時間から算出してください。")
 
     @staticmethod
     def convert_sed_time_to_seconds(time_val) -> float:
@@ -320,22 +341,19 @@ class FeatureConverter:
             if "start_datetime" in df.columns:
                 return df
 
-            if "年月日" in df.columns and "発走時間" in df.columns:
-                ymd_str = df["年月日"].fillna(0).astype(int).astype(str).str.zfill(8)
-                time_str = df["発走時間"].fillna(0).astype(int).astype(str).str.zfill(4)
-                mask = df["年月日"].notna() & df["発走時間"].notna()
-                df["start_datetime"] = (ymd_str + time_str).astype(int)
-                df.loc[~mask, "start_datetime"] = 0
-            elif "年月日" in df.columns:
-                ymd_str = df["年月日"].fillna(0).astype(int).astype(str).str.zfill(8)
-                df["start_datetime"] = ymd_str.astype(int) * 10000
-                df.loc[df["年月日"].isna(), "start_datetime"] = 0
-            elif "race_key" in df.columns:
-                df["start_datetime"] = FeatureConverter.get_datetime_from_race_key_vectorized(
-                    df["race_key"]
-                )
-            else:
-                df["start_datetime"] = 0
+            if "年月日" not in df.columns:
+                raise ValueError("start_datetime算出に必要な年月日カラムが存在しません。")
+
+            ymd_str = df["年月日"].apply(FeatureConverter.safe_ymd)
+            invalid_ymd = ymd_str.str.len() != 8
+            if invalid_ymd.any():
+                sample = ymd_str[invalid_ymd].head(10).tolist()
+                raise ValueError(f"年月日が不正/欠損の行があります: invalid={int(invalid_ymd.sum())}, sample={sample}")
+
+            # race_keyは日付を含まないため、時系列判定は年月日で行う。
+            # 発走時間はデータ側で欠損し得るため（fallback禁止のため0埋め等はしない）、
+            # start_datetimeは年月日のみ（00:00相当）で統一する。
+            df["start_datetime"] = ymd_str.astype(int) * 10000
 
             return df
         finally:

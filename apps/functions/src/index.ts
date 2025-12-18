@@ -8,9 +8,10 @@ import {
   handleScrapeJRACalendarWithRaceResults
 } from './jra_scraper/handlers'
 import { handleFetchJRDBDailyData, handleFetchJRDBAnnualData } from './jrdb_scraper/handlers'
-import { handleRunDailyPrediction } from './prediction/handlers'
+import { handleRunDailyPrediction, handleRunPredictionWithDataFetch } from './prediction/handlers'
 import { handleFetchJRDBDailyDataOnly } from './jrdb_scraper/handlers_fetch_only'
 import { addYearMonthToRaces } from './utils/addYearMonthToRaces'
+import { handleUploadModel } from './models/handlers'
 
 // 開発環境の場合、.envファイルを読み込む
 const isDevelopment = process.env.NODE_ENV === 'development' || 
@@ -165,6 +166,48 @@ export const runDailyPrediction = onRequest(
 export const fetchJRDBDailyDataOnly = onRequest(
   { timeoutSeconds: 600, memory: '2GiB', region: 'asia-northeast1', cors: true },
   handleFetchJRDBDailyDataOnly
+)
+
+/**
+ * 既存のracesコレクションのドキュメントにyearとmonthフィールドを追加するCloud Function
+ */
+/**
+ * JRDBデータ取得と予測実行を統合したCloud Function
+ * 
+ * オプショナルパラメータ（query）:
+ * - date: 予測対象日付（YYYY-MM-DD形式、省略時は今日）
+ * - useEmulator: Firebaseエミュレーターを使用するか（true/false、省略時はfalse）
+ * - autoSelectModel: 最新のモデルを自動選択するか（true/false、デフォルトはtrue）
+ * 
+ * 例: 
+ * - 今日の予測（最新モデル使用）: https://.../runPredictionWithDataFetch
+ * - 指定日の予測: https://.../runPredictionWithDataFetch?date=2025-12-14
+ * - エミュレーター使用: https://.../runPredictionWithDataFetch?useEmulator=true
+ */
+export const runPredictionWithDataFetch = onRequest(
+  { timeoutSeconds: 600, memory: '2GiB', region: 'asia-northeast1', cors: true },
+  handleRunPredictionWithDataFetch
+)
+
+/**
+ * 管理画面からモデルファイルをアップロードし、Firestore(models)にメタデータを保存するCloud Function
+ *
+ * 必須パラメータ（body JSON）:
+ * - fileName: 元ファイル名（表示用）
+ * - contentBase64: ファイル内容（base64）
+ * - modelName: FirestoreのドキュメントID（例: rank_model_202512180040_v1）
+ * - storagePath: Storage内のパス（例: models/rank_model_202512180040_v1.txt）
+ *
+ * オプショナル:
+ * - version, description, trainingDate
+ *
+ * 認証:
+ * - Authorization: Bearer <ID token> が必須
+ * - 本番では role=admin を要求（エミュレータでは認証済みでOK）
+ */
+export const uploadModel = onRequest(
+  { timeoutSeconds: 120, memory: '1GiB', region: 'asia-northeast1', cors: true },
+  handleUploadModel
 )
 
 /**

@@ -76,22 +76,52 @@ export function useRace() {
         constraints.push(where('surface', '==', filters.surface))
       }
 
-      // 単一のracesコレクションから取得
-      const q = query(collection(db, 'races'), ...constraints)
-      const snapshot = await getDocs(q)
-      
-      races.value = snapshot.docs.map(doc => {
+      const queryForYear = async (year: number, yearStart?: Date, yearEnd?: Date) => {
+        const yearConstraints: QueryConstraint[] = []
+        if (yearStart && yearEnd) {
+          yearConstraints.push(where('raceDate', '>=', Timestamp.fromDate(yearStart)))
+          yearConstraints.push(where('raceDate', '<=', Timestamp.fromDate(yearEnd)))
+          yearConstraints.push(orderBy('raceDate', 'asc'))
+        } else {
+          yearConstraints.push(orderBy('raceDate', 'asc'))
+        }
+        // filters
+        if (filters?.racecourse) yearConstraints.push(where('racecourse', '==', filters.racecourse))
+        if (filters?.grade) yearConstraints.push(where('grade', '==', filters.grade))
+        if (filters?.surface) yearConstraints.push(where('surface', '==', filters.surface))
+
+        const q = query(collection(db, 'racesByYear', String(year), 'races'), ...yearConstraints)
+        return await getDocs(q)
+      }
+
+      let snapshots = []
+      if (startDate && endDate && startYear !== endYear) {
+        // 年跨ぎは年別に取得して結合
+        const years = Array.from({ length: endYear - startYear + 1 }, (_, i) => startYear + i)
+        snapshots = await Promise.all(years.map(y => {
+          const yStart = y === startYear ? startDate : new Date(Date.UTC(y, 0, 1, 0, 0, 0, 0))
+          const yEnd = y === endYear ? endDate : new Date(Date.UTC(y, 11, 31, 23, 59, 59, 999))
+          return queryForYear(y, yStart, yEnd)
+        }))
+      } else {
+        const y = startDate && endDate ? startYear : targetYear
+        snapshots = [await queryForYear(y, startDate, endDate)]
+      }
+
+      races.value = snapshots.flatMap(snapshot => snapshot.docs.map(doc => {
         const data = doc.data()
+        const docId = doc.id
+        const storedRaceKey = (data as any).race_key
+        if (storedRaceKey != null && storedRaceKey !== docId) throw new Error(`race_key mismatch: doc.id=${docId}, data.race_key=${storedRaceKey}`)
         return {
-          id: doc.id,
-          race_key: doc.id, // ドキュメントIDがrace_key
+          id: docId,
+          race_key: docId,
           ...data
         } as Race
-      })
+      }))
 
     } catch (err: any) {
-      error.value = err.message
-      console.error('レース取得エラー:', err)
+      error.value = err instanceof Error ? err.message : String(err)
     } finally {
       loading.value = false
     }

@@ -47,7 +47,7 @@ class UnifiedFeatureExtractor:
         stats_df = stats_df.copy()  # 統計量計算で変更するため、ここでcopy()が必要
         stats_df["rank_1st"] = (stats_df["着順"] == 1).astype(int)
         stats_df["rank_3rd"] = (stats_df["着順"].isin([1, 2, 3])).astype(int)
-        stats_df["start_datetime"] = FeatureConverter.get_datetime_from_race_key_vectorized(stats_df["race_key"])
+        stats_df = FeatureConverter.add_start_datetime_to_df(stats_df)
         
         # 結果を格納するDataFrame（df_with_datetimeをベースに）
         # 前走データを追加するため、コピーが必要

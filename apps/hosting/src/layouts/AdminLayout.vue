@@ -118,6 +118,14 @@ const menuItems = ref([
       emit('navigate', 'scraping')
       sidebarOpen.value = false
     }
+  },
+  {
+    label: 'モデル管理',
+    icon: 'pi pi-box',
+    command: () => {
+      emit('navigate', 'models')
+      sidebarOpen.value = false
+    }
   }
 ])
 
@@ -128,7 +136,6 @@ const userMenuItems = ref([
     icon: 'pi pi-user', 
     command: () => { 
       // プロフィールダイアログを表示（将来実装）
-      console.log('プロフィールを表示')
     } 
   },
   { 
@@ -136,7 +143,6 @@ const userMenuItems = ref([
     icon: 'pi pi-cog', 
     command: () => { 
       // 設定ページへの遷移（将来実装）
-      console.log('設定ページへ遷移')
     } 
   },
   { separator: true },

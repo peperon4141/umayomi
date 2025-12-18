@@ -144,6 +144,10 @@ print(f"モデルを保存しました: {MODEL_PATH}")
 # ## 予測と評価
 print("検証データで予測を実行します...")
 val_predictions_raw = RankPredictor.predict(model, val_df, rank_predictor.features)
+if "predicted_score" not in val_predictions_raw.columns:
+    if "predict" not in val_predictions_raw.columns:
+        raise KeyError(f"val_predictions_rawにpredicted_score/predict列が存在しません。columns={list(val_predictions_raw.columns)}")
+    val_predictions_raw = val_predictions_raw.rename(columns={"predict": "predicted_score"})
 
 # original_df（full_data_df、日本語キー）から評価用データを取得
 original_eval = original_df.copy()

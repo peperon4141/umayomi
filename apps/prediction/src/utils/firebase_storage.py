@@ -58,7 +58,13 @@ def _initialize_firebase():
 def upload_model_to_storage(
     local_model_path: str,
     storage_path: Optional[str] = None,
-    metadata: Optional[dict] = None
+    metadata: Optional[dict] = None,
+    save_to_firestore: bool = True,
+    model_name: Optional[str] = None,
+    version: Optional[str] = None,
+    description: Optional[str] = None,
+    performance_metrics: Optional[dict] = None,
+    training_date: Optional[str] = None
 ) -> str:
     """
     モデルファイルをFirebase Storageにアップロード
@@ -67,6 +73,12 @@ def upload_model_to_storage(
         local_model_path: ローカルのモデルファイルパス
         storage_path: Storage内のパス（省略時はファイル名を使用）
         metadata: メタデータ（オプション）
+        save_to_firestore: Firestoreにメタデータを保存するか（デフォルト: True）
+        model_name: モデル名（Firestore保存時、省略時はファイル名を使用）
+        version: バージョン（オプション）
+        description: 説明（オプション）
+        performance_metrics: パフォーマンス指標（オプション）
+        training_date: 学習日付（YYYY-MM-DD形式、オプション）
     
     Returns:
         アップロードされたファイルのStorage URL
@@ -85,6 +97,11 @@ def upload_model_to_storage(
     
     if use_emulator:
         # エミュレーター環境: Google Cloud Storageクライアントを直接使用
+        try:
+            from google.cloud import storage as gcs_storage
+        except ImportError:
+            raise ImportError("google-cloud-storageがインストールされていません。pip install google-cloud-storage でインストールしてください。")
+        
         storage_emulator_host = os.getenv('STORAGE_EMULATOR_HOST', '127.0.0.1:9198')
         client = gcs_storage.Client(
             project='umayomi-fbb2b',
@@ -113,6 +130,29 @@ def upload_model_to_storage(
         url = blob.public_url
     
     logger.info(f"モデルファイルのアップロード完了: {url}")
+    
+    # Firestoreにメタデータを保存
+    if save_to_firestore:
+        try:
+            from .firestore_saver import save_model_metadata_to_firestore
+            
+            # モデル名が指定されていない場合はファイル名を使用
+            if model_name is None:
+                model_name = local_path.stem  # 拡張子を除いたファイル名
+            
+            save_model_metadata_to_firestore(
+                model_name=model_name,
+                storage_path=storage_path,
+                storage_url=url,
+                version=version,
+                description=description,
+                performance_metrics=performance_metrics,
+                training_date=training_date
+            )
+            logger.info(f"モデルメタデータをFirestoreに保存しました: {model_name}")
+        except Exception as e:
+            logger.warning(f"Firestoreへのメタデータ保存に失敗しました（Storageへのアップロードは成功）: {e}")
+    
     return url
 
 
@@ -136,6 +176,11 @@ def download_model_from_storage(
     
     if use_emulator:
         # エミュレーター環境: Google Cloud Storageクライアントを直接使用
+        try:
+            from google.cloud import storage as gcs_storage
+        except ImportError:
+            raise ImportError("google-cloud-storageがインストールされていません。pip install google-cloud-storage でインストールしてください。")
+        
         storage_emulator_host = os.getenv('STORAGE_EMULATOR_HOST', '127.0.0.1:9198')
         client = gcs_storage.Client(
             project='umayomi-fbb2b',
@@ -177,6 +222,11 @@ def list_models_in_storage(prefix: str = "models/") -> list[dict]:
     
     if use_emulator:
         # エミュレーター環境: Google Cloud Storageクライアントを直接使用
+        try:
+            from google.cloud import storage as gcs_storage
+        except ImportError:
+            raise ImportError("google-cloud-storageがインストールされていません。pip install google-cloud-storage でインストールしてください。")
+        
         storage_emulator_host = os.getenv('STORAGE_EMULATOR_HOST', '127.0.0.1:9198')
         client = gcs_storage.Client(
             project='umayomi-fbb2b',

@@ -54,7 +54,15 @@ def convert_to_parquet(
         
         # 年月日カラムがないデータタイプ（KYI等）の場合は、BACデータから日付を取得
         use_bac_date = bac_df is not None and "年月日" not in df.columns
-        df = FeatureConverter.add_race_key_to_df(df, bac_df=bac_df, use_bac_date=use_bac_date)
+        try:
+            df = FeatureConverter.add_race_key_to_df(df, bac_df=bac_df, use_bac_date=use_bac_date)
+        except Exception as e:
+            na_counts = {c: int(df[c].isna().sum()) for c in required_columns if c in df.columns}
+            sample = df[required_columns].head(5).to_dict(orient="records")
+            raise RuntimeError(
+                f"race_key追加に失敗しました: dataType={data_type_str}, use_bac_date={use_bac_date}, "
+                f"na_counts={na_counts}, sample_required_rows={sample}"
+            ) from e
         
         if "race_key" not in df.columns:
             logger.error(f"データタイプ '{data_type_str}' にrace_keyの追加に失敗しました。利用可能なカラム: {list(df.columns)[:10]}")

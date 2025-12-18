@@ -34,6 +34,8 @@
         <template #content>
           <DataTable
             :value="raceDateItems"
+            v-model:expandedRows="expandedRows"
+            dataKey="dateKey"
             :scrollable="true"
             scrollHeight="600px"
             class="p-datatable-sm"
@@ -43,12 +45,27 @@
             :rows="50"
             :rowsPerPageOptions="[10, 25, 50, 100]"
           >
+            <Column :expander="true" style="width: 3rem" />
             <Column field="displayDate" header="日付" :sortable="true">
               <template #body="{ data }">
                 <div class="flex items-center gap-2">
                   <span :class="{ 'font-bold': data.isCurrentMonth }">{{ data.displayDate }}</span>
                   <Chip v-if="data.isToday" label="今日" size="small" severity="info" />
                 </div>
+              </template>
+            </Column>
+            <Column header="JRA" style="width: 80px">
+              <template #body="{ data }">
+                <a
+                  :href="getJRACalendarUrl(data.year, data.month, data.day)"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="text-primary-600 hover:text-primary-800 hover:underline"
+                  @click.stop
+                >
+                  <i class="pi pi-external-link mr-1"></i>
+                  詳細
+                </a>
               </template>
             </Column>
             <Column field="raceCount" header="レース数" :sortable="true" style="width: 120px">
@@ -59,6 +76,45 @@
             <Column field="year" header="年" :sortable="true" style="width: 80px" />
             <Column field="month" header="月" :sortable="true" style="width: 60px" />
             <Column field="day" header="日" :sortable="true" style="width: 60px" />
+            <template #expansion="slotProps">
+              <div class="p-4">
+                <DataTable
+                  :value="slotProps.data.races"
+                  :paginator="false"
+                  class="p-datatable-sm"
+                >
+                  <Column field="race_key" header="race_key" :sortable="false">
+                    <template #body="{ data }">
+                      <Chip :label="data.race_key" size="small" />
+                    </template>
+                  </Column>
+                  <Column field="raceName" header="レース名" :sortable="false" />
+                  <Column field="racecourse" header="競馬場" :sortable="false" style="width: 100px">
+                    <template #body="{ data }">
+                      <span v-if="data.racecourse">{{ data.racecourse }}</span>
+                      <Tag v-else severity="danger" value="racecourse未設定" />
+                    </template>
+                  </Column>
+                  <Column field="raceNumber" header="レース番号" :sortable="false" style="width: 100px" />
+                  <Column field="raceStartTime" header="発走時刻" :sortable="false" style="width: 120px">
+                    <template #body="{ data }">
+                      <span v-if="data.raceStartTime">{{ formatTime(data.raceStartTime) }}</span>
+                      <span v-else class="text-surface-400">-</span>
+                    </template>
+                  </Column>
+                  <Column header="アクション" :exportable="false" style="width: 100px">
+                    <template #body="{ data }">
+                      <Button
+                        label="詳細"
+                        icon="pi pi-arrow-right"
+                        size="small"
+                        @click="selectRace(data)"
+                      />
+                    </template>
+                  </Column>
+                </DataTable>
+              </div>
+            </template>
           </DataTable>
         </template>
       </Card>
@@ -84,6 +140,7 @@ interface RaceDateItem {
   isToday: boolean
   isCurrentMonth: boolean
   displayDate: string  // "2025年11月30日" (表示用)
+  races: Race[]  // 該当日のレース一覧
 }
 
 const { races, fetchRaces } = useRace()
@@ -92,6 +149,8 @@ const { navigateTo } = useNavigation()
 const loading = ref(false)
 const error = ref<string | null>(null)
 const raceDateItems = ref<RaceDateItem[]>([])
+// dataKeyを使う場合、expandedRowsはオブジェクト形式（{ 'key': true }）が推奨
+const expandedRows = ref<Record<string, boolean>>({})
 
 // 日付をYYYYMMDD形式に変換
 const formatDateKey = (date: Date | Timestamp): string => {
@@ -118,6 +177,13 @@ const formatDisplayDate = (year: number, month: number, day: number): string => 
   return `${year}年${month}月${day}日`
 }
 
+// JRAカレンダーページのURLを生成
+const getJRACalendarUrl = (year: number, month: number, day: number): string => {
+  const monthStr = String(month).padStart(2, '0')
+  const dayStr = String(day).padStart(2, '0')
+  return `https://www.jra.go.jp/keiba/calendar${year}/${year}/${monthStr}/${monthStr}${dayStr}.html`
+}
+
 // 本日の日付を取得
 const today = computed(() => {
   const now = new Date()
@@ -133,10 +199,16 @@ const processRaceData = () => {
   const dateMap = new Map<string, Race[]>()
 
   races.value.forEach(race => {
-    const raceDateValue = race.raceDate || (race as any).date
+    let raceDateValue: unknown = race.raceDate
+    if (!raceDateValue) {
+      const legacyDate = (race as any).date
+      if (!legacyDate) throw new Error(`raceDate is required but was missing (race.id=${race.id}, race_key=${race.race_key})`)
+      raceDateValue = legacyDate
+    }
     const raceDate = raceDateValue instanceof Timestamp 
       ? raceDateValue.toDate() 
       : raceDateValue
+    if (!(raceDate instanceof Date)) throw new Error(`raceDate must be a Date or Timestamp (race.id=${race.id}, race_key=${race.race_key})`)
     const dateKey = formatDateKey(raceDate)
 
     if (!dateMap.has(dateKey)) {
@@ -161,7 +233,8 @@ const processRaceData = () => {
       raceCount: raceList.length,
       isToday,
       isCurrentMonth,
-      displayDate: formatDisplayDate(year, month, day)
+      displayDate: formatDisplayDate(year, month, day),
+      races: raceList
     })
   })
 
@@ -183,14 +256,46 @@ const getRowClass = (data: RaceDateItem) => {
   return ''
 }
 
-// 行クリック時の処理
+// 時刻をフォーマット
+const formatTime = (time: string | Date | Timestamp): string => {
+  if (typeof time === 'string') return time
+  if (time instanceof Timestamp) {
+    const date = time.toDate()
+    return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`
+  }
+  if (time instanceof Date) {
+    return `${String(time.getHours()).padStart(2, '0')}:${String(time.getMinutes()).padStart(2, '0')}`
+  }
+  return '-'
+}
+
+// レース選択時の処理
+const selectRace = (race: Race) => {
+  if (!race.race_key) throw new Error(`race_key is required but was ${race.race_key}`)
+  if (!race.year) throw new Error(`year is required but was ${race.year}`)
+  navigateTo(RouteName.RACE_DETAIL_DIRECT, { year: race.year, raceId: race.race_key })
+}
+
+// 行クリック時の処理（展開/折りたたみを制御）
 const onRowClick = (event: any) => {
-  const item = event.data as RaceDateItem
-  navigateTo(RouteName.RACE_LIST_IN_DAY, {
-    year: item.year,
-    month: item.month,
-    day: item.day
-  })
+  const target = event.originalEvent?.target as HTMLElement
+  
+  // 展開/折りたたみボタンがクリックされた場合は何もしない（DataTableが自動処理）
+  if (target?.closest('.p-row-toggler')) return
+  
+  // リンクやボタンがクリックされた場合は何もしない
+  if (target?.closest('a, button')) return
+  
+  // 行自体がクリックされた場合は展開/折りたたみを切り替え
+  const rowData = event.data as RaceDateItem
+  if (!rowData?.dateKey) return
+  
+  // 現在の展開状態を確認して切り替え
+  const isExpanded = expandedRows.value[rowData.dateKey] === true
+  expandedRows.value = {
+    ...expandedRows.value,
+    [rowData.dateKey]: !isExpanded
+  }
 }
 
 // データを読み込む
@@ -206,8 +311,7 @@ const loadData = async () => {
     }
     processRaceData()
   } catch (err: any) {
-    console.error('レースデータの取得エラー:', err)
-    error.value = err.message || 'レースデータの取得に失敗しました'
+    error.value = err instanceof Error ? err.message : 'レースデータの取得に失敗しました'
   } finally {
     loading.value = false
   }

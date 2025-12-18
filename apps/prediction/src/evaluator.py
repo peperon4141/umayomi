@@ -227,26 +227,33 @@ def evaluate_model(
                 try:
                     win5_flag_int = int(win5_flag_value)
                     if 1 <= win5_flag_int <= 5:
-                        # race_keyから日付を抽出（YYYYMMDD形式を想定）
-                        race_key_str = str(race_key)
-                        if len(race_key_str) >= 8:
-                            date_str = race_key_str[:8]  # YYYYMMDD
-                            if date_str not in win5_dates:
-                                win5_dates[date_str] = {"races": []}  # races: [(win5_flag, is_correct), ...]
-                            
-                            # 1着的中かどうかを記録
-                            is_correct = False
-                            if horse_num_values_all is not None:
-                                race_horse_nums = horse_num_values_all[start_idx:end_idx]
-                                actual_1st_mask = (rank_values == 1.0) | (rank_values == 1)
-                                if actual_1st_mask.any():
-                                    predicted_1st_horse_num = race_horse_nums[0]
-                                    actual_1st_horse_num = race_horse_nums[actual_1st_mask][0]
-                                    if pd.notna(predicted_1st_horse_num) and pd.notna(actual_1st_horse_num):
-                                        if predicted_1st_horse_num == actual_1st_horse_num:
-                                            is_correct = True
-                            
-                            win5_dates[date_str]["races"].append((win5_flag_int, is_correct))
+                        # WIN5評価は開催日（年月日）が必要。
+                        # race_keyは「場コード_回_日目_R」で日付を含まない前提のため、年月日カラムのみをソースにする。
+                        # 年月日が欠損/不正な場合はWIN5評価をスキップ（誤った値で継続しない）。
+                        date_str = None
+                        if "年月日" in race_data.columns:
+                            ymd = str(race_data.iloc[0]["年月日"])
+                            ymd = ymd.strip()
+                            if ymd.isdigit() and len(ymd) == 8:
+                                date_str = ymd
+                        if date_str is None:
+                            continue
+                        if date_str not in win5_dates:
+                            win5_dates[date_str] = {"races": []}  # races: [(win5_flag, is_correct), ...]
+                        
+                        # 1着的中かどうかを記録
+                        is_correct = False
+                        if horse_num_values_all is not None:
+                            race_horse_nums = horse_num_values_all[start_idx:end_idx]
+                            actual_1st_mask = (rank_values == 1.0) | (rank_values == 1)
+                            if actual_1st_mask.any():
+                                predicted_1st_horse_num = race_horse_nums[0]
+                                actual_1st_horse_num = race_horse_nums[actual_1st_mask][0]
+                                if pd.notna(predicted_1st_horse_num) and pd.notna(actual_1st_horse_num):
+                                    if predicted_1st_horse_num == actual_1st_horse_num:
+                                        is_correct = True
+                        
+                        win5_dates[date_str]["races"].append((win5_flag_int, is_correct))
                 except (ValueError, TypeError):
                     # 変換できない値はスキップ
                     pass

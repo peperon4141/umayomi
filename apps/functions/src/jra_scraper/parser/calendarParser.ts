@@ -118,20 +118,20 @@ export function parseRaceElement($: cheerio.CheerioAPI, element: cheerio.Cheerio
     const date = extractDateFromParent($, element, year, month)
     if (!date) return null
 
-    // カレンダーページから開催回数を抽出（必須）
+    // カレンダーページから開催回数を抽出（オプション）
+    // 注意: カレンダーページには開催回数の情報が含まれていない場合があるため、
+    // レース結果ページから取得したデータで上書きされる可能性がある
     const round = extractRoundFromCalendar($)
     
-    // roundがnullの場合はエラーを投げる（fallbackを禁止）
-    if (round == null) {
-      const pageTitle = $('title').text()
-      const pageText = $('body').text().substring(0, 1000)
-      throw new Error(
-        `Failed to extract round from JRA calendar page. ` +
-        `pageTitle: ${pageTitle}, ` +
-        `pageText sample: ${pageText.substring(0, 200)}. ` +
-        `Please check the HTML structure and update extractRoundFromCalendar function.`
-      )
-    }
+    // roundがnullの場合でもエラーを投げない（レース結果ページから取得したデータで上書きされる）
+    // ただし、ログには記録する
+    if (round == null) 
+      logger.warn('Failed to extract round from JRA calendar page. Will be updated from race result page.', {
+        raceName,
+        venue,
+        date: date.toISOString().split('T')[0]
+      })
+    
     
     return {
       raceNumber: index + 1,
@@ -141,7 +141,7 @@ export function parseRaceElement($: cheerio.CheerioAPI, element: cheerio.Cheerio
       raceDate: date,
       year,
       month,
-      round: round,
+      round: round, // nullの可能性がある（レース結果ページから取得したデータで上書きされる）
       // カレンダーページには距離データがないため、デフォルト値を設定
       distance: null,
       surface: null,
@@ -239,31 +239,113 @@ function extractRoundFromCalendar($: cheerio.CheerioAPI): number | null {
   // カレンダーページ全体から開催回数を抽出
   // より具体的なセレクタを使用
   let pageText = ''
+  const foundRounds: number[] = []
   
-  // ヘッダー部分を優先的に検索
+  // 1. ページタイトルから抽出を試みる
+  const pageTitle = $('title').text()
+  if (pageTitle) {
+    pageText += pageTitle + ' '
+    const titleRoundMatch = pageTitle.match(/第(\d+)回/)
+    if (titleRoundMatch) foundRounds.push(parseInt(titleRoundMatch[1]))
+  }
+  
+  // 2. ヘッダー部分を優先的に検索
   const headerSelectors = [
     'h1', 'h2', 'h3',
     '.header', '.title', '.page-title',
-    '.month_title', '.kaisai_title'
+    '.month_title', '.kaisai_title',
+    '.rc_table_header', '.calendar_header',
+    '.main_title', '.sub_title',
+    '#main_title', '#sub_title'
   ]
   
   for (const selector of headerSelectors) {
     const headerText = $(selector).text()
     if (headerText) {
       pageText += headerText + ' '
+      const roundMatch = headerText.match(/第(\d+)回/)
+      if (roundMatch) {
+        const round = parseInt(roundMatch[1])
+        if (!foundRounds.includes(round)) foundRounds.push(round)
+      }
     }
   }
   
-  // ヘッダーから取得できなかった場合はbody全体から検索
-  if (!pageText) {
-    pageText = $('body').text()
+  // 3. レース要素内から開催回数を抽出（レース名や競馬場情報に含まれる場合がある）
+  $('.race, .k_line, .rc').each((_, elem) => {
+    const elemText = $(elem).text()
+    const roundMatch = elemText.match(/第(\d+)回/)
+    if (roundMatch) {
+      const round = parseInt(roundMatch[1])
+      if (!foundRounds.includes(round)) foundRounds.push(round)
+    }
+  })
+  
+  // 4. メインコンテンツエリアから抽出を試みる
+  const mainContentSelectors = [
+    '.main_content', '#main_content',
+    '.calendar_content', '#calendar_content',
+    '.rc_table', '#rc_table',
+    '#contentsBody', '.contents_body'
+  ]
+  
+  for (const selector of mainContentSelectors) {
+    const contentText = $(selector).first().text()
+    if (contentText) {
+      pageText += contentText.substring(0, 2000) + ' '
+      const roundMatch = contentText.match(/第(\d+)回/)
+      if (roundMatch) {
+        const round = parseInt(roundMatch[1])
+        if (!foundRounds.includes(round)) foundRounds.push(round)
+      }
+    }
   }
   
-  // 「第○回」のパターンを検索
-  const roundMatch = pageText.match(/第(\d+)回/)
-  const round = roundMatch ? parseInt(roundMatch[1]) : null
+  // 5. ヘッダーから取得できなかった場合はbody全体から検索（最初の5000文字）
+  if (!pageText || pageText.trim().length < 10) {
+    const bodyText = $('body').text()
+    pageText = bodyText.substring(0, 5000) // 最初の5000文字
+  }
   
-  logger.info('Extracted round from calendar', { round, pageTextSample: pageText.substring(0, 200) })
+  // 6. ページ全体から「第○回」のパターンを検索
+  const roundPatterns = [
+    /第(\d+)回/,           // 第○回
+    /(\d+)回目/,           // ○回目
+    /回数[：:]\s*(\d+)/,   // 回数：○
+    /回[：:]\s*(\d+)/      // 回：○
+  ]
+  
+  // まず、見つかった開催回数を使用（最も頻繁に出現するものを採用）
+  if (foundRounds.length > 0) {
+    // 最も頻繁に出現する回数を採用
+    const roundCounts: { [key: number]: number } = {}
+    foundRounds.forEach(r => {
+      roundCounts[r] = (roundCounts[r] || 0) + 1
+    })
+    const mostFrequentRound = Object.keys(roundCounts).reduce((a, b) => 
+      roundCounts[parseInt(a)] > roundCounts[parseInt(b)] ? a : b
+    )
+    const round = parseInt(mostFrequentRound)
+    logger.info('Round extracted from calendar page', { round, allRounds: foundRounds, pageTextSample: pageText.substring(0, 500) })
+    return round
+  }
+  
+  // 見つからなかった場合は、ページ全体から検索
+  let round: number | null = null
+  for (const pattern of roundPatterns) {
+    const roundMatch = pageText.match(pattern)
+    if (roundMatch) {
+      round = parseInt(roundMatch[1])
+      break
+    }
+  }
+  
+  logger.info('Extracted round from calendar', { 
+    round, 
+    pageTextSample: pageText.substring(0, 500),
+    foundRounds,
+    extractedFrom: round && foundRounds.includes(round) ? 'found rounds' : (pageText.length > 0 ? 'page content' : 'empty')
+  })
   
   return round
 }

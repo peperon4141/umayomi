@@ -34,7 +34,7 @@ export async function addYearMonthToRaces(): Promise<void> {
     let batchCount = 0
     const maxBatchSize = 500
     
-    for (const doc of snapshot.docs) {
+    for (const doc of snapshot.docs) 
       try {
         const data = doc.data()
         
@@ -48,7 +48,7 @@ export async function addYearMonthToRaces(): Promise<void> {
         let year: number
         let month: number
         
-        if (data.date) {
+        if (data.date) 
           if (data.date instanceof Date) {
             year = data.date.getFullYear()
             month = data.date.getMonth() + 1
@@ -67,7 +67,7 @@ export async function addYearMonthToRaces(): Promise<void> {
             errorCount++
             continue
           }
-        } else {
+         else {
           logger.warn('dateフィールドが存在しません', { docId: doc.id })
           errorCount++
           continue
@@ -95,7 +95,7 @@ export async function addYearMonthToRaces(): Promise<void> {
         logger.error('ドキュメント処理エラー', { docId: doc.id, error })
         errorCount++
       }
-    }
+    
     
     // 残りのバッチをコミット
     if (batchCount > 0) {

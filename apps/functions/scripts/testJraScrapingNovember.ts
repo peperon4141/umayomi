@@ -2,7 +2,6 @@
  * 11月分のJRAデータ取得をテストするスクリプト
  */
 
-import { logger } from 'firebase-functions'
 import { fetchJRAHtmlWithPlaywright } from '../src/utils/htmlFetcher'
 import { parseJRACalendar, extractRaceDates } from '../src/jra_scraper/parser/calendarParser'
 import * as cheerio from 'cheerio'
@@ -100,12 +99,8 @@ async function testNovemberDataFetch() {
     
     // 7. 問題の検出
     console.log(`\n=== 問題検出 ===`)
-    if (raceDates.length === 0) {
-      console.log(`❌ 開催日が抽出できていません`)
-    }
-    if (allRaceResults.length === 0) {
-      console.log(`❌ レース結果が取得できていません`)
-    }
+    if (raceDates.length === 0) console.log(`❌ 開催日が抽出できていません`)
+    if (allRaceResults.length === 0) console.log(`❌ レース結果が取得できていません`)
     const zeroCountDates = Object.entries(dateResults).filter(([_, count]) => count === 0)
     if (zeroCountDates.length > 0) {
       console.log(`❌ レースが取得できなかった日付:`)

@@ -5,7 +5,8 @@
 export function getFunctionUrl(functionName: string): string {
   const isEmulator = import.meta.env.VITE_USE_FIREBASE_EMULATOR === 'true' || import.meta.env.DEV
   const region = 'asia-northeast1'
-  const projectId = import.meta.env.VITE_FIREBASE_PROJECT_ID || 'umayomi-fbb2b'
+  const projectId = import.meta.env.VITE_FIREBASE_PROJECT_ID
+  if (!projectId) throw new Error('VITE_FIREBASE_PROJECT_ID is required (no fallback). Check your .env.* configuration.')
   
   if (isEmulator) return `http://127.0.0.1:5101/${projectId}/${region}/${functionName}`
   

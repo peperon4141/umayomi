@@ -108,32 +108,26 @@ def convert_field_value(rawValue: str, fieldType: JRDBFieldType) -> Optional[Uni
         変換された値（int, str, None）
     """
     # INTEGER_ZERO_BLANK (Z型)の場合、空文字列はnull（0のとき空白）
-    if fieldType == JRDBFieldType.INTEGER_ZERO_BLANK and rawValue == '':
-        return None
-    
-    # INTEGER_NINE (9型)以外の数値型の場合、空文字列や0の場合はnullを返す
-    # INTEGER_NINE (9型)の場合は0も有効な値なので、nullにしない
-    if fieldType != JRDBFieldType.INTEGER_NINE and (rawValue == '' or rawValue == '0' or rawValue == '0.0'):
-        # INTEGER_ZERO_BLANK (Z型)の場合は既に処理済み
-        if fieldType == JRDBFieldType.INTEGER_ZERO_BLANK:
+    # 注意: Z型は「0のとき空白」という意味なので、0という値自体は有効
+    if fieldType == JRDBFieldType.INTEGER_ZERO_BLANK:
+        if rawValue == '' or rawValue.strip() == '':
+            return None
+        try:
+            intValue = int(rawValue, 10)
+            return intValue  # 0も有効な値として返す
+        except (ValueError, TypeError):
             return None
     
-    # フィールドタイプに応じて変換
+    # INTEGER_NINE (9型)の場合
     if fieldType == JRDBFieldType.INTEGER_NINE:
+        if rawValue == '' or rawValue.strip() == '':
+            return None
         try:
             intValue = int(rawValue, 10)
-            # 0も有効な値
-            if intValue == 0:
-                return 0
-            return intValue
+            return intValue  # 0も有効な値
         except (ValueError, TypeError):
             return None
-    elif fieldType == JRDBFieldType.INTEGER_ZERO_BLANK:
-        try:
-            intValue = int(rawValue, 10)
-            return intValue
-        except (ValueError, TypeError):
-            return None
-    else:  # STRING, STRING_HEX
-        return rawValue
+    
+    # STRING, STRING_HEX型の場合
+    return rawValue
 

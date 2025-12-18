@@ -6,6 +6,7 @@
     {"name": "race_key", "type": "string", "required": true, "description": "レースキー（マージキー、必須）", "category": "merge_key"},
     {"name": "馬番", "type": "integer", "required": true, "description": "馬番（マージキー、必須）", "category": "merge_key"},
     {"name": "着順", "type": "integer", "required": true, "description": "実際の着順（評価指標計算に必須）", "category": "required"},
+    {"name": "年月日", "type": "integer", "required": false, "description": "開催日（YYYYMMDD、WIN5評価のグルーピングに使用）", "category": "optional", "evaluation_metrics": ["win5_accuracy", "win5_success_days", "win5_total_days"]},
     {"name": "WIN5フラグ", "type": "integer", "required": false, "description": "WIN5対象レースのフラグ（1～5、WIN5評価用）", "category": "optional", "evaluation_metrics": ["win5_accuracy", "win5_success_days", "win5_total_days"]},
     {"name": "確定単勝オッズ", "type": "string", "required": false, "description": "確定単勝オッズ（回収率計算用）", "category": "optional", "evaluation_metrics": ["return_rate_single"]},
     {"name": "確定複勝オッズ", "type": "string", "required": false, "description": "確定複勝オッズ（複勝回収率計算用）", "category": "optional", "evaluation_metrics": ["return_rate_place"]},
@@ -70,6 +71,7 @@
   },
   "win5_accuracy": {
     "required_columns": [
+      "年月日",
       "WIN5フラグ",
       "着順"
     ],
@@ -77,6 +79,7 @@
   },
   "win5_success_days": {
     "required_columns": [
+      "年月日",
       "WIN5フラグ",
       "着順"
     ],
@@ -84,6 +87,7 @@
   },
   "win5_total_days": {
     "required_columns": [
+      "年月日",
       "WIN5フラグ"
     ],
     "description": "WIN5総日数の計算に使用"

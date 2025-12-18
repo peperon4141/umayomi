@@ -1,0 +1,35 @@
+{
+  "description": "JRDBデータファイル用の場コードマッピング（2桁コード）",
+  "version": "1.0.0",
+  "note": "JRDBデータファイル（BAC、KYI等）で使用される2桁の場コード。参考: JRDB仕様書、BAC仕様書",
+  "source": "http://www.jrdb.com/program/jrdb_code.txt (ただし、これはパドックコード。データファイル用の2桁コードは別途仕様書を参照)",
+  "mapping": {
+    "01": { "venue_name": "札幌", "venue_name_en": "Sapporo" },
+    "02": { "venue_name": "函館", "venue_name_en": "Hakodate" },
+    "03": { "venue_name": "福島", "venue_name_en": "Fukushima" },
+    "04": { "venue_name": "新潟", "venue_name_en": "Niigata" },
+    "05": { "venue_name": "東京", "venue_name_en": "Tokyo" },
+    "06": { "venue_name": "中山", "venue_name_en": "Nakayama" },
+    "07": { "venue_name": "中京", "venue_name_en": "Chukyo" },
+    "08": { "venue_name": "京都", "venue_name_en": "Kyoto" },
+    "09": { "venue_name": "阪神", "venue_name_en": "Hanshin" },
+    "10": { "venue_name": "小倉", "venue_name_en": "Kokura" },
+    "12": { "venue_name": "門別", "venue_name_en": "Monbetsu" },
+    "13": { "venue_name": "盛岡", "venue_name_en": "Morioka" },
+    "14": { "venue_name": "水沢", "venue_name_en": "Mizusawa" },
+    "15": { "venue_name": "金沢", "venue_name_en": "Kanazawa" },
+    "16": { "venue_name": "川崎", "venue_name_en": "Kawasaki" },
+    "17": { "venue_name": "船橋", "venue_name_en": "Funabashi" },
+    "18": { "venue_name": "大井", "venue_name_en": "Ooi" },
+    "19": { "venue_name": "浦和", "venue_name_en": "Urawa" },
+    "20": { "venue_name": "名古屋", "venue_name_en": "Nagoya" },
+    "22": { "venue_name": "園田", "venue_name_en": "Sonoda" },
+    "23": { "venue_name": "姫路", "venue_name_en": "Himeji" },
+    "24": { "venue_name": "高知", "venue_name_en": "Kochi" },
+    "25": { "venue_name": "佐賀", "venue_name_en": "Saga" },
+    "26": { "venue_name": "荒尾", "venue_name_en": "Arao" },
+    "27": { "venue_name": "中津", "venue_name_en": "Nakatsu" },
+    "28": { "venue_name": "北九州", "venue_name_en": "Kitakyushu" }
+  }
+}
+

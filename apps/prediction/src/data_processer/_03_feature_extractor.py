@@ -58,17 +58,50 @@ class FeatureExtractor:
         # 年齢カラムを生成（_04_01_numeric_converterの_add_computed_fieldsを呼び出し）
         from ._04_01_numeric_converter import NumericConverter
         NumericConverter._add_computed_fields(target_df)
-        historical_sed_df_with_key = FeatureConverter.add_race_key_to_df(historical_sed_df, bac_df=bac_df, use_bac_date=True)
+        # historical SEDは一部レコードに場コード/回/Rなどの欠損が含まれることがある。
+        # ここで無理な補完（fallback）は行わず、統計量計算に使えないレコードは明示的に除外する。
+        required_cols = ["場コード", "回", "日", "R"]
+        missing_required_cols = [c for c in required_cols if c not in historical_sed_df.columns]
+        if missing_required_cols:
+            raise ValueError(f"historical_sed_dfにrace_key生成必須カラムが存在しません: {missing_required_cols}")
+
+        missing_rows = historical_sed_df[required_cols].isna().any(axis=1)
+        if missing_rows.any():
+            import logging
+            logger = logging.getLogger(__name__)
+            missing_count = int(missing_rows.sum())
+            logger.warning(f"historical_sed_dfの必須カラム欠損行を除外します: {missing_count}/{len(historical_sed_df)}")
+            historical_sed_df = historical_sed_df.loc[~missing_rows].copy()
+
+        # historical SEDは自身が年月日を保持しているため、BACマッピングに依存せずにrace_keyを生成する
+        if "年月日" not in historical_sed_df.columns:
+            raise ValueError("historical_sed_dfに年月日カラムが存在しません。race_key生成に必須です。")
+
+        # 年月日欠損も補完せず除外（fallback禁止）
+        import logging
+        logger = logging.getLogger(__name__)
+        ymd_str = historical_sed_df["年月日"].apply(FeatureConverter.safe_ymd)
+        invalid_ymd = ymd_str.str.len() != 8
+        if invalid_ymd.any():
+            invalid_count = int(invalid_ymd.sum())
+            logger.warning(f"historical_sed_dfの年月日不正/欠損行を除外します: {invalid_count}/{len(historical_sed_df)}")
+            historical_sed_df = historical_sed_df.loc[~invalid_ymd].copy()
+
+        historical_sed_df_with_key = FeatureConverter.add_race_key_to_df(historical_sed_df, bac_df=None, use_bac_date=False)
         
         # 統計量計算用のDataFrameを準備
         stats_columns = FeatureExtractor._get_stats_columns_from_schema(full_info_schema)
         available_stats_columns = [col for col in stats_columns if col in historical_sed_df_with_key.columns]
+        # start_datetime算出に必要なカラムはスキーマに含まれないことがあるため、必須として追加する
+        for required_col in ["年月日", "発走時間"]:
+            if required_col in historical_sed_df_with_key.columns and required_col not in available_stats_columns:
+                available_stats_columns.append(required_col)
         if len(available_stats_columns) == 0: raise ValueError("統計量計算に必要なカラムがhistorical_sed_df_with_keyに存在しません。")
         
         historical_stats_df = historical_sed_df_with_key[available_stats_columns].copy()
         historical_stats_df["rank_1st"] = (historical_stats_df["着順"] == 1).astype(int)
         historical_stats_df["rank_3rd"] = (historical_stats_df["着順"].isin([1, 2, 3])).astype(int)
-        historical_stats_df["start_datetime"] = FeatureConverter.get_datetime_from_race_key_vectorized(historical_stats_df["race_key"])
+        historical_stats_df = FeatureConverter.add_start_datetime_to_df(historical_stats_df)
 
         # 並列処理実行
         max_workers = int(os.environ.get(FeatureExtractor.ENV_FEATURE_EXTRACTOR_MAX_WORKERS, FeatureExtractor.DEFAULT_FEATURE_EXTRACTOR_WORKERS))

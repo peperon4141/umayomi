@@ -112,6 +112,10 @@ print(f"モデル保存完了: {MODEL_PATH}")
 # %%
 # 予測と評価
 predictions = RankPredictor.predict(model, test_data_enhanced, rank_predictor.features)
+if "predicted_score" not in predictions.columns:
+    if "predict" not in predictions.columns:
+        raise KeyError(f"predictionsにpredicted_score/predict列が存在しません。columns={list(predictions.columns)}")
+    predictions = predictions.rename(columns={"predict": "predicted_score"})
 
 # 馬番を追加
 test_data_merged = test_data_enhanced.reset_index() if test_data_enhanced.index.name == "race_key" else test_data_enhanced.copy()

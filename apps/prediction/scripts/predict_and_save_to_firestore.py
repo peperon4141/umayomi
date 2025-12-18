@@ -167,8 +167,11 @@ if __name__ == "__main__":
     print(f"\n[4/5] 予測結果をFirestore形式に変換...")
     predictions = []
     for _, row in results_df.iterrows():
+        year = int(date_str.split("-")[0])
         prediction = {
             "race_key": str(row.get("race_key", "")),
+            "year": year,
+            "race_date": date_str,
             "horse_number": int(row.get("horse_number", 0)),
             "horse_name": str(row.get("horse_name", "")),
             "jockey_name": str(row.get("jockey_name", "")),

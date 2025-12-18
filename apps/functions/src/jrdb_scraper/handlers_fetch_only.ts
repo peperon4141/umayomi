@@ -27,9 +27,9 @@ export async function handleFetchJRDBDailyDataOnly(request: any, response: any):
     let monthParam: number | undefined
     let dayParam: number | undefined
 
-    if (date) {
+    if (date) 
       targetDate = date
-    } else if (year && month && day) {
+     else if (year && month && day) {
       yearParam = parseInt(String(year))
       monthParam = parseInt(String(month))
       dayParam = parseInt(String(day))
@@ -77,11 +77,11 @@ export async function handleFetchJRDBDailyDataOnly(request: any, response: any):
     const pythonCmd = process.env.PYTHON_COMMAND || 'python3'
     let command: string
     
-    if (targetDate) {
+    if (targetDate) 
       command = `${pythonCmd} "${scriptPath}" --date "${targetDate}"`
-    } else {
+     else 
       command = `${pythonCmd} "${scriptPath}" --year ${yearParam} --month ${monthParam} --day ${dayParam}`
-    }
+    
 
     logger.info('Executing Python script', { command })
 
@@ -159,12 +159,12 @@ export async function handleFetchJRDBDailyDataOnly(request: any, response: any):
               firestoreResult
             })
           }
-        } else {
+        } else 
           logger.warn('Export script not found', { exportScriptPath })
-        }
-      } else {
+        
+      } else 
         logger.warn('Daily folder not found', { dailyFolder })
-      }
+      
     } catch (error: any) {
       logger.error('Failed to save JRDB data to Firestore', {
         error: error instanceof Error ? error.message : String(error),
@@ -180,9 +180,7 @@ export async function handleFetchJRDBDailyDataOnly(request: any, response: any):
     let resultSummary: any = null
     try {
       const summaryMatch = stdout.match(/=== 結果サマリー ===\s*([\s\S]*)/)
-      if (summaryMatch) {
-        resultSummary = JSON.parse(summaryMatch[1])
-      }
+      if (summaryMatch) resultSummary = JSON.parse(summaryMatch[1])
     } catch (e) {
       logger.warn('Failed to parse result summary from stdout', { error: e })
     }
@@ -217,7 +215,7 @@ export async function handleFetchJRDBDailyDataOnly(request: any, response: any):
 
 /**
  * JRDBデータをFirestoreのサブコレクションに保存
- * 構造: races/{race_key}/jrdb_data/{dataType}
+ * 構造: racesByYear/{year}/races/{race_id}/jrdb_data/{dataType}
  */
 async function saveJRDBDataToFirestore(
   exportResult: any,
@@ -244,15 +242,17 @@ async function saveJRDBDataToFirestore(
 
       const groupedByRaceKey = typedResult.groupedByRaceKey as Record<string, any[]>
       
-      // 各race_keyごとにバッチで保存
+      // 各race_idごとにバッチで保存
       for (const [raceKey, records] of Object.entries(groupedByRaceKey)) {
-        if (!raceKey || records.length === 0) {
-          continue
-        }
+        if (!raceKey || records.length === 0) continue
 
         try {
-          // races/{race_key}/jrdb_data/{dataType} に保存
-          const raceRef = db.collection('races').doc(raceKey)
+          // yearをdateから決定（YYYY-MM-DD）
+          const year = date.split('-')[0]
+          if (!year) throw new Error(`Invalid date: ${date}`)
+
+          // racesByYear/{year}/races/{race_id}/jrdb_data/{dataType} に保存
+          const raceRef = db.collection('racesByYear').doc(year).collection('races').doc(raceKey)
           const jrdbDataRef = raceRef.collection('jrdb_data').doc(dataType)
           
           // メタデータとレコードを保存
@@ -287,9 +287,7 @@ async function saveJRDBDataToFirestore(
             }
           }
 
-          if (batchCount > 0) {
-            await batch.commit()
-          }
+          if (batchCount > 0) await batch.commit()
 
           savedRaceKeys.add(raceKey)
           

@@ -14,7 +14,7 @@
         "properties": {
           "race_key": {
             "type": "string",
-            "description": "レースキー（YYYYMMDD_場コード_回_日_R形式）",
+            "description": "レースキー（場コード_回_日目_R形式）",
             "required": true
           },
           "horse_number": {

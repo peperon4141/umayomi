@@ -7,6 +7,8 @@ from datetime import date
 from pathlib import Path
 from typing import Dict, List, Optional, Union
 
+import pandas as pd
+
 from .converter import convert_lzh_to_parquet
 from .downloader import download_jrdb_file
 from .entities.jrdb import JRDBDataType
@@ -22,7 +24,8 @@ def fetch_single_data_type(
     day: int,
     dataType: JRDBDataType,
     outputDir: Union[str, Path],
-    dateStr: str
+    dateStr: str,
+    bac_df: Optional[pd.DataFrame] = None
 ) -> Dict[str, Union[str, int, bool, Optional[str]]]:
     """単一のデータタイプのデータを取得してParquetに保存（内部関数）
     
@@ -33,6 +36,7 @@ def fetch_single_data_type(
         dataType: データタイプ
         outputDir: 出力ディレクトリ
         dateStr: 日付文字列（ISO形式）
+        bac_df: BACデータ（KYI等の年月日がないデータタイプのrace_key生成に使用、オプション）
     
     Returns:
         結果辞書
@@ -57,7 +61,7 @@ def fetch_single_data_type(
         
         # Parquetファイルも保存
         parquetFilePath = outputPath / f'{fileName}.parquet'
-        _, records = convert_lzh_to_parquet(lzhBuffer, actualDataType, year, parquetFilePath)
+        _, records = convert_lzh_to_parquet(lzhBuffer, actualDataType, year, parquetFilePath, bac_df=bac_df)
         
         if len(records) == 0:
             raise ValueError('パースされたレコードが0件です')
@@ -80,12 +84,11 @@ def fetch_single_data_type(
             'fileName': fileName
         }
     except Exception as error:
-        errorMessage = str(error)
-        logger.error('日単位データ取得エラー', extra={
-            'date': dateStr,
-            'dataType': dataType.value,
-            'error': errorMessage
-        })
+        error_type = type(error).__name__
+        errorMessage = f"{error_type}: {error}"
+        # extra はフォーマッタによって表示されないことがあるため、メッセージ本体に含める
+        # スタックトレースも必ず出す（原因調査のため）
+        logger.exception(f"日単位データ取得エラー date={dateStr} dataType={dataType.value}")
         
         return {
             'date': dateStr,
@@ -122,19 +125,50 @@ def fetch_daily_data(
         'dataTypes': [dt.value for dt in dataTypes]
     })
     
+    # KYI等の年月日がないデータタイプのrace_key生成用に、BACデータを事前に読み込む
+    bac_df: Optional[pd.DataFrame] = None
+    bac_result: Optional[Dict[str, Union[str, int, bool, Optional[str]]]] = None
+    
+    # BACが含まれている場合は、先に処理する
+    if JRDBDataType.BAC in dataTypes:
+        try:
+            bac_result = fetch_single_data_type(year, month, day, JRDBDataType.BAC, outputDir, dateStr)
+            if bac_result.get('success', False) and bac_result.get('outputPath'):
+                bac_parquet_path = Path(bac_result['outputPath'])
+                if bac_parquet_path.exists():
+                    bac_df = pd.read_parquet(bac_parquet_path)
+                    logger.info('BACデータを読み込みました（KYI等のrace_key生成用）', extra={
+                        'date': dateStr,
+                        'recordCount': len(bac_df) if bac_df is not None else 0
+                    })
+        except Exception as e:
+            logger.warning('BACデータの読み込みに失敗しました（KYI等のrace_key生成に影響する可能性があります）', extra={
+                'date': dateStr,
+                'error': str(e)
+            })
+    
     results: List[Dict[str, Union[str, int, bool, Optional[str]]]] = []
     
+    # BACの結果を先に追加（既に取得済みの場合）
+    if bac_result is not None:
+        results.append(bac_result)
+    
     for dataType in dataTypes:
+        # BACは既に処理済みなのでスキップ
+        if dataType == JRDBDataType.BAC:
+            continue
+        
         try:
-            result = fetch_single_data_type(year, month, day, dataType, outputDir, dateStr)
+            # KYI等の年月日がないデータタイプの場合は、BACデータを渡す
+            result = fetch_single_data_type(
+                year, month, day, dataType, outputDir, dateStr,
+                bac_df=bac_df
+            )
             results.append(result)
         except Exception as error:
-            errorMessage = str(error)
-            logger.error('データタイプ取得エラー', extra={
-                'date': dateStr,
-                'dataType': dataType.value,
-                'error': errorMessage
-            })
+            error_type = type(error).__name__
+            errorMessage = f"{error_type}: {error}"
+            logger.exception(f"データタイプ取得エラー date={dateStr} dataType={dataType.value}")
             results.append({
                 'date': dateStr,
                 'dataType': dataType.value,

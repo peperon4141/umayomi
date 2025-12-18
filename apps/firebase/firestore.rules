@@ -1,16 +1,16 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // レースデータ：認証済みユーザーのみ読み取り可能
-    match /races/{raceId} {
+    // レースデータ（年別名前空間）：認証済みユーザーのみ読み取り可能
+    match /racesByYear/{year}/races/{raceId} {
       allow read: if request.auth != null;
       allow write: if false; // Cloud Functionsからのみ書き込み可能
-      
+
       // JRDBデータサブコレクション：認証済みユーザーのみ読み取り可能
       match /jrdb_data/{dataType} {
         allow read: if request.auth != null;
         allow write: if false; // Cloud Functionsからのみ書き込み可能
-        
+
         // JRDBデータレコードサブコレクション
         match /records/{recordId} {
           allow read: if request.auth != null;
@@ -41,6 +41,21 @@ service cloud.firestore {
     match /predictions/{predictionId} {
       allow read: if request.auth != null;
       allow write: if false; // Cloud FunctionsまたはAdmin SDKからのみ書き込み可能
+    }
+    
+    // モデルメタデータ（modelsコレクション）：認証済みユーザーは読み取り可能
+    // is_activeフィールドのみ、認証済みユーザー（エミュレータ）または管理者（本番）が更新可能
+    match /models/{modelId} {
+      allow read: if request.auth != null;
+      // エミュレータ環境では認証済みユーザーを許可、本番環境では管理者のみ許可
+      allow create, update: if request.auth != null && (
+        // 管理者ロールがある場合は許可
+        request.auth.token.role == 'admin' ||
+        // エミュレータ環境ではroleが設定されていない場合があるため、認証済みユーザーを許可
+        // 本番環境ではroleが必須になる想定
+        !('role' in request.auth.token)
+      );
+      allow delete: if false; // 削除は禁止
     }
     
     // その他のドキュメントは認証済みユーザーのみ読み取り可能

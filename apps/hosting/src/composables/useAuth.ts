@@ -22,14 +22,9 @@ export function useAuth() {
     // リダイレクト結果をチェック
     try {
       const redirectResult = await getGoogleRedirectResult()
-      if (redirectResult.user) {
-        console.log('Google認証リダイレクト成功:', redirectResult.user)
-      } else if (redirectResult.error) {
-        console.error('Google認証リダイレクトエラー:', redirectResult.error)
-        error.value = redirectResult.error
-      }
+      if (redirectResult.error) error.value = redirectResult.error
     } catch (err: any) {
-      console.error('リダイレクト結果の取得エラー:', err)
+      error.value = err?.message ?? 'リダイレクト結果の取得に失敗しました'
     }
 
     unsubscribe = onAuthChange(async (authUser) => {
@@ -40,9 +35,7 @@ export function useAuth() {
       if (authUser) {
         try {
           await authUser.getIdToken(true) // 強制的にトークンを更新
-        } catch (error) {
-          console.error('Failed to refresh ID token:', error)
-        }
+        } catch {}
       }
     })
   })

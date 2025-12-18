@@ -1,5 +1,7 @@
 import { test, expect } from '@playwright/test'
 import { initializeApp, getApps } from 'firebase-admin/app'
+import { getAuth } from 'firebase-admin/auth'
+import { getFirestore } from 'firebase-admin/firestore'
 
 // Firebase Emulator用の環境変数を設定（開発時のみ）
 process.env.FIRESTORE_EMULATOR_HOST = '127.0.0.1:8180'
@@ -20,6 +22,61 @@ if (!getApps().length) {
 // })
 
 test.describe('Cloud Functions', () => {
+  test('uploadModel関数でモデルをアップロードできる', async ({ request }) => {
+    const adminAuth = getAuth()
+    const db = getFirestore()
+
+    const email = 'test@example.com'
+    const password = 'password123'
+
+    let uid: string
+    try {
+      uid = (await adminAuth.getUserByEmail(email)).uid
+    } catch {
+      uid = (await adminAuth.createUser({ email, password, emailVerified: true })).uid
+    }
+
+    const customToken = await adminAuth.createCustomToken(uid)
+
+    const signInRes = await request.post('http://127.0.0.1:9199/identitytoolkit.googleapis.com/v1/accounts:signInWithCustomToken?key=fake-api-key', {
+      data: { token: customToken, returnSecureToken: true }
+    })
+    expect(signInRes.ok()).toBe(true)
+    const signInJson = await signInRes.json()
+    const idToken = signInJson.idToken as string
+    expect(typeof idToken).toBe('string')
+
+    const modelName = 'rank_model_upload_test'
+    const storagePath = 'models/rank_model_upload_test.txt'
+    const contentBase64 = Buffer.from('dummy model content', 'utf8').toString('base64')
+
+    const uploadRes = await request.post('http://127.0.0.1:5101/umayomi-fbb2b/asia-northeast1/uploadModel', {
+      headers: { Authorization: `Bearer ${idToken}` },
+      data: {
+        fileName: 'rank_model_upload_test.txt',
+        contentBase64,
+        modelName,
+        storagePath,
+        version: 'test',
+        description: 'e2e upload test',
+        trainingDate: '2025-12-18'
+      }
+    })
+
+    expect(uploadRes.ok()).toBe(true)
+    const uploadJson = await uploadRes.json()
+    expect(uploadJson.success).toBe(true)
+    expect(uploadJson.modelName).toBe(modelName)
+    expect(uploadJson.storagePath).toBe(storagePath)
+
+    const modelDoc = await db.collection('models').doc(modelName).get()
+    expect(modelDoc.exists).toBe(true)
+    expect(modelDoc.data()).toMatchObject({
+      model_name: modelName,
+      storage_path: storagePath
+    })
+  })
+
   test.skip('scrapeJRACalendar関数を呼び出してデータを取得できる', async ({ request }) => {
     // スキップ理由: 実際のスクレイピングは重く、外部サイトに依存するため
     test.setTimeout(15000) // 15秒に短縮（実際は約6秒）

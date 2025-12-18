@@ -53,7 +53,7 @@ class PreviousRaceExtractor:
                 sed_df_with_key["race_key"].notna() & sed_df_with_key["血統登録番号"].notna()
             ].copy()
 
-            # race_keyでソート（文字列としてソート、YYYYMMDD形式なので時系列順になる）
+            # start_datetimeで時系列判定する（race_keyは場コード_回_日目_Rで日付を含まない）
             sed_df_with_key_filtered = sed_df_with_key_filtered.sort_values(
                 "race_key", ascending=True
             )
@@ -219,10 +219,8 @@ class StatisticalFeatureCalculator:
         stats_df["rank_1st"] = (stats_df["着順"] == 1).astype(int)
         stats_df["rank_3rd"] = (stats_df["着順"].isin([1, 2, 3])).astype(int)
 
-        # 各レースの開始日時を取得（ベクトル化）
-        stats_df["start_datetime"] = FeatureConverter.get_datetime_from_race_key_vectorized(
-            stats_df["race_key"]
-        )
+        # 各レースの開始日時を取得（年月日/発走時間から算出）
+        stats_df = FeatureConverter.add_start_datetime_to_df(stats_df)
 
         # 馬の統計量（各レースのstart_datetimeより前のデータのみを使用）
         if "血統登録番号" in df.columns:

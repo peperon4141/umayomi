@@ -17,8 +17,6 @@ export enum RouteName {
   
   // レース関連（階層構造）
   RACE_LIST = 'RaceList',
-  RACE_LIST_IN_DAY = 'RaceListInDay',
-  RACE_LIST_IN_DAY_PLACE = 'RaceListInDayPlace',
   RACE_LIST_IN_PLACE = 'RaceListInPlace',
   RACE_DETAIL = 'RaceDetail',
 }
@@ -48,9 +46,7 @@ const ROUTE_PATTERNS = {
   [RouteName.ADMIN_DASHBOARD]: () => '/admin',
   [RouteName.RACES]: () => '/races',
   [RouteName.RACE_LIST]: () => '/race-list',
-  [RouteName.RACE_DETAIL_DIRECT]: (options: RouteOptions) => `/race/${options.raceId}`,
-  [RouteName.RACE_LIST_IN_DAY]: (options: RouteOptions) => `/races/year/${options.year}/month/${options.month}/day/${options.day}`,
-  [RouteName.RACE_LIST_IN_DAY_PLACE]: (options: RouteOptions) => `/races/year/${options.year}/month/${options.month}/day/${options.day}?placeId=${options.placeId}`,
+  [RouteName.RACE_DETAIL_DIRECT]: (options: RouteOptions) => `/race/year/${options.year}/race/${options.raceId}`,
   [RouteName.RACE_LIST_IN_PLACE]: (options: RouteOptions) => `/races/year/${options.year}/month/${options.month}/place/${options.placeId}`,
   [RouteName.RACE_DETAIL]: (options: RouteOptions) => `/races/year/${options.year}/month/${options.month}/place/${options.placeId}/race/${options.raceId}`,
 } as const
@@ -58,9 +54,7 @@ const ROUTE_PATTERNS = {
 // 必須パラメータの検証
 const validateOptions = (routeName: RouteName, options: RouteOptions): void => {
   const validators: Partial<Record<RouteName, () => string | false>> = {
-    [RouteName.RACE_DETAIL_DIRECT]: () => !options.raceId && 'raceId is required',
-    [RouteName.RACE_LIST_IN_DAY]: () => (!options.year || !options.month || !options.day) && 'year, month, and day are required',
-    [RouteName.RACE_LIST_IN_DAY_PLACE]: () => (!options.year || !options.month || !options.day || !options.placeId) && 'year, month, day, and placeId are required',
+    [RouteName.RACE_DETAIL_DIRECT]: () => (!options.year || !options.raceId) && 'year and raceId are required',
     [RouteName.RACE_LIST_IN_PLACE]: () => (!options.year || !options.month || !options.placeId) && 'year, month, and placeId are required',
     [RouteName.RACE_DETAIL]: () => (!options.year || !options.month || !options.placeId || !options.raceId) && 'year, month, placeId, and raceId are required',
   }
